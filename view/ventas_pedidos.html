@@ -96,21 +96,44 @@
 <h3 class="text-center">Resultados de "{$fsc->query}":</h3>
 {/if}
 
-<ul class="nav nav-tabs" role="tablist">
-   <li{if condition="!isset($_GET['pendientes']) AND !isset($_GET['rechazados'])"} class="active"{/if}>
-      <a href="{$fsc->url()}">Todos los {#FS_PEDIDOS#}</a>
-   </li>
-   <li{if condition="isset($_GET['pendientes'])"} class="active"{/if}>
-      <a href="{$fsc->url()}&pendientes=TRUE">
-         <span class="glyphicon glyphicon-time"></span> &nbsp; Pendientes
-      </a>
-   </li>
-   <li{if condition="isset($_GET['rechazados'])"} class="active"{/if}>
-      <a href="{$fsc->url()}&rechazados=TRUE" title="Rechazados">
-         <span class="glyphicon glyphicon-remove"></span>
-      </a>
-   </li>
-</ul>
+<div class="col-md-12 hidden-xs">
+   <ul class="nav nav-tabs" role="tablist">
+      <li{if condition="!isset($_GET['pendientes']) AND !isset($_GET['rechazados'])"} class="active"{/if}>
+         <a href="{$fsc->url()}" title="Todos los {#FS_PEDIDOS#}">
+            <span class="glyphicon glyphicon-list"></span> &nbsp; Todos los {#FS_PEDIDOS#}
+         </a>
+      </li>
+      <li{if condition="isset($_GET['pendientes'])"} class="active"{/if}>
+         <a href="{$fsc->url()}&pendientes=TRUE">
+            <span class="glyphicon glyphicon-time"></span> &nbsp; Pendientes
+         </a>
+      </li>
+      <li{if condition="isset($_GET['rechazados'])"} class="active"{/if}>
+         <a href="{$fsc->url()}&rechazados=TRUE" title="Rechazados">
+            <span class="glyphicon glyphicon-remove"></span>
+         </a>
+      </li>
+   </ul>
+</div>
+<div class="col-xs-12 visible-xs">
+   <ul class="nav nav-tabs" role="tablist">
+      <li{if condition="!isset($_GET['pendientes']) AND !isset($_GET['rechazados'])"} class="active"{/if}>
+         <a href="{$fsc->url()}" title="Todos los {#FS_PEDIDOS#}">
+            <span class="glyphicon glyphicon-list"></span>
+         </a>
+      </li>
+      <li{if condition="isset($_GET['pendientes'])"} class="active"{/if}>
+         <a href="{$fsc->url()}&pendientes=TRUE" title="Pendientes">
+            <span class="glyphicon glyphicon-time"></span>
+         </a>
+      </li>
+      <li{if condition="isset($_GET['rechazados'])"} class="active"{/if}>
+         <a href="{$fsc->url()}&rechazados=TRUE" title="Rechazados">
+            <span class="glyphicon glyphicon-remove"></span>
+         </a>
+      </li>
+   </ul>
+</div>
 
 <div class="table-responsive">
    <table class="table table-hover">
