@@ -134,8 +134,8 @@
             <th class="text-left">Observaciones</th>
             <th class="text-right">Total</th>
             <th class="text-right">Fecha</th>
-            <th class="text-right">Fecha validez</th>
             <th class="text-right">Hora</th>
+            <th class="text-right">Fecha validez</th>
          </tr>
       </thead>
       {loop="$fsc->resultados"}
@@ -153,8 +153,14 @@
          <td>{$value->observaciones_resume()}</td>
          <td class="text-right">{$fsc->show_precio($value->total, $value->coddivisa)}</td>
          <td class="text-right">{$value->fecha}</td>
-         <td class="text-right">{$value->finoferta}</td>
          <td class="text-right">{$value->show_hora()}</td>
+         <td class="text-right">
+            {if="$value->status==0"}
+            {$value->finoferta}
+            {else}
+            -
+            {/if}
+         </td>
       </tr>
       {else}
       <tr class="bg-warning">

@@ -17,13 +17,16 @@
          </tr>
       </thead>
       {loop="$fsc->resultados"}
-      <tr{if condition="$value->total<=0"} class="bg-warning"{/if} class="clickableRow" href="{$value->url()}">
+      <tr class="clickableRow{if="$value->status==2"} bg-danger{elseif="$value->total<=0"} bg-warning{/if}" href="{$value->url()}">
          <td class="text-center">
             {if condition="$value->idalbaran"}
-            <span class="glyphicon glyphicon-paperclip" title="Hay un {#FS_ALBARAN#} asociado"></span>
+            <span class="glyphicon glyphicon-paperclip" title="El {#FS_PEDIDO#} tiene vinculado un {#FS_ALBARAN#}"></span>
+            {/if}
+            {if condition="$value->status==2"}
+            <span class="glyphicon glyphicon-remove" title="El {#FS_PEDIDO#} ha sido rechazado"></span>
             {/if}
          </td>
-         <td>{$value->codigo}</td>
+         <td><a href="{$value->url()}">{$value->codigo}</a> {$value->numero2}</td>
          <td>{$value->observaciones_resume()}</td>
          <td class="text-right">{$fsc->show_precio($value->total, $value->coddivisa)}</td>
          <td class="text-right">{$value->fecha}</td>
@@ -42,8 +45,7 @@
    {if condition="$fsc->anterior_url()!=''"}
    <li class="previous">
       <a href="{$fsc->anterior_url()}">
-         <span class="glyphicon glyphicon-chevron-left"></span>
-         &nbsp; Anteriores
+         <span class="glyphicon glyphicon-chevron-left"></span> &nbsp; Anteriores
       </a>
    </li>
    {/if}
@@ -51,8 +53,7 @@
    {if condition="$fsc->siguiente_url()!=''"}
    <li class="next">
       <a href="{$fsc->siguiente_url()}">
-         Siguientes &nbsp;
-         <span class="glyphicon glyphicon-chevron-right"></span>
+         Siguientes &nbsp; <span class="glyphicon glyphicon-chevron-right"></span>
       </a>
    </li>
    {/if}
