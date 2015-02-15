@@ -1,7 +1,7 @@
 {include="header"}
 
-{if condition="$fsc->pedido"}
-{if condition="$fsc->pedido->editable"}
+{if="$fsc->pedido"}
+{if="$fsc->pedido->editable"}
 <script type="text/javascript" src="plugins/facturacion_base/view/js/nueva_venta.js"></script>
 <script type="text/javascript">
    numlineas = {function="count($fsc->pedido->get_lineas())"};
@@ -11,7 +11,7 @@
    cliente = {function="json_encode($fsc->cliente_s)"};
    nueva_venta_url = '{$fsc->nuevo_pedido_url}';
    fs_community_url = '{#FS_COMMUNITY_URL#}';
-
+   
    $(document).ready(function () {
       $('#numlineas').val(numlineas);
       usar_serie();
@@ -68,13 +68,13 @@
             <a class="btn btn-sm btn-default" href="{$fsc->url()}" title="Recargar la página">
                <span class="glyphicon glyphicon-refresh"></span>
             </a>
-
+            
             <div class="btn-group">
                <a id="b_imprimir" class="btn btn-sm btn-default" href="#">
                   <span class="glyphicon glyphicon-print"></span>
                   <span class="hidden-xs"> &nbsp; Imprimir</span>
                </a>
-               {if condition="$fsc->empresa->can_send_mail()"}
+               {if="$fsc->empresa->can_send_mail()"}
                <a id="b_enviar" class="btn btn-sm btn-default" href="#">
                   <span class="glyphicon glyphicon-envelope"></span>
                   <span class="hidden-xs"> &nbsp; Enviar</span>
@@ -123,7 +123,7 @@
                
                <div class="btn-group">
                {loop="$fsc->extensions"}
-                  {if condition="$value->type=='button'"}
+                  {if="$value->type=='button'"}
                   <a href="index.php?page={$value->from}&id={$fsc->albaran->idalbaran}" class="btn btn-sm btn-default">{$value->text}</a>
                   {/if}
                {/loop}
@@ -144,13 +144,13 @@
          </div>
       </div>
       <div class="row">
-         <div class="col-lg-12">
+         <div class="col-md-12">
             <h3 class="text-capitalize" style="margin-bottom: 0px;">
                <a href="{$fsc->ppage->url()}">{#FS_PEDIDOS#}</a> /
                <a href="{$fsc->pedido->cliente_url()}">{$fsc->pedido->nombrecliente}</a> /
                {$fsc->pedido->codigo}
             </h3>
-            {if condition="$fsc->agente"}
+            {if="$fsc->agente"}
             <p>
                <span class="text-capitalize">{#FS_PEDIDO#}</span> creado por
                <a href="{$fsc->agente->url()}">{$fsc->agente->get_fullname()}</a>.
@@ -159,7 +159,7 @@
          </div>
       </div>
       <div class="row">
-         {if condition="$fsc->pedido->editable"}
+         {if="$fsc->pedido->editable"}
          <div class="col-md-5 col-sm-12">
             <div class="form-group">
                Cliente actual:
@@ -174,16 +174,16 @@
             </div>
          </div>
          {/if}
-         <div class="col-md-2 col-sm-2">
+         <div class="col-md-2 col-sm-6">
             <div class="form-group">
                Número 2:
                <input class="form-control" type="text" name="numero2" value="{$fsc->pedido->numero2}"/>
             </div>
          </div>
-         <div class="col-md-2 col-sm-2">
+         <div class="col-md-1 col-sm-2">
             <div class="form-group">
                <a href="{$fsc->serie->url()}">Serie</a>:
-               {if condition="$fsc->pedido->editable"}
+               {if="$fsc->pedido->editable"}
                <select class="form-control" name="serie" id="codserie" onchange="usar_serie();recalcular();">
                {loop="$fsc->serie->all()"}
                   {if="$value->codserie==$fsc->pedido->codserie"}
@@ -204,7 +204,7 @@
                <input class="form-control datepicker" type="text" name="fecha" value="{$fsc->pedido->fecha}" autocomplete="off"/>
             </div>
          </div>
-         <div class="col-md-1 col-sm-2">
+         <div class="col-md-2 col-sm-2">
             <div class="form-group">
                Hora:
                <input class="form-control" type="text" name="hora" value="{$fsc->pedido->hora}" autocomplete="off"/>
@@ -216,10 +216,13 @@
    <div role="tabpanel">
       <ul class="nav nav-tabs" role="tablist">
          <li role="presentation" class="active">
-            <a href="#lineas_p" aria-controls="lineas_p" role="tab" data-toggle="tab">Líneas</a>
+            <a href="#lineas_p" aria-controls="lineas_p" role="tab" data-toggle="tab">
+               <span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span>
+               <span class="hidden-xs"> &nbsp; Líneas</span>
+            </a>
          </li>
          {loop="$fsc->extensions"}
-            {if condition="$value->type=='tab'"}
+            {if="$value->type=='tab'"}
             <li role="presentation">
                <a href="#ext_{$value->name}" aria-controls="ext_{$value->name}" role="tab" data-toggle="tab">{$value->text}</a>
             </li>
@@ -229,7 +232,7 @@
       <div class="tab-content">
          <div role="tabpanel" class="tab-pane active" id="lineas_p">
             <div class="table-responsive">
-               {if condition="$fsc->pedido->editable"}
+               {if="$fsc->pedido->editable"}
                <table class="table table-condensed">
                   <thead>
                      <tr>
@@ -365,7 +368,7 @@
             </div>
          </div>
          {loop="$fsc->extensions"}
-            {if condition="$value->type=='tab'"}
+            {if="$value->type=='tab'"}
             <div role="tabpanel" class="tab-pane" id="ext_{$value->name}">
                <iframe src="index.php?page={$value->from}{$value->params}&id={$fsc->pedido->idpedido}" width="100%" height="600" frameborder="0"></iframe>
             </div>
@@ -376,7 +379,7 @@
 
    <div class="container-fluid">
       <div class="row">
-         <div class="col-lg-12 col-md-12 col-sm-12">
+         <div class="col-md-12">
             <div class="form-group">
                Observaciones:
                <textarea class="form-control" name="observaciones" rows="3">{$fsc->pedido->observaciones}</textarea>
@@ -391,14 +394,14 @@
       <div class="modal-content">
          <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3 class="modal-title">Buscar artículos</h3>
+            <h4 class="modal-title">Buscar artículos</h4>
          </div>
          <div class="modal-body">
             <form id="f_buscar_articulos" name="f_buscar_articulos" action="{$fsc->url()}" method="post" class="form">
                <input type="hidden" name="codcliente" value="{$fsc->pedido->codcliente}"/>
                <div class="container-fluid">
                   <div class="row">
-                     <div class="col-lg-6 col-md-6 col-sm-6">
+                     <div class="col-md-6 col-sm-6">
                         <div class="input-group">
                            <input class="form-control" type="text" name="query" autocomplete="off"/>
                            <span class="input-group-btn">
@@ -412,7 +415,7 @@
                            sólo con stock
                         </label>
                      </div>
-                     <div class="col-lg-6 col-md-6 col-sm-6">
+                     <div class="col-md-6 col-sm-6">
                         <select class="form-control" name="codfamilia" onchange="buscar_articulos()">
                            <option value="">Todas las familias</option>
                            <option value="">------</option>
@@ -442,19 +445,19 @@
                   Descripción:
                   <input class="form-control" type="text" name="descripcion" autocomplete="off"/>
                </div>
-               <div class="form-group col-lg-6 col-md-6 col-sm-6">
+               <div class="form-group col-md-6 col-sm-6">
                   <a href="{$fsc->familia->url()}">Familia</a>:
                   <select name="codfamilia" class="form-control">
-                     {loop="$fsc->familia->all()"}
+                  {loop="$fsc->familia->all()"}
                      <option value="{$value->codfamilia}">{$value->descripcion}</option>
-                     {/loop}
+                  {/loop}
                   </select>
                </div>
-               <div class="form-group col-lg-6 col-md-6 col-sm-6">
+               <div class="form-group col-md-6 col-sm-6">
                   <a href="{$fsc->impuesto->url()}">IVA</a>:
                   <select name="codimpuesto" class="form-control">
                      {loop="$fsc->impuesto->all()"}
-                     <option value="{$value->codimpuesto}"{if condition="$value->is_default()"} selected="selected"{/if}>{$value->descripcion}</option>
+                     <option value="{$value->codimpuesto}"{if="$value->is_default()"} selected="selected"{/if}>{$value->descripcion}</option>
                      {/loop}
                   </select>
                </div>
@@ -474,16 +477,16 @@
       <div class="modal-content">
          <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3 class="modal-title">Imprimir {#FS_PEDIDO#}</h3>
+            <h4 class="modal-title">Imprimir {#FS_PEDIDO#}</h4>
          </div>
          <div class="modal-body">
-         {loop="$fsc->extensions"}
-            {if condition="$value->type=='pdf'"}
-            <a href="index.php?page={$value->from}{$value->params}&id={$fsc->pedido->idpedido}" target="_blank" class="btn btn-block btn-default">
-               <span class="glyphicon glyphicon-print"></span> &nbsp; {$value->text}
-            </a>
-            {/if}
-         {/loop}
+            {loop="$fsc->extensions"}
+               {if="$value->type=='pdf'"}
+               <a href="index.php?page={$value->from}{$value->params}&id={$fsc->pedido->idpedido}" target="_blank" class="btn btn-block btn-default">
+                  <span class="glyphicon glyphicon-print"></span> &nbsp; {$value->text}
+               </a>
+               {/if}
+            {/loop}
          </div>
       </div>
    </div>
@@ -495,7 +498,7 @@
          <div class="modal-content">
             <div class="modal-header">
                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-               <h3 class="modal-title">Enviar {#FS_PEDIDO#}</h3>
+               <h4 class="modal-title">Enviar {#FS_PEDIDO#}</h4>
             </div>
             <div class="modal-body">
                <div class="form-group">
@@ -510,8 +513,8 @@
             </div>
             <div class="modal-footer">
             {loop="$fsc->extensions"}
-               {if condition="$value->type=='email'"}
-               <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled = true;this.form.action = 'index.php?page={$value->from}{$value->params}&id={$fsc->pedido->idpedido}';this.form.submit();">
+               {if="$value->type=='email'"}
+               <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled=true;this.form.action='index.php?page={$value->from}{$value->params}&id={$fsc->pedido->idpedido}';this.form.submit();">
                   <span class="glyphicon glyphicon-send"></span> &nbsp; Enviar {$value->text}
                </button>
                {/if}
@@ -529,14 +532,14 @@
          <div class="modal-content">
             <div class="modal-header">
                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-               <h3 class="modal-title">¿Realmente desea eliminar este {#FS_PEDIDO#}?</h3>
+               <h4 class="modal-title">¿Realmente desea eliminar este {#FS_PEDIDO#}?</h4>
             </div>
             <div class="modal-footer">
                <button class="btn btn-sm btn-danger" onclick="this.disabled = true;this.form.submit();">
                   <span class="glyphicon glyphicon-trash"></span> &nbsp; Eliminar
                </button>
             </div>
-            {if condition="$fsc->pedido->idalbaran"}
+            {if="$fsc->pedido->idalbaran"}
             <div class="alert alert-info">
                Hay un {#FS_ALBARAN#} asociado que será eliminada junto con este {#FS_PEDIDO#}.
             </div>
