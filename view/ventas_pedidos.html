@@ -44,7 +44,12 @@
 
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
    <div class="row">
-      <div class="col-md-4 col-sm-4 col-xs-4">
+      <div class="col-xs-12 text-center visible-xs">
+         <h2 style="margin-top: 0px;">{$fsc->page->title}</h2>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-8 col-sm-7 col-xs-8">
          <div class="btn-group hidden-xs">
             <a class="btn btn-sm btn-default" href="{$fsc->url()}" title="Recargar la página">
                <span class="glyphicon glyphicon-refresh"></span>
@@ -67,19 +72,16 @@
             </a>
             {loop="$fsc->extensions"}
                {if="$value->type=='button'"}
-               <a href="index.php?page={$value->from}" class="btn btn-sm btn-default">{$value->text}</a>
+               <a href="index.php?page={$value->from}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
                {/if}
             {/loop}
          </div>
-      </div>
-      <div class="col-md-4 col-sm-3 col-xs-4 text-center">
-         <h2 style="margin-top: 0px;">{$fsc->page->title}</h2>
       </div>
       <div class="col-md-2 col-sm-2 col-xs-4 text-right">
          <div class="btn-group">
             <a id="b_buscar_lineas" class="btn btn-sm btn-info" title="Buscar en líneas">
                <span class="glyphicon glyphicon-search"></span>
-               <span class="hidden-xs"> &nbsp; Líneas</span>
+               <span class="hidden-sm hidden-xs"> &nbsp; Líneas</span>
             </a>
          </div>
       </div>
@@ -88,7 +90,7 @@
          <form name="f_custom_search" action="{$fsc->url()}" method="post" class="form">
             <div class="input-group">
                <input class="form-control" type="text" name="query" value="{$fsc->query}" autocomplete="off" placeholder="Buscar">
-               <span class="input-group-btn">
+               <span class="input-group-btn hidden-sm">
                   <button class="btn btn-primary" type="submit">
                      <span class="glyphicon glyphicon-search"></span>
                   </button>
@@ -106,8 +108,8 @@
 <ul class="nav nav-tabs" role="tablist">
    <li{if="!isset($_GET['pendientes']) AND !isset($_GET['rechazados'])"} class="active"{/if}>
       <a href="{$fsc->url()}" title="Todos los {#FS_PEDIDOS#}">
-         <span class="glyphicon glyphicon-list"></span>
-         <span class="hidden-xs"> &nbsp; Todos</span>
+         <span class="glyphicon glyphicon-list visible-xs"></span>
+         <span class="hidden-xs"> &nbsp; Todos los {#FS_PEDIDOS#}</span>
       </a>
    </li>
    <li{if="isset($_GET['pendientes'])"} class="active"{/if}>

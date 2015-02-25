@@ -462,14 +462,14 @@ class pedido_cliente extends fs_model {
              */
             $albaran = new albaran_cliente();
             $alb0 = $albaran->get($this->idalbaran);
-            if ($alb0)
+            if($alb0)
             {
                $alb0->delete();
             }
          }
 
          /// modificamos el presupuesto relacionado
-         $this->db->exec("UPDATE presupuestoscli SET idpedido = NULL, editable = TRUE WHERE idpedido = " . $this->var2str($this->idpedido) . ";");
+         $this->db->exec("UPDATE presupuestoscli SET idpedido = NULL, editable = TRUE, status = 0 WHERE idpedido = " . $this->var2str($this->idpedido) . ";");
 
          return TRUE;
       }

@@ -124,7 +124,7 @@
                <div class="btn-group">
                {loop="$fsc->extensions"}
                   {if="$value->type=='button'"}
-                  <a href="index.php?page={$value->from}&id={$fsc->albaran->idalbaran}" class="btn btn-sm btn-default">{$value->text}</a>
+                  <a href="index.php?page={$value->from}&id={$fsc->albaran->idalbaran}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
                   {/if}
                {/loop}
                </div>
@@ -218,7 +218,7 @@
          <li role="presentation" class="active">
             <a href="#lineas_p" aria-controls="lineas_p" role="tab" data-toggle="tab">
                <span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span>
-               <span class="hidden-xs"> &nbsp; Líneas</span>
+               <span class="hidden-xs">&nbsp; Líneas</span>
             </a>
          </li>
          {loop="$fsc->extensions"}
@@ -256,6 +256,11 @@
                            <input type="hidden" name="idlinea_{$counter}" value="{$value->idlinea}"/>
                            <input type="hidden" name="referencia_{$counter}" value="{$value->referencia}"/>
                            <div class="form-control">
+                              {if="$value->idlineapresupuesto"}
+                              <a target="_blank" href="index.php?page=ventas_presupuesto&id={$value->idpresupuesto}" title="ver {#FS_PRESUPUESTO#}">
+                                 <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span>
+                              </a> &nbsp;
+                              {/if}
                               <a target="_blank" href="{$value->articulo_url()}">{$value->referencia}</a>
                            </div>
                         </td>
@@ -343,8 +348,15 @@
                      </tr>
                   </thead>
                   {loop="$fsc->pedido->get_lineas()"}
-                  <tr class="clickableRow" href="{$value->articulo_url()}">
-                     <td>{$value->referencia} {$value->descripcion}</td>
+                  <tr>
+                     <td>
+                        {if="$value->idlineapresupuesto"}
+                        <a target="_blank" href="index.php?page=ventas_presupuesto&id={$value->idpresupuesto}" title="ver {#FS_PRESUPUESTO#}">
+                           <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span>
+                        </a> &nbsp;
+                        {/if}
+                        <a target="_blank" href="{$value->articulo_url()}">{$value->referencia}</a> {$value->descripcion}
+                     </td>
                      <td class="text-right">{$value->cantidad}</td>
                      <td class="text-right">{$fsc->show_precio($value->pvpunitario, $fsc->pedido->coddivisa)}</td>
                      <td class="text-right">{$fsc->show_numero($value->dtopor, 2)} %</td>

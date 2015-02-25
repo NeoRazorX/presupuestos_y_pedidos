@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
  * Copyright (C) 2014  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,9 @@ class linea_pedido_cliente extends fs_model
    public $descripcion;
    public $dtopor;
    public $idlinea;
+   public $idlineapresupuesto;
    public $idpedido;
+   public $idpresupuesto;
    public $irpf;
    public $iva;
    public $pvpsindto;
@@ -50,10 +52,11 @@ class linea_pedido_cliente extends fs_model
          $this->cantidad = floatval($l['cantidad']);
          $this->codimpuesto = $l['codimpuesto'];
          $this->descripcion = $l['descripcion'];
-         $this->dtolineal = floatval($l['dtolineal']);
          $this->dtopor = floatval($l['dtopor']);
-         $this->idlinea = intval($l['idlinea']);
+         $this->idlinea = $this->intval($l['idlinea']);
+         $this->idlineapresupuesto = $this->intval($l['idlineapresupuesto']);
          $this->idpedido = $this->intval($l['idpedido']);
+         $this->idpresupuesto = $this->intval($l['idpresupuesto']);
          $this->irpf = floatval($l['irpf']);
          $this->iva = floatval($l['iva']);
          $this->pvpsindto = floatval($l['pvpsindto']);
@@ -67,17 +70,18 @@ class linea_pedido_cliente extends fs_model
          $this->cantidad = 0;
          $this->codimpuesto = NULL;
          $this->descripcion = '';
-         $this->dtolineal = 0;
          $this->dtopor = 0;
          $this->idlinea = NULL;
+         $this->idlineapresupuesto = NULL;
          $this->idpedido = NULL;
+         $this->idpresupuesto = NULL;
          $this->irpf = 0;
          $this->iva = 0;
          $this->pvpsindto = 0;
          $this->pvptotal = 0;
          $this->pvpunitario = 0;
          $this->recargo = 0;
-         $this->referencia = '';
+         $this->referencia = NULL;
       }
    }
    
@@ -173,16 +177,15 @@ class linea_pedido_cliente extends fs_model
    
    public function url()
    {
-      if( is_null($this->idpedido) )
-         return 'index.php?page=ventas_pedidos';
-      else
-         return 'index.php?page=ventas_pedido&id='.$this->idpedido;
+      return 'index.php?page=ventas_pedido&id='.$this->idpedido;
    }
    
    public function articulo_url()
    {
-      if( is_null($this->referencia) OR $this->referencia == ' ')
+      if( is_null($this->referencia) OR $this->referencia == '')
+      {
          return "index.php?page=ventas_articulos";
+      }
       else
          return "index.php?page=ventas_articulo&ref=".urlencode($this->referencia);
    }
@@ -190,7 +193,9 @@ class linea_pedido_cliente extends fs_model
    public function exists()
    {
       if( is_null($this->idlinea) )
+      {
          return FALSE;
+      }
       else
          return $this->db->select("SELECT * FROM ".$this->table_name." WHERE idlinea = ".$this->var2str($this->idlinea).";");
    }
@@ -203,14 +208,12 @@ class linea_pedido_cliente extends fs_model
       
       if( !$this->floatcmp($this->pvptotal, $total, FS_NF0, TRUE) )
       {
-         $this->new_error_msg("Error en el valor de pvptotal de la línea ".
-                 $this->referencia." del ".FS_PEDIDO.". Valor correcto: ".$total);
+         $this->new_error_msg("Error en el valor de pvptotal de la línea ".$this->referencia." del ".FS_PEDIDO.". Valor correcto: ".$total);
          return FALSE;
       }
       else if( !$this->floatcmp($this->pvpsindto, $totalsindto, FS_NF0, TRUE) )
       {
-         $this->new_error_msg("Error en el valor de pvpsindto de la línea ".
-                 $this->referencia." del ".FS_PEDIDO.". Valor correcto: ".$totalsindto);
+         $this->new_error_msg("Error en el valor de pvpsindto de la línea ".$this->referencia." del ".FS_PEDIDO.". Valor correcto: ".$totalsindto);
          return FALSE;
       }
       else
@@ -225,22 +228,26 @@ class linea_pedido_cliente extends fs_model
          {
             $sql = "UPDATE ".$this->table_name." SET cantidad = ".$this->var2str($this->cantidad).",
                codimpuesto = ".$this->var2str($this->codimpuesto).", descripcion = ".$this->var2str($this->descripcion).",
-               dtolineal = ".$this->var2str($this->dtolineal).", dtopor = ".$this->var2str($this->dtopor).", idpedido = ".$this->var2str($this->idpedido).",
+               dtopor = ".$this->var2str($this->dtopor).", idpedido = ".$this->var2str($this->idpedido).",
+               idlineapresupuesto = ".$this->var2str($this->idlineapresupuesto).", idpresupuesto = ".$this->var2str($this->idpresupuesto).",
                irpf = ".$this->var2str($this->irpf).", iva = ".$this->var2str($this->iva).",
                pvpsindto = ".$this->var2str($this->pvpsindto).", pvptotal = ".$this->var2str($this->pvptotal).",
                pvpunitario = ".$this->var2str($this->pvpunitario).", recargo = ".$this->var2str($this->recargo).",
                referencia = ".$this->var2str($this->referencia)." WHERE idlinea = ".$this->var2str($this->idlinea).";";
+            
             return $this->db->exec($sql);
          }
          else
          {
-            $sql = "INSERT INTO ".$this->table_name." (cantidad,codimpuesto,descripcion,dtolineal,dtopor,
-               idpedido,irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia)
+            $sql = "INSERT INTO ".$this->table_name." (cantidad,codimpuesto,descripcion,dtopor,idpedido,
+               irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,idlineapresupuesto,idpresupuesto)
                VALUES (".$this->var2str($this->cantidad).",".$this->var2str($this->codimpuesto).",
-               ".$this->var2str($this->descripcion).",".$this->var2str($this->dtolineal).",".$this->var2str($this->dtopor).",
+               ".$this->var2str($this->descripcion).",".$this->var2str($this->dtopor).",
                ".$this->var2str($this->idpedido).",".$this->var2str($this->irpf).",".$this->var2str($this->iva).",
                ".$this->var2str($this->pvpsindto).",".$this->var2str($this->pvptotal).",".$this->var2str($this->pvpunitario).",
-               ".$this->var2str($this->recargo).",".$this->var2str($this->referencia).");";
+               ".$this->var2str($this->recargo).",".$this->var2str($this->referencia).",
+               ".$this->var2str($this->idlineapresupuesto).",".$this->var2str($this->idpresupuesto).");";
+            
             if( $this->db->exec($sql) )
             {
                $this->idlinea = $this->db->lastval();

@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -50,9 +50,6 @@ class ventas_presupuesto extends fs_controller {
    {
       $this->ppage = $this->page->get('ventas_presupuestos');
       $this->agente = FALSE;
-
-      /// desactivamos la barra de botones
-      $this->show_fs_toolbar = FALSE;
 
       $presupuesto = new presupuesto_cliente();
       $this->presupuesto = FALSE;
@@ -290,7 +287,6 @@ class ventas_presupuesto extends fs_controller {
                         $lineas[$k]->cantidad = floatval($_POST['cantidad_' . $num]);
                         $lineas[$k]->pvpunitario = floatval($_POST['pvp_' . $num]);
                         $lineas[$k]->dtopor = floatval($_POST['dto_' . $num]);
-                        $lineas[$k]->dtolineal = 0;
                         $lineas[$k]->pvpsindto = ($value->cantidad * $value->pvpunitario);
                         $lineas[$k]->pvptotal = ($value->cantidad * $value->pvpunitario * (100 - $value->dtopor) / 100);
                         $lineas[$k]->descripcion = $_POST['desc_' . $num];
@@ -373,7 +369,7 @@ class ventas_presupuesto extends fs_controller {
             $this->presupuesto->totalrecargo = round($this->presupuesto->totalrecargo, FS_NF0);
             $this->presupuesto->total = $this->presupuesto->neto + $this->presupuesto->totaliva - $this->presupuesto->totalirpf + $this->presupuesto->totalrecargo;
 
-            if (abs(floatval($_POST['atotal']) - $this->presupuesto->total) > .01)
+            if (abs(floatval($_POST['atotal']) - $this->presupuesto->total) >= .02)
             {
                $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->presupuesto->total .
                        " frente a " . $_POST['atotal'] . "). Debes informar del error.");
@@ -445,12 +441,12 @@ class ventas_presupuesto extends fs_controller {
          foreach ($this->presupuesto->get_lineas() as $l)
          {
             $n = new linea_pedido_cliente();
+            $n->idlineapresupuesto = $l->idlinea;
             $n->idpresupuesto = $l->idpresupuesto;
             $n->idpedido = $pedido->idpedido;
             $n->cantidad = $l->cantidad;
             $n->codimpuesto = $l->codimpuesto;
             $n->descripcion = $l->descripcion;
-            $n->dtolineal = $l->dtolineal;
             $n->dtopor = $l->dtopor;
             $n->irpf = $l->irpf;
             $n->iva = $l->iva;

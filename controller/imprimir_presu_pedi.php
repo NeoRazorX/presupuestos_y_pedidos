@@ -2,7 +2,7 @@
 
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -43,7 +43,6 @@ class imprimir_presu_pedi extends fs_controller
    
    protected function process()
    {
-      $this->show_fs_toolbar = FALSE;
       $this->cliente = FALSE;
       $this->pedido = FALSE;
       $this->presupuesto = FALSE;
@@ -261,9 +260,6 @@ class imprimir_presu_pedi extends fs_controller
                   'dto' => $this->show_numero($lineas[$linea_actual]->dtopor, 0) . " %",
                   'importe' => $this->show_precio($lineas[$linea_actual]->pvptotal, $this->presupuesto->coddivisa)
                );
-               
-               if($lineas[$linea_actual]->referencia != '0')
-                  $fila['descripcion'] = substr($lineas[$linea_actual]->referencia.' - '.$lineas[$linea_actual]->descripcion, 0, 50);
                
                $pdf_doc->add_table_row($fila);
                $saltos++;
@@ -495,9 +491,6 @@ class imprimir_presu_pedi extends fs_controller
                   'dto' => $this->show_numero($lineas[$linea_actual]->dtopor, 0) . " %",
                   'importe' => $this->show_precio($lineas[$linea_actual]->pvptotal, $this->pedido->coddivisa)
                );
-               
-               if($lineas[$linea_actual]->referencia != '0')
-                  $fila['descripcion'] = substr($lineas[$linea_actual]->referencia.' - '.$lineas[$linea_actual]->descripcion, 0, 50);
                
                $pdf_doc->add_table_row($fila);
                $saltos++;

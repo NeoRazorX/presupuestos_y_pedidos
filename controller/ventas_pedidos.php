@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -221,7 +221,7 @@ class ventas_pedidos extends fs_controller
               'name' => 'pedidos_articulo',
               'page_from' => __CLASS__,
               'page_to' => 'ventas_articulo',
-              'type' => 'button',
+              'type' => 'tab_button',
               'text' => ucfirst(FS_PEDIDOS) . ' de cliente',
               'params' => ''
           ),

@@ -39,12 +39,15 @@
    <columna>
       <nombre>idlineapresupuesto</nombre>
       <tipo>integer</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>idpedido</nombre>
       <tipo>integer</tipo>
       <nulo>NO</nulo>
+   </columna>
+   <columna>
+      <nombre>idpresupuesto</nombre>
+      <tipo>integer</tipo>
    </columna>
    <columna>
       <nombre>irpf</nombre>

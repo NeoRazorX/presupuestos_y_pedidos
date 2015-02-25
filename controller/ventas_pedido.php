@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -50,9 +50,6 @@ class ventas_pedido extends fs_controller
    {
       $this->ppage = $this->page->get('ventas_pedidos');
       $this->agente = FALSE;
-
-      /// desactivamos la barra de botones
-      $this->show_fs_toolbar = FALSE;
 
       $pedido = new pedido_cliente();
       $this->pedido = FALSE;
@@ -250,7 +247,6 @@ class ventas_pedido extends fs_controller
                         $lineas[$k]->cantidad = floatval($_POST['cantidad_' . $num]);
                         $lineas[$k]->pvpunitario = floatval($_POST['pvp_' . $num]);
                         $lineas[$k]->dtopor = floatval($_POST['dto_' . $num]);
-                        $lineas[$k]->dtolineal = 0;
                         $lineas[$k]->pvpsindto = ($value->cantidad * $value->pvpunitario);
                         $lineas[$k]->pvptotal = ($value->cantidad * $value->pvpunitario * (100 - $value->dtopor) / 100);
                         $lineas[$k]->descripcion = $_POST['desc_' . $num];
@@ -333,7 +329,7 @@ class ventas_pedido extends fs_controller
             $this->pedido->totalrecargo = round($this->pedido->totalrecargo, FS_NF0);
             $this->pedido->total = $this->pedido->neto + $this->pedido->totaliva - $this->pedido->totalirpf + $this->pedido->totalrecargo;
 
-            if (abs(floatval($_POST['atotal']) - $this->pedido->total) > .01)
+            if (abs(floatval($_POST['atotal']) - $this->pedido->total) >= .02)
             {
                $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->pedido->total .
                        " frente a " . $_POST['atotal'] . "). Debes informar del error.");
@@ -408,12 +404,12 @@ class ventas_pedido extends fs_controller
          foreach ($this->pedido->get_lineas() as $l)
          {
             $n = new linea_albaran_cliente();
+            $n->idlineapedido = $l->idlinea;
             $n->idpedido = $l->idpedido;
             $n->idalbaran = $albaran->idalbaran;
             $n->cantidad = $l->cantidad;
             $n->codimpuesto = $l->codimpuesto;
             $n->descripcion = $l->descripcion;
-            $n->dtolineal = $l->dtolineal;
             $n->dtopor = $l->dtopor;
             $n->irpf = $l->irpf;
             $n->iva = $l->iva;
