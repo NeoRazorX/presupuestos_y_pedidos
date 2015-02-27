@@ -60,6 +60,9 @@ class ventas_pedido extends fs_controller
       $this->impuesto = new impuesto();
       $this->nuevo_pedido_url = FALSE;
       $this->serie = new serie();
+      
+      /// ¿El usuario tiene permiso para eliminar en esta página?
+      $this->allow_delete = $this->user->allow_delete_on(__CLASS__);
 
       /**
        * Comprobamos si el usuario tiene acceso a nueva_venta,
