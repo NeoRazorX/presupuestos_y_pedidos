@@ -194,7 +194,7 @@ class ventas_presupuesto extends fs_controller {
             $this->presupuesto->hora = $_POST['hora'];
          }
          else
-            $this->new_error_msg('No se encuentra el ejercicio asociado al ".FS_PRESUPUESTO."');
+            $this->new_error_msg('No se encuentra el ejercicio asociado al '.FS_PRESUPUESTO);
 
          /// ¿cambiamos el cliente?
          if ($_POST['cliente'] != $this->presupuesto->codcliente)

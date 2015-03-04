@@ -178,7 +178,7 @@ class imprimir_presu_pedi extends fs_controller
                   $direccion .= ' (' . $this->empresa->provincia . ')';
                if($this->empresa->telefono)
                   $direccion .= ' - Teléfono: ' . $this->empresa->telefono;
-               $pdf_doc->pdf->ezText($direccion, 9, array('justification' => 'center'));
+               $pdf_doc->pdf->ezText($this->fix_html($direccion), 9, array('justification' => 'center'));
             }
             
             /*
@@ -199,7 +199,7 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->add_table_row(
                array(
                    'campo1' => "<b>Cliente:</b>",
-                   'dato1' => $this->presupuesto->nombrecliente,
+                   'dato1' => $this->fix_html($this->presupuesto->nombrecliente),
                    'campo2' => "<b>".FS_CIFNIF.":</b>",
                    'dato2' => $this->presupuesto->cifnif
                )
@@ -207,7 +207,7 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->add_table_row(
                array(
                    'campo1' => "<b>Dirección:</b>",
-                   'dato1' => $this->presupuesto->direccion.' CP: '.$this->presupuesto->codpostal.' - '.$this->presupuesto->ciudad.' ('.$this->presupuesto->provincia.')',
+                   'dato1' => $this->fix_html($this->presupuesto->direccion.' CP: '.$this->presupuesto->codpostal.' - '.$this->presupuesto->ciudad.' ('.$this->presupuesto->provincia.')'),
                    'campo2' => "<b>Teléfonos:</b>",
                    'dato2' => $this->cliente->telefono1.'  '.$this->cliente->telefono2
                )
@@ -254,7 +254,7 @@ class imprimir_presu_pedi extends fs_controller
                   $impuestos[$lineas[$linea_actual]->iva] += $lineas[$linea_actual]->pvptotal * $lineas[$linea_actual]->iva / 100;
                
                $fila = array(
-                  'descripcion' => substr($lineas[$linea_actual]->descripcion, 0, 60),
+                  'descripcion' => $this->fix_html($lineas[$linea_actual]->descripcion),
                   'cantidad' => $lineas[$linea_actual]->cantidad,
                   'pvp' => $this->show_precio($lineas[$linea_actual]->pvpunitario, $this->presupuesto->coddivisa),
                   'dto' => $this->show_numero($lineas[$linea_actual]->dtopor, 0) . " %",
@@ -289,7 +289,7 @@ class imprimir_presu_pedi extends fs_controller
             }
             else
             {
-               $salto = "\n<b>Observaciones</b>: " . $this->presupuesto->observaciones;
+               $salto = "\n<b>Observaciones</b>: " . $this->fix_html($this->presupuesto->observaciones);
                $saltos += count( explode("\n", $this->presupuesto->observaciones) ) - 1;
             }
             
@@ -345,7 +345,7 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->save_table($opciones);
             $pdf_doc->pdf->ezText("\n", 10);
             
-            $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->empresa->pie_factura, 153), 0, 1.5);
+            $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->fix_html($this->empresa->pie_factura), 153), 0, 1.5);
             
             $pagina++;
          }
@@ -409,7 +409,7 @@ class imprimir_presu_pedi extends fs_controller
                   $direccion .= ' (' . $this->empresa->provincia . ')';
                if($this->empresa->telefono)
                   $direccion .= ' - Teléfono: ' . $this->empresa->telefono;
-               $pdf_doc->pdf->ezText($direccion, 9, array('justification' => 'center'));
+               $pdf_doc->pdf->ezText($this->fix_html($direccion), 9, array('justification' => 'center'));
             }
             
             /*
@@ -430,7 +430,7 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->add_table_row(
                array(
                    'campo1' => "<b>Cliente:</b>",
-                   'dato1' => $this->pedido->nombrecliente,
+                   'dato1' => $this->fix_html($this->pedido->nombrecliente),
                    'campo2' => "<b>".FS_CIFNIF.":</b>",
                    'dato2' => $this->pedido->cifnif
                )
@@ -438,7 +438,7 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->add_table_row(
                array(
                    'campo1' => "<b>Dirección:</b>",
-                   'dato1' => $this->pedido->direccion.' CP: '.$this->pedido->codpostal.' - '.$this->pedido->ciudad.' ('.$this->pedido->provincia.')',
+                   'dato1' => $this->fix_html($this->pedido->direccion.' CP: '.$this->pedido->codpostal.' - '.$this->pedido->ciudad.' ('.$this->pedido->provincia.')'),
                    'campo2' => "<b>Teléfonos:</b>",
                    'dato2' => $this->cliente->telefono1.'  '.$this->cliente->telefono2
                )
@@ -485,7 +485,7 @@ class imprimir_presu_pedi extends fs_controller
                   $impuestos[$lineas[$linea_actual]->iva] += $lineas[$linea_actual]->pvptotal * $lineas[$linea_actual]->iva / 100;
                
                $fila = array(
-                  'descripcion' => substr($lineas[$linea_actual]->descripcion, 0, 60),
+                  'descripcion' => $this->fix_html($lineas[$linea_actual]->descripcion),
                   'cantidad' => $lineas[$linea_actual]->cantidad,
                   'pvp' => $this->show_precio($lineas[$linea_actual]->pvpunitario, $this->pedido->coddivisa),
                   'dto' => $this->show_numero($lineas[$linea_actual]->dtopor, 0) . " %",
@@ -520,7 +520,7 @@ class imprimir_presu_pedi extends fs_controller
             }
             else
             {
-               $salto = "\n<b>Observaciones</b>: " . $this->pedido->observaciones;
+               $salto = "\n<b>Observaciones</b>: " . $this->fix_html($this->pedido->observaciones);
                $saltos += count( explode("\n", $this->pedido->observaciones) ) - 1;
             }
             
@@ -576,7 +576,7 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->save_table($opciones);
             $pdf_doc->pdf->ezText("\n", 10);
             
-            $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->empresa->pie_factura, 153), 0, 1.5);
+            $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->fix_html($this->empresa->pie_factura), 153), 0, 1.5);
             
             $pagina++;
          }
@@ -673,5 +673,14 @@ class imprimir_presu_pedi extends fs_controller
          else
             $this->new_error_msg('Imposible generar el PDF.');
       }
+   }
+   
+   private function fix_html($txt)
+   {
+      $newt = str_replace('&lt;', '<', $txt);
+      $newt = str_replace('&gt;', '>', $newt);
+      $newt = str_replace('&quot;', '"', $newt);
+      $newt = str_replace('&#39;', "'", $newt);
+      return $newt;
    }
 }
