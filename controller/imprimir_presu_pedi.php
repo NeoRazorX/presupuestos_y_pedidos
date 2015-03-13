@@ -23,7 +23,7 @@ require_once 'extras/phpmailer/class.phpmailer.php';
 require_once 'extras/phpmailer/class.smtp.php';
 
 require_model('cliente.php');
-require_model('fs_var.php');
+require_model('impuesto.php');
 require_model('pedido_cliente.php');
 require_model('presupuesto_cliente.php');
 
@@ -33,6 +33,7 @@ require_model('presupuesto_cliente.php');
 class imprimir_presu_pedi extends fs_controller
 {
    public $cliente;
+   public $impuesto;
    public $pedido;
    public $presupuesto;
    
@@ -44,6 +45,7 @@ class imprimir_presu_pedi extends fs_controller
    protected function process()
    {
       $this->cliente = FALSE;
+      $this->impuesto = new impuesto();
       $this->pedido = FALSE;
       $this->presupuesto = FALSE;
       
@@ -248,10 +250,12 @@ class imprimir_presu_pedi extends fs_controller
             $impuestos = array();
             for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
             {
-               if( !isset($impuestos[$lineas[$linea_actual]->iva]) )
-                  $impuestos[$lineas[$linea_actual]->iva] = $lineas[$linea_actual]->pvptotal * $lineas[$linea_actual]->iva / 100;
+               if( !isset($impuestos[$lineas[$linea_actual]->codimpuesto]) )
+               {
+                  $impuestos[$lineas[$linea_actual]->codimpuesto] = $lineas[$linea_actual]->pvptotal * $lineas[$linea_actual]->iva / 100;
+               }
                else
-                  $impuestos[$lineas[$linea_actual]->iva] += $lineas[$linea_actual]->pvptotal * $lineas[$linea_actual]->iva / 100;
+                  $impuestos[$lineas[$linea_actual]->codimpuesto] += $lineas[$linea_actual]->pvptotal * $lineas[$linea_actual]->iva / 100;
                
                $fila = array(
                   'descripcion' => $this->fix_html($lineas[$linea_actual]->descripcion),
@@ -325,14 +329,21 @@ class imprimir_presu_pedi extends fs_controller
             );
             foreach($impuestos as $i => $value)
             {
-               $titulo['iva'.$i] = '<b>IVA '.$i.'%</b>';
+               $imp = $this->impuesto->get($i);
+               if($imp)
+               {
+                  $titulo['iva'.$i] = '<b>'.$imp->descripcion.'</b>';
+               }
+               else
+                  $titulo['iva'.$i] = '<b>'.FS_IVA.' '.$i.'%</b>';
+               
                $fila['iva'.$i] = $this->show_precio($value, $this->presupuesto->coddivisa);
                $opciones['cols']['iva'.$i] = array('justification' => 'right');
             }
             
             if($this->presupuesto->totalirpf != 0)
             {
-               $titulo['irpf'] = '<b>IRPF</b>';
+               $titulo['irpf'] = '<b>'.FS_IRPF.'</b>';
                $fila['irpf'] = $this->show_precio(0 - $this->presupuesto->totalirpf);
                $opciones['cols']['irpf'] = array('justification' => 'right');
             }
@@ -479,10 +490,12 @@ class imprimir_presu_pedi extends fs_controller
             $impuestos = array();
             for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
             {
-               if( !isset($impuestos[$lineas[$linea_actual]->iva]) )
-                  $impuestos[$lineas[$linea_actual]->iva] = $lineas[$linea_actual]->pvptotal * $lineas[$linea_actual]->iva / 100;
+               if( !isset($impuestos[$lineas[$linea_actual]->codimpuesto]) )
+               {
+                  $impuestos[$lineas[$linea_actual]->codimpuesto] = $lineas[$linea_actual]->pvptotal * $lineas[$linea_actual]->iva / 100;
+               }
                else
-                  $impuestos[$lineas[$linea_actual]->iva] += $lineas[$linea_actual]->pvptotal * $lineas[$linea_actual]->iva / 100;
+                  $impuestos[$lineas[$linea_actual]->codimpuesto] += $lineas[$linea_actual]->pvptotal * $lineas[$linea_actual]->iva / 100;
                
                $fila = array(
                   'descripcion' => $this->fix_html($lineas[$linea_actual]->descripcion),
@@ -556,14 +569,21 @@ class imprimir_presu_pedi extends fs_controller
             );
             foreach($impuestos as $i => $value)
             {
-               $titulo['iva'.$i] = '<b>IVA '.$i.'%</b>';
-               $fila['iva'.$i] = $this->show_precio($value, $this->pedido->coddivisa);
+               $imp = $this->impuesto->get($i);
+               if($imp)
+               {
+                  $titulo['iva'.$i] = '<b>'.$imp->descripcion.'</b>';
+               }
+               else
+                  $titulo['iva'.$i] = '<b>'.FS_IVA.' '.$i.'%</b>';
+               
+               $fila['iva'.$i] = $this->show_precio($value, $this->albaran->coddivisa);
                $opciones['cols']['iva'.$i] = array('justification' => 'right');
             }
             
             if($this->pedido->totalirpf != 0)
             {
-               $titulo['irpf'] = '<b>IRPF</b>';
+               $titulo['irpf'] = '<b>'.FS_IRPF.'</b>';
                $fila['irpf'] = $this->show_precio(0 - $this->pedido->totalirpf);
                $opciones['cols']['irpf'] = array('justification' => 'right');
             }
