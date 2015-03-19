@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
  * Copyright (C) 2014  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,12 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once 'base/fs_model.php';
-require_model('agente.php');
 require_model('pedido_cliente.php');
-require_model('articulo.php');
-require_model('cliente.php');
-require_model('ejercicio.php');
 require_model('linea_presupuesto_cliente.php');
 require_model('secuencia.php');
 
@@ -266,26 +261,26 @@ class presupuesto_cliente extends fs_model
    {
       $sec = new secuencia();
       $sec = $sec->get_by_params2($this->codejercicio, $this->codserie, 'npresupuestocli');
-      if ($sec)
+      if($sec)
       {
          $this->numero = $sec->valorout;
          $sec->valorout++;
          $sec->save();
       }
 
-      if (!$sec OR $this->numero <= 1)
+      if(!$sec OR $this->numero <= 1)
       {
          $numero = $this->db->select("SELECT MAX(" . $this->db->sql_to_int('numero') . ") as num
             FROM " . $this->table_name . " WHERE codejercicio = " . $this->var2str($this->codejercicio) .
                  " AND codserie = " . $this->var2str($this->codserie) . ";");
-         if ($numero)
+         if($numero)
          {
             $this->numero = 1 + intval($numero[0]['num']);
          }
          else
             $this->numero = 1;
 
-         if ($sec)
+         if($sec)
          {
             $sec->valorout = 1 + $this->numero;
             $sec->save();
@@ -300,7 +295,7 @@ class presupuesto_cliente extends fs_model
       $this->observaciones = $this->no_html($this->observaciones);
       $this->totaleuros = $this->total * $this->tasaconv;
 
-      if ($this->floatcmp($this->total, $this->neto + $this->totaliva - $this->totalirpf + $this->totalrecargo, FS_NF0, TRUE))
+      if( $this->floatcmp($this->total, $this->neto + $this->totaliva - $this->totalirpf + $this->totalrecargo, FS_NF0, TRUE) )
       {
          return TRUE;
       }
@@ -320,9 +315,9 @@ class presupuesto_cliente extends fs_model
       $iva = 0;
       $irpf = 0;
       $recargo = 0;
-      foreach ($this->get_lineas() as $l)
+      foreach($this->get_lineas() as $l)
       {
-         if (!$l->test())
+         if( !$l->test() )
             $status = FALSE;
 
          $neto += $l->pvptotal;
@@ -337,35 +332,34 @@ class presupuesto_cliente extends fs_model
       $recargo = round($recargo, FS_NF0);
       $total = $neto + $iva - $irpf + $recargo;
 
-      if (!$this->floatcmp($this->neto, $neto, FS_NF0, TRUE))
+      if( !$this->floatcmp($this->neto, $neto, FS_NF0, TRUE) )
       {
          $this->new_error_msg("Valor neto de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $neto);
          $status = FALSE;
       }
-      else if (!$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE))
+      else if( !$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE) )
       {
          $this->new_error_msg("Valor totaliva de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $iva);
          $status = FALSE;
       }
-      else if (!$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE))
+      else if( !$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE) )
       {
          $this->new_error_msg("Valor totalirpf de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $irpf);
          $status = FALSE;
       }
-      else if (!$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE))
+      else if( !$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE) )
       {
          $this->new_error_msg("Valor totalrecargo de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $recargo);
          $status = FALSE;
       }
-      else if (!$this->floatcmp($this->total, $total, FS_NF0, TRUE))
+      else if( !$this->floatcmp($this->total, $total, FS_NF0, TRUE) )
       {
          $this->new_error_msg("Valor total de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $total);
          $status = FALSE;
       }
-      else if (!$this->floatcmp($this->totaleuros, $this->total * $this->tasaconv, FS_NF0, TRUE))
+      else if( !$this->floatcmp($this->totaleuros, $this->total * $this->tasaconv, FS_NF0, TRUE) )
       {
-         $this->new_error_msg("Valor totaleuros de " . FS_PRESUPUESTO . " incorrecto.
-            Valor correcto: " . round($this->total * $this->tasaconv, FS_NF0));
+         $this->new_error_msg("Valor totaleuros de ".FS_PRESUPUESTO." incorrecto. Valor correcto: ".round($this->total*$this->tasaconv, FS_NF0));
          $status = FALSE;
       }
 
@@ -374,9 +368,9 @@ class presupuesto_cliente extends fs_model
 
    public function save()
    {
-      if ($this->test())
+      if( $this->test() )
       {
-         if ($this->exists())
+         if( $this->exists() )
          {
             $sql = "UPDATE " . $this->table_name . " SET apartado = " . $this->var2str($this->apartado) . ",
                cifnif = " . $this->var2str($this->cifnif) . ", ciudad = " . $this->var2str($this->ciudad) . ",
@@ -398,6 +392,7 @@ class presupuesto_cliente extends fs_model
                totaleuros = " . $this->var2str($this->totaleuros) . ", totalirpf = " . $this->var2str($this->totalirpf) . ",
                totaliva = " . $this->var2str($this->totaliva) . ", totalrecargo = " . $this->var2str($this->totalrecargo) . "
                WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";";
+            
             return $this->db->exec($sql);
          }
          else
@@ -436,9 +431,9 @@ class presupuesto_cliente extends fs_model
 
    public function delete()
    {
-      if ($this->db->exec("DELETE FROM " . $this->table_name . " WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";"))
+      if( $this->db->exec("DELETE FROM " . $this->table_name . " WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";") )
       {
-         if ($this->idpedido)
+         if($this->idpedido)
          {
             /**
              * Delegamos la eliminación en la clase correspondiente,
@@ -446,7 +441,7 @@ class presupuesto_cliente extends fs_model
              */
             $pedido = new pedido_cliente();
             $ped0 = $pedido->get($this->idpedido);
-            if ($ped0)
+            if($ped0)
             {
                $ped0->delete();
             }
@@ -463,9 +458,9 @@ class presupuesto_cliente extends fs_model
       $preslist = array();
       
       $presupuestos = $this->db->select_limit("SELECT * FROM " . $this->table_name . " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if ($presupuestos)
+      if($presupuestos)
       {
-         foreach ($presupuestos as $p)
+         foreach($presupuestos as $p)
             $preslist[] = new presupuesto_cliente($p);
       }
       
@@ -478,9 +473,9 @@ class presupuesto_cliente extends fs_model
       
       $presupuestos = $this->db->select_limit("SELECT * FROM " . $this->table_name .
               " WHERE idpedido IS NULL AND status=0 ORDER BY fecha " . $order . ", codigo " . $order, FS_ITEM_LIMIT, $offset);
-      if ($presupuestos)
+      if($presupuestos)
       {
-         foreach ($presupuestos as $p)
+         foreach($presupuestos as $p)
             $preslist[] = new presupuesto_cliente($p);
       }
       
@@ -492,9 +487,9 @@ class presupuesto_cliente extends fs_model
       $preclist = array();
       
       $presupuestos = $this->db->select_limit("SELECT * FROM ".$this->table_name ." WHERE status=2 ORDER BY fecha ".$order.", codigo ".$order, FS_ITEM_LIMIT, $offset);
-      if ($presupuestos)
+      if($presupuestos)
       {
-         foreach ($presupuestos as $p)
+         foreach($presupuestos as $p)
             $preclist[] = new presupuesto_cliente($p);
       }
       
@@ -507,9 +502,9 @@ class presupuesto_cliente extends fs_model
       
       $presupuestos = $this->db->select_limit("SELECT * FROM " . $this->table_name .
               " WHERE codcliente = " . $this->var2str($codcliente) . " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if ($presupuestos)
+      if($presupuestos)
       {
-         foreach ($presupuestos as $p)
+         foreach($presupuestos as $p)
             $preslist[] = new presupuesto_cliente($p);
       }
       
@@ -522,9 +517,9 @@ class presupuesto_cliente extends fs_model
       
       $presupuestos = $this->db->select_limit("SELECT * FROM " . $this->table_name .
               " WHERE codagente = " . $this->var2str($codagente) ." ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if ($presupuestos)
+      if($presupuestos)
       {
-         foreach ($presupuestos as $p)
+         foreach($presupuestos as $p)
             $preslist[] = new presupuesto_cliente($p);
       }
       
@@ -537,9 +532,9 @@ class presupuesto_cliente extends fs_model
       
       $presupuestos = $this->db->select("SELECT * FROM " . $this->table_name .
               " WHERE fecha >= " . $this->var2str($desde) . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;");
-      if ($presupuestos)
+      if($presupuestos)
       {
-         foreach ($presupuestos as $p)
+         foreach($presupuestos as $p)
             $preslist[] = new presupuesto_cliente($p);
       }
       
@@ -552,12 +547,12 @@ class presupuesto_cliente extends fs_model
       $query = strtolower($this->no_html($query));
       
       $consulta = "SELECT * FROM " . $this->table_name . " WHERE ";
-      if (is_numeric($query))
+      if( is_numeric($query) )
       {
          $consulta .= "codigo LIKE '%" . $query . "%' OR numero2 LIKE '%" . $query . "%' OR observaciones LIKE '%" . $query . "%'
             OR total BETWEEN '" . ($query - .01) . "' AND '" . ($query + .01) . "'";
       }
-      else if (preg_match('/^([0-9]{1,2})-([0-9]{1,2})-([0-9]{4})$/i', $query))
+      else if( preg_match('/^([0-9]{1,2})-([0-9]{1,2})-([0-9]{4})$/i', $query) )
       {
          /// es una fecha
          $consulta .= "fecha = " . $this->var2str($query) . " OR observaciones LIKE '%" . $query . "%'";
@@ -570,9 +565,9 @@ class presupuesto_cliente extends fs_model
       $consulta .= " ORDER BY fecha DESC, codigo DESC";
 
       $presupuestos = $this->db->select_limit($consulta, FS_ITEM_LIMIT, $offset);
-      if ($presupuestos)
+      if($presupuestos)
       {
-         foreach ($presupuestos as $p)
+         foreach($presupuestos as $p)
             $preslist[] = new presupuesto_cliente($p);
       }
       
@@ -587,18 +582,24 @@ class presupuesto_cliente extends fs_model
               " AND idpedido AND fecha BETWEEN " . $this->var2str($desde) . " AND " . $this->var2str($hasta) .
               " AND codserie = " . $this->var2str($serie);
 
-      if ($obs != '')
+      if($obs != '')
          $sql .= " AND lower(observaciones) = " . $this->var2str(strtolower($obs));
 
       $sql .= " ORDER BY fecha DESC, codigo DESC;";
 
       $presupuestos = $this->db->select($sql);
-      if ($presupuestos)
+      if($presupuestos)
       {
-         foreach ($presupuestos as $p)
+         foreach($presupuestos as $p)
             $preslist[] = new presupuesto_cliente($p);
       }
       
       return $preslist;
+   }
+   
+   public function cron_job()
+   {
+      /// marcamos como rechazados todos los presupuestos con finoferta ya pasada
+      $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE finoferta < ".$pre->var2str(Date('d-m-Y'))." AND idpedido is null;");
    }
 }

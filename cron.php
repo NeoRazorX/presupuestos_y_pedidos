@@ -18,21 +18,21 @@
  */
 
 require_model('pedido_cliente.php');
+require_model('pedido_proveedor.php');
 require_model('presupuesto_cliente.php');
 
 class presupuestos_pedidos_cron
 {
    public function __construct(&$db)
    {
-      /// forzamos la comprobación de modelos
-      $ped = new pedido_cliente();
       $pre = new presupuesto_cliente();
+      $pre->cron_job();
       
-      /// marcamos como rechazados todos los presupuestos con finoferta ya pasada
-      $db->exec("UPDATE presupuestoscli SET status = '2' WHERE finoferta < ".$pre->var2str(Date('d-m-Y'))." AND idpedido is null;");
-
-      /// marcamos como pendientes los pedidos sin idpedido
-      $db->exec("UPDATE pedidoscli SET status = '0' WHERE status = '1' AND idalbaran is null;");
+      $ped = new pedido_cliente();
+      $ped->cron_job();
+      
+      $pedp = new pedido_proveedor();
+      $pedp->cron_job();
    }
 }
 

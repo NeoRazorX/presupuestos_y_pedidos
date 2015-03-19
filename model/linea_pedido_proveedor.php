@@ -2,7 +2,7 @@
 /*
  * This file is part of FacturaSctipts
  * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,16 +18,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class linea_pedido_cliente extends fs_model
+class linea_pedido_proveedor extends fs_model
 {
    public $cantidad;
    public $codimpuesto;
    public $descripcion;
    public $dtopor;
+   
+   /**
+    * Clave primaria.
+    * @var type 
+    */
    public $idlinea;
-   public $idlineapresupuesto;
    public $idpedido;
-   public $idpresupuesto;
    public $irpf;
    public $iva;
    public $pvpsindto;
@@ -40,7 +43,7 @@ class linea_pedido_cliente extends fs_model
    
    public function __construct($l = FALSE)
    {
-      parent::__construct('lineaspedidoscli', 'plugins/presupuestos_y_pedidos/');
+      parent::__construct('lineaspedidosprov', 'plugins/presupuestos_y_pedidos/');
       
       if( !isset(self::$pedidos) )
          self::$pedidos = array();
@@ -52,9 +55,7 @@ class linea_pedido_cliente extends fs_model
          $this->descripcion = $l['descripcion'];
          $this->dtopor = floatval($l['dtopor']);
          $this->idlinea = $this->intval($l['idlinea']);
-         $this->idlineapresupuesto = $this->intval($l['idlineapresupuesto']);
          $this->idpedido = $this->intval($l['idpedido']);
-         $this->idpresupuesto = $this->intval($l['idpresupuesto']);
          $this->irpf = floatval($l['irpf']);
          $this->iva = floatval($l['iva']);
          $this->pvpsindto = floatval($l['pvpsindto']);
@@ -70,9 +71,7 @@ class linea_pedido_cliente extends fs_model
          $this->descripcion = '';
          $this->dtopor = 0;
          $this->idlinea = NULL;
-         $this->idlineapresupuesto = NULL;
          $this->idpedido = NULL;
-         $this->idpresupuesto = NULL;
          $this->irpf = 0;
          $this->iva = 0;
          $this->pvpsindto = 0;
@@ -115,7 +114,7 @@ class linea_pedido_cliente extends fs_model
       
       if( !$encontrado )
       {
-         $pre = new pedido_cliente();
+         $pre = new pedido_proveedor();
          self::$pedidos[] = $pre->get($this->idpedido);
          $codigo = self::$pedidos[ count(self::$pedidos)-1 ]->codigo;
       }
@@ -140,7 +139,7 @@ class linea_pedido_cliente extends fs_model
       
       if( !$encontrado )
       {
-         $pre = new pedido_cliente();
+         $pre = new pedido_proveedor();
          self::$pedidos[] = $pre->get($this->idpedido);
          $fecha = self::$pedidos[ count(self::$pedidos)-1 ]->fecha;
       }
@@ -148,7 +147,7 @@ class linea_pedido_cliente extends fs_model
       return $fecha;
    }
    
-   public function show_nombrecliente()
+   public function show_nombre()
    {
       $nombre = 'desconocido';
       
@@ -157,7 +156,7 @@ class linea_pedido_cliente extends fs_model
       {
          if($p->idpedido == $this->idpedido)
          {
-            $nombre = $p->nombrecliente;
+            $nombre = $p->nombre;
             $encontrado = TRUE;
             break;
          }
@@ -165,9 +164,9 @@ class linea_pedido_cliente extends fs_model
       
       if( !$encontrado )
       {
-         $pre = new pedido_cliente();
+         $pre = new pedido_proveedor();
          self::$pedidos[] = $pre->get($this->idpedido);
-         $nombre = self::$pedidos[ count(self::$pedidos)-1 ]->nombrecliente;
+         $nombre = self::$pedidos[ count(self::$pedidos)-1 ]->nombre;
       }
       
       return $nombre;
@@ -175,7 +174,7 @@ class linea_pedido_cliente extends fs_model
    
    public function url()
    {
-      return 'index.php?page=ventas_pedido&id='.$this->idpedido;
+      return 'index.php?page=compras_pedido&id='.$this->idpedido;
    }
    
    public function articulo_url()
@@ -227,7 +226,6 @@ class linea_pedido_cliente extends fs_model
             $sql = "UPDATE ".$this->table_name." SET cantidad = ".$this->var2str($this->cantidad).",
                codimpuesto = ".$this->var2str($this->codimpuesto).", descripcion = ".$this->var2str($this->descripcion).",
                dtopor = ".$this->var2str($this->dtopor).", idpedido = ".$this->var2str($this->idpedido).",
-               idlineapresupuesto = ".$this->var2str($this->idlineapresupuesto).", idpresupuesto = ".$this->var2str($this->idpresupuesto).",
                irpf = ".$this->var2str($this->irpf).", iva = ".$this->var2str($this->iva).",
                pvpsindto = ".$this->var2str($this->pvpsindto).", pvptotal = ".$this->var2str($this->pvptotal).",
                pvpunitario = ".$this->var2str($this->pvpunitario).", recargo = ".$this->var2str($this->recargo).",
@@ -238,13 +236,12 @@ class linea_pedido_cliente extends fs_model
          else
          {
             $sql = "INSERT INTO ".$this->table_name." (cantidad,codimpuesto,descripcion,dtopor,idpedido,
-               irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,idlineapresupuesto,idpresupuesto)
+               irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia)
                VALUES (".$this->var2str($this->cantidad).",".$this->var2str($this->codimpuesto).",
                ".$this->var2str($this->descripcion).",".$this->var2str($this->dtopor).",
                ".$this->var2str($this->idpedido).",".$this->var2str($this->irpf).",".$this->var2str($this->iva).",
                ".$this->var2str($this->pvpsindto).",".$this->var2str($this->pvptotal).",".$this->var2str($this->pvpunitario).",
-               ".$this->var2str($this->recargo).",".$this->var2str($this->referencia).",
-               ".$this->var2str($this->idlineapresupuesto).",".$this->var2str($this->idpresupuesto).");";
+               ".$this->var2str($this->recargo).",".$this->var2str($this->referencia).");";
             
             if( $this->db->exec($sql) )
             {
@@ -272,7 +269,7 @@ class linea_pedido_cliente extends fs_model
       if($data)
       {
          foreach($data as $d)
-            $plist[] = new linea_pedido_cliente($d);
+            $plist[] = new linea_pedido_proveedor($d);
       }
       
       return $plist;
@@ -286,7 +283,7 @@ class linea_pedido_cliente extends fs_model
       if( $lineas )
       {
          foreach($lineas as $l)
-            $linealist[] = new linea_pedido_cliente($l);
+            $linealist[] = new linea_pedido_proveedor($l);
       }
       
       return $linealist;
@@ -313,7 +310,7 @@ class linea_pedido_cliente extends fs_model
       if( $lineas )
       {
          foreach($lineas as $l)
-            $linealist[] = new linea_pedido_cliente($l);
+            $linealist[] = new linea_pedido_proveedor($l);
       }
       
       return $linealist;
