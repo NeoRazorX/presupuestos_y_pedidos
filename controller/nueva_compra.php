@@ -357,9 +357,6 @@ class nueva_compra extends fs_controller
                      
                      if( $linea->save() )
                      {
-                        /// sumamos al stock
-                        $articulo->sum_stock($pedido->codalmacen, $linea->cantidad);
-                        
                         $pedido->neto += $linea->pvptotal;
                         $pedido->totaliva += ($linea->pvptotal * $linea->iva/100);
                         $pedido->totalirpf += ($linea->pvptotal * $linea->irpf/100);
