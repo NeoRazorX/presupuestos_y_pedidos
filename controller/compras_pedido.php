@@ -153,23 +153,9 @@ class compras_pedido extends fs_controller
             $proveedor = $this->proveedor->get($_POST['proveedor']);
             if($proveedor)
             {
-               foreach($proveedor->get_direcciones() as $d)
-               {
-                  if($d->domfacturacion)
-                  {
-                     $this->pedido->codproveedor = $proveedor->codproveedor;
-                     $this->pedido->cifnif = $proveedor->cifnif;
-                     $this->pedido->proveedor = $proveedor->nombrecomercial;
-                     $this->pedido->apartado = $d->apartado;
-                     $this->pedido->ciudad = $d->ciudad;
-                     $this->pedido->coddir = $d->id;
-                     $this->pedido->codpais = $d->codpais;
-                     $this->pedido->codpostal = $d->codpostal;
-                     $this->pedido->direccion = $d->direccion;
-                     $this->pedido->provincia = $d->provincia;
-                     break;
-                  }
-               }
+               $this->pedido->codproveedor = $proveedor->codproveedor;
+               $this->pedido->nombre = $proveedor->nombrecomercial;
+               $this->pedido->cifnif = $proveedor->cifnif;
             }
             else
                die('No se ha encontrado el proveedor.');

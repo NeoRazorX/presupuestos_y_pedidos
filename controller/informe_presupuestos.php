@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2015  Carlos Garcia Gomez  neorazorx@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,9 +18,15 @@
  */
 
 require_model('presupuesto_cliente.php');
+require_model('pedido_cliente.php');
 
 class informe_presupuestos extends fs_controller
 {
+   public $desde;
+   public $hasta;
+   public $mostrar;
+   public $resultados;
+   
    public function __construct()
    {
       parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTOS), 'informes', FALSE, TRUE);
@@ -29,22 +35,47 @@ class informe_presupuestos extends fs_controller
    protected function process()
    {
       /// declaramos los objetos sólo para asegurarnos de que existen las tablas
-      $presupuesto_cli = new presupuesto_cliente();
+      $presupuesto = new presupuesto_cliente();
+      $pedido = new pedido_cliente();
+      
+      $this->mostrar = 'stats';
+      if( isset($_REQUEST['mostrar']) )
+      {
+         $this->mostrar = $_REQUEST['mostrar'];
+      }
+      
+      if($this->mostrar == 'listado')
+      {
+         $this->desde = Date('1-m-Y');
+         $this->hasta = Date('d-m-Y', mktime(0, 0, 0, date("m")+1, date("1")-1, date("Y")));
+         
+         if( isset($_POST['desde']) )
+         {
+            $this->desde = $_POST['desde'];
+            $this->hasta = $_POST['hasta'];
+         }
+         
+         $this->resultados = $presupuesto->all_desde($this->desde, $this->hasta);
+      }
    }
    
    public function stats_last_days()
    {
       $stats = array();
-      $stats_cli = $this->stats_last_days_aux('presupuestoscli');
       
-      foreach($stats_cli as $i => $value)
+      $stats_pre = $this->stats_last_days_aux('presupuestoscli');
+      foreach($stats_pre as $i => $value)
       {
          $stats[$i] = array(
              'day' => $value['day'],
-             'total_cli' => $value['total'],
-             'total_pro' => 0
+             'total_pre' => $value['total'],
+             'total_ped' => 0
          );
       }
+      
+      $stats_ped = $this->stats_last_days_aux('pedidoscli');
+      foreach($stats_ped as $i => $value)
+         $stats[$i]['total_ped'] = $value['total'];
       
       return $stats;
    }
@@ -86,7 +117,7 @@ class informe_presupuestos extends fs_controller
    public function stats_last_months()
    {
       $stats = array();
-      $stats_cli = $this->stats_last_months_aux('presupuestoscli');
+      $stats_pre = $this->stats_last_months_aux('presupuestoscli');
       $meses = array(
           1 => 'ene',
           2 => 'feb',
@@ -102,14 +133,18 @@ class informe_presupuestos extends fs_controller
           12 => 'dic'
       );
       
-      foreach($stats_cli as $i => $value)
+      foreach($stats_pre as $i => $value)
       {
          $stats[$i] = array(
              'month' => $meses[ $value['month'] ],
-             'total_cli' => round($value['total'], 2),
-             'total_pro' => 0
+             'total_pre' => round($value['total'], 2),
+             'total_ped' => 0
          );
       }
+      
+      $stats_ped = $this->stats_last_months_aux('pedidoscli');
+      foreach($stats_ped as $i => $value)
+         $stats[$i]['total_ped'] = $value['total'];
       
       return $stats;
    }
@@ -151,16 +186,20 @@ class informe_presupuestos extends fs_controller
    public function stats_last_years()
    {
       $stats = array();
-      $stats_cli = $this->stats_last_years_aux('presupuestoscli');
       
-      foreach($stats_cli as $i => $value)
+      $stats_pre = $this->stats_last_years_aux('presupuestoscli');
+      foreach($stats_pre as $i => $value)
       {
          $stats[$i] = array(
              'year' => $value['year'],
-             'total_cli' => round($value['total'], 2),
-             'total_pro' => 0
+             'total_pre' => round($value['total'], 2),
+             'total_ped' => 0
          );
       }
+      
+      $stats_ped = $this->stats_last_years_aux('pedidoscli');
+      foreach($stats_ped as $i => $value)
+         $stats[$i]['total_ped'] = $value['total'];
       
       return $stats;
    }
@@ -212,5 +251,10 @@ class informe_presupuestos extends fs_controller
       }
       
       return $dates;
+   }
+
+   public function finoferta($finoferta, $idpedido)
+   {
+      return is_null($idpedido) AND strtotime($finoferta) < strtotime(Date('d-m-Y'));
    }
 }

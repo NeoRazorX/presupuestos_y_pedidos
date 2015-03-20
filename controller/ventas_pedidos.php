@@ -98,7 +98,12 @@ class ventas_pedidos extends fs_controller
             $this->resultados = $pedido->all_rechazados($this->offset);
          }
          else
+         {
+            /// ejecutamos el proceso del cron para pedidos.
+            $pedido->cron_job();
+            
             $this->resultados = $pedido->all($this->offset);
+         }
       }
    }
 

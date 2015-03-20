@@ -481,6 +481,21 @@ class pedido_proveedor extends fs_model {
       
       return $pedilist;
    }
+
+   public function all_desde($desde, $hasta)
+   {
+      $pedlist = array();
+      
+      $pedidos = $this->db->select("SELECT * FROM " . $this->table_name .
+              " WHERE fecha >= " . $this->var2str($desde) . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;");
+      if ($pedidos)
+      {
+         foreach ($pedidos as $p)
+            $pedlist[] = new pedido_proveedor($p);
+      }
+      
+      return $pedlist;
+   }
    
    public function search($query, $offset = 0)
    {

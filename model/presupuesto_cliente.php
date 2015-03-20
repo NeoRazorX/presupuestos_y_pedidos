@@ -600,6 +600,6 @@ class presupuesto_cliente extends fs_model
    public function cron_job()
    {
       /// marcamos como rechazados todos los presupuestos con finoferta ya pasada
-      $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE finoferta < ".$pre->var2str(Date('d-m-Y'))." AND idpedido is null;");
+      $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE finoferta < ".$this->var2str(Date('d-m-Y'))." AND idpedido is null;");
    }
 }

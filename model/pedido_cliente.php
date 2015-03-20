@@ -540,9 +540,9 @@ class pedido_cliente extends fs_model {
       
       $pedidos = $this->db->select_limit("SELECT * FROM " . $this->table_name .
               " WHERE codagente = " . $this->var2str($codagente) ." ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if ($pedidos)
+      if($pedidos)
       {
-         foreach ($pedidos as $p)
+         foreach($pedidos as $p)
             $pedilist[] = new pedido_cliente($p);
       }
       
@@ -555,9 +555,9 @@ class pedido_cliente extends fs_model {
       
       $pedidos = $this->db->select("SELECT * FROM " . $this->table_name .
               " WHERE fecha >= " . $this->var2str($desde) . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;");
-      if ($pedidos)
+      if($pedidos)
       {
-         foreach ($pedidos as $p)
+         foreach($pedidos as $p)
             $pedlist[] = new pedido_cliente($p);
       }
       
@@ -570,12 +570,12 @@ class pedido_cliente extends fs_model {
       $query = strtolower($this->no_html($query));
 
       $consulta = "SELECT * FROM " . $this->table_name . " WHERE ";
-      if (is_numeric($query))
+      if( is_numeric($query) )
       {
          $consulta .= "codigo LIKE '%" . $query . "%' OR numero2 LIKE '%" . $query . "%' OR observaciones LIKE '%" . $query . "%'
             OR total BETWEEN '" . ($query - .01) . "' AND '" . ($query + .01) . "'";
       }
-      else if (preg_match('/^([0-9]{1,2})-([0-9]{1,2})-([0-9]{4})$/i', $query))
+      else if( preg_match('/^([0-9]{1,2})-([0-9]{1,2})-([0-9]{4})$/i', $query) )
       {
          /// es una fecha
          $consulta .= "fecha = " . $this->var2str($query) . " OR observaciones LIKE '%" . $query . "%'";
@@ -588,9 +588,9 @@ class pedido_cliente extends fs_model {
       $consulta .= " ORDER BY fecha DESC, codigo DESC";
 
       $pedidos = $this->db->select_limit($consulta, FS_ITEM_LIMIT, $offset);
-      if ($pedidos)
+      if($pedidos)
       {
-         foreach ($pedidos as $p)
+         foreach($pedidos as $p)
             $pedilist[] = new pedido_cliente($p);
       }
       
@@ -605,15 +605,15 @@ class pedido_cliente extends fs_model {
               " AND idalbaran AND fecha BETWEEN " . $this->var2str($desde) . " AND " . $this->var2str($hasta) .
               " AND codserie = " . $this->var2str($serie);
 
-      if ($obs != '')
+      if($obs != '')
          $sql .= " AND lower(observaciones) = " . $this->var2str(strtolower($obs));
 
       $sql .= " ORDER BY fecha DESC, codigo DESC;";
 
       $pedidos = $this->db->select($sql);
-      if ($pedidos)
+      if($pedidos)
       {
-         foreach ($pedidos as $p)
+         foreach($pedidos as $p)
             $pedilist[] = new pedido_cliente($p);
       }
       

@@ -98,7 +98,12 @@ class ventas_presupuestos extends fs_controller
             $this->resultados = $presupuesto->all_rechazados($this->offset);
          }
          else
+         {
+            /// ejecutamos la tarea del cron
+            $presupuesto->cron_job();
+            
             $this->resultados = $presupuesto->all($this->offset);
+         }
       }
    }
 

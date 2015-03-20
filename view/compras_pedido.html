@@ -27,7 +27,7 @@
          onSelect: function (suggestion) {
             if (suggestion)
             {
-               if (document.f_pedido.proveedor.value != suggestion.data && suggestion.data != '')
+               if(document.f_pedido.proveedor.value != suggestion.data && suggestion.data != '')
                {
                   document.f_pedido.proveedor.value = suggestion.data;
                   usar_proveedor(suggestion.data);
@@ -134,7 +134,7 @@
          <div class="col-md-2 col-sm-6">
             <div class="form-group">
                Núm. Proveedor:
-               <input class="form-control" type="text" name="numero2" value="{$fsc->pedido->numproveedor}"/>
+               <input class="form-control" type="text" name="numproveedor" value="{$fsc->pedido->numproveedor}"/>
             </div>
          </div>
          <div class="col-md-1 col-sm-2">

@@ -1,5 +1,21 @@
 {include="header"}
 
+<ul class="nav nav-tabs">
+   <li role="presentation"{if="$fsc->mostrar=='stats'"} class="active"{/if}>
+      <a href="{$fsc->url()}">
+         <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+         <span class="hidden-xs">&nbsp; Estadísticas</span>
+      </a>
+   </li>
+   <li role="presentation"{if="$fsc->mostrar=='listado'"} class="active"{/if}>
+      <a href="{$fsc->url()}&mostrar=listado">
+         <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+         <span class="hidden-xs">&nbsp; Listado</span>
+      </a>
+   </li>
+</ul>
+
+{if="$fsc->mostrar=='stats'"}
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
    // Load the Visualization API and the piechart package.
@@ -16,11 +32,11 @@
       // Create the data table.
       var data = new google.visualization.DataTable();
       data.addColumn('string', 'día');
-      data.addColumn('number', 'ventas {$fsc->simbolo_divisa()}');
-      data.addColumn('number', 'compras {$fsc->simbolo_divisa()}');
+      data.addColumn('number', '{#FS_PRESUPUESTOS#} {$fsc->simbolo_divisa()}');
+      data.addColumn('number', '{#FS_PEDIDOS#} {$fsc->simbolo_divisa()}');
       data.addRows([
       {loop="$fsc->stats_last_days()"}
-         ['{$value['day']}', {$value['total_cli']}, {$value['total_pro']}],
+         ['{$value['day']}', {$value['total_pre']}, {$value['total_ped']}],
       {/loop}
       ]);
       
@@ -31,11 +47,11 @@
       // Create the data table.
       var data2 = new google.visualization.DataTable();
       data2.addColumn('string', 'mes');
-      data2.addColumn('number', 'ventas {$fsc->simbolo_divisa()}');
-      data2.addColumn('number', 'compras {$fsc->simbolo_divisa()}');
+      data2.addColumn('number', '{#FS_PRESUPUESTOS#} {$fsc->simbolo_divisa()}');
+      data2.addColumn('number', '{#FS_PEDIDOS#} {$fsc->simbolo_divisa()}');
       data2.addRows([
       {loop="$fsc->stats_last_months()"}
-         ['{$value['month']}', {$value['total_cli']}, {$value['total_pro']}],
+         ['{$value['month']}', {$value['total_pre']}, {$value['total_ped']}],
       {/loop}
       ]);
       
@@ -46,11 +62,11 @@
       // Create the data table.
       var data3 = new google.visualization.DataTable();
       data3.addColumn('string', 'año');
-      data3.addColumn('number', 'ventas {$fsc->simbolo_divisa()}');
-      data3.addColumn('number', 'compras {$fsc->simbolo_divisa()}');
+      data3.addColumn('number', '{#FS_PRESUPUESTOS#} {$fsc->simbolo_divisa()}');
+      data3.addColumn('number', '{#FS_PEDIDOS#} {$fsc->simbolo_divisa()}');
       data3.addRows([
       {loop="$fsc->stats_last_years()"}
-         ['{$value['year']}', {$value['total_cli']}, {$value['total_pro']}],
+         ['{$value['year']}', {$value['total_pre']}, {$value['total_ped']}],
       {/loop}
       ]);
       
@@ -60,31 +76,121 @@
    }
 </script>
 
-<div class="panel panel-default" style="margin: 5px;">
-   <div class="panel-heading">
-      <h3 class="panel-title"><span class="text-capitalize">{#FS_PRESUPUESTOS#}</span> de los últimos días</h3>
+<div class="container-fluid" style="margin-top: 10px;">
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="panel panel-default">
+            <div class="panel-heading">
+               <h3 class="panel-title"><span class="text-capitalize">{#FS_PRESUPUESTOS#}</span> de los últimos días</h3>
+            </div>
+            <div class="panel-body">
+               <div id="chart_presupuestos_day" style="width: 95%; margin-left: auto; margin-right: auto;"></div>
+            </div>
+         </div>
+      </div>
    </div>
-   <div class="panel-body">
-      <div id="chart_presupuestos_day" style="width: 95%; margin-left: auto; margin-right: auto;"></div>
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="panel panel-default">
+            <div class="panel-heading">
+               <h3 class="panel-title"><span class="text-capitalize">{#FS_PRESUPUESTOS#}</span> de los últimos meses</h3>
+            </div>
+            <div class="panel-body">
+               <div id="chart_presupuestos_month" style="width: 95%; margin-left: auto; margin-right: auto; height: 300px;"></div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="panel panel-default">
+            <div class="panel-heading">
+               <h3 class="panel-title"><span class="text-capitalize">{#FS_PRESUPUESTOS#}</span> de los últimos años</h3>
+            </div>
+            <div class="panel-body">
+               <div id="chart_presupuestos_year" style="width: 95%; margin-left: auto; margin-right: auto; height: 300px;"></div>
+            </div>
+         </div>
+      </div>
    </div>
 </div>
+{elseif="$fsc->mostrar=='listado'"}
+<form action="{$fsc->url()}&mostrar=listado" method="post" class="form">
+   <div class="container-fluid" style="margin-top: 10px;">
+      <div class="row">
+         <div class="col-sm-2">
+            <div class="form-group">
+               Desde:
+               <input type="text" name="desde" value="{$fsc->desde}" class="form-control datepicker" autocomplete="off"/>
+            </div>
+         </div>
+         <div class="col-sm-2">
+            <div class="form-group">
+               Hasta:
+               <input type="text" name="hasta" value="{$fsc->hasta}" class="form-control datepicker" autocomplete="off"/>
+            </div>
+         </div>
+         <div class="col-sm-8 text-right">
+            <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled = true;this.form.submit();">
+               <span class="glyphicon glyphicon-search"></span>
+               <span class="hidden-xs"> &nbsp; Buscar</span>
+            </button>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-sm-12">
+            <h2 class="text-capitalize">{#FS_PRESUPUESTOS#}</h2>
+         </div>
+      </div>
+   </div>
+</form>
 
-<div class="panel panel-default" style="margin: 5px;">
-   <div class="panel-heading">
-      <h3 class="panel-title"><span class="text-capitalize">{#FS_PRESUPUESTOS#}</span> de los últimos meses</h3>
-   </div>
-   <div class="panel-body">
-      <div id="chart_presupuestos_month" style="width: 95%; margin-left: auto; margin-right: auto; height: 300px;"></div>
-   </div>
+<div class="table-responsive">
+   <table class="table table-hover">
+      <thead>
+         <tr>
+            <th></th>
+            <th class="text-left">Código + Número 2</th>
+            <th class="text-left">Cliente</th>
+            <th class="text-left">Observaciones</th>
+            <th class="text-right">Total</th>
+            <th class="text-right">Fecha</th>
+            <th class="text-right">Hora</th>
+            <th class="text-right">Fecha validez</th>
+         </tr>
+      </thead>
+      {loop="$fsc->resultados"}
+      <tr class="clickableRow{if="$value->total<=0"} bg-warning{elseif="$value->status==2 OR $fsc->finoferta($value->finoferta,$value->idpedido)"} bg-danger{/if}" href="{$value->url()}">
+         <td class="text-center">
+            {if="$value->idpedido"}
+            <span class="glyphicon glyphicon-paperclip" title="El {#FS_PRESUPUESTO#} tiene vinculado un {#FS_PEDIDO#}"></span>
+            {/if}
+            {if="$value->status==2"}
+            <span class="glyphicon glyphicon-remove" title="El {#FS_PRESUPUESTO#} ha sido rechazado"></span>
+            {/if}
+         </td>
+         <td><a href="{$value->url()}">{$value->codigo}</a> {$value->numero2}</td>
+         <td>{$value->nombrecliente}</td>
+         <td>{$value->observaciones_resume()}</td>
+         <td class="text-right">{$fsc->show_precio($value->total, $value->coddivisa)}</td>
+         <td class="text-right">{$value->fecha}</td>
+         <td class="text-right">{$value->show_hora()}</td>
+         <td class="text-right">
+            {if="$value->status==0"}
+            {$value->finoferta}
+            {else}
+            -
+            {/if}
+         </td>
+      </tr>
+      {else}
+      <tr class="bg-warning">
+         <td></td>
+         <td colspan="7">Ningún {#FS_PRESUPUESTO#} encontrado.</td>
+      </tr>
+      {/loop}
+   </table>
 </div>
-
-<div class="panel panel-default" style="margin: 5px;">
-   <div class="panel-heading">
-      <h3 class="panel-title"><span class="text-capitalize">{#FS_PRESUPUESTOS#}</span> de los últimos años</h3>
-   </div>
-   <div class="panel-body">
-      <div id="chart_presupuestos_year" style="width: 95%; margin-left: auto; margin-right: auto; height: 300px;"></div>
-   </div>
-</div>
+{/if}
 
 {include="footer"}
