@@ -32,7 +32,7 @@ class ventas_presupuestos extends fs_controller
 
    public function __construct()
    {
-      parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTOS) . ' de cliente', 'ventas', FALSE, TRUE, TRUE);
+      parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTOS) . ' a cliente', 'ventas');
    }
 
    protected function process()
@@ -211,7 +211,7 @@ class ventas_presupuestos extends fs_controller
               'page_from' => __CLASS__,
               'page_to' => 'ventas_cliente',
               'type' => 'button',
-              'text' => ucfirst(FS_PRESUPUESTOS),
+              'text' => '<span class="glyphicon glyphicon-list" aria-hidden="true"></span> &nbsp; '.ucfirst(FS_PRESUPUESTOS),
               'params' => ''
           ),
           array(
@@ -219,7 +219,7 @@ class ventas_presupuestos extends fs_controller
               'page_from' => __CLASS__,
               'page_to' => 'admin_agente',
               'type' => 'button',
-              'text' => ucfirst(FS_PRESUPUESTOS) . ' de cliente',
+              'text' => '<span class="glyphicon glyphicon-list" aria-hidden="true"></span> &nbsp; '.ucfirst(FS_PRESUPUESTOS) . ' de cliente',
               'params' => ''
           ),
           array(
@@ -227,7 +227,7 @@ class ventas_presupuestos extends fs_controller
               'page_from' => __CLASS__,
               'page_to' => 'ventas_articulo',
               'type' => 'tab_button',
-              'text' => ucfirst(FS_PRESUPUESTOS) . ' de cliente',
+              'text' => '<span class="glyphicon glyphicon-list" aria-hidden="true"></span> &nbsp; '.ucfirst(FS_PRESUPUESTOS) . ' de cliente',
               'params' => ''
           ),
       );

@@ -577,7 +577,7 @@ class imprimir_presu_pedi extends fs_controller
                else
                   $titulo['iva'.$i] = '<b>'.FS_IVA.' '.$i.'%</b>';
                
-               $fila['iva'.$i] = $this->show_precio($value, $this->albaran->coddivisa);
+               $fila['iva'.$i] = $this->show_precio($value, $this->pedido->coddivisa);
                $opciones['cols']['iva'.$i] = array('justification' => 'right');
             }
             

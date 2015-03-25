@@ -208,7 +208,7 @@ class compras_pedidos extends fs_controller
               'page_from' => __CLASS__,
               'page_to' => 'compras_proveedor',
               'type' => 'button',
-              'text' => ucfirst(FS_PEDIDOS),
+              'text' => '<span class="glyphicon glyphicon-list" aria-hidden="true"></span> &nbsp; '.ucfirst(FS_PEDIDOS),
               'params' => ''
           ),
           array(
@@ -216,7 +216,7 @@ class compras_pedidos extends fs_controller
               'page_from' => __CLASS__,
               'page_to' => 'admin_agente',
               'type' => 'button',
-              'text' => ucfirst(FS_PEDIDOS) . ' a proveedor',
+              'text' => '<span class="glyphicon glyphicon-list" aria-hidden="true"></span> &nbsp; '.ucfirst(FS_PEDIDOS) . ' a proveedor',
               'params' => ''
           ),
           array(
@@ -224,7 +224,7 @@ class compras_pedidos extends fs_controller
               'page_from' => __CLASS__,
               'page_to' => 'ventas_articulo',
               'type' => 'tab_button',
-              'text' => ucfirst(FS_PEDIDOS) . ' a proveedor',
+              'text' => '<span class="glyphicon glyphicon-list" aria-hidden="true"></span> &nbsp; '.ucfirst(FS_PEDIDOS) . ' a proveedor',
               'params' => ''
           ),
       );
