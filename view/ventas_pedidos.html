@@ -101,21 +101,22 @@
    </div>
 </div>
 
-{if="$fsc->query!=''"}
-<h3 class="text-center">Resultados de "{$fsc->query}":</h3>
-{/if}
-
 <ul class="nav nav-tabs" role="tablist">
    <li{if="!isset($_GET['pendientes']) AND !isset($_GET['rechazados'])"} class="active"{/if}>
       <a href="{$fsc->url()}" title="Todos los {#FS_PEDIDOS#}">
-         <span class="glyphicon glyphicon-list visible-xs"></span>
-         <span class="hidden-xs"> &nbsp; Todos los {#FS_PEDIDOS#}</span>
+         {if="$fsc->query==''"}
+         Todos los {#FS_PEDIDOS#}
+         {else}
+         <span class="glyphicon glyphicon-search"></span>
+         <span class="hidden-xs">&nbsp; Resultados de "{$fsc->query}"</span>
+         {/if}
       </a>
    </li>
    <li{if="isset($_GET['pendientes'])"} class="active"{/if}>
       <a href="{$fsc->url()}&pendientes=TRUE" title="Pendientes">
          <span class="glyphicon glyphicon-time"></span>
          <span class="hidden-xs"> &nbsp; Pendientes</span>
+         <span class="hidden-xs badge">{$fsc->total_pendientes()}</span>
       </a>
    </li>
    <li{if="isset($_GET['rechazados'])"} class="active"{/if}>

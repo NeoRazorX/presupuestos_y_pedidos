@@ -237,4 +237,15 @@ class compras_pedidos extends fs_controller
          }
       }
    }
+   
+   public function total_pendientes()
+   {
+      $data = $this->db->select("SELECT COUNT(*) as total FROM pedidosprov WHERE idalbaran IS NULL;");
+      if($data)
+      {
+         return intval($data[0]['total']);
+      }
+      else
+         return 0;
+   }
 }

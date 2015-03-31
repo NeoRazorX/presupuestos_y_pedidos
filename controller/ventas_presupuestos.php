@@ -245,4 +245,15 @@ class ventas_presupuestos extends fs_controller
    {
       return is_null($idpedido) AND strtotime($finoferta) < strtotime(Date('d-m-Y'));
    }
+   
+   public function total_pendientes()
+   {
+      $data = $this->db->select("SELECT COUNT(*) as total FROM presupuestoscli WHERE idpedido IS NULL AND status=0;");
+      if($data)
+      {
+         return intval($data[0]['total']);
+      }
+      else
+         return 0;
+   }
 }

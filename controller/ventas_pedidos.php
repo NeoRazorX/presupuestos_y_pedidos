@@ -240,4 +240,15 @@ class ventas_pedidos extends fs_controller
          }
       }
    }
+   
+   public function total_pendientes()
+   {
+      $data = $this->db->select("SELECT COUNT(*) as total FROM pedidoscli WHERE idalbaran IS NULL AND status=0;");
+      if($data)
+      {
+         return intval($data[0]['total']);
+      }
+      else
+         return 0;
+   }
 }
