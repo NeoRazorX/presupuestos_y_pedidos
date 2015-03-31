@@ -28,7 +28,6 @@
    <columna>
       <nombre>dtolineal</nombre>
       <tipo>double precision</tipo>
-      <nulo>NO</nulo>
    </columna>
    <columna>
       <nombre>descripcion</nombre>
@@ -84,7 +83,6 @@
    <columna>
       <nombre>totalenalbaran</nombre>
       <tipo>double precision</tipo>
-      <nulo>NO</nulo>
    </columna>
    <restriccion>
       <nombre>lineaspedidosprov_pkey</nombre>

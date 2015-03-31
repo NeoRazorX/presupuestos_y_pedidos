@@ -94,7 +94,6 @@
    <columna>
       <nombre>fechaentrada</nombre>
       <tipo>date</tipo>
-      <nulo>NO</nulo>
    </columna>
    <columna>
       <nombre>totalrecargo</nombre>
