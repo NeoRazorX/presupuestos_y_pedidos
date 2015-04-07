@@ -144,20 +144,23 @@ class ventas_presupuesto extends fs_controller {
    {
       if( is_null($this->presupuesto->idpedido) AND $this->presupuesto->status == 0 )
       {
-         foreach ($this->presupuesto->get_lineas() as $l)
+         foreach($this->presupuesto->get_lineas() as $l)
          {
-            $data = $this->db->select("SELECT factualizado,pvp FROM articulos WHERE referencia = " . $l->var2str($l->referencia) . " ORDER BY referencia ASC;");
-            if (strtotime($data[0]["factualizado"]) > strtotime($this->presupuesto->fecha))
+            if($l->referencia != '')
             {
-               if ($l->pvpunitario > floatval($data[0]['pvp']))
+               $data = $this->db->select("SELECT factualizado,pvp FROM articulos WHERE referencia = " . $l->var2str($l->referencia) . " ORDER BY referencia ASC;");
+               if (strtotime($data[0]["factualizado"]) > strtotime($this->presupuesto->fecha))
                {
-                  $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
-                          . " ha bajado desde la elaboración del " . FS_PRESUPUESTO . ".");
-               }
-               else if ($l->pvpunitario < floatval($data[0]['pvp']))
-               {
-                  $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
-                          . " ha subido desde la elaboración del " . FS_PRESUPUESTO . ".");
+                  if ($l->pvpunitario > floatval($data[0]['pvp']))
+                  {
+                     $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
+                           . " ha bajado desde la elaboración del " . FS_PRESUPUESTO . ".");
+                  }
+                  else if ($l->pvpunitario < floatval($data[0]['pvp']))
+                  {
+                     $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
+                             . " ha subido desde la elaboración del " . FS_PRESUPUESTO . ".");
+                  }
                }
             }
          }
