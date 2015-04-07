@@ -265,7 +265,7 @@ class linea_pedido_proveedor extends fs_model
    {
       $plist = array();
       
-      $data = $this->db->select("SELECT * FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($idp)." ORDER BY referencia ASC;");
+      $data = $this->db->select("SELECT * FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($idp)." ORDER BY idlinea ASC;");
       if($data)
       {
          foreach($data as $d)
