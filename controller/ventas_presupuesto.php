@@ -68,24 +68,24 @@ class ventas_presupuesto extends fs_controller {
        * Comprobamos si el usuario tiene acceso a nueva_venta,
        * necesario para poder añadir líneas.
        */
-      if ($this->user->have_access_to('nueva_venta', FALSE))
+      if( $this->user->have_access_to('nueva_venta', FALSE) )
       {
          $nuevoprep = $this->page->get('nueva_venta');
-         if ($nuevoprep)
+         if($nuevoprep)
             $this->nuevo_presupuesto_url = $nuevoprep->url();
       }
 
-      if (isset($_POST['idpresupuesto']))
+      if( isset($_POST['idpresupuesto']) )
       {
          $this->presupuesto = $presupuesto->get($_POST['idpresupuesto']);
          $this->modificar();
       }
-      else if (isset($_GET['id']))
+      else if( isset($_GET['id']) )
       {
          $this->presupuesto = $presupuesto->get($_GET['id']);
       }
 
-      if ($this->presupuesto)
+      if($this->presupuesto)
       {
          $this->page->title = $this->presupuesto->codigo;
 
@@ -100,7 +100,7 @@ class ventas_presupuesto extends fs_controller {
          $this->cliente_s = $this->cliente->get($this->presupuesto->codcliente);
 
          /// comprobamos el presupuesto
-         if ($this->presupuesto->full_test())
+         if( $this->presupuesto->full_test() )
          {
             if( strtotime($this->presupuesto->finoferta) < strtotime(Date('d-m-Y')) AND $this->presupuesto->status != 2)
             {
@@ -327,43 +327,42 @@ class ventas_presupuesto extends fs_controller {
                   /// añadimos la línea
                   if (!$encontrada AND intval($_POST['idlinea_' . $num]) == -1 AND isset($_POST['referencia_' . $num]))
                   {
-                     $art0 = $articulo->get($_POST['referencia_' . $num]);
-                     if ($art0)
+                     $linea = new linea_presupuesto_cliente();
+                     $linea->idpresupuesto = $this->presupuesto->idpresupuesto;
+                     $linea->descripcion = $_POST['desc_' . $num];
+                     
+                     if (!$serie->siniva AND $cliente->regimeniva != 'Exento')
                      {
-                        $linea = new linea_presupuesto_cliente();
+                        $imp0 = $this->impuesto->get_by_iva($_POST['iva_'.$num]);
+                        if($imp0)
+                           $linea->codimpuesto = $imp0->codimpuesto;
+                        
+                        $linea->iva = floatval($_POST['iva_' . $num]);
+                        $linea->recargo = floatval($_POST['recargo_' . $num]);
+                     }
+                     
+                     $linea->irpf = floatval($_POST['irpf_'.$num]);
+                     $linea->cantidad = floatval($_POST['cantidad_' . $num]);
+                     $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
+                     $linea->dtopor = floatval($_POST['dto_' . $num]);
+                     $linea->pvpsindto = ($linea->cantidad * $linea->pvpunitario);
+                     $linea->pvptotal = ($linea->cantidad * $linea->pvpunitario * (100 - $linea->dtopor) / 100);
+                     
+                     $art0 = $articulo->get($_POST['referencia_' . $num]);
+                     if($art0)
+                     {
                         $linea->referencia = $art0->referencia;
-                        $linea->descripcion = $_POST['desc_' . $num];
-                        $linea->irpf = $this->presupuesto->irpf;
-
-                        if (!$serie->siniva AND $cliente->regimeniva != 'Exento')
-                        {
-                           $imp0 = $this->impuesto->get_by_iva($_POST['iva_'.$num]);
-                           if ($imp0)
-                              $linea->codimpuesto = $imp0->codimpuesto;
-
-                           $linea->iva = floatval($_POST['iva_' . $num]);
-                           $linea->recargo = floatval($_POST['recargo_' . $num]);
-                        }
-
-                        $linea->idpresupuesto = $this->presupuesto->idpresupuesto;
-                        $linea->cantidad = floatval($_POST['cantidad_' . $num]);
-                        $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
-                        $linea->dtopor = floatval($_POST['dto_' . $num]);
-                        $linea->pvpsindto = ($linea->cantidad * $linea->pvpunitario);
-                        $linea->pvptotal = ($linea->cantidad * $linea->pvpunitario * (100 - $linea->dtopor) / 100);
-
-                        if( $linea->save() )
-                        {
-                           $this->presupuesto->neto += $linea->pvptotal;
-                           $this->presupuesto->totaliva += $linea->pvptotal * $linea->iva / 100;
-                           $this->presupuesto->totalirpf += $linea->pvptotal * $linea->irpf / 100;
-                           $this->presupuesto->totalrecargo += $linea->pvptotal * $linea->recargo / 100;
-                        }
-                        else
-                           $this->new_error_msg("¡Imposible guardar la línea del artículo " . $linea->referencia . "!");
+                     }
+                     
+                     if( $linea->save() )
+                     {
+                        $this->presupuesto->neto += $linea->pvptotal;
+                        $this->presupuesto->totaliva += $linea->pvptotal * $linea->iva / 100;
+                        $this->presupuesto->totalirpf += $linea->pvptotal * $linea->irpf / 100;
+                        $this->presupuesto->totalrecargo += $linea->pvptotal * $linea->recargo / 100;
                      }
                      else
-                        $this->new_error_msg("¡Artículo " . $_POST['referencia_' . $num] . " no encontrado!");
+                        $this->new_error_msg("¡Imposible guardar la línea del artículo " . $linea->referencia . "!");
                   }
                }
             }

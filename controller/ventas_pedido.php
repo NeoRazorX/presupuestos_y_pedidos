@@ -68,24 +68,24 @@ class ventas_pedido extends fs_controller
        * Comprobamos si el usuario tiene acceso a nueva_venta,
        * necesario para poder añadir líneas.
        */
-      if ($this->user->have_access_to('nueva_venta', FALSE))
+      if( $this->user->have_access_to('nueva_venta', FALSE) )
       {
          $nuevopedp = $this->page->get('nueva_venta');
-         if ($nuevopedp)
+         if($nuevopedp)
             $this->nuevo_pedido_url = $nuevopedp->url();
       }
 
-      if (isset($_POST['idpedido']))
+      if( isset($_POST['idpedido']) )
       {
          $this->pedido = $pedido->get($_POST['idpedido']);
          $this->modificar();
       }
-      else if (isset($_GET['id']))
+      else if( isset($_GET['id']) )
       {
          $this->pedido = $pedido->get($_GET['id']);
       }
 
-      if ($this->pedido)
+      if($this->pedido)
       {
          $this->page->title = $this->pedido->codigo;
 
@@ -284,43 +284,42 @@ class ventas_pedido extends fs_controller
                   /// añadimos la línea
                   if (!$encontrada AND intval($_POST['idlinea_' . $num]) == -1 AND isset($_POST['referencia_' . $num]))
                   {
-                     $art0 = $articulo->get($_POST['referencia_' . $num]);
-                     if ($art0)
+                     $linea = new linea_pedido_cliente();
+                     $linea->idpedido = $this->pedido->idpedido;
+                     $linea->descripcion = $_POST['desc_' . $num];
+                     
+                     if (!$serie->siniva AND $cliente->regimeniva != 'Exento')
                      {
-                        $linea = new linea_pedido_cliente();
+                        $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
+                        if($imp0)
+                           $linea->codimpuesto = $imp0->codimpuesto;
+                        
+                        $linea->iva = floatval($_POST['iva_' . $num]);
+                        $linea->recargo = floatval($_POST['recargo_' . $num]);
+                     }
+                     
+                     $linea->irpf = floatval($_POST['irpf_'.$num]);
+                     $linea->cantidad = floatval($_POST['cantidad_' . $num]);
+                     $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
+                     $linea->dtopor = floatval($_POST['dto_' . $num]);
+                     $linea->pvpsindto = ($linea->cantidad * $linea->pvpunitario);
+                     $linea->pvptotal = ($linea->cantidad * $linea->pvpunitario * (100 - $linea->dtopor) / 100);
+                     
+                     $art0 = $articulo->get($_POST['referencia_' . $num]);
+                     if($art0)
+                     {
                         $linea->referencia = $art0->referencia;
-                        $linea->descripcion = $_POST['desc_' . $num];
-                        $linea->irpf = $this->pedido->irpf;
-
-                        if (!$serie->siniva AND $cliente->regimeniva != 'Exento')
-                        {
-                           $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
-                           if ($imp0)
-                              $linea->codimpuesto = $imp0->codimpuesto;
-
-                           $linea->iva = floatval($_POST['iva_' . $num]);
-                           $linea->recargo = floatval($_POST['recargo_' . $num]);
-                        }
-
-                        $linea->idpedido = $this->pedido->idpedido;
-                        $linea->cantidad = floatval($_POST['cantidad_' . $num]);
-                        $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
-                        $linea->dtopor = floatval($_POST['dto_' . $num]);
-                        $linea->pvpsindto = ($linea->cantidad * $linea->pvpunitario);
-                        $linea->pvptotal = ($linea->cantidad * $linea->pvpunitario * (100 - $linea->dtopor) / 100);
-
-                        if ($linea->save())
-                        {
-                           $this->pedido->neto += $linea->pvptotal;
-                           $this->pedido->totaliva += $linea->pvptotal * $linea->iva / 100;
-                           $this->pedido->totalirpf += $linea->pvptotal * $linea->irpf / 100;
-                           $this->pedido->totalrecargo += $linea->pvptotal * $linea->recargo / 100;
-                        }
-                        else
-                           $this->new_error_msg("¡Imposible guardar la línea del artículo " . $linea->referencia . "!");
+                     }
+                     
+                     if( $linea->save() )
+                     {
+                        $this->pedido->neto += $linea->pvptotal;
+                        $this->pedido->totaliva += $linea->pvptotal * $linea->iva / 100;
+                        $this->pedido->totalirpf += $linea->pvptotal * $linea->irpf / 100;
+                        $this->pedido->totalrecargo += $linea->pvptotal * $linea->recargo / 100;
                      }
                      else
-                        $this->new_error_msg("¡Artículo " . $_POST['referencia_' . $num] . " no encontrado!");
+                        $this->new_error_msg("¡Imposible guardar la línea del artículo " . $linea->referencia . "!");
                   }
                }
             }
