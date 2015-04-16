@@ -248,7 +248,7 @@ class ventas_presupuestos extends fs_controller
    
    public function total_pendientes()
    {
-      $data = $this->db->select("SELECT COUNT(*) as total FROM presupuestoscli WHERE idpedido IS NULL AND status=0;");
+      $data = $this->db->select("SELECT COUNT(idpresupuesto) as total FROM presupuestoscli WHERE idpedido IS NULL AND status=0;");
       if($data)
       {
          return intval($data[0]['total']);
