@@ -97,11 +97,18 @@ class presupuesto_cliente extends fs_model
          $this->provincia = $p['provincia'];
          $this->apartado = $p['apartado'];
          $this->fecha = Date('d-m-Y', strtotime($p['fecha']));
-         $this->finoferta = Date('d-m-Y', strtotime($p['finoferta']));
+         
+         $this->finoferta = NULL;
+         if( !is_null($p['finoferta']) )
+         {
+            $this->finoferta = Date('d-m-Y', strtotime($p['finoferta']));
+         }
 
          $this->hora = '00:00:00';
-         if (!is_null($p['hora']))
+         if( !is_null($p['hora']) )
+         {
             $this->hora = $p['hora'];
+         }
 
          $this->neto = floatval($p['neto']);
          $this->total = floatval($p['total']);
@@ -600,6 +607,7 @@ class presupuesto_cliente extends fs_model
    public function cron_job()
    {
       /// marcamos como rechazados todos los presupuestos con finoferta ya pasada
-      $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE finoferta < ".$this->var2str(Date('d-m-Y'))." AND idpedido is null;");
+      $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE finoferta IS NOT NULL AND"
+              . " finoferta < ".$this->var2str(Date('d-m-Y'))." AND idpedido is null;");
    }
 }
