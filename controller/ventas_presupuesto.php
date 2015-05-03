@@ -102,13 +102,7 @@ class ventas_presupuesto extends fs_controller {
          /// comprobamos el presupuesto
          if( $this->presupuesto->full_test() )
          {
-            if( strtotime($this->presupuesto->finoferta) < strtotime(Date('d-m-Y')) AND $this->presupuesto->status != 2)
-            {
-               $this->new_advice("Fecha validez del " . FS_PRESUPUESTO . " vencida.");
-               $this->presupuesto->status = 2; /// rechazado
-               $this->presupuesto->save();
-            }
-            else if (isset($_REQUEST['status']))
+            if (isset($_REQUEST['status']))
             {
                $this->presupuesto->status = intval($_REQUEST['status']);
                

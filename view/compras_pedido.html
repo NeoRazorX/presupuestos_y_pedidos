@@ -77,7 +77,7 @@
                <div class="btn-group">
                {loop="$fsc->extensions"}
                   {if="$value->type=='button'"}
-                  <a href="index.php?page={$value->from}&id={$fsc->albaran->idalbaran}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
+                  <a href="index.php?page={$value->from}&id={$fsc->pedido->idpedido}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
                   {/if}
                {/loop}
                </div>
