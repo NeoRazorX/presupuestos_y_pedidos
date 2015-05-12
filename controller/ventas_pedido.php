@@ -25,6 +25,7 @@ require_model('albaran_cliente.php');
 require_model('familia.php');
 require_model('impuesto.php');
 require_model('linea_pedido_cliente.php');
+require_model('pais.php');
 require_model('pedido_cliente.php');
 require_model('regularizacion_iva.php');
 require_model('serie.php');
@@ -38,6 +39,7 @@ class ventas_pedido extends fs_controller
    public $familia;
    public $impuesto;
    public $nuevo_pedido_url;
+   public $pais;
    public $pedido;
    public $serie;
 
@@ -59,6 +61,7 @@ class ventas_pedido extends fs_controller
       $this->familia = new familia();
       $this->impuesto = new impuesto();
       $this->nuevo_pedido_url = FALSE;
+      $this->pais = new pais();
       $this->serie = new serie();
       
       /// ¿El usuario tiene permiso para eliminar en esta página?
@@ -184,7 +187,15 @@ class ventas_pedido extends fs_controller
                die('No se ha encontrado el cliente.');
          }
          else
+         {
+            $this->pedido->codpais = $_POST['codpais'];
+            $this->pedido->provincia = $_POST['provincia'];
+            $this->pedido->ciudad = $_POST['ciudad'];
+            $this->pedido->codpostal = $_POST['codpostal'];
+            $this->pedido->direccion = $_POST['direccion'];
+            
             $cliente = $this->cliente->get($this->pedido->codcliente);
+         }
 
          $serie = $this->serie->get($this->pedido->codserie);
 
