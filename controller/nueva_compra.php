@@ -376,6 +376,23 @@ class nueva_compra extends fs_controller
                   
                   if( $linea->save() )
                   {
+                     if($articulo)
+                     {
+                        if( isset($_POST['costemedio']) )
+                        {
+                           if($articulo->costemedio == 0)
+                           {
+                              $articulo->costemedio = $linea->pvptotal/$linea->cantidad;
+                           }
+                           else
+                           {
+                              $articulo->costemedio = $articulo->get_costemedio();
+                           }
+                           
+                           $articulo->save();
+                        }
+                     }
+                     
                      $pedido->neto += $linea->pvptotal;
                      $pedido->totaliva += ($linea->pvptotal * $linea->iva/100);
                      $pedido->totalirpf += ($linea->pvptotal * $linea->irpf/100);
