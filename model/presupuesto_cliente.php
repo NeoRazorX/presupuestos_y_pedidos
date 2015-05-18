@@ -294,7 +294,14 @@ class presupuesto_cliente extends fs_model
          }
       }
       
-      $this->codigo = $this->codejercicio . sprintf('%02s', $this->codserie) . sprintf('%06s', $this->numero);
+      if(FS_NEW_CODIGO == 'eneboo')
+      {
+         $this->codigo = $this->codejercicio.sprintf('%02s', $this->codserie).sprintf('%06s', $this->numero);
+      }
+      else
+      {
+         $this->codigo = strtoupper(substr(FS_PRESUPUESTO, 0, 3)).$this->codejercicio.$this->codserie.$this->numero;
+      }
    }
 
    public function test()

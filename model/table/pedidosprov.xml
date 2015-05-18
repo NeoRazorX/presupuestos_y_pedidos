@@ -7,7 +7,7 @@
 <tabla>
    <columna>
       <nombre>codigo</nombre>
-      <tipo>character varying(12)</tipo>
+      <tipo>character varying(20)</tipo>
       <nulo>NO</nulo>
    </columna>
    <columna>
