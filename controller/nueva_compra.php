@@ -387,6 +387,10 @@ class nueva_compra extends fs_controller
                            else
                            {
                               $articulo->costemedio = $articulo->get_costemedio();
+                              if($articulo->costemedio == 0)
+                              {
+                                 $articulo->costemedio = $linea->pvptotal/$linea->cantidad;
+                              }
                            }
                            
                            $articulo->save();
@@ -786,6 +790,10 @@ class nueva_compra extends fs_controller
                            else
                            {
                               $articulo->costemedio = $articulo->get_costemedio();
+                              if($articulo->costemedio == 0)
+                              {
+                                 $articulo->costemedio = $linea->pvptotal/$linea->cantidad;
+                              }
                            }
                         }
                         
