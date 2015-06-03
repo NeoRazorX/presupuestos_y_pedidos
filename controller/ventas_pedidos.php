@@ -27,8 +27,9 @@ class ventas_pedidos extends fs_controller
 {
    public $buscar_lineas;
    public $lineas;
-   public $resultados;
+   public $mostrar;
    public $offset;
+   public $resultados;
 
    public function __construct()
    {
@@ -39,18 +40,23 @@ class ventas_pedidos extends fs_controller
    {
       $pedido = new pedido_cliente();
 
-      /// desactivamos la barra de botones
-      $this->show_fs_toolbar = FALSE;
-
       $this->offset = 0;
-      if (isset($_GET['offset']))
+      if( isset($_GET['offset']) )
+      {
          $this->offset = intval($_GET['offset']);
+      }
+      
+      $this->mostrar = 'todos';
+      if( isset($_GET['mostrar']) )
+      {
+         $this->mostrar = $_GET['mostrar'];
+      }
 
-      if (isset($_POST['buscar_lineas']))
+      if( isset($_POST['buscar_lineas']) )
       {
          $this->buscar_lineas();
       }
-      else if (isset($_GET['codagente']))
+      else if( isset($_GET['codagente']) )
       {
          $this->template = 'extension/ventas_pedidos_agente';
 
@@ -58,7 +64,7 @@ class ventas_pedidos extends fs_controller
          $this->agente = $agente->get($_GET['codagente']);
          $this->resultados = $pedido->all_from_agente($_GET['codagente'], $this->offset);
       }
-      else if (isset($_GET['codcliente']))
+      else if( isset($_GET['codcliente']) )
       {
          $this->template = 'extension/ventas_pedidos_cliente';
 
@@ -66,7 +72,7 @@ class ventas_pedidos extends fs_controller
          $this->cliente = $cliente->get($_GET['codcliente']);
          $this->resultados = $pedido->all_from_cliente($_GET['codcliente'], $this->offset);
       }
-      else if (isset($_GET['ref']))
+      else if( isset($_GET['ref']) )
       {
          $this->template = 'extension/ventas_pedidos_articulo';
 
@@ -85,15 +91,15 @@ class ventas_pedidos extends fs_controller
             $this->delete_pedido();
          }
 
-         if ($this->query)
+         if($this->query)
          {
             $this->resultados = $pedido->search($this->query, $this->offset);
          }
-         else if (isset($_GET['pendientes']))
+         else if($this->mostrar == 'pendientes')
          {
             $this->resultados = $pedido->all_ptealbaran($this->offset);
          }
-         else if (isset($_GET['rechazados']))
+         else if($this->mostrar == 'rechazados')
          {
             $this->resultados = $pedido->all_rechazados($this->offset);
          }
@@ -101,7 +107,6 @@ class ventas_pedidos extends fs_controller
          {
             /// ejecutamos el proceso del cron para pedidos.
             $pedido->cron_job();
-            
             $this->resultados = $pedido->all($this->offset);
          }
       }
@@ -110,30 +115,26 @@ class ventas_pedidos extends fs_controller
    public function anterior_url()
    {
       $url = '';
-      $extra = '';
+      $extra = '&mostrar='.$this->mostrar;
 
-      if (isset($_GET['ptealbaran']))
+      if( isset($_GET['codagente']) )
       {
-         $extra = '&ptealbaran=TRUE';
+         $extra .= '&codagente=' . $_GET['codagente'];
       }
-      else if (isset($_GET['codagente']))
+      else if( isset($_GET['codcliente']) )
       {
-         $extra = '&codagente=' . $_GET['codagente'];
+         $extra .= '&codcliente=' . $_GET['codcliente'];
       }
-      else if (isset($_GET['codcliente']))
+      else if( isset($_GET['ref']) )
       {
-         $extra = '&codcliente=' . $_GET['codcliente'];
-      }
-      else if (isset($_GET['ref']))
-      {
-         $extra = '&ref=' . $_GET['ref'];
+         $extra .= '&ref=' . $_GET['ref'];
       }
 
-      if ($this->query != '' AND $this->offset > '0')
+      if($this->query != '' AND $this->offset > '0')
       {
          $url = $this->url() . "&query=" . $this->query . "&offset=" . ($this->offset - FS_ITEM_LIMIT) . $extra;
       }
-      else if ($this->query == '' AND $this->offset > '0')
+      else if($this->query == '' AND $this->offset > '0')
       {
          $url = $this->url() . "&offset=" . ($this->offset - FS_ITEM_LIMIT) . $extra;
       }
@@ -144,30 +145,26 @@ class ventas_pedidos extends fs_controller
    public function siguiente_url()
    {
       $url = '';
-      $extra = '';
+      $extra = '&mostrar='.$this->mostrar;
 
-      if (isset($_GET['ptealbaran']))
+      if( isset($_GET['codagente']) )
       {
-         $extra = '&ptealbaran=TRUE';
+         $extra .= '&codagente=' . $_GET['codagente'];
       }
-      else if (isset($_GET['codagente']))
+      else if( isset($_GET['codcliente']) )
       {
-         $extra = '&codagente=' . $_GET['codagente'];
+         $extra .= '&codcliente=' . $_GET['codcliente'];
       }
-      else if (isset($_GET['codcliente']))
+      else if( isset($_GET['ref']) )
       {
-         $extra = '&codcliente=' . $_GET['codcliente'];
-      }
-      else if (isset($_GET['ref']))
-      {
-         $extra = '&ref=' . $_GET['ref'];
+         $extra .= '&ref=' . $_GET['ref'];
       }
 
-      if ($this->query != '' AND count($this->resultados) == FS_ITEM_LIMIT)
+      if($this->query != '' AND count($this->resultados) == FS_ITEM_LIMIT)
       {
          $url = $this->url() . "&query=" . $this->query . "&offset=" . ($this->offset + FS_ITEM_LIMIT) . $extra;
       }
-      else if ($this->query == '' AND count($this->resultados) == FS_ITEM_LIMIT)
+      else if($this->query == '' AND count($this->resultados) == FS_ITEM_LIMIT)
       {
          $url = $this->url() . "&offset=" . ($this->offset + FS_ITEM_LIMIT) . $extra;
       }

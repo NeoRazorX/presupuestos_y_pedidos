@@ -102,7 +102,7 @@
 </div>
 
 <ul class="nav nav-tabs" role="tablist">
-   <li{if="!isset($_GET['pendientes']) AND !isset($_GET['rechazados'])"} class="active"{/if}>
+   <li{if="$fsc->mostrar=='todos'"} class="active"{/if}>
       <a href="{$fsc->url()}" title="Todos los {#FS_PRESUPUESTOS#}">
          {if="$fsc->query==''"}
          Todos los {#FS_PRESUPUESTOS#}
@@ -112,15 +112,15 @@
          {/if}
       </a>
    </li>
-   <li{if="isset($_GET['pendientes'])"} class="active"{/if}>
-      <a href="{$fsc->url()}&pendientes=TRUE" title="Pendientes">
+   <li{if="$fsc->mostrar=='pendientes'"} class="active"{/if}>
+      <a href="{$fsc->url()}&mostrar=pendientes" title="Pendientes">
          <span class="glyphicon glyphicon-time"></span>
          <span class="hidden-xs">&nbsp; Pendientes</span>
          <span class="hidden-xs badge">{$fsc->total_pendientes()}</span>
       </a>
    </li>
-   <li{if="isset($_GET['rechazados'])"} class="active"{/if}>
-      <a href="{$fsc->url()}&rechazados=TRUE" title="Rechazados">
+   <li{if="$fsc->mostrar=='rechazados'"} class="active"{/if}>
+      <a href="{$fsc->url()}&mostrar=rechazados" title="Rechazados">
          <span class="glyphicon glyphicon-remove"></span>
          <span class="hidden-xs">&nbsp; Rechazados</span>
       </a>
@@ -138,11 +138,13 @@
             <th class="text-right">Total</th>
             <th class="text-right">Fecha</th>
             <th class="text-right hidden-sm">Hora</th>
+            {if="$fsc->mostrar!='todos'"}
             <th class="text-right hidden-sm hidden-md">Fecha validez</th>
+            {/if}
          </tr>
       </thead>
       {loop="$fsc->resultados"}
-      <tr class="clickableRow{if="$value->total<=0"} bg-warning{elseif="$value->status==2 OR $fsc->finoferta($value->finoferta,$value->idpedido)"} bg-danger{/if}" href="{$value->url()}">
+      <tr class="clickableRow{if="$value->total<=0"} bg-warning{elseif="$value->status==2"} bg-danger{/if}" href="{$value->url()}">
          <td class="text-center">
             {if="$value->idpedido"}
             <span class="glyphicon glyphicon-paperclip" title="El {#FS_PRESUPUESTO#} tiene vinculado un {#FS_PEDIDO#}"></span>
@@ -160,6 +162,7 @@
          <td class="text-right">{$fsc->show_precio($value->total, $value->coddivisa)}</td>
          <td class="text-right">{$value->fecha}</td>
          <td class="text-right hidden-sm">{$value->show_hora()}</td>
+         {if="$fsc->mostrar!='todos'"}
          <td class="text-right hidden-sm hidden-md">
             {if="$value->status==0"}
             {$value->finoferta}
@@ -167,6 +170,7 @@
             -
             {/if}
          </td>
+         {/if}
       </tr>
       {else}
       <tr class="bg-warning">

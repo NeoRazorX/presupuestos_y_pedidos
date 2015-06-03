@@ -27,8 +27,9 @@ class ventas_presupuestos extends fs_controller
 {
    public $buscar_lineas;
    public $lineas;
-   public $resultados;
+   public $mostrar;
    public $offset;
+   public $resultados;
 
    public function __construct()
    {
@@ -40,16 +41,22 @@ class ventas_presupuestos extends fs_controller
       $presupuesto = new presupuesto_cliente();
 
       $this->offset = 0;
-      if (isset($_GET['offset']))
+      if( isset($_GET['offset']) )
       {
          $this->offset = intval($_GET['offset']);
       }
-
-      if (isset($_POST['buscar_lineas']))
+      
+      $this->mostrar = 'todos';
+      if( isset($_GET['mostrar']) )
+      {
+         $this->mostrar = $_GET['mostrar'];
+      }
+      
+      if( isset($_POST['buscar_lineas']) )
       {
          $this->buscar_lineas();
       }
-      else if (isset($_GET['codagente']))
+      else if( isset($_GET['codagente']) )
       {
          $this->template = 'extension/ventas_presupuestos_agente';
 
@@ -57,7 +64,7 @@ class ventas_presupuestos extends fs_controller
          $this->agente = $agente->get($_GET['codagente']);
          $this->resultados = $presupuesto->all_from_agente($_GET['codagente'], $this->offset);
       }
-      else if (isset($_GET['codcliente']))
+      else if( isset($_GET['codcliente']) )
       {
          $this->template = 'extension/ventas_presupuestos_cliente';
 
@@ -65,7 +72,7 @@ class ventas_presupuestos extends fs_controller
          $this->cliente = $cliente->get($_GET['codcliente']);
          $this->resultados = $presupuesto->all_from_cliente($_GET['codcliente'], $this->offset);
       }
-      else if (isset($_GET['ref']))
+      else if( isset($_GET['ref']) )
       {
          $this->template = 'extension/ventas_presupuestos_articulo';
 
@@ -79,20 +86,20 @@ class ventas_presupuestos extends fs_controller
       {
          $this->share_extension();
 
-         if (isset($_POST['delete']))
+         if( isset($_POST['delete']) )
          {
             $this->delete_presupuesto();
          }
-
-         if ($this->query)
+         
+         if($this->query)
          {
             $this->resultados = $presupuesto->search($this->query, $this->offset);
          }
-         else if (isset($_GET['pendientes']))
+         else if($this->mostrar == 'pendientes')
          {
             $this->resultados = $presupuesto->all_ptepedir($this->offset);
          }
-         else if (isset($_GET['rechazados']))
+         else if($this->mostrar == 'rechazados')
          {
             $this->resultados = $presupuesto->all_rechazados($this->offset);
          }
@@ -100,7 +107,6 @@ class ventas_presupuestos extends fs_controller
          {
             /// ejecutamos la tarea del cron
             $presupuesto->cron_job();
-            
             $this->resultados = $presupuesto->all($this->offset);
          }
       }
@@ -109,30 +115,26 @@ class ventas_presupuestos extends fs_controller
    public function anterior_url()
    {
       $url = '';
-      $extra = '';
+      $extra = '&mostrar='.$this->mostrar;
 
-      if (isset($_GET['ptepedido']))
+      if( isset($_GET['codagente']) )
       {
-         $extra = '&ptepedido=TRUE';
+         $extra .= '&codagente=' . $_GET['codagente'];
       }
-      else if (isset($_GET['codagente']))
+      else if( isset($_GET['codcliente']) )
       {
-         $extra = '&codagente=' . $_GET['codagente'];
+         $extra .= '&codcliente=' . $_GET['codcliente'];
       }
-      else if (isset($_GET['codcliente']))
+      else if( isset($_GET['ref']) )
       {
-         $extra = '&codcliente=' . $_GET['codcliente'];
-      }
-      else if (isset($_GET['ref']))
-      {
-         $extra = '&ref=' . $_GET['ref'];
+         $extra .= '&ref=' . $_GET['ref'];
       }
 
-      if ($this->query != '' AND $this->offset > '0')
+      if($this->query != '' AND $this->offset > '0')
       {
          $url = $this->url() . "&query=" . $this->query . "&offset=" . ($this->offset - FS_ITEM_LIMIT) . $extra;
       }
-      else if ($this->query == '' AND $this->offset > '0')
+      else if($this->query == '' AND $this->offset > '0')
       {
          $url = $this->url() . "&offset=" . ($this->offset - FS_ITEM_LIMIT) . $extra;
       }
@@ -143,30 +145,26 @@ class ventas_presupuestos extends fs_controller
    public function siguiente_url()
    {
       $url = '';
-      $extra = '';
+      $extra = '&mostrar='.$this->mostrar;
 
-      if (isset($_GET['ptepedido']))
+      if( isset($_GET['codagente']) )
       {
-         $extra = '&ptepedido=TRUE';
+         $extra .= '&codagente=' . $_GET['codagente'];
       }
-      else if (isset($_GET['codagente']))
+      else if( isset($_GET['codcliente']) )
       {
-         $extra = '&codagente=' . $_GET['codagente'];
+         $extra .= '&codcliente=' . $_GET['codcliente'];
       }
-      else if (isset($_GET['codcliente']))
+      else if( isset($_GET['ref']) )
       {
-         $extra = '&codcliente=' . $_GET['codcliente'];
-      }
-      else if (isset($_GET['ref']))
-      {
-         $extra = '&ref=' . $_GET['ref'];
+         $extra .= '&ref=' . $_GET['ref'];
       }
 
-      if ($this->query != '' AND count($this->resultados) == FS_ITEM_LIMIT)
+      if($this->query != '' AND count($this->resultados) == FS_ITEM_LIMIT)
       {
          $url = $this->url() . "&query=" . $this->query . "&offset=" . ($this->offset + FS_ITEM_LIMIT) . $extra;
       }
-      else if ($this->query == '' AND count($this->resultados) == FS_ITEM_LIMIT)
+      else if($this->query == '' AND count($this->resultados) == FS_ITEM_LIMIT)
       {
          $url = $this->url() . "&offset=" . ($this->offset + FS_ITEM_LIMIT) . $extra;
       }
@@ -238,11 +236,6 @@ class ventas_presupuestos extends fs_controller
             $this->new_error_msg('Imposible guardar los datos de la extensión ' . $ext['name'] . '.');
          }
       }
-   }
-
-   public function finoferta($finoferta, $idpedido)
-   {
-      return is_null($idpedido) AND strtotime($finoferta) < strtotime(Date('d-m-Y'));
    }
    
    public function total_pendientes()
