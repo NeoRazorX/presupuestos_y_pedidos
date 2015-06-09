@@ -149,7 +149,7 @@ class presupuesto_cliente extends fs_model
          $this->provincia = NULL;
          $this->apartado = NULL;
          $this->fecha = Date('d-m-Y');
-         $this->finoferta = date("d-m-Y", strtotime(Date('d-m-Y') . " +30 days"));
+         $this->finoferta = date("d-m-Y", strtotime(Date('d-m-Y') . " +1month"));
          $this->hora = Date('H:i:s');
          $this->neto = 0;
          $this->total = 0;
@@ -195,6 +195,11 @@ class presupuesto_cliente extends fs_model
       }
       else
          return substr($this->observaciones, 0, 50) . '...';
+   }
+   
+   public function finoferta()
+   {
+      return ( strtotime(Date('d-m-Y')) > strtotime($this->finoferta) );
    }
 
    public function url()

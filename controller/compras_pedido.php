@@ -23,6 +23,7 @@ require_model('proveedor.php');
 require_model('ejercicio.php');
 require_model('albaran_proveedor.php');
 require_model('familia.php');
+require_model('forma_pago.php');
 require_model('impuesto.php');
 require_model('linea_pedido_proveedor.php');
 require_model('pedido_proveedor.php');
@@ -32,15 +33,16 @@ require_model('serie.php');
 class compras_pedido extends fs_controller
 {
    public $agente;
-   public $proveedor;
-   public $proveedor_s;
    public $ejercicio;
    public $familia;
+   public $forma_pago;
    public $impuesto;
    public $nuevo_pedido_url;
    public $pedido;
+   public $proveedor;
+   public $proveedor_s;
    public $serie;
-
+   
    public function __construct()
    {
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDO), 'compras', FALSE, FALSE);
@@ -50,15 +52,16 @@ class compras_pedido extends fs_controller
    {
       $this->ppage = $this->page->get('compras_pedidos');
       $this->agente = FALSE;
-
+      
+      $this->ejercicio = new ejercicio();
+      $this->familia = new familia();
+      $this->forma_pago = new forma_pago();
+      $this->impuesto = new impuesto();
+      $this->nuevo_pedido_url = FALSE;
       $pedido = new pedido_proveedor();
       $this->pedido = FALSE;
       $this->proveedor = new proveedor();
       $this->proveedor_s = FALSE;
-      $this->ejercicio = new ejercicio();
-      $this->familia = new familia();
-      $this->impuesto = new impuesto();
-      $this->nuevo_pedido_url = FALSE;
       $this->serie = new serie();
       
       /// ¿El usuario tiene permiso para eliminar en esta página?
@@ -134,7 +137,7 @@ class compras_pedido extends fs_controller
    {
       $this->pedido->observaciones = $_POST['observaciones'];
       $this->pedido->numproveedor = $_POST['numproveedor'];
-
+      
       if( is_null($this->pedido->idalbaran) )
       {
          /// obtenemos los datos del ejercicio para acotar la fecha
@@ -178,7 +181,9 @@ class compras_pedido extends fs_controller
                $serie = $serie2;
             }
          }
-
+         
+         $this->pedido->codpago = $_POST['forma_pago'];
+         
          if( isset($_POST['numlineas']) )
          {
             $numlineas = intval($_POST['numlineas']);

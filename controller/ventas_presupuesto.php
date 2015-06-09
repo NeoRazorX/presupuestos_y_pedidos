@@ -23,6 +23,7 @@ require_model('cliente.php');
 require_model('ejercicio.php');
 require_model('pedido_cliente.php');
 require_model('familia.php');
+require_model('forma_pago.php');
 require_model('impuesto.php');
 require_model('linea_presupuesto_cliente.php');
 require_model('pais.php');
@@ -37,6 +38,7 @@ class ventas_presupuesto extends fs_controller {
    public $cliente_s;
    public $ejercicio;
    public $familia;
+   public $forma_pago;
    public $impuesto;
    public $nuevo_presupuesto_url;
    public $pais;
@@ -59,6 +61,7 @@ class ventas_presupuesto extends fs_controller {
       $this->cliente_s = FALSE;
       $this->ejercicio = new ejercicio();
       $this->familia = new familia();
+      $this->forma_pago = new forma_pago();
       $this->impuesto = new impuesto();
       $this->nuevo_presupuesto_url = FALSE;
       $this->pais = new pais();
@@ -249,7 +252,9 @@ class ventas_presupuesto extends fs_controller {
                $serie = $serie2;
             }
          }
-
+         
+         $this->presupuesto->codpago = $_POST['forma_pago'];
+         
          if (isset($_POST['numlineas']))
          {
             $numlineas = intval($_POST['numlineas']);

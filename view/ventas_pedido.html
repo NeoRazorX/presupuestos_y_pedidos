@@ -160,7 +160,7 @@
       </div>
       <div class="row">
          {if="$fsc->pedido->editable"}
-         <div class="col-md-5 col-sm-12">
+         <div class="col-md-4 col-sm-12">
             <div class="form-group">
                Cliente actual:
                <div class="input-group">
@@ -174,37 +174,19 @@
             </div>
          </div>
          {/if}
-         <div class="col-md-2 col-sm-6">
+         <div class="col-md-4 col-sm-6">
             <div class="form-group">
                Número 2:
                <input class="form-control" type="text" name="numero2" value="{$fsc->pedido->numero2}"/>
             </div>
          </div>
-         <div class="col-md-1 col-sm-2">
-            <div class="form-group">
-               <a href="{$fsc->serie->url()}">Serie</a>:
-               {if="$fsc->pedido->editable"}
-               <select class="form-control" name="serie" id="codserie" onchange="usar_serie();recalcular();">
-               {loop="$fsc->serie->all()"}
-                  {if="$value->codserie==$fsc->pedido->codserie"}
-                  <option value="{$value->codserie}" selected="selected">{$value->descripcion}</option>
-                  {else}
-                  <option value="{$value->codserie}">{$value->descripcion}</option>
-                  {/if}
-               {/loop}
-               </select>
-               {else}
-               <div class="form-control">{$fsc->pedido->codserie}</div>
-               {/if}
-            </div>
-         </div>
-         <div class="col-md-2 col-sm-2">
+         <div class="col-md-2 col-sm-3">
             <div class="form-group">
                Fecha:
                <input class="form-control datepicker" type="text" name="fecha" value="{$fsc->pedido->fecha}" autocomplete="off"/>
             </div>
          </div>
-         <div class="col-md-2 col-sm-2">
+         <div class="col-md-2 col-sm-3">
             <div class="form-group">
                Hora:
                <input class="form-control" type="text" name="hora" value="{$fsc->pedido->hora}" autocomplete="off"/>
@@ -225,6 +207,12 @@
             <a href="#direccion_p" aria-controls="direccion_p" role="tab" data-toggle="tab">
                <span class="glyphicon glyphicon-road" aria-hidden="true"></span>
                <span class="hidden-xs">&nbsp; Dirección</span>
+            </a>
+         </li>
+         <li role="presentation">
+            <a href="#opciones" aria-controls="opciones" role="tab" data-toggle="tab">
+               <span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span>
+               <span class="hidden-xs">&nbsp; Opciones</span>
             </a>
          </li>
          {loop="$fsc->extensions"}
@@ -433,6 +421,36 @@
                </div>
             </div>
          </div>
+         <div role="tabpanel" class="tab-pane" id="opciones">
+            <div class="container-fluid" style="margin-top: 10px;">
+               <div class="row">
+                  <div class="col-sm-2">
+                     <div class="form-group">
+                        <a href="{$fsc->serie->url()}">Serie</a>:
+                        <select class="form-control" name="serie" id="codserie" onchange="usar_serie();recalcular();">
+                        {loop="$fsc->serie->all()"}
+                           {if="$value->codserie==$fsc->pedido->codserie"}
+                           <option value="{$value->codserie}" selected="selected">{$value->descripcion}</option>
+                           {else}
+                           <option value="{$value->codserie}">{$value->descripcion}</option>
+                           {/if}
+                        {/loop}
+                        </select>
+                     </div>
+                  </div>
+                  <div class="col-sm-3">
+                     <div class="form-group">
+                        <a href="{$fsc->forma_pago->url()}">Forma de pago</a>:
+                        <select name="forma_pago" class="form-control">
+                           {loop="$fsc->forma_pago->all()"}
+                           <option value="{$value->codpago}"{if="$value->codpago==$fsc->pedido->codpago"} selected="selected"{/if}>{$value->descripcion}</option>
+                           {/loop}
+                        </select>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
          {loop="$fsc->extensions"}
             {if="$value->type=='tab'"}
             <div role="tabpanel" class="tab-pane" id="ext_{$value->name}">
@@ -541,7 +559,7 @@
                      </div>
                      <div class="col-sm-4">
                         <div class="form-group">
-                           PVP:
+                           Precio:
                            <input type="text" name="pvp" value="0" class="form-control" autocomplete="off"/>
                         </div>
                      </div>
