@@ -182,13 +182,21 @@
          <div class="col-md-2 col-sm-3">
             <div class="form-group">
                Fecha:
+               {if="$fsc->pedido->editable"}
                <input class="form-control datepicker" type="text" name="fecha" value="{$fsc->pedido->fecha}" autocomplete="off"/>
+               {else}
+               <div class="form-control">{$fsc->pedido->fecha}</div>
+               {/if}
             </div>
          </div>
          <div class="col-md-2 col-sm-3">
             <div class="form-group">
                Hora:
+               {if="$fsc->pedido->editable"}
                <input class="form-control" type="text" name="hora" value="{$fsc->pedido->hora}" autocomplete="off"/>
+               {else}
+               <div class="form-control">{$fsc->pedido->hora}</div>
+               {/if}
             </div>
          </div>
       </div>
@@ -202,6 +210,7 @@
                <span class="hidden-xs">&nbsp; Líneas</span>
             </a>
          </li>
+         {if="$fsc->pedido->editable"}
          <li role="presentation">
             <a href="#direccion_p" aria-controls="direccion_p" role="tab" data-toggle="tab">
                <span class="glyphicon glyphicon-road" aria-hidden="true"></span>
@@ -214,6 +223,7 @@
                <span class="hidden-xs">&nbsp; Opciones</span>
             </a>
          </li>
+         {/if}
          {loop="$fsc->extensions"}
             {if="$value->type=='tab'"}
             <li role="presentation">
@@ -380,6 +390,7 @@
                {/if}
             </div>
          </div>
+         {if="$fsc->pedido->editable"}
          <div role="tabpanel" class="tab-pane" id="direccion_p">
             <div class="container-fluid" style="margin-top: 10px;">
                <div class="row">
@@ -470,6 +481,7 @@
                </div>
             </div>
          </div>
+         {/if}
          {loop="$fsc->extensions"}
             {if="$value->type=='tab'"}
             <div role="tabpanel" class="tab-pane" id="ext_{$value->name}">
