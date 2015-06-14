@@ -18,21 +18,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_model('articulo.php');
-require_model('proveedor.php');
-require_model('ejercicio.php');
 require_model('albaran_proveedor.php');
+require_model('articulo.php');
+require_model('divisa.php');
+require_model('ejercicio.php');
 require_model('familia.php');
 require_model('forma_pago.php');
 require_model('impuesto.php');
 require_model('linea_pedido_proveedor.php');
 require_model('pedido_proveedor.php');
+require_model('proveedor.php');
 require_model('regularizacion_iva.php');
 require_model('serie.php');
 
 class compras_pedido extends fs_controller
 {
    public $agente;
+   public $divisa;
    public $ejercicio;
    public $familia;
    public $forma_pago;
@@ -53,6 +55,7 @@ class compras_pedido extends fs_controller
       $this->ppage = $this->page->get('compras_pedidos');
       $this->agente = FALSE;
       
+      $this->divisa = new divisa();
       $this->ejercicio = new ejercicio();
       $this->familia = new familia();
       $this->forma_pago = new forma_pago();
@@ -157,7 +160,7 @@ class compras_pedido extends fs_controller
             if($proveedor)
             {
                $this->pedido->codproveedor = $proveedor->codproveedor;
-               $this->pedido->nombre = $proveedor->nombrecomercial;
+               $this->pedido->nombre = $proveedor->razonsocial;
                $this->pedido->cifnif = $proveedor->cifnif;
             }
             else
@@ -183,6 +186,21 @@ class compras_pedido extends fs_controller
          }
          
          $this->pedido->codpago = $_POST['forma_pago'];
+         
+         /// ¿Cambiamos la divisa?
+         if($_POST['divisa'] != $this->pedido->coddivisa)
+         {
+            $divisa = $this->divisa->get($_POST['divisa']);
+            if($divisa)
+            {
+               $this->pedido->coddivisa = $divisa->coddivisa;
+               $this->pedido->tasaconv = $divisa->tasaconv;
+            }
+         }
+         else if($_POST['tasaconv'] != '')
+         {
+            $this->pedido->tasaconv = floatval($_POST['tasaconv']);
+         }
          
          if( isset($_POST['numlineas']) )
          {

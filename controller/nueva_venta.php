@@ -107,7 +107,7 @@ class nueva_venta extends fs_controller
             {
                $this->cliente_s = new cliente();
                $this->cliente_s->codcliente = $this->cliente_s->get_new_codigo();
-               $this->cliente_s->nombre = $this->cliente_s->nombrecomercial = $_POST['nuevo_cliente'];
+               $this->cliente_s->nombre = $this->cliente_s->razonsocial = $_POST['nuevo_cliente'];
                $this->cliente_s->cifnif = $_POST['nuevo_dni'];
                $this->cliente_s->save();
             }
@@ -424,6 +424,12 @@ class nueva_venta extends fs_controller
          $albaran->codpago = $forma_pago->codpago;
          $albaran->coddivisa = $divisa->coddivisa;
          $albaran->tasaconv = $divisa->tasaconv;
+         
+         if($_POST['tasaconv'] != '')
+         {
+            $albaran->tasaconv = floatval($_POST['tasaconv']);
+         }
+         
          $albaran->codagente = $this->agente->codagente;
          $albaran->numero2 = $_POST['numero2'];
          $albaran->observaciones = $_POST['observaciones'];
@@ -432,7 +438,7 @@ class nueva_venta extends fs_controller
          
          $albaran->codcliente = $cliente->codcliente;
          $albaran->cifnif = $cliente->cifnif;
-         $albaran->nombrecliente = $cliente->nombrecomercial;
+         $albaran->nombrecliente = $cliente->razonsocial;
          $albaran->ciudad = $_POST['ciudad'];
          $albaran->codpais = $_POST['codpais'];
          $albaran->codpostal = $_POST['codpostal'];
@@ -618,6 +624,12 @@ class nueva_venta extends fs_controller
          $factura->codpago = $forma_pago->codpago;
          $factura->coddivisa = $divisa->coddivisa;
          $factura->tasaconv = $divisa->tasaconv;
+         
+         if($_POST['tasaconv'] != '')
+         {
+            $factura->tasaconv = floatval($_POST['tasaconv']);
+         }
+         
          $factura->codagente = $this->agente->codagente;
          $factura->observaciones = $_POST['observaciones'];
          $factura->numero2 = $_POST['numero2'];
@@ -633,7 +645,7 @@ class nueva_venta extends fs_controller
          
          $factura->codcliente = $cliente->codcliente;
          $factura->cifnif = $cliente->cifnif;
-         $factura->nombrecliente = $cliente->nombrecomercial;
+         $factura->nombrecliente = $cliente->razonsocial;
          $factura->ciudad = $_POST['ciudad'];
          $factura->codpais = $_POST['codpais'];
          $factura->codpostal = $_POST['codpostal'];
@@ -839,6 +851,12 @@ class nueva_venta extends fs_controller
          $presupuesto->codpago = $forma_pago->codpago;
          $presupuesto->coddivisa = $divisa->coddivisa;
          $presupuesto->tasaconv = $divisa->tasaconv;
+         
+         if($_POST['tasaconv'] != '')
+         {
+            $presupuesto->tasaconv = floatval($_POST['tasaconv']);
+         }
+         
          $presupuesto->codagente = $this->agente->codagente;
          $presupuesto->observaciones = $_POST['observaciones'];
          $presupuesto->numero2 = $_POST['numero2'];
@@ -847,7 +865,7 @@ class nueva_venta extends fs_controller
          
          $presupuesto->codcliente = $cliente->codcliente;
          $presupuesto->cifnif = $cliente->cifnif;
-         $presupuesto->nombrecliente = $cliente->nombrecomercial;
+         $presupuesto->nombrecliente = $cliente->razonsocial;
          $presupuesto->ciudad = $_POST['ciudad'];
          $presupuesto->codpais = $_POST['codpais'];
          $presupuesto->codpostal = $_POST['codpostal'];
@@ -1026,6 +1044,12 @@ class nueva_venta extends fs_controller
          $pedido->codpago = $forma_pago->codpago;
          $pedido->coddivisa = $divisa->coddivisa;
          $pedido->tasaconv = $divisa->tasaconv;
+         
+         if($_POST['tasaconv'] != '')
+         {
+            $pedido->tasaconv = floatval($_POST['tasaconv']);
+         }
+         
          $pedido->codagente = $this->agente->codagente;
          $pedido->observaciones = $_POST['observaciones'];
          $pedido->numero2 = $_POST['numero2'];
@@ -1034,7 +1058,7 @@ class nueva_venta extends fs_controller
          
          $pedido->codcliente = $cliente->codcliente;
          $pedido->cifnif = $cliente->cifnif;
-         $pedido->nombrecliente = $cliente->nombrecomercial;
+         $pedido->nombrecliente = $cliente->razonsocial;
          $pedido->ciudad = $_POST['ciudad'];
          $pedido->codpais = $_POST['codpais'];
          $pedido->codpostal = $_POST['codpostal'];

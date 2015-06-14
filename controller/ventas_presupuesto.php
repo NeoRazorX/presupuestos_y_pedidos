@@ -20,6 +20,7 @@
 
 require_model('articulo.php');
 require_model('cliente.php');
+require_model('divisa.php');
 require_model('ejercicio.php');
 require_model('pedido_cliente.php');
 require_model('familia.php');
@@ -36,6 +37,7 @@ class ventas_presupuesto extends fs_controller {
    public $agente;
    public $cliente;
    public $cliente_s;
+   public $divisa;
    public $ejercicio;
    public $familia;
    public $forma_pago;
@@ -59,6 +61,7 @@ class ventas_presupuesto extends fs_controller {
       $this->presupuesto = FALSE;
       $this->cliente = new cliente();
       $this->cliente_s = FALSE;
+      $this->divisa = new divisa();
       $this->ejercicio = new ejercicio();
       $this->familia = new familia();
       $this->forma_pago = new forma_pago();
@@ -186,7 +189,7 @@ class ventas_presupuesto extends fs_controller {
       $this->presupuesto->observaciones = $_POST['observaciones'];
       $this->presupuesto->numero2 = $_POST['numero2'];
 
-      if (is_null($this->presupuesto->idpedido))
+      if( is_null($this->presupuesto->idpedido) )
       {
          /// obtenemos los datos del ejercicio para acotar la fecha
          $eje0 = $this->ejercicio->get($this->presupuesto->codejercicio);
@@ -211,7 +214,7 @@ class ventas_presupuesto extends fs_controller {
                   {
                      $this->presupuesto->codcliente = $cliente->codcliente;
                      $this->presupuesto->cifnif = $cliente->cifnif;
-                     $this->presupuesto->nombrecliente = $cliente->nombrecomercial;
+                     $this->presupuesto->nombrecliente = $cliente->razonsocial;
                      $this->presupuesto->apartado = $d->apartado;
                      $this->presupuesto->ciudad = $d->ciudad;
                      $this->presupuesto->coddir = $d->id;
@@ -254,6 +257,21 @@ class ventas_presupuesto extends fs_controller {
          }
          
          $this->presupuesto->codpago = $_POST['forma_pago'];
+         
+         /// ¿Cambiamos la divisa?
+         if($_POST['divisa'] != $this->presupuesto->coddivisa)
+         {
+            $divisa = $this->divisa->get($_POST['divisa']);
+            if($divisa)
+            {
+               $this->presupuesto->coddivisa = $divisa->coddivisa;
+               $this->presupuesto->tasaconv = $divisa->tasaconv;
+            }
+         }
+         else if($_POST['tasaconv'] != '')
+         {
+            $this->presupuesto->tasaconv = floatval($_POST['tasaconv']);
+         }
          
          if (isset($_POST['numlineas']))
          {

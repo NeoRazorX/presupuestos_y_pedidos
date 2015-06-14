@@ -20,6 +20,7 @@
 
 require_model('articulo.php');
 require_model('cliente.php');
+require_model('divisa.php');
 require_model('ejercicio.php');
 require_model('albaran_cliente.php');
 require_model('familia.php');
@@ -36,6 +37,7 @@ class ventas_pedido extends fs_controller
    public $agente;
    public $cliente;
    public $cliente_s;
+   public $divisa;
    public $ejercicio;
    public $familia;
    public $forma_pago;
@@ -59,6 +61,7 @@ class ventas_pedido extends fs_controller
       $this->pedido = FALSE;
       $this->cliente = new cliente();
       $this->cliente_s = FALSE;
+      $this->divisa = new divisa();
       $this->ejercicio = new ejercicio();
       $this->familia = new familia();
       $this->forma_pago = new forma_pago();
@@ -174,7 +177,7 @@ class ventas_pedido extends fs_controller
                   {
                      $this->pedido->codcliente = $cliente->codcliente;
                      $this->pedido->cifnif = $cliente->cifnif;
-                     $this->pedido->nombrecliente = $cliente->nombrecomercial;
+                     $this->pedido->nombrecliente = $cliente->razonsocial;
                      $this->pedido->apartado = $d->apartado;
                      $this->pedido->ciudad = $d->ciudad;
                      $this->pedido->coddir = $d->id;
@@ -217,6 +220,21 @@ class ventas_pedido extends fs_controller
          }
          
          $this->pedido->codpago = $_POST['forma_pago'];
+         
+         /// ¿Cambiamos la divisa?
+         if($_POST['divisa'] != $this->pedido->coddivisa)
+         {
+            $divisa = $this->divisa->get($_POST['divisa']);
+            if($divisa)
+            {
+               $this->pedido->coddivisa = $divisa->coddivisa;
+               $this->pedido->tasaconv = $divisa->tasaconv;
+            }
+         }
+         else if($_POST['tasaconv'] != '')
+         {
+            $this->pedido->tasaconv = floatval($_POST['tasaconv']);
+         }
          
          if (isset($_POST['numlineas']))
          {

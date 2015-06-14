@@ -21,11 +21,12 @@
 require_once 'plugins/facturacion_base/extras/fs_pdf.php';
 require_once 'extras/phpmailer/class.phpmailer.php';
 require_once 'extras/phpmailer/class.smtp.php';
-
 require_model('cliente.php');
 require_model('impuesto.php');
 require_model('pedido_cliente.php');
+require_model('pedido_proveedor.php');
 require_model('presupuesto_cliente.php');
+require_model('proveedor.php');
 
 /**
  * Esta clase agrupa los procedimientos de imprimir/enviar presupuestos y pedidos.
@@ -36,6 +37,7 @@ class imprimir_presu_pedi extends fs_controller
    public $impuesto;
    public $pedido;
    public $presupuesto;
+   public $proveedor;
    
    public function __construct()
    {
@@ -48,8 +50,26 @@ class imprimir_presu_pedi extends fs_controller
       $this->impuesto = new impuesto();
       $this->pedido = FALSE;
       $this->presupuesto = FALSE;
+      $this->proveedor = FALSE;
       
-      if( isset($_REQUEST['pedido']) AND isset($_REQUEST['id']) )
+      if( isset($_REQUEST['pedido_p']) AND isset($_REQUEST['id']) )
+      {
+         $ped = new pedido_proveedor();
+         $this->pedido = $ped->get($_REQUEST['id']);
+         if($this->pedido)
+         {
+            $proveedor = new proveedor();
+            $this->proveedor = $proveedor->get($this->pedido->codproveedor);
+         }
+         
+         if( isset($_POST['email']) )
+         {
+            $this->enviar_email_proveedor('pedio');
+         }
+         else
+            $this->generar_pdf_pedido_proveedor();
+      }
+      else if( isset($_REQUEST['pedido']) AND isset($_REQUEST['id']) )
       {
          $ped = new pedido_cliente();
          $this->pedido = $ped->get($_REQUEST['id']);
@@ -90,6 +110,22 @@ class imprimir_presu_pedi extends fs_controller
    private function share_extensions()
    {
       $extensiones = array(
+          array(
+              'name' => 'imprimir_pedido_proveedor',
+              'page_from' => __CLASS__,
+              'page_to' => 'compras_pedido',
+              'type' => 'pdf',
+              'text' => ucfirst(FS_PEDIDO).' simple',
+              'params' => '&pedido_p=TRUE'
+          ),
+          array(
+              'name' => 'email_pedido_proveedor',
+              'page_from' => __CLASS__,
+              'page_to' => 'compras_pedido',
+              'type' => 'email',
+              'text' => ucfirst(FS_PEDIDO).' simple',
+              'params' => '&pedido_p=TRUE'
+          ),
           array(
               'name' => 'imprimir_pedido',
               'page_from' => __CLASS__,
@@ -371,6 +407,236 @@ class imprimir_presu_pedi extends fs_controller
          $pdf_doc->show();
    }
    
+   private function generar_pdf_pedido_proveedor($archivo = FALSE)
+   {
+      if( !$archivo )
+      {
+         /// desactivamos la plantilla HTML
+         $this->template = FALSE;
+      }
+      
+      $pdf_doc = new fs_pdf();
+      $pdf_doc->pdf->addInfo('Title', ucfirst(FS_PEDIDO).' '. $this->pedido->codigo);
+      $pdf_doc->pdf->addInfo('Subject', ucfirst(FS_PEDIDO).' de proveedor ' . $this->pedido->codigo);
+      $pdf_doc->pdf->addInfo('Author', $this->empresa->nombre);
+      
+      $lineas = $this->pedido->get_lineas();
+      $lineas_iva = $this->get_lineas_iva($lineas);
+      if($lineas)
+      {
+         $linea_actual = 0;
+         $lppag = 42;
+         $pagina = 1;
+         
+         /// imprimimos las páginas necesarias
+         while( $linea_actual < count($lineas) )
+         {
+            /// salto de página
+            if($linea_actual > 0)
+               $pdf_doc->pdf->ezNewPage();
+            
+            /// ¿Añadimos el logo?
+            if( file_exists('tmp/'.FS_TMP_NAME.'logo.png') )
+            {
+               $pdf_doc->pdf->ezImage('tmp/'.FS_TMP_NAME.'logo.png', 0, 200, 'none');
+               $lppag -= 2; /// si metemos el logo, caben menos líneas
+            }
+            else
+            {
+               $pdf_doc->pdf->ezText("<b>".$this->empresa->nombre."</b>", 16, array('justification' => 'center'));
+               $pdf_doc->pdf->ezText(FS_CIFNIF.": ".$this->empresa->cifnif, 8, array('justification' => 'center'));
+               
+               $direccion = $this->empresa->direccion;
+               if($this->empresa->codpostal)
+                  $direccion .= ' - ' . $this->empresa->codpostal;
+               if($this->empresa->ciudad)
+                  $direccion .= ' - ' . $this->empresa->ciudad;
+               if($this->empresa->provincia)
+                  $direccion .= ' (' . $this->empresa->provincia . ')';
+               if($this->empresa->telefono)
+                  $direccion .= ' - Teléfono: ' . $this->empresa->telefono;
+               $pdf_doc->pdf->ezText($this->fix_html($direccion), 9, array('justification' => 'center'));
+            }
+            
+            /*
+             * Esta es la tabla con los datos del cliente:
+             * Pedido:             Fecha:
+             * Cliente:             CIF/NIF:
+             * Dirección:           Teléfonos:
+             */
+            $pdf_doc->new_table();
+            $pdf_doc->add_table_row(
+               array(
+                   'campo1' => "<b>".ucfirst(FS_PEDIDO).":</b>",
+                   'dato1' => $this->pedido->codigo,
+                   'campo2' => "<b>Fecha:</b>",
+                   'dato2' => $this->pedido->fecha
+               )
+            );
+            $pdf_doc->add_table_row(
+               array(
+                   'campo1' => "<b>Proveedor:</b>",
+                   'dato1' => $this->fix_html($this->pedido->nombre),
+                   'campo2' => "<b>".FS_CIFNIF.":</b>",
+                   'dato2' => $this->pedido->cifnif
+               )
+            );
+            $pdf_doc->save_table(
+               array(
+                   'cols' => array(
+                       'campo1' => array('justification' => 'right'),
+                       'dato1' => array('justification' => 'left'),
+                       'campo2' => array('justification' => 'right'),
+                       'dato2' => array('justification' => 'left')
+                   ),
+                   'showLines' => 0,
+                   'width' => 540,
+                   'shaded' => 0
+               )
+            );
+            $pdf_doc->pdf->ezText("\n", 10);
+            
+            
+            /*
+             * Creamos la tabla con las lineas del pedido:
+             * 
+             * Descripción    PVP   DTO   Cantidad    Importe
+             */
+            $pdf_doc->new_table();
+            $pdf_doc->add_table_header(
+               array(
+                  'descripcion' => '<b>Descripción</b>',
+                  'cantidad' => '<b>Cantidad</b>',
+                  'pvp' => '<b>PVP</b>',
+                  'dto' => '<b>DTO</b>',
+                  'importe' => '<b>Importe</b>'
+               )
+            );
+            $saltos = 0;
+            for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
+            {
+               $fila = array(
+                  'descripcion' => $this->fix_html($lineas[$linea_actual]->descripcion),
+                  'cantidad' => $lineas[$linea_actual]->cantidad,
+                  'pvp' => $this->show_precio($lineas[$linea_actual]->pvpunitario, $this->pedido->coddivisa),
+                  'dto' => $this->show_numero($lineas[$linea_actual]->dtopor, 0) . " %",
+                  'importe' => $this->show_precio($lineas[$linea_actual]->pvptotal, $this->pedido->coddivisa)
+               );
+               
+               $pdf_doc->add_table_row($fila);
+               $saltos++;
+               $linea_actual++;
+            }
+            $pdf_doc->save_table(
+               array(
+                   'fontSize' => 8,
+                   'cols' => array(
+                       'cantidad' => array('justification' => 'right'),
+                       'pvp' => array('justification' => 'right'),
+                       'dto' => array('justification' => 'right'),
+                       'importe' => array('justification' => 'right')
+                   ),
+                   'width' => 540,
+                   'shaded' => 0
+               )
+            );
+            
+            
+            /*
+             * Rellenamos el hueco que falta hasta donde debe aparecer la última tabla
+             */
+            if($this->pedido->observaciones == '')
+            {
+               $salto = '';
+            }
+            else
+            {
+               $salto = "\n<b>Observaciones</b>: " . $this->fix_html($this->pedido->observaciones);
+               $saltos += count( explode("\n", $this->pedido->observaciones) ) - 1;
+            }
+            
+            if($saltos < $lppag)
+            {
+               for(;$saltos < $lppag; $saltos++)
+                  $salto .= "\n";
+               $pdf_doc->pdf->ezText($salto, 11);
+            }
+            else if($linea_actual >= $lineasfact)
+               $pdf_doc->pdf->ezText($salto, 11);
+            else
+               $pdf_doc->pdf->ezText("\n", 11);
+            
+            
+            /*
+             * Rellenamos la última tabla de la página:
+             * 
+             * Página            Neto    IVA   Total
+             */
+            $pdf_doc->new_table();
+            $titulo = array('pagina' => '<b>Página</b>', 'neto' => '<b>Neto</b>',);
+            $fila = array(
+                'pagina' => $pagina . '/' . ceil(count($lineas) / $lppag),
+                'neto' => $this->show_precio($this->pedido->neto, $this->pedido->coddivisa),
+            );
+            $opciones = array(
+                'cols' => array(
+                    'neto' => array('justification' => 'right'),
+                ),
+                'showLines' => 4,
+                'width' => 540
+            );
+            foreach($lineas_iva as $li)
+            {
+               $imp = $this->impuesto->get($li['codimpuesto']);
+               if($imp)
+               {
+                  $titulo['iva'.$li['iva']] = '<b>'.$imp->descripcion.'</b>';
+               }
+               else
+                  $titulo['iva'.$li['iva']] = '<b>'.FS_IVA.' '.$li['iva'].'%</b>';
+               
+               $fila['iva'.$li['iva']] = $this->show_precio($li['totaliva'], $this->pedido->coddivisa);
+               
+               if($li['totalrecargo'] != 0)
+               {
+                  $fila['iva'.$li['iva']] .= ' (RE: '.$this->show_precio($li['totalrecargo'], $this->pedido->coddivisa).')';
+               }
+               
+               $opciones['cols']['iva'.$li['iva']] = array('justification' => 'right');
+            }
+            
+            if($this->pedido->totalirpf != 0)
+            {
+               $titulo['irpf'] = '<b>'.FS_IRPF.'</b>';
+               $fila['irpf'] = $this->show_precio(0 - $this->pedido->totalirpf);
+               $opciones['cols']['irpf'] = array('justification' => 'right');
+            }
+            
+            $titulo['liquido'] = '<b>Total</b>';
+            $fila['liquido'] = $this->show_precio($this->pedido->total, $this->pedido->coddivisa);
+            $opciones['cols']['liquido'] = array('justification' => 'right');
+            $pdf_doc->add_table_header($titulo);
+            $pdf_doc->add_table_row($fila);
+            $pdf_doc->save_table($opciones);
+            $pdf_doc->pdf->ezText("\n", 10);
+            
+            $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->fix_html($this->empresa->pie_factura), 153), 0, 1.5);
+            
+            $pagina++;
+         }
+      }
+      
+      if($archivo)
+      {
+         if( !file_exists('tmp/'.FS_TMP_NAME.'enviar') )
+            mkdir('tmp/'.FS_TMP_NAME.'enviar');
+         
+         $pdf_doc->save('tmp/'.FS_TMP_NAME.'enviar/'.$archivo);
+      }
+      else
+         $pdf_doc->show();
+   }
+   
    private function generar_pdf_pedido($archivo = FALSE)
    {
       if( !$archivo )
@@ -609,6 +875,72 @@ class imprimir_presu_pedi extends fs_controller
          $pdf_doc->show();
    }
    
+   private function enviar_email_proveedor($doc)
+   {
+      if( $this->empresa->can_send_mail() )
+      {
+         if( $_POST['email'] != $this->proveedor->email )
+         {
+            $this->proveedor->email = $_POST['email'];
+            $this->proveedor->save();
+         }
+         
+         /// obtenemos la configuración extra del email
+         $mailop = array(
+             'mail_host' => 'smtp.gmail.com',
+             'mail_port' => '465',
+             'mail_user' => '',
+             'mail_enc' => 'ssl'
+         );
+         $fsvar = new fs_var();
+         $mailop = $fsvar->array_get($mailop, FALSE);
+         
+         $filename = 'pedido_'.$this->pedido->codigo.'.pdf';
+         $this->generar_pdf_pedido_proveedor($filename);
+         
+         if( file_exists('tmp/'.FS_TMP_NAME.'enviar/'.$filename) )
+         {
+            $mail = new PHPMailer();
+            $mail->IsSMTP();
+            $mail->SMTPAuth = TRUE;
+            $mail->SMTPSecure = $mailop['mail_enc'];
+            $mail->Host = $mailop['mail_host'];
+            $mail->Port = intval($mailop['mail_port']);
+            
+            $mail->Username = $this->empresa->email;
+            if($mailop['mail_user'] != '')
+            {
+               $mail->Username = $mailop['mail_user'];
+            }
+            
+            $mail->Password = $this->empresa->email_password;
+            $mail->From = $this->empresa->email;
+            $mail->FromName = $this->user->nick;
+            $mail->CharSet = 'UTF-8';
+            
+            $mail->Subject = $this->empresa->nombre . ': Mi '.FS_PEDIDO.' '.$this->pedido->codigo;
+            $mail->AltBody = 'Buenos días, le adjunto mi '.FS_PEDIDO.' '.$this->pedido->codigo.".\n".$this->empresa->email_firma;
+            
+            $mail->WordWrap = 50;
+            $mail->MsgHTML( nl2br($_POST['mensaje']) );
+            $mail->AddAttachment('tmp/'.FS_TMP_NAME.'enviar/'.$filename);
+            $mail->AddAddress($_POST['email'], $this->proveedor->razonsocial);
+            $mail->IsHTML(TRUE);
+            
+            if( $mail->Send() )
+            {
+               $this->new_message('Mensaje enviado correctamente.');
+            }
+            else
+               $this->new_error_msg("Error al enviar el email: " . $mail->ErrorInfo);
+            
+            unlink('tmp/'.FS_TMP_NAME.'enviar/'.$filename);
+         }
+         else
+            $this->new_error_msg('Imposible generar el PDF.');
+      }
+   }
+   
    private function enviar_email($doc)
    {
       if( $this->empresa->can_send_mail() )
@@ -674,7 +1006,7 @@ class imprimir_presu_pedi extends fs_controller
             $mail->WordWrap = 50;
             $mail->MsgHTML( nl2br($_POST['mensaje']) );
             $mail->AddAttachment('tmp/'.FS_TMP_NAME.'enviar/'.$filename);
-            $mail->AddAddress($_POST['email'], $this->cliente->nombrecomercial);
+            $mail->AddAddress($_POST['email'], $this->cliente->razonsocial);
             $mail->IsHTML(TRUE);
             
             if( $mail->Send() )

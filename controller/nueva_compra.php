@@ -94,7 +94,7 @@ class nueva_compra extends fs_controller
             {
                $this->proveedor_s = new proveedor();
                $this->proveedor_s->codproveedor = $this->proveedor_s->get_new_codigo();
-               $this->proveedor_s->nombre = $this->proveedor_s->nombrecomercial = $_POST['nuevo_proveedor'];
+               $this->proveedor_s->nombre = $this->proveedor_s->razonsocial = $_POST['nuevo_proveedor'];
                $this->proveedor_s->cifnif = $_POST['nuevo_dni'];
                $this->proveedor_s->save();
             }
@@ -320,7 +320,7 @@ class nueva_compra extends fs_controller
          $pedido->fecha = $_POST['fecha'];
          $pedido->hora = $_POST['hora'];
          $pedido->codproveedor = $proveedor->codproveedor;
-         $pedido->nombre = $proveedor->nombrecomercial;
+         $pedido->nombre = $proveedor->razonsocial;
          $pedido->cifnif = $proveedor->cifnif;
          $pedido->codalmacen = $almacen->codalmacen;
          $pedido->codejercicio = $ejercicio->codejercicio;
@@ -328,6 +328,12 @@ class nueva_compra extends fs_controller
          $pedido->codpago = $forma_pago->codpago;
          $pedido->coddivisa = $divisa->coddivisa;
          $pedido->tasaconv = $divisa->tasaconv;
+         
+         if($_POST['tasaconv'] != '')
+         {
+            $pedido->tasaconv = floatval($_POST['tasaconv']);
+         }
+         
          $pedido->codagente = $this->agente->codagente;
          $pedido->numproveedor = $_POST['numproveedor'];
          $pedido->observaciones = $_POST['observaciones'];
@@ -522,7 +528,7 @@ class nueva_compra extends fs_controller
          $albaran->fecha = $_POST['fecha'];
          $albaran->hora = $_POST['hora'];
          $albaran->codproveedor = $proveedor->codproveedor;
-         $albaran->nombre = $proveedor->nombrecomercial;
+         $albaran->nombre = $proveedor->razonsocial;
          $albaran->cifnif = $proveedor->cifnif;
          $albaran->codalmacen = $almacen->codalmacen;
          $albaran->codejercicio = $ejercicio->codejercicio;
@@ -530,6 +536,12 @@ class nueva_compra extends fs_controller
          $albaran->codpago = $forma_pago->codpago;
          $albaran->coddivisa = $divisa->coddivisa;
          $albaran->tasaconv = $divisa->tasaconv;
+         
+         if($_POST['tasaconv'] != '')
+         {
+            $albaran->tasaconv = floatval($_POST['tasaconv']);
+         }
+         
          $albaran->codagente = $this->agente->codagente;
          $albaran->numproveedor = $_POST['numproveedor'];
          $albaran->observaciones = $_POST['observaciones'];
@@ -718,7 +730,7 @@ class nueva_compra extends fs_controller
          $factura->fecha = $_POST['fecha'];
          $factura->hora = $_POST['hora'];
          $factura->codproveedor = $proveedor->codproveedor;
-         $factura->nombre = $proveedor->nombrecomercial;
+         $factura->nombre = $proveedor->razonsocial;
          $factura->cifnif = $proveedor->cifnif;
          $factura->codalmacen = $almacen->codalmacen;
          $factura->codejercicio = $ejercicio->codejercicio;
@@ -726,6 +738,12 @@ class nueva_compra extends fs_controller
          $factura->codpago = $forma_pago->codpago;
          $factura->coddivisa = $divisa->coddivisa;
          $factura->tasaconv = $divisa->tasaconv;
+         
+         if($_POST['tasaconv'] != '')
+         {
+            $factura->tasaconv = floatval($_POST['tasaconv']);
+         }
+         
          $factura->codagente = $this->agente->codagente;
          $factura->numproveedor = $_POST['numproveedor'];
          $factura->observaciones = $_POST['observaciones'];
