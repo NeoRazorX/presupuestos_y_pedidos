@@ -21,6 +21,7 @@
 require_once 'plugins/facturacion_base/extras/fs_pdf.php';
 require_once 'extras/phpmailer/class.phpmailer.php';
 require_once 'extras/phpmailer/class.smtp.php';
+require_model('articulo_proveedor.php');
 require_model('cliente.php');
 require_model('impuesto.php');
 require_model('pedido_cliente.php');
@@ -33,6 +34,7 @@ require_model('proveedor.php');
  */
 class imprimir_presu_pedi extends fs_controller
 {
+   public $articulo_proveedor;
    public $cliente;
    public $impuesto;
    public $pedido;
@@ -46,6 +48,7 @@ class imprimir_presu_pedi extends fs_controller
    
    protected function process()
    {
+      $this->articulo_proveedor = new articulo_proveedor();
       $this->cliente = FALSE;
       $this->impuesto = new impuesto();
       $this->pedido = FALSE;
@@ -475,13 +478,13 @@ class imprimir_presu_pedi extends fs_controller
             /*
              * Creamos la tabla con las lineas del pedido:
              * 
-             * Cantidad Descripción    PVP   DTO   Importe
+             * Cantidad Ref. Proveedor + Descripción    PVP   DTO   Importe
              */
             $pdf_doc->new_table();
             $pdf_doc->add_table_header(
                array(
                   'cantidad' => '<b>Cant.</b>',
-                  'descripcion' => '<b>Ref + Descripción</b>',
+                  'descripcion' => '<b>Ref. Prov. + Descripción</b>',
                   'pvp' => '<b>PVP</b>',
                   'dto' => '<b>Dto.</b>',
                   'importe' => '<b>Importe</b>'
@@ -492,7 +495,8 @@ class imprimir_presu_pedi extends fs_controller
                $descripcion = $this->fix_html($lineas[$linea_actual]->descripcion);
                if( !is_null($lineas[$linea_actual]->referencia) )
                {
-                  $descripcion = $this->fix_html('<b>'.$lineas[$linea_actual]->referencia.'</b> '.$lineas[$linea_actual]->descripcion);
+                  $descripcion = '<b>'.$this->get_referencia_proveedor($lineas[$linea_actual]->referencia, $this->pedido->codproveedor).
+                          '</b> '.$this->fix_html($lineas[$linea_actual]->descripcion);
                }
                
                $fila = array(
@@ -589,6 +593,17 @@ class imprimir_presu_pedi extends fs_controller
          $pdf_doc->show();
    }
    
+   private function get_referencia_proveedor($ref, $codproveedor)
+   {
+      $artprov = $this->articulo_proveedor->get_by($ref, $codproveedor);
+      if($artprov)
+      {
+         return $artprov->refproveedor;
+      }
+      else
+         return $ref;
+   }
+   
    private function generar_pdf_pedido($archivo = FALSE)
    {
       if( !$archivo )
@@ -666,7 +681,8 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->add_table_row(
                array(
                    'campo1' => "<b>Dirección:</b>",
-                   'dato1' => $this->fix_html($this->pedido->direccion.' CP: '.$this->pedido->codpostal.' - '.$this->pedido->ciudad.' ('.$this->pedido->provincia.')'),
+                   'dato1' => $this->fix_html($this->pedido->direccion.' CP: '.$this->pedido->codpostal.
+                           ' - '.$this->pedido->ciudad.' ('.$this->pedido->provincia.')'),
                    'campo2' => "<b>Teléfonos:</b>",
                    'dato2' => $this->cliente->telefono1.'  '.$this->cliente->telefono2
                )
@@ -969,7 +985,8 @@ class imprimir_presu_pedi extends fs_controller
             $lineasiva[$lin->codimpuesto]['neto'] += $lin->pvptotal;
             $lineasiva[$lin->codimpuesto]['totaliva'] += ($lin->pvptotal*$lin->iva)/100;
             $lineasiva[$lin->codimpuesto]['totalrecargo'] += ($lin->pvptotal*$lin->recargo)/100;
-            $lineasiva[$lin->codimpuesto]['totallinea'] = $lineasiva[$lin->codimpuesto]['neto'] + $lineasiva[$lin->codimpuesto]['totaliva'] + $lineasiva[$lin->codimpuesto]['totalrecargo'];
+            $lineasiva[$lin->codimpuesto]['totallinea'] = $lineasiva[$lin->codimpuesto]['neto']
+                    + $lineasiva[$lin->codimpuesto]['totaliva'] + $lineasiva[$lin->codimpuesto]['totalrecargo'];
          }
          else
          {
@@ -982,7 +999,8 @@ class imprimir_presu_pedi extends fs_controller
                 'totalrecargo' => ($lin->pvptotal*$lin->recargo)/100,
                 'totallinea' => 0
             );
-            $lineasiva[$lin->codimpuesto]['totallinea'] = $lineasiva[$lin->codimpuesto]['neto'] + $lineasiva[$lin->codimpuesto]['totaliva'] + $lineasiva[$lin->codimpuesto]['totalrecargo'];
+            $lineasiva[$lin->codimpuesto]['totallinea'] = $lineasiva[$lin->codimpuesto]['neto']
+                    + $lineasiva[$lin->codimpuesto]['totaliva'] + $lineasiva[$lin->codimpuesto]['totalrecargo'];
          }
       }
       
