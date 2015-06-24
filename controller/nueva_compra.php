@@ -327,7 +327,7 @@ class nueva_compra extends fs_controller
          $pedido->codserie = $serie->codserie;
          $pedido->codpago = $forma_pago->codpago;
          $pedido->coddivisa = $divisa->coddivisa;
-         $pedido->tasaconv = $divisa->tasaconv;
+         $pedido->tasaconv = $divisa->tasaconv_compra;
          
          if($_POST['tasaconv'] != '')
          {
@@ -535,7 +535,7 @@ class nueva_compra extends fs_controller
          $albaran->codserie = $serie->codserie;
          $albaran->codpago = $forma_pago->codpago;
          $albaran->coddivisa = $divisa->coddivisa;
-         $albaran->tasaconv = $divisa->tasaconv;
+         $albaran->tasaconv = $divisa->tasaconv_compra;
          
          if($_POST['tasaconv'] != '')
          {
@@ -737,7 +737,7 @@ class nueva_compra extends fs_controller
          $factura->codserie = $serie->codserie;
          $factura->codpago = $forma_pago->codpago;
          $factura->coddivisa = $divisa->coddivisa;
-         $factura->tasaconv = $divisa->tasaconv;
+         $factura->tasaconv = $divisa->tasaconv_compra;
          
          if($_POST['tasaconv'] != '')
          {

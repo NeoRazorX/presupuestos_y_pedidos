@@ -194,7 +194,7 @@ class compras_pedido extends fs_controller
             if($divisa)
             {
                $this->pedido->coddivisa = $divisa->coddivisa;
-               $this->pedido->tasaconv = $divisa->tasaconv;
+               $this->pedido->tasaconv = $divisa->tasaconv_compra;
             }
          }
          else if($_POST['tasaconv'] != '')

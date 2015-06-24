@@ -160,7 +160,7 @@
          </tr>
       </thead>
       {loop="$fsc->resultados"}
-      <tr class="clickableRow{if="$value->total<=0"} bg-warning{elseif="$value->status==2 OR $fsc->finoferta($value->finoferta,$value->idpedido)"} bg-danger{/if}" href="{$value->url()}">
+      <tr class="clickableRow{if="$value->total<=0"} bg-warning{elseif="$value->status==2"} bg-danger{/if}" href="{$value->url()}">
          <td class="text-center">
             {if="$value->idpedido"}
             <span class="glyphicon glyphicon-paperclip" title="El {#FS_PRESUPUESTO#} tiene vinculado un {#FS_PEDIDO#}"></span>

@@ -252,9 +252,4 @@ class informe_presupuestos extends fs_controller
       
       return $dates;
    }
-
-   public function finoferta($finoferta, $idpedido)
-   {
-      return is_null($idpedido) AND strtotime($finoferta) < strtotime(Date('d-m-Y'));
-   }
 }

@@ -246,7 +246,9 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->add_table_row(
                array(
                    'campo1' => "<b>Dirección:</b>",
-                   'dato1' => $this->fix_html($this->presupuesto->direccion.' CP: '.$this->presupuesto->codpostal.' - '.$this->presupuesto->ciudad.' ('.$this->presupuesto->provincia.')'),
+                   'dato1' => $this->fix_html($this->presupuesto->direccion.' CP: '.
+                           $this->presupuesto->codpostal.' - '.$this->presupuesto->ciudad.
+                           ' ('.$this->presupuesto->provincia.')'),
                    'campo2' => "<b>Teléfonos:</b>",
                    'dato2' => $this->cliente->telefono1.'  '.$this->cliente->telefono2
                )
@@ -260,7 +262,7 @@ class imprimir_presu_pedi extends fs_controller
                        'dato2' => array('justification' => 'left')
                    ),
                    'showLines' => 0,
-                   'width' => 540,
+                   'width' => 520,
                    'shaded' => 0
                )
             );
@@ -282,7 +284,6 @@ class imprimir_presu_pedi extends fs_controller
                   'importe' => '<b>Importe</b>'
                )
             );
-            $saltos = 0;
             for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
             {
                $fila = array(
@@ -294,7 +295,6 @@ class imprimir_presu_pedi extends fs_controller
                );
                
                $pdf_doc->add_table_row($fila);
-               $saltos++;
                $linea_actual++;
             }
             $pdf_doc->save_table(
@@ -306,36 +306,12 @@ class imprimir_presu_pedi extends fs_controller
                        'dto' => array('justification' => 'right'),
                        'importe' => array('justification' => 'right')
                    ),
-                   'width' => 540,
+                   'width' => 520,
                    'shaded' => 0
                )
             );
             
-            
-            /*
-             * Rellenamos el hueco que falta hasta donde debe aparecer la última tabla
-             */
-            if($this->presupuesto->observaciones == '')
-            {
-               $salto = '';
-            }
-            else
-            {
-               $salto = "\n<b>Observaciones</b>: " . $this->fix_html($this->presupuesto->observaciones);
-               $saltos += count( explode("\n", $this->presupuesto->observaciones) ) - 1;
-            }
-            
-            if($saltos < $lppag)
-            {
-               for(;$saltos < $lppag; $saltos++)
-                  $salto .= "\n";
-               $pdf_doc->pdf->ezText($salto, 11);
-            }
-            else if($linea_actual >= $lineasfact)
-               $pdf_doc->pdf->ezText($salto, 11);
-            else
-               $pdf_doc->pdf->ezText("\n", 11);
-            
+            $pdf_doc->set_y(80);
             
             /*
              * Rellenamos la última tabla de la página:
@@ -353,7 +329,7 @@ class imprimir_presu_pedi extends fs_controller
                     'neto' => array('justification' => 'right'),
                 ),
                 'showLines' => 4,
-                'width' => 540
+                'width' => 520
             );
             foreach($lineas_iva as $li)
             {
@@ -377,7 +353,7 @@ class imprimir_presu_pedi extends fs_controller
             
             if($this->presupuesto->totalirpf != 0)
             {
-               $titulo['irpf'] = '<b>'.FS_IRPF.'</b>';
+               $titulo['irpf'] = '<b>'.FS_IRPF.' '.$this->presupuesto->irpf.'%</b>';
                $fila['irpf'] = $this->show_precio(0 - $this->presupuesto->totalirpf);
                $opciones['cols']['irpf'] = array('justification' => 'right');
             }
@@ -388,7 +364,6 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->add_table_header($titulo);
             $pdf_doc->add_table_row($fila);
             $pdf_doc->save_table($opciones);
-            $pdf_doc->pdf->ezText("\n", 10);
             
             $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->fix_html($this->empresa->pie_factura), 153), 0, 1.5);
             
@@ -490,7 +465,7 @@ class imprimir_presu_pedi extends fs_controller
                        'dato2' => array('justification' => 'left')
                    ),
                    'showLines' => 0,
-                   'width' => 540,
+                   'width' => 520,
                    'shaded' => 0
                )
             );
@@ -500,31 +475,35 @@ class imprimir_presu_pedi extends fs_controller
             /*
              * Creamos la tabla con las lineas del pedido:
              * 
-             * Descripción    PVP   DTO   Cantidad    Importe
+             * Cantidad Descripción    PVP   DTO   Importe
              */
             $pdf_doc->new_table();
             $pdf_doc->add_table_header(
                array(
-                  'descripcion' => '<b>Descripción</b>',
-                  'cantidad' => '<b>Cantidad</b>',
+                  'cantidad' => '<b>Cant.</b>',
+                  'descripcion' => '<b>Ref + Descripción</b>',
                   'pvp' => '<b>PVP</b>',
-                  'dto' => '<b>DTO</b>',
+                  'dto' => '<b>Dto.</b>',
                   'importe' => '<b>Importe</b>'
                )
             );
-            $saltos = 0;
             for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
             {
+               $descripcion = $this->fix_html($lineas[$linea_actual]->descripcion);
+               if( !is_null($lineas[$linea_actual]->referencia) )
+               {
+                  $descripcion = $this->fix_html('<b>'.$lineas[$linea_actual]->referencia.'</b> '.$lineas[$linea_actual]->descripcion);
+               }
+               
                $fila = array(
-                  'descripcion' => $this->fix_html($lineas[$linea_actual]->descripcion),
                   'cantidad' => $lineas[$linea_actual]->cantidad,
+                  'descripcion' => $descripcion,
                   'pvp' => $this->show_precio($lineas[$linea_actual]->pvpunitario, $this->pedido->coddivisa),
                   'dto' => $this->show_numero($lineas[$linea_actual]->dtopor, 0) . " %",
                   'importe' => $this->show_precio($lineas[$linea_actual]->pvptotal, $this->pedido->coddivisa)
                );
                
                $pdf_doc->add_table_row($fila);
-               $saltos++;
                $linea_actual++;
             }
             $pdf_doc->save_table(
@@ -536,36 +515,12 @@ class imprimir_presu_pedi extends fs_controller
                        'dto' => array('justification' => 'right'),
                        'importe' => array('justification' => 'right')
                    ),
-                   'width' => 540,
-                   'shaded' => 0
+                   'width' => 520,
+                   'shaded' => 0,
                )
             );
             
-            
-            /*
-             * Rellenamos el hueco que falta hasta donde debe aparecer la última tabla
-             */
-            if($this->pedido->observaciones == '')
-            {
-               $salto = '';
-            }
-            else
-            {
-               $salto = "\n<b>Observaciones</b>: " . $this->fix_html($this->pedido->observaciones);
-               $saltos += count( explode("\n", $this->pedido->observaciones) ) - 1;
-            }
-            
-            if($saltos < $lppag)
-            {
-               for(;$saltos < $lppag; $saltos++)
-                  $salto .= "\n";
-               $pdf_doc->pdf->ezText($salto, 11);
-            }
-            else if($linea_actual >= $lineasfact)
-               $pdf_doc->pdf->ezText($salto, 11);
-            else
-               $pdf_doc->pdf->ezText("\n", 11);
-            
+            $pdf_doc->set_y(80);
             
             /*
              * Rellenamos la última tabla de la página:
@@ -583,7 +538,7 @@ class imprimir_presu_pedi extends fs_controller
                     'neto' => array('justification' => 'right'),
                 ),
                 'showLines' => 4,
-                'width' => 540
+                'width' => 520
             );
             foreach($lineas_iva as $li)
             {
@@ -607,7 +562,7 @@ class imprimir_presu_pedi extends fs_controller
             
             if($this->pedido->totalirpf != 0)
             {
-               $titulo['irpf'] = '<b>'.FS_IRPF.'</b>';
+               $titulo['irpf'] = '<b>'.FS_IRPF.' '.$this->pedido->irpf.'%</b>';
                $fila['irpf'] = $this->show_precio(0 - $this->pedido->totalirpf);
                $opciones['cols']['irpf'] = array('justification' => 'right');
             }
@@ -618,9 +573,6 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->add_table_header($titulo);
             $pdf_doc->add_table_row($fila);
             $pdf_doc->save_table($opciones);
-            $pdf_doc->pdf->ezText("\n", 10);
-            
-            $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->fix_html($this->empresa->pie_factura), 153), 0, 1.5);
             
             $pagina++;
          }
@@ -728,7 +680,7 @@ class imprimir_presu_pedi extends fs_controller
                        'dato2' => array('justification' => 'left')
                    ),
                    'showLines' => 0,
-                   'width' => 540,
+                   'width' => 520,
                    'shaded' => 0
                )
             );
@@ -750,7 +702,6 @@ class imprimir_presu_pedi extends fs_controller
                   'importe' => '<b>Importe</b>'
                )
             );
-            $saltos = 0;
             for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
             {
                $fila = array(
@@ -762,7 +713,6 @@ class imprimir_presu_pedi extends fs_controller
                );
                
                $pdf_doc->add_table_row($fila);
-               $saltos++;
                $linea_actual++;
             }
             $pdf_doc->save_table(
@@ -774,36 +724,12 @@ class imprimir_presu_pedi extends fs_controller
                        'dto' => array('justification' => 'right'),
                        'importe' => array('justification' => 'right')
                    ),
-                   'width' => 540,
+                   'width' => 520,
                    'shaded' => 0
                )
             );
             
-            
-            /*
-             * Rellenamos el hueco que falta hasta donde debe aparecer la última tabla
-             */
-            if($this->pedido->observaciones == '')
-            {
-               $salto = '';
-            }
-            else
-            {
-               $salto = "\n<b>Observaciones</b>: " . $this->fix_html($this->pedido->observaciones);
-               $saltos += count( explode("\n", $this->pedido->observaciones) ) - 1;
-            }
-            
-            if($saltos < $lppag)
-            {
-               for(;$saltos < $lppag; $saltos++)
-                  $salto .= "\n";
-               $pdf_doc->pdf->ezText($salto, 11);
-            }
-            else if($linea_actual >= $lineasfact)
-               $pdf_doc->pdf->ezText($salto, 11);
-            else
-               $pdf_doc->pdf->ezText("\n", 11);
-            
+            $pdf_doc->set_y(80);
             
             /*
              * Rellenamos la última tabla de la página:
@@ -821,7 +747,7 @@ class imprimir_presu_pedi extends fs_controller
                     'neto' => array('justification' => 'right'),
                 ),
                 'showLines' => 4,
-                'width' => 540
+                'width' => 520
             );
             foreach($lineas_iva as $li)
             {
@@ -845,7 +771,7 @@ class imprimir_presu_pedi extends fs_controller
             
             if($this->pedido->totalirpf != 0)
             {
-               $titulo['irpf'] = '<b>'.FS_IRPF.'</b>';
+               $titulo['irpf'] = '<b>'.FS_IRPF.' '.$this->pedido->irpf.'%</b>';
                $fila['irpf'] = $this->show_precio(0 - $this->pedido->totalirpf);
                $opciones['cols']['irpf'] = array('justification' => 'right');
             }
@@ -856,7 +782,6 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->add_table_header($titulo);
             $pdf_doc->add_table_row($fila);
             $pdf_doc->save_table($opciones);
-            $pdf_doc->pdf->ezText("\n", 10);
             
             $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->fix_html($this->empresa->pie_factura), 153), 0, 1.5);
             
