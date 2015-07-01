@@ -486,7 +486,7 @@ class presupuesto_cliente extends fs_model
       return $preslist;
    }
 
-   public function all_ptepedir($offset = 0, $order = 'DESC')
+   public function all_ptepedir($offset = 0, $order = 'ASC')
    {
       $preslist = array();
       

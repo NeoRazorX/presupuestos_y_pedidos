@@ -36,6 +36,7 @@ class imprimir_presu_pedi extends fs_controller
 {
    public $articulo_proveedor;
    public $cliente;
+   public $impresion;
    public $impuesto;
    public $pedido;
    public $presupuesto;
@@ -54,6 +55,15 @@ class imprimir_presu_pedi extends fs_controller
       $this->pedido = FALSE;
       $this->presupuesto = FALSE;
       $this->proveedor = FALSE;
+      
+      /// obtenemos los datos de configuración de impresión
+      $this->impresion = array(
+          'print_ref' => '1',
+          'print_dto' => '1',
+          'print_alb' => '1'
+      );
+      $fsvar = new fs_var();
+      $this->impresion = $fsvar->array_get($this->impresion, FALSE);
       
       if( isset($_REQUEST['pedido_p']) AND isset($_REQUEST['id']) )
       {
@@ -190,15 +200,18 @@ class imprimir_presu_pedi extends fs_controller
       if($lineas)
       {
          $linea_actual = 0;
-         $lppag = 42;
          $pagina = 1;
          
          /// imprimimos las páginas necesarias
          while( $linea_actual < count($lineas) )
          {
+            $lppag = 35;
+            
             /// salto de página
             if($linea_actual > 0)
+            {
                $pdf_doc->pdf->ezNewPage();
+            }
             
             /// ¿Añadimos el logo?
             if( file_exists('tmp/'.FS_TMP_NAME.'logo.png') )
@@ -278,19 +291,41 @@ class imprimir_presu_pedi extends fs_controller
              * Descripción    PVP   DTO   Cantidad    Importe
              */
             $pdf_doc->new_table();
-            $pdf_doc->add_table_header(
-               array(
-                  'descripcion' => '<b>Descripción</b>',
-                  'cantidad' => '<b>Cantidad</b>',
-                  'pvp' => '<b>PVP</b>',
-                  'dto' => '<b>DTO</b>',
-                  'importe' => '<b>Importe</b>'
-               )
-            );
+            
+            if($this->impresion['print_dto'])
+            {
+               $pdf_doc->add_table_header(
+                  array(
+                     'descripcion' => '<b>Descripción</b>',
+                     'cantidad' => '<b>Cantidad</b>',
+                     'pvp' => '<b>PVP</b>',
+                     'dto' => '<b>DTO</b>',
+                     'importe' => '<b>Importe</b>'
+                  )
+               );
+            }
+            else
+            {
+               $pdf_doc->add_table_header(
+                  array(
+                     'descripcion' => '<b>Descripción</b>',
+                     'cantidad' => '<b>Cantidad</b>',
+                     'pvp' => '<b>PVP</b>',
+                     'importe' => '<b>Importe</b>'
+                  )
+               );
+            }
+            
             for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
             {
+               $descripcion = $this->fix_html($lineas[$linea_actual]->descripcion);
+               if( $this->impresion['print_ref'] AND !is_null($lineas[$linea_actual]->referencia) )
+               {
+                  $descripcion = '<b>'.$lineas[$linea_actual]->referencia.'</b> '.$descripcion;
+               }
+               
                $fila = array(
-                  'descripcion' => $this->fix_html($lineas[$linea_actual]->descripcion),
+                  'descripcion' => $descripcion,
                   'cantidad' => $lineas[$linea_actual]->cantidad,
                   'pvp' => $this->show_precio($lineas[$linea_actual]->pvpunitario, $this->presupuesto->coddivisa),
                   'dto' => $this->show_numero($lineas[$linea_actual]->dtopor, 0) . " %",
@@ -313,6 +348,14 @@ class imprimir_presu_pedi extends fs_controller
                    'shaded' => 0
                )
             );
+            
+            if( $linea_actual == count($lineas) )
+            {
+               if($this->presupuesto->observaciones != '')
+               {
+                  $pdf_doc->pdf->ezText("\n".$this->presupuesto->observaciones, 9);
+               }
+            }
             
             $pdf_doc->set_y(80);
             
@@ -403,15 +446,18 @@ class imprimir_presu_pedi extends fs_controller
       if($lineas)
       {
          $linea_actual = 0;
-         $lppag = 42;
          $pagina = 1;
          
          /// imprimimos las páginas necesarias
          while( $linea_actual < count($lineas) )
          {
+            $lppag = 35;
+            
             /// salto de página
             if($linea_actual > 0)
+            {
                $pdf_doc->pdf->ezNewPage();
+            }
             
             /// ¿Añadimos el logo?
             if( file_exists('tmp/'.FS_TMP_NAME.'logo.png') )
@@ -524,6 +570,14 @@ class imprimir_presu_pedi extends fs_controller
                )
             );
             
+            if( $linea_actual == count($lineas) )
+            {
+               if($this->pedido->observaciones != '')
+               {
+                  $pdf_doc->pdf->ezText("\n".$this->pedido->observaciones, 9);
+               }
+            }
+            
             $pdf_doc->set_y(80);
             
             /*
@@ -622,15 +676,18 @@ class imprimir_presu_pedi extends fs_controller
       if($lineas)
       {
          $linea_actual = 0;
-         $lppag = 42;
          $pagina = 1;
          
          /// imprimimos las páginas necesarias
          while( $linea_actual < count($lineas) )
          {
+            $lppag = 35;
+            
             /// salto de página
             if($linea_actual > 0)
+            {
                $pdf_doc->pdf->ezNewPage();
+            }
             
             /// ¿Añadimos el logo?
             if( file_exists('tmp/'.FS_TMP_NAME.'logo.png') )
@@ -709,19 +766,41 @@ class imprimir_presu_pedi extends fs_controller
              * Descripción    PVP   DTO   Cantidad    Importe
              */
             $pdf_doc->new_table();
-            $pdf_doc->add_table_header(
-               array(
-                  'descripcion' => '<b>Descripción</b>',
-                  'cantidad' => '<b>Cantidad</b>',
-                  'pvp' => '<b>PVP</b>',
-                  'dto' => '<b>DTO</b>',
-                  'importe' => '<b>Importe</b>'
-               )
-            );
+            
+            if($this->impresion['print_dto'])
+            {
+               $pdf_doc->add_table_header(
+                  array(
+                     'descripcion' => '<b>Descripción</b>',
+                     'cantidad' => '<b>Cantidad</b>',
+                     'pvp' => '<b>PVP</b>',
+                     'dto' => '<b>DTO</b>',
+                     'importe' => '<b>Importe</b>'
+                  )
+               );
+            }
+            else
+            {
+               $pdf_doc->add_table_header(
+                  array(
+                     'descripcion' => '<b>Descripción</b>',
+                     'cantidad' => '<b>Cantidad</b>',
+                     'pvp' => '<b>PVP</b>',
+                     'importe' => '<b>Importe</b>'
+                  )
+               );
+            }
+            
             for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
             {
+               $descripcion = $this->fix_html($lineas[$linea_actual]->descripcion);
+               if( $this->impresion['print_ref'] AND !is_null($lineas[$linea_actual]->referencia) )
+               {
+                  $descripcion = '<b>'.$lineas[$linea_actual]->referencia.'</b> '.$descripcion;
+               }
+               
                $fila = array(
-                  'descripcion' => $this->fix_html($lineas[$linea_actual]->descripcion),
+                  'descripcion' => $descripcion,
                   'cantidad' => $lineas[$linea_actual]->cantidad,
                   'pvp' => $this->show_precio($lineas[$linea_actual]->pvpunitario, $this->pedido->coddivisa),
                   'dto' => $this->show_numero($lineas[$linea_actual]->dtopor, 0) . " %",
@@ -744,6 +823,14 @@ class imprimir_presu_pedi extends fs_controller
                    'shaded' => 0
                )
             );
+            
+            if( $linea_actual == count($lineas) )
+            {
+               if($this->pedido->observaciones != '')
+               {
+                  $pdf_doc->pdf->ezText("\n".$this->pedido->observaciones, 9);
+               }
+            }
             
             $pdf_doc->set_y(80);
             

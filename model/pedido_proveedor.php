@@ -443,7 +443,7 @@ class pedido_proveedor extends fs_model {
       return $pedilist;
    }
 
-   public function all_ptealbaran($offset = 0, $order = 'DESC')
+   public function all_ptealbaran($offset = 0, $order = 'ASC')
    {
       $pedilist = array();
       

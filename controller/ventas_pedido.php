@@ -458,10 +458,13 @@ class ventas_pedido extends fs_controller
             if ($n->save())
             {
                /// descontamos del stock
-               if (!is_null($n->referencia))
+               if( !is_null($n->referencia) )
                {
                   $articulo = $art0->get($n->referencia);
-                  $articulo->sum_stock($albaran->codalmacen, 0 - $l->cantidad);
+                  if($articulo)
+                  {
+                     $articulo->sum_stock($albaran->codalmacen, 0 - $l->cantidad);
+                  }
                }
             }
             else
