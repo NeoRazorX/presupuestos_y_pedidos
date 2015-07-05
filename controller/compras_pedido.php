@@ -421,7 +421,10 @@ class compras_pedido extends fs_controller
                if( !is_null($n->referencia) )
                {
                   $articulo = $art0->get($n->referencia);
-                  $articulo->sum_stock($albaran->codalmacen, $l->cantidad);
+                  if($articulo)
+                  {
+                     $articulo->sum_stock($albaran->codalmacen, $l->cantidad);
+                  }
                }
             }
             else
