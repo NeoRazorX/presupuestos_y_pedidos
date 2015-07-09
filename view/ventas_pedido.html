@@ -154,6 +154,8 @@
                <span class="text-capitalize">{#FS_PEDIDO#}</span> creado por
                <a href="{$fsc->agente->url()}">{$fsc->agente->get_fullname()}</a>.
             </p>
+            {else}
+            <p>Sin datos de qué empleado ha creado este {#FS_PEDIDO#}.</p>
             {/if}
          </div>
       </div>
@@ -239,17 +241,17 @@
                <table class="table table-condensed">
                   <thead>
                      <tr>
-                        <th class="text-left" style="min-width: 150px; width: 300px;">Referencia</th>
-                        <th class="text-left" style="min-width: 150px;">Descripción</th>
-                        <th class="text-right" style="min-width: 70px; width: 90px;">Cantidad</th>
-                        <th style="width: 40px;"></th>
-                        <th class="text-right" style="min-width: 100px; width: 120px;">Precio</th>
-                        <th class="text-right" style="min-width: 90px; width: 90px;">Dto. %</th>
-                        <th class="text-right" style="min-width: 100px; width: 120px;">Neto</th>
-                        <th class="text-right" style="min-width: 110px; width: 115px;">{#FS_IVA#}</th>
+                        <th class="text-left" width="180">Referencia</th>
+                        <th class="text-left">Descripción</th>
+                        <th class="text-right" width="90">Cantidad</th>
+                        <th width="60"></th>
+                        <th class="text-right" width="110">Precio</th>
+                        <th class="text-right" width="90">Dto. %</th>
+                        <th class="text-right" width="130">Neto</th>
+                        <th class="text-right" width="115">{#FS_IVA#}</th>
                         <th class="text-right recargo">RE %</th>
                         <th class="text-right irpf">{#FS_IRPF#} %</th>
-                        <th class="text-right" style="min-width: 100px; width: 120px;">Total</th>
+                        <th class="text-right" width="140">Total</th>
                      </tr>
                   </thead>
                   <tbody id="lineas_albaran">

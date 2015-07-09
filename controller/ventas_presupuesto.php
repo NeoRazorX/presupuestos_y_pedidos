@@ -152,17 +152,20 @@ class ventas_presupuesto extends fs_controller {
             if($l->referencia != '')
             {
                $data = $this->db->select("SELECT factualizado,pvp FROM articulos WHERE referencia = " . $l->var2str($l->referencia) . " ORDER BY referencia ASC;");
-               if (strtotime($data[0]["factualizado"]) > strtotime($this->presupuesto->fecha))
+               if($data)
                {
-                  if ($l->pvpunitario > floatval($data[0]['pvp']))
+                  if( strtotime($data[0]["factualizado"]) > strtotime($this->presupuesto->fecha) )
                   {
-                     $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
-                           . " ha bajado desde la elaboración del " . FS_PRESUPUESTO . ".");
-                  }
-                  else if ($l->pvpunitario < floatval($data[0]['pvp']))
-                  {
-                     $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
-                             . " ha subido desde la elaboración del " . FS_PRESUPUESTO . ".");
+                     if( $l->pvpunitario > floatval($data[0]['pvp']) )
+                     {
+                        $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
+                              . " ha bajado desde la elaboración del " . FS_PRESUPUESTO . ".");
+                     }
+                     else if( $l->pvpunitario < floatval($data[0]['pvp']) )
+                     {
+                        $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
+                                . " ha subido desde la elaboración del " . FS_PRESUPUESTO . ".");
+                     }
                   }
                }
             }
@@ -193,11 +196,16 @@ class ventas_presupuesto extends fs_controller {
       {
          /// obtenemos los datos del ejercicio para acotar la fecha
          $eje0 = $this->ejercicio->get($this->presupuesto->codejercicio);
-         if ($eje0)
+         if($eje0)
          {
             $this->presupuesto->fecha = $eje0->get_best_fecha($_POST['fecha'], TRUE);
-            $this->presupuesto->finoferta = $_POST['finoferta'];
             $this->presupuesto->hora = $_POST['hora'];
+            
+            $this->presupuesto->finoferta = NULL;
+            if($_POST['finoferta'] != '')
+            {
+               $this->presupuesto->finoferta = $_POST['finoferta'];
+            }
          }
          else
             $this->new_error_msg('No se encuentra el ejercicio asociado al '.FS_PRESUPUESTO);
