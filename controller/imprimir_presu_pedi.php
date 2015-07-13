@@ -216,8 +216,16 @@ class imprimir_presu_pedi extends fs_controller
             /// ¿Añadimos el logo?
             if( file_exists('tmp/'.FS_TMP_NAME.'logo.png') )
             {
-               $pdf_doc->pdf->ezImage('tmp/'.FS_TMP_NAME.'logo.png', 0, 200, 'none');
-               $lppag -= 2; /// si metemos el logo, caben menos líneas
+               if( function_exists('imagecreatefromstring') )
+               {
+                  $pdf_doc->pdf->ezImage('tmp/'.FS_TMP_NAME.'logo.png', 0, 200, 'none');
+                  $lppag -= 2; /// si metemos el logo, caben menos líneas
+               }
+               else
+               {
+                  die('ERROR: no se encuentra la función imagecreatefromstring(). '
+                  . 'Y por tanto no se puede usar el logotipo en los documentos.');
+               }
             }
             else
             {
@@ -462,8 +470,16 @@ class imprimir_presu_pedi extends fs_controller
             /// ¿Añadimos el logo?
             if( file_exists('tmp/'.FS_TMP_NAME.'logo.png') )
             {
-               $pdf_doc->pdf->ezImage('tmp/'.FS_TMP_NAME.'logo.png', 0, 200, 'none');
-               $lppag -= 2; /// si metemos el logo, caben menos líneas
+               if( function_exists('imagecreatefromstring') )
+               {
+                  $pdf_doc->pdf->ezImage('tmp/'.FS_TMP_NAME.'logo.png', 0, 200, 'none');
+                  $lppag -= 2; /// si metemos el logo, caben menos líneas
+               }
+               else
+               {
+                  die('ERROR: no se encuentra la función imagecreatefromstring(). '
+                  . 'Y por tanto no se puede usar el logotipo en los documentos.');
+               }
             }
             else
             {
@@ -692,8 +708,16 @@ class imprimir_presu_pedi extends fs_controller
             /// ¿Añadimos el logo?
             if( file_exists('tmp/'.FS_TMP_NAME.'logo.png') )
             {
-               $pdf_doc->pdf->ezImage('tmp/'.FS_TMP_NAME.'logo.png', 0, 200, 'none');
-               $lppag -= 2; /// si metemos el logo, caben menos líneas
+               if( function_exists('imagecreatefromstring') )
+               {
+                  $pdf_doc->pdf->ezImage('tmp/'.FS_TMP_NAME.'logo.png', 0, 200, 'none');
+                  $lppag -= 2; /// si metemos el logo, caben menos líneas
+               }
+               else
+               {
+                  die('ERROR: no se encuentra la función imagecreatefromstring(). '
+                  . 'Y por tanto no se puede usar el logotipo en los documentos.');
+               }
             }
             else
             {
