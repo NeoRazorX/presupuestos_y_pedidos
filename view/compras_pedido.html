@@ -2,7 +2,7 @@
 
 {if="$fsc->pedido"}
 {if="$fsc->pedido->editable"}
-<script type="text/javascript" src="plugins/facturacion_base/view/js/nueva_compra.js"></script>
+<script type="text/javascript" src="{$fsc->get_js_location('nueva_compra.js')}"></script>
 <script type="text/javascript">
    numlineas = {function="count($fsc->pedido->get_lineas())"};
    fs_nf0 = {#FS_NF0#};
@@ -235,7 +235,7 @@
                               <a target="_blank" href="{$value->articulo_url()}">{$value->referencia}</a>
                            </div>
                         </td>
-                        <td><input type="text" class="form-control" name="desc_{$counter}" value="{$value->descripcion}" onclick="this.select()"/></td>
+                        <td><textarea class="form-control" name="desc_{$counter}" rows="1" onclick="this.select()">{$value->descripcion}</textarea></td>
                         <td>
                            <input type="number" step="any" id="cantidad_{$counter}" class="form-control text-right" name="cantidad_{$counter}"
                                   value="{$value->cantidad}" onchange="recalcular()" onkeyup="recalcular()" autocomplete="off" value="1"/>
