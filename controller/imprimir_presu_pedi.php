@@ -361,7 +361,7 @@ class imprimir_presu_pedi extends fs_controller
             {
                if($this->presupuesto->observaciones != '')
                {
-                  $pdf_doc->pdf->ezText("\n".$this->presupuesto->observaciones, 9);
+                  $pdf_doc->pdf->ezText("\n".$this->fix_html($this->presupuesto->observaciones), 9);
                }
             }
             
@@ -590,7 +590,7 @@ class imprimir_presu_pedi extends fs_controller
             {
                if($this->pedido->observaciones != '')
                {
-                  $pdf_doc->pdf->ezText("\n".$this->pedido->observaciones, 9);
+                  $pdf_doc->pdf->ezText("\n".$this->fix_html($this->pedido->observaciones), 9);
                }
             }
             
@@ -852,7 +852,7 @@ class imprimir_presu_pedi extends fs_controller
             {
                if($this->pedido->observaciones != '')
                {
-                  $pdf_doc->pdf->ezText("\n".$this->pedido->observaciones, 9);
+                  $pdf_doc->pdf->ezText("\n".$this->fix_html($this->pedido->observaciones), 9);
                }
             }
             
