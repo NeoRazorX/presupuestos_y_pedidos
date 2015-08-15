@@ -424,6 +424,10 @@ class imprimir_presu_pedi extends fs_controller
             $pagina++;
          }
       }
+      else
+      {
+         $pdf_doc->pdf->ezText('¡'.ucfirst(FS_PRESUPUESTO).' sin líneas!', 20);
+      }
       
       if($archivo)
       {
@@ -433,7 +437,7 @@ class imprimir_presu_pedi extends fs_controller
          $pdf_doc->save('tmp/'.FS_TMP_NAME.'enviar/'.$archivo);
       }
       else
-         $pdf_doc->show();
+         $pdf_doc->show(FS_PRESUPUESTO.'_'.$this->presupuesto->codigo.'.pdf');
    }
    
    private function generar_pdf_pedido_proveedor($archivo = FALSE)
@@ -651,6 +655,10 @@ class imprimir_presu_pedi extends fs_controller
             $pagina++;
          }
       }
+      else
+      {
+         $pdf_doc->pdf->ezText('¡'.ucfirst(FS_PEDIDO).' sin líneas!', 20);
+      }
       
       if($archivo)
       {
@@ -660,7 +668,7 @@ class imprimir_presu_pedi extends fs_controller
          $pdf_doc->save('tmp/'.FS_TMP_NAME.'enviar/'.$archivo);
       }
       else
-         $pdf_doc->show();
+         $pdf_doc->show(FS_PEDIDO.'_compra_'.$this->pedido->codigo.'.pdf');
    }
    
    private function get_referencia_proveedor($ref, $codproveedor)
@@ -915,6 +923,10 @@ class imprimir_presu_pedi extends fs_controller
             $pagina++;
          }
       }
+      else
+      {
+         $pdf_doc->pdf->ezText('¡'.ucfirst(FS_PEDIDO).' sin líneas!', 20);
+      }
       
       if($archivo)
       {
@@ -924,7 +936,7 @@ class imprimir_presu_pedi extends fs_controller
          $pdf_doc->save('tmp/'.FS_TMP_NAME.'enviar/'.$archivo);
       }
       else
-         $pdf_doc->show();
+         $pdf_doc->show(FS_PEDIDO.'_'.$this->pedido->codigo.'.pdf');
    }
    
    private function enviar_email_proveedor($doc)
