@@ -50,7 +50,7 @@ class compras_pedido extends fs_controller
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDO), 'compras', FALSE, FALSE);
    }
 
-   protected function process()
+   protected function private_core()
    {
       $this->ppage = $this->page->get('compras_pedidos');
       $this->agente = FALSE;

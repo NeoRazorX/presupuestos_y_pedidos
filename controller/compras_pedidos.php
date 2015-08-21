@@ -35,7 +35,7 @@ class compras_pedidos extends fs_controller
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS).' a proveedor', 'compras');
    }
 
-   protected function process()
+   protected function private_core()
    {
       $pedido = new pedido_proveedor();
 

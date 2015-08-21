@@ -147,8 +147,15 @@
          <div class="col-md-12">
             <h3 class="text-capitalize" style="margin-bottom: 0px;">
                <a href="{$fsc->ppage->url()}">{#FS_PRESUPUESTOS#}</a> /
-               <a href="{$fsc->presupuesto->cliente_url()}">{$fsc->presupuesto->nombrecliente}</a> /
-               {$fsc->presupuesto->codigo}
+               <a href="{$fsc->presupuesto->cliente_url()}">{$fsc->presupuesto->nombrecliente}</a>
+               {if="$fsc->cliente_s"}
+                  {if="$fsc->cliente_s->nombre!=$fsc->presupuesto->nombrecliente"}
+                  <a href="#" class="btn btn-xs btn-default" onclick="alert('Cliente conocido como: {$fsc->cliente_s->nombre}')">
+                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                  </a>
+                  {/if}
+               {/if}
+               / {$fsc->presupuesto->codigo}
             </h3>
             {if="$fsc->agente"}
             <p>

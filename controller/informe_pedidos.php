@@ -33,7 +33,7 @@ class informe_pedidos extends fs_controller
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS), 'informes', FALSE, TRUE);
    }
    
-   protected function process()
+   protected function private_core()
    {
       /// declaramos los objetos sólo para asegurarnos de que existen las tablas
       $pedido_cli = new pedido_cliente();

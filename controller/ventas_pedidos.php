@@ -36,7 +36,7 @@ class ventas_pedidos extends fs_controller
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS) . ' de cliente', 'ventas');
    }
 
-   protected function process()
+   protected function private_core()
    {
       $pedido = new pedido_cliente();
 

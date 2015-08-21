@@ -36,7 +36,7 @@ class ventas_presupuestos extends fs_controller
       parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTOS) . ' a cliente', 'ventas');
    }
 
-   protected function process()
+   protected function private_core()
    {
       $presupuesto = new presupuesto_cliente();
 

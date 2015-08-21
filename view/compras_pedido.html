@@ -123,8 +123,15 @@
          <div class="col-md-12">
             <h3 class="text-capitalize" style="margin-bottom: 0px;">
                <a href="{$fsc->ppage->url()}">{#FS_PEDIDOS#}</a> /
-               <a href="{$fsc->pedido->proveedor_url()}">{$fsc->pedido->nombre}</a> /
-               {$fsc->pedido->codigo}
+               <a href="{$fsc->pedido->proveedor_url()}">{$fsc->pedido->nombre}</a>
+               {if="$fsc->proveedor_s"}
+                  {if="$fsc->proveedor_s->nombre!=$fsc->pedido->nombre"}
+                  <a href="#" class="btn btn-xs btn-default" onclick="alert('Proveedor conocido como: {$fsc->proveedor_s->nombre}')">
+                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                  </a>
+                  {/if}
+               {/if}
+               / {$fsc->pedido->codigo}
             </h3>
             {if="$fsc->agente"}
             <p>

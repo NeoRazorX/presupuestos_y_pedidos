@@ -52,7 +52,7 @@ class ventas_pedido extends fs_controller
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDO), 'ventas', FALSE, FALSE);
    }
 
-   protected function process()
+   protected function private_core()
    {
       $this->ppage = $this->page->get('ventas_pedidos');
       $this->agente = FALSE;

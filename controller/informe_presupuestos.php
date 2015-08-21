@@ -32,7 +32,7 @@ class informe_presupuestos extends fs_controller
       parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTOS), 'informes', FALSE, TRUE);
    }
    
-   protected function process()
+   protected function private_core()
    {
       /// declaramos los objetos sólo para asegurarnos de que existen las tablas
       $presupuesto = new presupuesto_cliente();
