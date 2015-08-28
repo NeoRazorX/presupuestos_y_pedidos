@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez       neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,7 @@ require_model('cliente.php');
 require_model('divisa.php');
 require_model('ejercicio.php');
 require_model('albaran_cliente.php');
+require_model('fabricante.php');
 require_model('familia.php');
 require_model('forma_pago.php');
 require_model('impuesto.php');
@@ -39,6 +40,7 @@ class ventas_pedido extends fs_controller
    public $cliente_s;
    public $divisa;
    public $ejercicio;
+   public $fabricante;
    public $familia;
    public $forma_pago;
    public $impuesto;
@@ -63,6 +65,7 @@ class ventas_pedido extends fs_controller
       $this->cliente_s = FALSE;
       $this->divisa = new divisa();
       $this->ejercicio = new ejercicio();
+      $this->fabricante = new fabricante();
       $this->familia = new familia();
       $this->forma_pago = new forma_pago();
       $this->impuesto = new impuesto();
@@ -153,7 +156,7 @@ class ventas_pedido extends fs_controller
       $this->pedido->observaciones = $_POST['observaciones'];
       $this->pedido->numero2 = $_POST['numero2'];
 
-      if (is_null($this->pedido->idalbaran))
+      if($this->pedido->editable)
       {
          /// obtenemos los datos del ejercicio para acotar la fecha
          $eje0 = $this->ejercicio->get($this->pedido->codejercicio);
@@ -386,7 +389,6 @@ class ventas_pedido extends fs_controller
    {
       $albaran = new albaran_cliente();
       $albaran->apartado = $this->pedido->apartado;
-      $albaran->automatica = TRUE;
       $albaran->cifnif = $this->pedido->cifnif;
       $albaran->ciudad = $this->pedido->ciudad;
       $albaran->codagente = $this->pedido->codagente;
@@ -400,7 +402,6 @@ class ventas_pedido extends fs_controller
       $albaran->codpostal = $this->pedido->codpostal;
       $albaran->codserie = $this->pedido->codserie;
       $albaran->direccion = $this->pedido->direccion;
-      $albaran->editable = TRUE;
       $albaran->neto = $this->pedido->neto;
       $albaran->nombrecliente = $this->pedido->nombrecliente;
       $albaran->observaciones = $this->pedido->observaciones;
@@ -410,7 +411,6 @@ class ventas_pedido extends fs_controller
       $albaran->numero2 = $this->pedido->numero2;
       $albaran->irpf = $this->pedido->irpf;
       $albaran->porcomision = $this->pedido->porcomision;
-      $albaran->recfinanciero = $this->pedido->recfinanciero;
       $albaran->totalirpf = $this->pedido->totalirpf;
       $albaran->totalrecargo = $this->pedido->totalrecargo;
 
@@ -478,16 +478,15 @@ class ventas_pedido extends fs_controller
          if ($continuar)
          {
             $this->pedido->idalbaran = $albaran->idalbaran;
-            $this->pedido->editable = FALSE;
             
-            if ($this->pedido->save())
+            if( $this->pedido->save() )
             {
                $this->new_message("<a href='" . $albaran->url() . "'>" . ucfirst(FS_ALBARAN) . '</a> generado correctamente.');
             }
             else
             {
                $this->new_error_msg("¡Imposible vincular el ".FS_PEDIDO." con el nuevo " . FS_ALBARAN . "!");
-               if ($albaran->delete())
+               if( $albaran->delete() )
                {
                   $this->new_error_msg("El " . FS_ALBARAN . " se ha borrado.");
                }
@@ -497,7 +496,7 @@ class ventas_pedido extends fs_controller
          }
          else
          {
-            if ($albaran->delete())
+            if( $albaran->delete() )
             {
                $this->new_error_msg("El " . FS_ALBARAN . " se ha borrado.");
             }

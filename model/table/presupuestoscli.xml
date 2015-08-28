@@ -170,7 +170,6 @@
    <columna>
       <nombre>recfinanciero</nombre>
       <tipo>double precision</tipo>
-      <nulo>NO</nulo>
    </columna>
    <columna>
       <nombre>tasaconv</nombre>

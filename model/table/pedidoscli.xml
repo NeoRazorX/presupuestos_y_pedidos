@@ -160,12 +160,10 @@
    <columna>
       <nombre>recfinanciero</nombre>
       <tipo>double precision</tipo>
-      <nulo>NO</nulo>
    </columna>
    <columna>
       <nombre>servido</nombre>
       <tipo>character varying(10)</tipo>
-      <nulo>NO</nulo>
    </columna>
    <columna>
       <nombre>tasaconv</nombre>

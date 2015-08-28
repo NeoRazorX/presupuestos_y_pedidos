@@ -127,7 +127,7 @@
          </tr>
       </thead>
       {loop="$fsc->resultados"}
-      <tr class="clickableRow{if="$value->total<=0"} bg-warning{/if}" href="{$value->url()}">
+      <tr class="clickableRow{if="$value->idalbaran"} success{elseif="$value->total<=0"} bg-warning{/if}" href="{$value->url()}">
          <td class="text-center">
             {if condition="$value->idalbaran"}
             <span class="glyphicon glyphicon-paperclip" title="El {#FS_PEDIDO#} tiene vinculado un {#FS_ALBARAN#}"></span>

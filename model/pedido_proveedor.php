@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez       neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -26,34 +26,149 @@ require_model('secuencia.php');
 /**
  * Pedido de proveedor
  */
-class pedido_proveedor extends fs_model {
-
+class pedido_proveedor extends fs_model
+{
+   /**
+    * Clave primaria.
+    * @var type 
+    */
    public $idpedido;
+   
+   /**
+    * ID del albarán relacionado.
+    * @var type 
+    */
    public $idalbaran;
+   
+   /**
+    * Código único. Para humanos.
+    * @var type 
+    */
    public $codigo;
+   
+   /**
+    * Serie relacionada.
+    * @var type 
+    */
    public $codserie;
+   
+   /**
+    * Ejercicio relacionado. El que corresponde a la fecha.
+    * @var type 
+    */
    public $codejercicio;
+   
+   /**
+    * Código del proveedor del pedido.
+    * @var type 
+    */
    public $codproveedor;
+   
+   /**
+    * Empleado que ha creado el pedido.
+    * @var type 
+    */
    public $codagente;
+   
+   /**
+    * Forma de pago del pedido.
+    * @var type 
+    */
    public $codpago;
+   
+   /**
+    * Divisa del pedido.
+    * @var type 
+    */
    public $coddivisa;
+   
+   /**
+    * Almacén en el que entrará la mercancía.
+    * @var type 
+    */
    public $codalmacen;
+   
+   /**
+    * Número de pedido.
+    * Único para la serie+ejercicio.
+    * @var type 
+    */
    public $numero;
+   
+   /**
+    * Número del pedido del proveedor. Si lo tiene.
+    * @var type 
+    */
    public $numproveedor;
+   
+   /**
+    * Nombre del proveedor.
+    * @var type 
+    */
    public $nombre;
+   
    public $cifnif;
    public $fecha;
    public $hora;
+   
+   /**
+    * Imprte total antes de impuestos.
+    * es la suma del pvptotal de las líneas.
+    * @var type 
+    */
    public $neto;
+   
+   /**
+    * Importe total del pedido, con impuestos.
+    * @var type 
+    */
    public $total;
+   
+   /**
+    * Suma total del IVA de las líneas.
+    * @var type 
+    */
    public $totaliva;
-   public $totaleuros;
+   
+   /**
+    * Total expresado en euros, por si no fuese la divisa del albarán.
+    * Se calcula de forma automática.
+    * totaleuros = total * tasaconv
+    * @var type 
+    */
+   private $totaleuros;
+   
+   /**
+    * % de retención IRPF del pedido. Se obtiene de la serie.
+    * Cada línea puede tener un % distinto.
+    * @var type 
+    */
    public $irpf;
+   
+   /**
+    * Suma de las retenciones IRPF de las líneas del pedido.
+    * @var type 
+    */
    public $totalirpf;
+   
+   /**
+    * Tasa de conversión a Euros de la divisa seleccionada.
+    * @var type 
+    */
    public $tasaconv;
-   public $recfinanciero;
+   
+   /**
+    * Suma total del recargo de equivalencia de las líneas.
+    * @var type 
+    */
    public $totalrecargo;
+   
    public $observaciones;
+   
+   /**
+    * Indica si se puede editar o no.
+    * @var type 
+    */
    public $editable;
 
    public function __construct($p = FALSE)
@@ -88,7 +203,6 @@ class pedido_proveedor extends fs_model {
          $this->irpf = floatval($p['irpf']);
          $this->totalirpf = floatval($p['totalirpf']);
          $this->tasaconv = floatval($p['tasaconv']);
-         $this->recfinanciero = floatval($p['recfinanciero']);
          $this->totalrecargo = floatval($p['totalrecargo']);
          $this->observaciones = $p['observaciones'];
          $this->editable = $this->str2bool($p['editable']);
@@ -118,7 +232,6 @@ class pedido_proveedor extends fs_model {
          $this->irpf = 0;
          $this->totalirpf = 0;
          $this->tasaconv = 1;
-         $this->recfinanciero = 0;
          $this->totalrecargo = 0;
          $this->observaciones = NULL;
          $this->editable = TRUE;
@@ -330,7 +443,8 @@ class pedido_proveedor extends fs_model {
       }
       else if (!$this->floatcmp($this->totaleuros, $this->total * $this->tasaconv, FS_NF0, TRUE))
       {
-         $this->new_error_msg("Valor totaleuros de ".FS_PEDIDO." incorrecto. Valor correcto: ".round($this->total*$this->tasaconv, FS_NF0));
+         $this->new_error_msg("Valor totaleuros de ".FS_PEDIDO." incorrecto. Valor correcto: "
+                 .round($this->total*$this->tasaconv, FS_NF0));
          $status = FALSE;
       }
       
@@ -354,45 +468,68 @@ class pedido_proveedor extends fs_model {
       {
          if( $this->exists() )
          {
-            $sql = "UPDATE " . $this->table_name . " SET cifnif = " . $this->var2str($this->cifnif) . ",
-               codagente = " . $this->var2str($this->codagente) . ", codalmacen = " . $this->var2str($this->codalmacen) . ",
-               codproveedor = " . $this->var2str($this->codproveedor) . ",
-               coddivisa = " . $this->var2str($this->coddivisa) . ", codejercicio = " . $this->var2str($this->codejercicio) . ",
-               codigo = " . $this->var2str($this->codigo) . ", codpago = " . $this->var2str($this->codpago) . ",
-               codserie = " . $this->var2str($this->codserie) . ",
-               editable = " . $this->var2str($this->editable) . ", fecha = " . $this->var2str($this->fecha) . ", hora = " . $this->var2str($this->hora) . ",
-               idalbaran = " . $this->var2str($this->idalbaran) . ",
-               irpf = " . $this->var2str($this->irpf) . ", neto = " . $this->var2str($this->neto) . ",
-               nombre = " . $this->var2str($this->nombre) . ", numero = " . $this->var2str($this->numero) . ",
-               numproveedor = " . $this->var2str($this->numproveedor) . ", observaciones = " . $this->var2str($this->observaciones) . ", 
-               recfinanciero = " . $this->var2str($this->recfinanciero) . ",
-               tasaconv = " . $this->var2str($this->tasaconv) . ",
-               total = " . $this->var2str($this->total) . ", totaleuros = " . $this->var2str($this->totaleuros) . ",
-               totalirpf = " . $this->var2str($this->totalirpf) . ", totaliva = " . $this->var2str($this->totaliva) . ",
-               totalrecargo = " . $this->var2str($this->totalrecargo) . " WHERE idpedido = " . $this->var2str($this->idpedido) . ";";
+            $sql = "UPDATE " . $this->table_name . " SET cifnif = " . $this->var2str($this->cifnif)
+                    . ", codagente = " . $this->var2str($this->codagente)
+                    . ", codalmacen = " . $this->var2str($this->codalmacen)
+                    . ", codproveedor = " . $this->var2str($this->codproveedor)
+                    . ", coddivisa = " . $this->var2str($this->coddivisa)
+                    . ", codejercicio = " . $this->var2str($this->codejercicio)
+                    . ", codigo = " . $this->var2str($this->codigo)
+                    . ", codpago = " . $this->var2str($this->codpago)
+                    . ", codserie = " . $this->var2str($this->codserie)
+                    . ", editable = " . $this->var2str($this->editable)
+                    . ", fecha = " . $this->var2str($this->fecha)
+                    . ", hora = " . $this->var2str($this->hora)
+                    . ", idalbaran = " . $this->var2str($this->idalbaran)
+                    . ", irpf = " . $this->var2str($this->irpf)
+                    . ", neto = " . $this->var2str($this->neto)
+                    . ", nombre = " . $this->var2str($this->nombre)
+                    . ", numero = " . $this->var2str($this->numero)
+                    . ", numproveedor = " . $this->var2str($this->numproveedor)
+                    . ", observaciones = " . $this->var2str($this->observaciones)
+                    . ", tasaconv = " . $this->var2str($this->tasaconv)
+                    . ", total = " . $this->var2str($this->total)
+                    . ", totaleuros = " . $this->var2str($this->totaleuros)
+                    . ", totalirpf = " . $this->var2str($this->totalirpf)
+                    . ", totaliva = " . $this->var2str($this->totaliva)
+                    . ", totalrecargo = " . $this->var2str($this->totalrecargo)
+                    . "  WHERE idpedido = " . $this->var2str($this->idpedido) . ";";
             
             return $this->db->exec($sql);
          }
          else
          {
             $this->new_codigo();
-            $sql = "INSERT INTO ".$this->table_name." (cifnif,codagente,codalmacen,codproveedor,coddivisa,codejercicio,codigo,codpago,codserie,
-               editable,fecha,hora,idalbaran,irpf,neto,nombre,numero,observaciones,recfinanciero,tasaconv,total,totaleuros,
-               totalirpf,totaliva,totalrecargo,numproveedor) VALUES (" . $this->var2str($this->cifnif) . ",
-               " . $this->var2str($this->codagente) . "," . $this->var2str($this->codalmacen) . ",
-               " . $this->var2str($this->codproveedor) . "," . $this->var2str($this->coddivisa) . ",
-               " . $this->var2str($this->codejercicio) . "," . $this->var2str($this->codigo) . ",
-               " . $this->var2str($this->codpago) . "," . $this->var2str($this->codserie) . ",
-               " . $this->var2str($this->editable) . "," . $this->var2str($this->fecha) . ",
-               " . $this->var2str($this->hora) . "," . $this->var2str($this->idalbaran) . ",
-               " . $this->var2str($this->irpf) . "," . $this->var2str($this->neto) . "," . $this->var2str($this->nombre) . ",
-               " . $this->var2str($this->numero) . "," . $this->var2str($this->observaciones) . ",
-               " . $this->var2str($this->recfinanciero) . ",
-               " . $this->var2str($this->tasaconv) . "," . $this->var2str($this->total) . "," . $this->var2str($this->totaleuros) . ",
-               " . $this->var2str($this->totalirpf) . "," . $this->var2str($this->totaliva) . "," . $this->var2str($this->totalrecargo) . ",
-               " . $this->var2str($this->numproveedor) . ");";
-
-            if ($this->db->exec($sql))
+            $sql = "INSERT INTO ".$this->table_name." (cifnif,codagente,codalmacen,codproveedor,
+               coddivisa,codejercicio,codigo,codpago,codserie,editable,fecha,hora,idalbaran,irpf,
+               neto,nombre,numero,observaciones,tasaconv,total,totaleuros,totalirpf,
+               totaliva,totalrecargo,numproveedor) VALUES (" . $this->var2str($this->cifnif)
+                    . "," . $this->var2str($this->codagente)
+                    . "," . $this->var2str($this->codalmacen)
+                    . "," . $this->var2str($this->codproveedor)
+                    . "," . $this->var2str($this->coddivisa)
+                    . "," . $this->var2str($this->codejercicio)
+                    . "," . $this->var2str($this->codigo)
+                    . "," . $this->var2str($this->codpago)
+                    . "," . $this->var2str($this->codserie)
+                    . "," . $this->var2str($this->editable)
+                    . "," . $this->var2str($this->fecha)
+                    . "," . $this->var2str($this->hora)
+                    . "," . $this->var2str($this->idalbaran)
+                    . "," . $this->var2str($this->irpf)
+                    . "," . $this->var2str($this->neto)
+                    . "," . $this->var2str($this->nombre)
+                    . "," . $this->var2str($this->numero)
+                    . "," . $this->var2str($this->observaciones)
+                    . "," . $this->var2str($this->tasaconv)
+                    . "," . $this->var2str($this->total)
+                    . "," . $this->var2str($this->totaleuros)
+                    . "," . $this->var2str($this->totalirpf)
+                    . "," . $this->var2str($this->totaliva)
+                    . "," . $this->var2str($this->totalrecargo)
+                    . "," . $this->var2str($this->numproveedor) . ");";
+            
+            if( $this->db->exec($sql) )
             {
                $this->idpedido = $this->db->lastval();
                return TRUE;
@@ -407,36 +544,17 @@ class pedido_proveedor extends fs_model {
 
    public function delete()
    {
-      if( $this->db->exec("DELETE FROM " . $this->table_name . " WHERE idpedido = " . $this->var2str($this->idpedido) . ";") )
-      {
-         if($this->idalbaran)
-         {
-            /**
-             * Delegamos la eliminación en la clase correspondiente,
-             * que tendrá que hacer más cosas.
-             */
-            $albaran = new albaran_proveedor();
-            $alb0 = $albaran->get($this->idalbaran);
-            if($alb0)
-            {
-               $alb0->delete();
-            }
-         }
-         
-         return TRUE;
-      }
-      else
-         return FALSE;
+      return $this->db->exec("DELETE FROM " . $this->table_name . " WHERE idpedido = " . $this->var2str($this->idpedido) . ";");
    }
 
    public function all($offset = 0)
    {
       $pedilist = array();
       
-      $pedidos = $this->db->select_limit("SELECT * FROM " . $this->table_name . " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if ($pedidos)
+      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name . " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
+      if ($data)
       {
-         foreach ($pedidos as $p)
+         foreach ($data as $p)
             $pedilist[] = new pedido_proveedor($p);
       }
       
@@ -447,11 +565,11 @@ class pedido_proveedor extends fs_model {
    {
       $pedilist = array();
       
-      $pedidos = $this->db->select_limit("SELECT * FROM " . $this->table_name .
+      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
               " WHERE idalbaran IS NULL ORDER BY fecha " . $order . ", codigo " . $order, FS_ITEM_LIMIT, $offset);
-      if ($pedidos)
+      if ($data)
       {
-         foreach ($pedidos as $p)
+         foreach ($data as $p)
             $pedilist[] = new pedido_proveedor($p);
       }
       
@@ -462,12 +580,12 @@ class pedido_proveedor extends fs_model {
    {
       $pedilist = array();
       
-      $pedidos = $this->db->select_limit("SELECT * FROM " . $this->table_name .
+      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
               " WHERE codproveedor = " . $this->var2str($codproveedor) .
               " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if ($pedidos)
+      if ($data)
       {
-         foreach ($pedidos as $p)
+         foreach ($data as $p)
             $pedilist[] = new pedido_proveedor($p);
       }
       
@@ -478,11 +596,11 @@ class pedido_proveedor extends fs_model {
    {
       $pedilist = array();
       
-      $pedidos = $this->db->select_limit("SELECT * FROM " . $this->table_name .
+      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
               " WHERE codagente = " . $this->var2str($codagente) ." ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if ($pedidos)
+      if ($data)
       {
-         foreach ($pedidos as $p)
+         foreach ($data as $p)
             $pedilist[] = new pedido_proveedor($p);
       }
       
@@ -493,11 +611,11 @@ class pedido_proveedor extends fs_model {
    {
       $pedlist = array();
       
-      $pedidos = $this->db->select("SELECT * FROM " . $this->table_name .
+      $data = $this->db->select("SELECT * FROM " . $this->table_name .
               " WHERE fecha >= " . $this->var2str($desde) . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;");
-      if ($pedidos)
+      if ($data)
       {
-         foreach ($pedidos as $p)
+         foreach ($data as $p)
             $pedlist[] = new pedido_proveedor($p);
       }
       
@@ -527,10 +645,10 @@ class pedido_proveedor extends fs_model {
       }
       $consulta .= " ORDER BY fecha DESC, codigo DESC";
 
-      $pedidos = $this->db->select_limit($consulta, FS_ITEM_LIMIT, $offset);
-      if ($pedidos)
+      $data = $this->db->select_limit($consulta, FS_ITEM_LIMIT, $offset);
+      if ($data)
       {
-         foreach ($pedidos as $p)
+         foreach ($data as $p)
             $pedilist[] = new pedido_proveedor($p);
       }
       
@@ -539,6 +657,7 @@ class pedido_proveedor extends fs_model {
    
    public function cron_job()
    {
-      $this->db->exec("UPDATE ".$this->table_name." SET idalbaran = NULL WHERE idalbaran NOT IN (SELECT idalbaran FROM albaranesprov);");
+      $this->db->exec("UPDATE ".$this->table_name." SET idalbaran = NULL, editable = TRUE"
+              . " WHERE idalbaran NOT IN (SELECT idalbaran FROM albaranesprov);");
    }
 }

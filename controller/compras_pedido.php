@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez       neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -22,6 +22,7 @@ require_model('albaran_proveedor.php');
 require_model('articulo.php');
 require_model('divisa.php');
 require_model('ejercicio.php');
+require_model('fabricante.php');
 require_model('familia.php');
 require_model('forma_pago.php');
 require_model('impuesto.php');
@@ -36,6 +37,7 @@ class compras_pedido extends fs_controller
    public $agente;
    public $divisa;
    public $ejercicio;
+   public $fabricante;
    public $familia;
    public $forma_pago;
    public $impuesto;
@@ -57,6 +59,7 @@ class compras_pedido extends fs_controller
       
       $this->divisa = new divisa();
       $this->ejercicio = new ejercicio();
+      $this->fabricante = new fabricante();
       $this->familia = new familia();
       $this->forma_pago = new forma_pago();
       $this->impuesto = new impuesto();
@@ -116,6 +119,11 @@ class compras_pedido extends fs_controller
             }
             else
                $this->generar_albaran();
+         }
+         else if( isset($_GET['desbloquear']) )
+         {
+            $this->pedido->editable = TRUE;
+            $this->pedido->save();
          }
       }
       else
@@ -353,7 +361,6 @@ class compras_pedido extends fs_controller
    private function generar_albaran()
    {
       $albaran = new albaran_proveedor();
-      $albaran->automatica = TRUE;
       $albaran->cifnif = $this->pedido->cifnif;
       $albaran->codagente = $this->pedido->codagente;
       $albaran->codalmacen = $this->pedido->codalmacen;
@@ -362,7 +369,6 @@ class compras_pedido extends fs_controller
       $albaran->tasaconv = $this->pedido->tasaconv;
       $albaran->codpago = $this->pedido->codpago;
       $albaran->codserie = $this->pedido->codserie;
-      $albaran->editable = TRUE;
       $albaran->neto = $this->pedido->neto;
       $albaran->nombre = $this->pedido->nombre;
       $albaran->observaciones = $this->pedido->observaciones;
@@ -370,7 +376,6 @@ class compras_pedido extends fs_controller
       $albaran->totaliva = $this->pedido->totaliva;
       $albaran->numproveedor = $this->pedido->numproveedor;
       $albaran->irpf = $this->pedido->irpf;
-      $albaran->recfinanciero = $this->pedido->recfinanciero;
       $albaran->totalirpf = $this->pedido->totalirpf;
       $albaran->totalrecargo = $this->pedido->totalrecargo;
 

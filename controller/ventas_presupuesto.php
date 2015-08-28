@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez       neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,7 @@ require_model('cliente.php');
 require_model('divisa.php');
 require_model('ejercicio.php');
 require_model('pedido_cliente.php');
+require_model('fabricante.php');
 require_model('familia.php');
 require_model('forma_pago.php');
 require_model('impuesto.php');
@@ -39,6 +40,7 @@ class ventas_presupuesto extends fs_controller {
    public $cliente_s;
    public $divisa;
    public $ejercicio;
+   public $fabricante;
    public $familia;
    public $forma_pago;
    public $impuesto;
@@ -63,6 +65,7 @@ class ventas_presupuesto extends fs_controller {
       $this->cliente_s = FALSE;
       $this->divisa = new divisa();
       $this->ejercicio = new ejercicio();
+      $this->fabricante = new fabricante();
       $this->familia = new familia();
       $this->forma_pago = new forma_pago();
       $this->impuesto = new impuesto();
@@ -119,7 +122,7 @@ class ventas_presupuesto extends fs_controller {
                {
                   $this->generar_pedido();
                }
-               else if ($this->presupuesto->save())
+               else if( $this->presupuesto->save() )
                {
                   $this->new_message(ucfirst(FS_PRESUPUESTO)." modificado correctamente.");
                }
@@ -145,7 +148,7 @@ class ventas_presupuesto extends fs_controller {
     */
    private function check_lineas()
    {
-      if( is_null($this->presupuesto->idpedido) AND $this->presupuesto->status == 0 )
+      if($this->presupuesto->status == 0)
       {
          foreach($this->presupuesto->get_lineas() as $l)
          {
@@ -192,7 +195,7 @@ class ventas_presupuesto extends fs_controller {
       $this->presupuesto->observaciones = $_POST['observaciones'];
       $this->presupuesto->numero2 = $_POST['numero2'];
 
-      if( is_null($this->presupuesto->idpedido) )
+      if($this->presupuesto->editable)
       {
          /// obtenemos los datos del ejercicio para acotar la fecha
          $eje0 = $this->ejercicio->get($this->presupuesto->codejercicio);
@@ -431,7 +434,6 @@ class ventas_presupuesto extends fs_controller {
    {
       $pedido = new pedido_cliente();
       $pedido->apartado = $this->presupuesto->apartado;
-      $pedido->automatica = TRUE;
       $pedido->cifnif = $this->presupuesto->cifnif;
       $pedido->ciudad = $this->presupuesto->ciudad;
       $pedido->codagente = $this->presupuesto->codagente;
@@ -445,7 +447,6 @@ class ventas_presupuesto extends fs_controller {
       $pedido->codpostal = $this->presupuesto->codpostal;
       $pedido->codserie = $this->presupuesto->codserie;
       $pedido->direccion = $this->presupuesto->direccion;
-      $pedido->editable = TRUE;
       $pedido->neto = $this->presupuesto->neto;
       $pedido->nombrecliente = $this->presupuesto->nombrecliente;
       $pedido->observaciones = $this->presupuesto->observaciones;
@@ -455,7 +456,6 @@ class ventas_presupuesto extends fs_controller {
       $pedido->numero2 = $this->presupuesto->numero2;
       $pedido->irpf = $this->presupuesto->irpf;
       $pedido->porcomision = $this->presupuesto->porcomision;
-      $pedido->recfinanciero = $this->presupuesto->recfinanciero;
       $pedido->totalirpf = $this->presupuesto->totalirpf;
       $pedido->totalrecargo = $this->presupuesto->totalrecargo;
 
@@ -507,16 +507,15 @@ class ventas_presupuesto extends fs_controller {
          if ($continuar)
          {
             $this->presupuesto->idpedido = $pedido->idpedido;
-            $this->presupuesto->editable = FALSE;
             
-            if ($this->presupuesto->save())
+            if( $this->presupuesto->save() )
             {
                $this->new_message("<a href='" . $pedido->url() . "'>" . ucfirst(FS_PEDIDO) . '</a> generado correctamente.');
             }
             else
             {
                $this->new_error_msg("¡Imposible vincular el " . FS_PRESUPUESTO . " con el nuevo " . FS_PEDIDO . "!");
-               if ($pedido->delete())
+               if( $pedido->delete() )
                {
                   $this->new_error_msg("El " . FS_PEDIDO . " se ha borrado.");
                }
@@ -526,7 +525,7 @@ class ventas_presupuesto extends fs_controller {
          }
          else
          {
-            if ($pedido->delete())
+            if( $pedido->delete() )
             {
                $this->new_error_msg("El " . FS_PEDIDO . " se ha borrado.");
             }
