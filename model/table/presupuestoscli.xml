@@ -112,6 +112,11 @@
       <nulo>YES</nulo>
    </columna>
    <columna>
+      <nombre>fechasalida</nombre>
+      <tipo>date</tipo>
+      <nulo>YES</nulo>
+   </columna>
+   <columna>
       <nombre>idpresupuesto</nombre>
       <tipo>serial</tipo>
       <nulo>NO</nulo>

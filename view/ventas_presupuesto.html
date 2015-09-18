@@ -12,15 +12,7 @@
    cliente = {function="json_encode($fsc->cliente_s)"};
    nueva_venta_url = '{$fsc->nuevo_presupuesto_url}';
    kiwimaru_url = '{#FS_COMMUNITY_URL#}/index.php?page=kiwimaru';
-   function check(id) {
-      if($("#"+id).is(":checked"))
-      {
-         $("#checked_"+id).prop("disabled",false);
-      }
-      else
-      {
-         $("#checked_"+id).prop("disabled",true);
-      }
+   
    $(document).ready(function () {
       $('#numlineas').val(numlineas);
       usar_serie();
@@ -43,6 +35,17 @@
 </script>
 {/if}
 <script type="text/javascript">
+   function check_enviar_copia()
+   {
+      if($("#copia").is(":checked"))
+      {
+         $("#checked_copia").prop("disabled",false);
+      }
+      else
+      {
+         $("#checked_copia").prop("disabled",true);
+      }
+   }
    $(document).ready(function () {
       $('#b_imprimir').click(function (event) {
          event.preventDefault();
@@ -697,10 +700,10 @@
                </div>
                <div class="form-group">
                   <label>
-                     <input id="copia" onclick="check(this.id)" type="checkbox" name="concopia" value="TRUE" checked="checked"/>
+                     <input id="copia" onclick="check_enviar_copia()" type="checkbox" name="concopia" value="TRUE"/>
                      Enviar copia:
                   </label>
-                  <input id="checked_copia" class="form-control" type="text" name="email_copia" value="{$fsc->empresa->email}" autocomplete="off"/>
+                  <input id="checked_copia" class="form-control" type="text" name="email_copia" autocomplete="off" disabled=""/>
                </div>
                <div class="form-group">
                   Mensaje:
