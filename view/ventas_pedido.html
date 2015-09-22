@@ -268,8 +268,8 @@
                         <th class="text-right" width="90">Dto. %</th>
                         <th class="text-right" width="130">Neto</th>
                         <th class="text-right" width="115">{#FS_IVA#}</th>
-                        <th class="text-right recargo">RE %</th>
-                        <th class="text-right irpf">{#FS_IRPF#} %</th>
+                        <th class="text-right recargo" width="115">RE %</th>
+                        <th class="text-right irpf" width="115">{#FS_IRPF#} %</th>
                         <th class="text-right" width="140">Total</th>
                      </tr>
                   </thead>
@@ -410,6 +410,17 @@
                </table>
                {/if}
             </div>
+            
+            <div class="container-fluid">
+               <div class="row">
+                  <div class="col-sm-12">
+                     <div class="form-group">
+                        Observaciones:
+                        <textarea class="form-control" name="observaciones" rows="3">{$fsc->pedido->observaciones}</textarea>
+                     </div>
+                  </div>
+               </div>
+            </div>
          </div>
          {if="$fsc->pedido->editable"}
          <div role="tabpanel" class="tab-pane" id="direccion_p">
@@ -506,21 +517,10 @@
          {loop="$fsc->extensions"}
             {if="$value->type=='tab'"}
             <div role="tabpanel" class="tab-pane" id="ext_{$value->name}">
-               <iframe src="index.php?page={$value->from}{$value->params}&id={$fsc->pedido->idpedido}" width="100%" height="600" frameborder="0"></iframe>
+               <iframe src="index.php?page={$value->from}{$value->params}&id={$fsc->pedido->idpedido}" width="100%" height="1100" frameborder="0"></iframe>
             </div>
             {/if}
          {/loop}
-      </div>
-   </div>
-
-   <div class="container-fluid">
-      <div class="row">
-         <div class="col-md-12">
-            <div class="form-group">
-               Observaciones:
-               <textarea class="form-control" name="observaciones" rows="3">{$fsc->pedido->observaciones}</textarea>
-            </div>
-         </div>
       </div>
    </div>
 </form>
@@ -737,8 +737,8 @@
                <h4 class="modal-title">¿Realmente desea eliminar este {#FS_PEDIDO#}?</h4>
             </div>
             {if="$fsc->pedido->idalbaran"}
-            <div class="alert alert-warning">
-               Hay un <b>{#FS_ALBARAN#}</b> asociado, pero <b>no será eliminado</b>.
+            <div class="modal-body bg-warning">
+               Hay un {#FS_ALBARAN#} asociado, pero no será eliminado.
             </div>
             {/if}
             <div class="modal-footer">
