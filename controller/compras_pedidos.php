@@ -32,7 +32,7 @@ class compras_pedidos extends fs_controller
 
    public function __construct()
    {
-      parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS).' a proveedor', 'compras');
+      parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS).' de compra', 'compras');
    }
 
    protected function private_core()
