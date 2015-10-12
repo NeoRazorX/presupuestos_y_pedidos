@@ -408,7 +408,7 @@ class imprimir_presu_pedi extends fs_controller
             if($this->presupuesto->totalirpf != 0)
             {
                $titulo['irpf'] = '<b>'.FS_IRPF.' '.$this->presupuesto->irpf.'%</b>';
-               $fila['irpf'] = $this->show_precio(0 - $this->presupuesto->totalirpf);
+               $fila['irpf'] = $this->show_precio($this->presupuesto->totalirpf);
                $opciones['cols']['irpf'] = array('justification' => 'right');
             }
             
@@ -641,7 +641,7 @@ class imprimir_presu_pedi extends fs_controller
             if($this->pedido->totalirpf != 0)
             {
                $titulo['irpf'] = '<b>'.FS_IRPF.' '.$this->pedido->irpf.'%</b>';
-               $fila['irpf'] = $this->show_precio(0 - $this->pedido->totalirpf);
+               $fila['irpf'] = $this->show_precio($this->pedido->totalirpf);
                $opciones['cols']['irpf'] = array('justification' => 'right');
             }
             
@@ -907,7 +907,7 @@ class imprimir_presu_pedi extends fs_controller
             if($this->pedido->totalirpf != 0)
             {
                $titulo['irpf'] = '<b>'.FS_IRPF.' '.$this->pedido->irpf.'%</b>';
-               $fila['irpf'] = $this->show_precio(0 - $this->pedido->totalirpf);
+               $fila['irpf'] = $this->show_precio($this->pedido->totalirpf);
                $opciones['cols']['irpf'] = array('justification' => 'right');
             }
             
