@@ -22,27 +22,14 @@ require_model('agente.php');
 require_model('articulo.php');
 require_model('cliente.php');
 require_model('pedido_cliente.php');
-require_model('serie.php');
 
 class ventas_pedidos extends fs_controller
 {
-   public $agente;
-   public $articulo;
    public $buscar_lineas;
-   public $cliente;
-   public $codagente;
-   public $codserie;
-   public $desde;
-   public $hasta;
    public $lineas;
    public $mostrar;
-   public $num_resultados;
    public $offset;
-   public $order;
    public $resultados;
-   public $serie;
-   public $total_resultados;
-   public $total_resultados_txt;
 
    public function __construct()
    {
@@ -52,60 +39,38 @@ class ventas_pedidos extends fs_controller
    protected function private_core()
    {
       $pedido = new pedido_cliente();
-      $this->agente = new agente();
-      $this->serie = new serie();
 
       $this->offset = 0;
-      if( isset($_REQUEST['offset']) )
+      if( isset($_GET['offset']) )
       {
-         $this->offset = intval($_REQUEST['offset']);
+         $this->offset = intval($_GET['offset']);
       }
       
-      $this->mostrar = 'todo';
+      $this->mostrar = 'todos';
       if( isset($_GET['mostrar']) )
       {
          $this->mostrar = $_GET['mostrar'];
-         setcookie('ventas_ped_mostrar', $this->mostrar, time()+FS_COOKIES_EXPIRE);
-      }
-      else if( isset($_COOKIE['ventas_ped_mostrar']) )
-      {
-         $this->mostrar = $_COOKIE['ventas_ped_mostrar'];
-      }
-      
-      $this->order = 'fecha DESC';
-      if( isset($_GET['order']) )
-      {
-         if($_GET['order'] == 'fecha_desc')
-         {
-            $this->order = 'fecha DESC';
-         }
-         else if($_GET['order'] == 'fecha_asc')
-         {
-            $this->order = 'fecha ASC';
-         }
-         else if($_GET['order'] == 'codigo_desc')
-         {
-            $this->order = 'codigo DESC';
-         }
-         else if($_GET['order'] == 'codigo_asc')
-         {
-            $this->order = 'codigo ASC';
-         }
-         
-         setcookie('ventas_ped_order', $this->order, time()+FS_COOKIES_EXPIRE);
-      }
-      else if( isset($_COOKIE['ventas_ped_order']) )
-      {
-         $this->order = $_COOKIE['ventas_ped_order'];
       }
 
       if( isset($_POST['buscar_lineas']) )
       {
          $this->buscar_lineas();
       }
-      else if( isset($_REQUEST['buscar_cliente']) )
+      else if( isset($_GET['codagente']) )
       {
-         $this->buscar_cliente();
+         $this->template = 'extension/ventas_pedidos_agente';
+
+         $agente = new agente();
+         $this->agente = $agente->get($_GET['codagente']);
+         $this->resultados = $pedido->all_from_agente($_GET['codagente'], $this->offset);
+      }
+      else if( isset($_GET['codcliente']) )
+      {
+         $this->template = 'extension/ventas_pedidos_cliente';
+
+         $cliente = new cliente();
+         $this->cliente = $cliente->get($_GET['codcliente']);
+         $this->resultados = $pedido->all_from_cliente($_GET['codcliente'], $this->offset);
       }
       else if( isset($_GET['ref']) )
       {
@@ -120,121 +85,93 @@ class ventas_pedidos extends fs_controller
       else
       {
          $this->share_extension();
-         $this->cliente = FALSE;
-         $this->codagente = '';
-         $this->codserie = '';
-         $this->desde = '';
-         $this->hasta = '';
-         $this->num_resultados = '';
-         $this->total_resultados = '';
-         $this->total_resultados_txt = '';
 
          if (isset($_POST['delete']))
          {
             $this->delete_pedido();
          }
-         else
-         {
-            if( !isset($_GET['mostrar']) AND (isset($_REQUEST['codagente']) OR isset($_REQUEST['codcliente'])) )
-            {
-               /**
-                * si obtenermos un codagente o un codcliente pasamos direcatemente
-                * a la pestaña de búsqueda, a menos que tengamos un mostrar, que
-                * entonces nos indica donde tenemos que estar.
-                */
-               $this->mostrar = 'buscar';
-            }
-            
-            if( isset($_REQUEST['codcliente']) )
-            {
-               if($_REQUEST['codcliente'] != '')
-               {
-                  $cli0 = new cliente();
-                  $this->cliente = $cli0->get($_REQUEST['codcliente']);
-               }
-            }
-            
-            if( isset($_REQUEST['codagente']) )
-            {
-               $this->codagente = $_REQUEST['codagente'];
-            }
-            
-            if( isset($_REQUEST['codserie']) )
-            {
-               $this->codserie = $_REQUEST['codserie'];
-               $this->desde = $_REQUEST['desde'];
-               $this->hasta = $_REQUEST['hasta'];
-            }
-         }
-         
-         /// añadimos segundo nivel de ordenación
-         $order2 = '';
-         if($this->order == 'fecha DESC')
-         {
-            $order2 = ', codigo DESC';
-         }
-         else if($this->order == 'fecha ASC')
-         {
-            $order2 = ', codigo ASC';
-         }
 
-         if($this->mostrar == 'pendientes')
+         if($this->query)
          {
-            $this->resultados = $pedido->all_ptealbaran($this->offset, $this->order.$order2);
-            
-            if($this->offset == 0)
-            {
-               $this->total_resultados = 0;
-               $this->total_resultados_txt = 'Suma total de esta página:';
-               foreach($this->resultados as $alb)
-               {
-                  $this->total_resultados += $alb->total;
-               }
-            }
+            $this->resultados = $pedido->search($this->query, $this->offset);
+         }
+         else if($this->mostrar == 'pendientes')
+         {
+            $this->resultados = $pedido->all_ptealbaran($this->offset);
          }
          else if($this->mostrar == 'rechazados')
          {
-            $this->resultados = $pedido->all_rechazados($this->offset, $this->order.$order2);
-            
-            if($this->offset == 0)
-            {
-               $this->total_resultados = 0;
-               $this->total_resultados_txt = 'Suma total de esta página:';
-               foreach($this->resultados as $alb)
-               {
-                  $this->total_resultados += $alb->total;
-               }
-            }
-         }
-         else if($this->mostrar == 'buscar')
-         {
-            $this->buscar($order2);
+            $this->resultados = $pedido->all_rechazados($this->offset);
          }
          else
          {
             /// ejecutamos el proceso del cron para pedidos.
             $pedido->cron_job();
-            $this->resultados = $pedido->all($this->offset, $this->order.$order2);
+            $this->resultados = $pedido->all($this->offset);
          }
       }
    }
-   
-   private function buscar_cliente()
+
+   public function anterior_url()
    {
-      /// desactivamos la plantilla HTML
-      $this->template = FALSE;
-      
-      $cli0 = new cliente();
-      $json = array();
-      foreach($cli0->search($_REQUEST['buscar_cliente']) as $cli)
+      $url = '';
+      $extra = '&mostrar='.$this->mostrar;
+
+      if( isset($_GET['codagente']) )
       {
-         $json[] = array('value' => $cli->nombre, 'data' => $cli->codcliente);
+         $extra .= '&codagente=' . $_GET['codagente'];
       }
-      
-      header('Content-Type: application/json');
-      echo json_encode( array('query' => $_REQUEST['buscar_cliente'], 'suggestions' => $json) );
+      else if( isset($_GET['codcliente']) )
+      {
+         $extra .= '&codcliente=' . $_GET['codcliente'];
+      }
+      else if( isset($_GET['ref']) )
+      {
+         $extra .= '&ref=' . $_GET['ref'];
+      }
+
+      if($this->query != '' AND $this->offset > '0')
+      {
+         $url = $this->url() . "&query=" . $this->query . "&offset=" . ($this->offset - FS_ITEM_LIMIT) . $extra;
+      }
+      else if($this->query == '' AND $this->offset > '0')
+      {
+         $url = $this->url() . "&offset=" . ($this->offset - FS_ITEM_LIMIT) . $extra;
+      }
+
+      return $url;
    }
-   
+
+   public function siguiente_url()
+   {
+      $url = '';
+      $extra = '&mostrar='.$this->mostrar;
+
+      if( isset($_GET['codagente']) )
+      {
+         $extra .= '&codagente=' . $_GET['codagente'];
+      }
+      else if( isset($_GET['codcliente']) )
+      {
+         $extra .= '&codcliente=' . $_GET['codcliente'];
+      }
+      else if( isset($_GET['ref']) )
+      {
+         $extra .= '&ref=' . $_GET['ref'];
+      }
+
+      if($this->query != '' AND count($this->resultados) == FS_ITEM_LIMIT)
+      {
+         $url = $this->url() . "&query=" . $this->query . "&offset=" . ($this->offset + FS_ITEM_LIMIT) . $extra;
+      }
+      else if($this->query == '' AND count($this->resultados) == FS_ITEM_LIMIT)
+      {
+         $url = $this->url() . "&offset=" . ($this->offset + FS_ITEM_LIMIT) . $extra;
+      }
+
+      return $url;
+   }
+
    public function buscar_lineas()
    {
       /// cambiamos la plantilla HTML
@@ -242,15 +179,7 @@ class ventas_pedidos extends fs_controller
 
       $this->buscar_lineas = $_POST['buscar_lineas'];
       $linea = new linea_pedido_cliente();
-      
-      if( isset($_POST['codcliente']) )
-      {
-         $this->lineas = $linea->search_from_cliente2($_POST['codcliente'], $this->buscar_lineas, $_POST['buscar_lineas_o'], $this->offset);
-      }
-      else
-      {
-        $this->lineas = $linea->search($this->buscar_lineas);
-      }
+      $this->lineas = $linea->search($this->buscar_lineas);
    }
 
    private function delete_pedido()
@@ -309,80 +238,6 @@ class ventas_pedidos extends fs_controller
       }
    }
    
-   public function paginas()
-   {
-      $codcliente = '';
-      if($this->cliente)
-      {
-         $codcliente = $this->cliente->codcliente;
-      }
-      
-      $url = $this->url()."&mostrar=".$this->mostrar
-              ."&query=".$this->query
-              ."&codserie=".$this->codserie
-              ."&codagente=".$this->codagente
-              ."&codcliente=".$codcliente
-              ."&desde=".$this->desde
-              ."&hasta=".$this->hasta;
-      
-      $paginas = array();
-      $i = 0;
-      $num = 0;
-      $actual = 1;
-      
-      if($this->mostrar == 'pendientes')
-      {
-         $total = $this->total_pendientes();
-      }
-      else if($this->mostrar == 'rechazados')
-      {
-         $total = $this->total_rechazados();
-      }
-      else if($this->mostrar == 'buscar')
-      {
-         $total = $this->num_resultados;
-      }
-      else
-      {
-         $total = $this->total_registros();
-      }
-      
-      /// añadimos todas la página
-      while($num < $total)
-      {
-         $paginas[$i] = array(
-             'url' => $url."&offset=".($i*FS_ITEM_LIMIT),
-             'num' => $i + 1,
-             'actual' => ($num == $this->offset)
-         );
-         
-         if($num == $this->offset)
-         {
-            $actual = $i;
-         }
-         
-         $i++;
-         $num += FS_ITEM_LIMIT;
-      }
-      
-      /// ahora descartamos
-      foreach($paginas as $j => $value)
-      {
-         $enmedio = intval($i/2);
-         
-         /**
-          * descartamos todo excepto la primera, la última, la de enmedio,
-          * la actual, las 5 anteriores y las 5 siguientes
-          */
-         if( ($j>1 AND $j<$actual-5 AND $j!=$enmedio) OR ($j>$actual+5 AND $j<$i-1 AND $j!=$enmedio) )
-         {
-            unset($paginas[$j]);
-         }
-      }
-      
-      return $paginas;
-   }
-   
    public function total_pendientes()
    {
       $data = $this->db->select("SELECT COUNT(idpedido) as total FROM pedidoscli WHERE idalbaran IS NULL AND status=0;");
@@ -392,103 +247,5 @@ class ventas_pedidos extends fs_controller
       }
       else
          return 0;
-   }
-   
-   public function total_rechazados()
-   {
-      $data = $this->db->select("SELECT COUNT(idpedido) as total FROM pedidoscli WHERE status=2;");
-      if($data)
-      {
-         return intval($data[0]['total']);
-      }
-      else
-         return 0;
-   }
-   
-   private function total_registros()
-   {
-      $data = $this->db->select("SELECT COUNT(idpedido) as total FROM pedidoscli;");
-      if($data)
-      {
-         return intval($data[0]['total']);
-      }
-      else
-         return 0;
-   }
-   
-   private function buscar($order2)
-   {
-      $this->resultados = array();
-      $this->num_resultados = 0;
-      $query = $this->agente->no_html( strtolower($this->query) );
-      $sql = " FROM pedidoscli ";
-      $where = 'WHERE ';
-      
-      if($this->query != '')
-      {
-         $sql .= $where;
-         if( is_numeric($query) )
-         {
-            $sql .= "(codigo LIKE '%".$query."%' OR numero2 LIKE '%".$query."%' OR observaciones LIKE '%".$query."%')";
-         }
-         else
-         {
-            $sql .= "(lower(codigo) LIKE '%".$query."%' OR lower(numero2) LIKE '%".$query."%' "
-                    . "OR lower(observaciones) LIKE '%".str_replace(' ', '%', $query)."%')";
-         }
-         $where = ' AND ';
-      }
-      
-      if($this->codagente != '')
-      {
-         $sql .= $where."codagente = ".$this->agente->var2str($this->codagente);
-         $where = ' AND ';
-      }
-      
-      if($this->cliente)
-      {
-         $sql .= $where."codcliente = ".$this->agente->var2str($this->cliente->codcliente);
-         $where = ' AND ';
-      }
-      
-      if($this->codserie != '')
-      {
-         $sql .= $where."codserie = ".$this->agente->var2str($this->codserie);
-         $where = ' AND ';
-      }
-      
-      if($this->desde != '')
-      {
-         $sql .= $where."fecha >= ".$this->agente->var2str($this->desde);
-         $where = ' AND ';
-      }
-      
-      if($this->hasta != '')
-      {
-         $sql .= $where."fecha <= ".$this->agente->var2str($this->hasta);
-         $where = ' AND ';
-      }
-      
-      $data = $this->db->select("SELECT COUNT(idpedido) as total".$sql);
-      if($data)
-      {
-         $this->num_resultados = intval($data[0]['total']);
-         
-         $data2 = $this->db->select_limit("SELECT *".$sql." ORDER BY ".$this->order.$order2, FS_ITEM_LIMIT, $this->offset);
-         if($data2)
-         {
-            foreach($data2 as $d)
-            {
-               $this->resultados[] = new pedido_cliente($d);
-            }
-         }
-         
-         $data2 = $this->db->select("SELECT SUM(total) as total".$sql);
-         if($data2)
-         {
-            $this->total_resultados = floatval($data2[0]['total']);
-            $this->total_resultados_txt = 'Suma total de los resultados:';
-         }
-      }
    }
 }
