@@ -654,11 +654,11 @@ class pedido_cliente extends fs_model
          return FALSE;
    }
 
-   public function all($offset = 0)
+   public function all($offset = 0, $order='fecha DESC')
    {
       $pedilist = array();
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name . " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
+      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name . " ORDER BY ".$order, FS_ITEM_LIMIT, $offset);
       if ($data)
       {
          foreach ($data as $p)
@@ -668,12 +668,12 @@ class pedido_cliente extends fs_model
       return $pedilist;
    }
 
-   public function all_ptealbaran($offset = 0, $order = 'ASC')
+   public function all_ptealbaran($offset = 0, $order = 'fecha ASC')
    {
       $pedilist = array();
       
       $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
-              " WHERE idalbaran IS NULL AND status=0 ORDER BY fecha " . $order . ", codigo " . $order, FS_ITEM_LIMIT, $offset);
+              " WHERE idalbaran IS NULL AND status=0 ORDER BY " . $order, FS_ITEM_LIMIT, $offset);
       if ($data)
       {
          foreach ($data as $p)
@@ -683,12 +683,12 @@ class pedido_cliente extends fs_model
       return $pedilist;
    }
 
-   public function all_rechazados($offset = 0, $order = 'DESC')
+   public function all_rechazados($offset = 0, $order = 'fecha DESC')
    {
       $preclist = array();
       
       $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
-              " WHERE status=2 ORDER BY fecha " . $order . ", codigo " . $order, FS_ITEM_LIMIT, $offset);
+              " WHERE status=2 ORDER BY " . $order, FS_ITEM_LIMIT, $offset);
       if ($data)
       {
          foreach ($data as $p)

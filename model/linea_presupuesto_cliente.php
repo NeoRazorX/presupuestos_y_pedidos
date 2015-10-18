@@ -310,4 +310,32 @@ class linea_presupuesto_cliente extends fs_model
       
       return $linealist;
    }
+   
+   public function search_from_cliente2($codcliente, $ref='', $obs='', $offset=0)
+   {
+      $linealist = array();
+      $ref = strtolower( $this->no_html($ref) );
+      
+      $sql = "SELECT * FROM ".$this->table_name." WHERE idpresupuesto IN
+         (SELECT idpresupuesto FROM presupuestoscli WHERE codcliente = ".$this->var2str($codcliente)."
+         AND lower(observaciones) LIKE '".strtolower($obs)."%') AND ";
+      if( is_numeric($ref) )
+      {
+         $sql .= "(referencia LIKE '%".$ref."%' OR descripcion LIKE '%".$ref."%')";
+      }
+      else
+      {
+         $buscar = str_replace(' ', '%', $ref);
+         $sql .= "(lower(referencia) LIKE '%".$ref."%' OR lower(descripcion) LIKE '%".$ref."%')";
+      }
+      $sql .= " ORDER BY idpresupuesto DESC, idlinea ASC";
+      
+      $lineas = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if( $lineas )
+      {
+         foreach($lineas as $l)
+            $linealist[] = new linea_presupuesto_cliente($l);
+      }
+      return $linealist;
+   }
 }
