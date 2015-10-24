@@ -42,6 +42,8 @@ class imprimir_presu_pedi extends fs_controller
    public $presupuesto;
    public $proveedor;
    
+   private $logo;
+   
    public function __construct()
    {
       parent::__construct(__CLASS__, 'imprimir', 'ventas', FALSE, FALSE);
@@ -64,6 +66,16 @@ class imprimir_presu_pedi extends fs_controller
       );
       $fsvar = new fs_var();
       $this->impresion = $fsvar->array_get($this->impresion, FALSE);
+      
+      $this->logo = FALSE;
+      if( file_exists('tmp/'.FS_TMP_NAME.'logo.png') )
+      {
+         $this->logo = 'tmp/'.FS_TMP_NAME.'logo.png';
+      }
+      else if( file_exists('tmp/'.FS_TMP_NAME.'logo.jpg') )
+      {
+         $this->logo = 'tmp/'.FS_TMP_NAME.'logo.jpg';
+      }
       
       if( isset($_REQUEST['pedido_p']) AND isset($_REQUEST['id']) )
       {
@@ -202,6 +214,21 @@ class imprimir_presu_pedi extends fs_controller
          $linea_actual = 0;
          $pagina = 1;
          
+         if($this->impresion['print_dto'])
+         {
+            $this->impresion['print_dto'] = FALSE;
+            
+            /// leemos las líneas para ver si de verdad mostramos los descuentos
+            foreach($lineas as $lin)
+            {
+               if($lin->dtopor != 0)
+               {
+                  $this->impresion['print_dto'] = TRUE;
+                  break;
+               }
+            }
+         }
+         
          /// imprimimos las páginas necesarias
          while( $linea_actual < count($lineas) )
          {
@@ -214,11 +241,11 @@ class imprimir_presu_pedi extends fs_controller
             }
             
             /// ¿Añadimos el logo?
-            if( file_exists('tmp/'.FS_TMP_NAME.'logo.png') )
+            if($this->logo)
             {
                if( function_exists('imagecreatefromstring') )
                {
-                  $pdf_doc->pdf->ezImage('tmp/'.FS_TMP_NAME.'logo.png', 0, 200, 'none');
+                  $pdf_doc->pdf->ezImage($this->logo, 0, 150, 'none');
                   $lppag -= 2; /// si metemos el logo, caben menos líneas
                }
                else
@@ -460,6 +487,21 @@ class imprimir_presu_pedi extends fs_controller
          $linea_actual = 0;
          $pagina = 1;
          
+         if($this->impresion['print_dto'])
+         {
+            $this->impresion['print_dto'] = FALSE;
+            
+            /// leemos las líneas para ver si de verdad mostramos los descuentos
+            foreach($lineas as $lin)
+            {
+               if($lin->dtopor != 0)
+               {
+                  $this->impresion['print_dto'] = TRUE;
+                  break;
+               }
+            }
+         }
+         
          /// imprimimos las páginas necesarias
          while( $linea_actual < count($lineas) )
          {
@@ -472,11 +514,11 @@ class imprimir_presu_pedi extends fs_controller
             }
             
             /// ¿Añadimos el logo?
-            if( file_exists('tmp/'.FS_TMP_NAME.'logo.png') )
+            if($this->logo)
             {
                if( function_exists('imagecreatefromstring') )
                {
-                  $pdf_doc->pdf->ezImage('tmp/'.FS_TMP_NAME.'logo.png', 0, 200, 'none');
+                  $pdf_doc->pdf->ezImage($this->logo, 0, 150, 'none');
                   $lppag -= 2; /// si metemos el logo, caben menos líneas
                }
                else
@@ -547,15 +589,31 @@ class imprimir_presu_pedi extends fs_controller
              * Cantidad Ref. Proveedor + Descripción    PVP   DTO   Importe
              */
             $pdf_doc->new_table();
-            $pdf_doc->add_table_header(
-               array(
-                  'cantidad' => '<b>Cant.</b>',
-                  'descripcion' => '<b>Ref. Prov. + Descripción</b>',
-                  'pvp' => '<b>PVP</b>',
-                  'dto' => '<b>Dto.</b>',
-                  'importe' => '<b>Importe</b>'
-               )
-            );
+            
+            if($this->impresion['print_dto'])
+            {
+               $pdf_doc->add_table_header(
+                  array(
+                     'cantidad' => '<b>Cant.</b>',
+                     'descripcion' => '<b>Ref. Prov. + Descripción</b>',
+                     'pvp' => '<b>PVP</b>',
+                     'dto' => '<b>Dto.</b>',
+                     'importe' => '<b>Importe</b>'
+                  )
+               );
+            }
+            else
+            {
+               $pdf_doc->add_table_header(
+                  array(
+                     'cantidad' => '<b>Cant.</b>',
+                     'descripcion' => '<b>Ref. Prov. + Descripción</b>',
+                     'pvp' => '<b>PVP</b>',
+                     'importe' => '<b>Importe</b>'
+                  )
+               );
+            }
+            
             for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
             {
                $descripcion = $this->fix_html($lineas[$linea_actual]->descripcion);
@@ -702,6 +760,21 @@ class imprimir_presu_pedi extends fs_controller
          $linea_actual = 0;
          $pagina = 1;
          
+         if($this->impresion['print_dto'])
+         {
+            $this->impresion['print_dto'] = FALSE;
+            
+            /// leemos las líneas para ver si de verdad mostramos los descuentos
+            foreach($lineas as $lin)
+            {
+               if($lin->dtopor != 0)
+               {
+                  $this->impresion['print_dto'] = TRUE;
+                  break;
+               }
+            }
+         }
+         
          /// imprimimos las páginas necesarias
          while( $linea_actual < count($lineas) )
          {
@@ -714,11 +787,11 @@ class imprimir_presu_pedi extends fs_controller
             }
             
             /// ¿Añadimos el logo?
-            if( file_exists('tmp/'.FS_TMP_NAME.'logo.png') )
+            if($this->logo)
             {
                if( function_exists('imagecreatefromstring') )
                {
-                  $pdf_doc->pdf->ezImage('tmp/'.FS_TMP_NAME.'logo.png', 0, 200, 'none');
+                  $pdf_doc->pdf->ezImage($this->logo, 0, 150, 'none');
                   $lppag -= 2; /// si metemos el logo, caben menos líneas
                }
                else

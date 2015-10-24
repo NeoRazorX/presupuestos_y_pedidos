@@ -206,6 +206,11 @@ class pedido_proveedor extends fs_model
          $this->totalrecargo = floatval($p['totalrecargo']);
          $this->observaciones = $p['observaciones'];
          $this->editable = $this->str2bool($p['editable']);
+         
+         if($this->idalbaran)
+         {
+            $this->editable = FALSE;
+         }
       }
       else
       {
