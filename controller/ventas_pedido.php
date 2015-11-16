@@ -197,6 +197,8 @@ class ventas_pedido extends fs_controller
          }
          else
          {
+            $this->pedido->nombrecliente = $_POST['nombrecliente'];
+            $this->pedido->cifnif = $_POST['cifnif'];
             $this->pedido->codpais = $_POST['codpais'];
             $this->pedido->provincia = $_POST['provincia'];
             $this->pedido->ciudad = $_POST['ciudad'];

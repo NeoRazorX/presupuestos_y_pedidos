@@ -300,9 +300,14 @@ class imprimir_presu_pedi extends fs_controller
       $pdf_doc->new_table();
       $table_header = array(
           'cantidad' => '<b>Cant.</b>',
-          'descripcion' => '<b>Ref. Prov. + Descripción</b>',
+          'descripcion' => '<b>Ref. + Descripción</b>',
           'pvp' => '<b>PVP</b>',
       );
+      
+      if( get_class($lineas[$linea_actual]) == 'linea_pedido_proveedor' )
+      {
+         $table_header['referencia'] = '<b>Ref. Prov. + Descripción</b>';
+      }
       
       if($this->impresion['print_dto'])
       {

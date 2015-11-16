@@ -148,6 +148,8 @@ class compras_pedido extends fs_controller
    {
       $this->pedido->observaciones = $_POST['observaciones'];
       $this->pedido->numproveedor = $_POST['numproveedor'];
+      $this->pedido->nombre = $_POST['nombre'];
+      $this->pedido->cifnif = $_POST['cifnif'];
       
       if( is_null($this->pedido->idalbaran) )
       {

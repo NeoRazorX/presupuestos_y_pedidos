@@ -242,6 +242,8 @@ class ventas_presupuesto extends fs_controller {
          }
          else
          {
+            $this->presupuesto->nombrecliente = $_POST['nombrecliente'];
+            $this->presupuesto->cifnif = $_POST['cifnif'];
             $this->presupuesto->codpais = $_POST['codpais'];
             $this->presupuesto->provincia = $_POST['provincia'];
             $this->presupuesto->ciudad = $_POST['ciudad'];
@@ -254,10 +256,10 @@ class ventas_presupuesto extends fs_controller {
          $serie = $this->serie->get($this->presupuesto->codserie);
 
          /// ¿cambiamos la serie?
-         if ($_POST['serie'] != $this->presupuesto->codserie)
+         if($_POST['serie'] != $this->presupuesto->codserie)
          {
             $serie2 = $this->serie->get($_POST['serie']);
-            if ($serie2)
+            if($serie2)
             {
                $this->presupuesto->codserie = $serie2->codserie;
                $this->presupuesto->irpf = $serie2->irpf;
@@ -284,7 +286,7 @@ class ventas_presupuesto extends fs_controller {
             $this->presupuesto->tasaconv = floatval($_POST['tasaconv']);
          }
          
-         if (isset($_POST['numlineas']))
+         if( isset($_POST['numlineas']) )
          {
             $numlineas = intval($_POST['numlineas']);
 
