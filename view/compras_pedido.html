@@ -322,7 +322,12 @@
                            </a>
                         </td>
                         <td colspan="2">
-                           <div class="form-control text-right">Totales</div>
+                           <div class="form-control text-right">
+                              Totales
+                              {if="$fsc->pedido->coddivisa!=$fsc->empresa->coddivisa"}
+                              ({$fsc->pedido->coddivisa})
+                              {/if}
+                           </div>
                         </td>
                         <td><div id="aneto" class="form-control text-right" style="font-weight: bold;">{$fsc->show_numero(0)}</div></td>
                         <td><div id="aiva" class="form-control text-right" style="font-weight: bold;">{$fsc->show_numero(0)}</div></td>
@@ -336,11 +341,11 @@
                      {if="$fsc->user->admin"}
                      <tr>
                         <td colspan="6"></td>
-                        <td class="text-right">{$fsc->show_precio($fsc->pedido->neto)}</td>
-                        <td class="text-right">{$fsc->show_precio($fsc->pedido->totaliva)}</td>
-                        <td class="recargo text-right">{$fsc->show_precio($fsc->pedido->totalrecargo)}</td>
-                        <td class="irpf text-right">{$fsc->show_precio($fsc->pedido->totalirpf)}</td>
-                        <td class="text-right">{$fsc->show_precio($fsc->pedido->total)}</td>
+                        <td class="text-right">{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</td>
+                        <td class="text-right">{$fsc->show_precio($fsc->pedido->totaliva, $fsc->pedido->coddivisa)}</td>
+                        <td class="recargo text-right">{$fsc->show_precio($fsc->pedido->totalrecargo, $fsc->pedido->coddivisa)}</td>
+                        <td class="irpf text-right">{$fsc->show_precio($fsc->pedido->totalirpf, $fsc->pedido->coddivisa)}</td>
+                        <td class="text-right">{$fsc->show_precio($fsc->pedido->total, $fsc->pedido->coddivisa)}</td>
                      </tr>
                      {/if}
                   </tbody>
@@ -376,7 +381,11 @@
                   </tr>
                   {/loop}
                   <tr>
+                     {if="$fsc->pedido->coddivisa!=$fsc->empresa->coddivisa"}
+                     <td colspan="4" class="text-right warning"><b>{$fsc->pedido->coddivisa}:</b></td>
+                     {else}
                      <td colspan="4"></td>
+                     {/if}
                      <td class="text-right"><b>{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</b></td>
                      <td class="text-right"><b>{$fsc->show_precio($fsc->pedido->totaliva, $fsc->pedido->coddivisa)}</b></td>
                      <td class="text-right recargo"><b>{$fsc->show_precio($fsc->pedido->totalrecargo, $fsc->pedido->coddivisa)}</b></td>
@@ -386,6 +395,7 @@
                </table>
                {/if}
             </div>
+            
             <div class="container-fluid">
                <div class="row">
                   <div class="col-sm-12">
