@@ -34,11 +34,20 @@
       data.addColumn('string', 'día');
       data.addColumn('number', 'ventas {$fsc->simbolo_divisa()}');
       data.addColumn('number', 'compras {$fsc->simbolo_divisa()}');
+      {if="$fsc->prestashop"}
+      data.addColumn('number', 'PrestaShop {$fsc->simbolo_divisa()}');
+      data.addRows([
+      {loop="$fsc->stats_last_days()"}
+         ['{$value['day']}', {$value['total_cli']}, {$value['total_pro']}, {$value['total_ps']}],
+      {/loop}
+      ]);
+      {else}
       data.addRows([
       {loop="$fsc->stats_last_days()"}
          ['{$value['day']}', {$value['total_cli']}, {$value['total_pro']}],
       {/loop}
       ]);
+      {/if}
       
       // Instantiate and draw our chart, passing in some options.
       var chart = new google.visualization.ColumnChart(document.getElementById('chart_pedidos_day'));
@@ -49,11 +58,20 @@
       data2.addColumn('string', 'mes');
       data2.addColumn('number', 'ventas {$fsc->simbolo_divisa()}');
       data2.addColumn('number', 'compras {$fsc->simbolo_divisa()}');
+      {if="$fsc->prestashop"}
+      data2.addColumn('number', 'PrestaShop {$fsc->simbolo_divisa()}');
+      data2.addRows([
+      {loop="$fsc->stats_last_months()"}
+         ['{$value['month']}', {$value['total_cli']}, {$value['total_pro']}, {$value['total_ps']}],
+      {/loop}
+      ]);
+      {else}
       data2.addRows([
       {loop="$fsc->stats_last_months()"}
          ['{$value['month']}', {$value['total_cli']}, {$value['total_pro']}],
       {/loop}
       ]);
+      {/if}
       
       // Instantiate and draw our chart, passing in some options.
       var chart2 = new google.visualization.AreaChart(document.getElementById('chart_pedidos_month'));
@@ -64,11 +82,20 @@
       data3.addColumn('string', 'año');
       data3.addColumn('number', 'ventas {$fsc->simbolo_divisa()}');
       data3.addColumn('number', 'compras {$fsc->simbolo_divisa()}');
+      {if="$fsc->prestashop"}
+      data3.addColumn('number', 'PrestaShop {$fsc->simbolo_divisa()}');
+      data3.addRows([
+      {loop="$fsc->stats_last_years()"}
+         ['{$value['year']}', {$value['total_cli']}, {$value['total_pro']}, {$value['total_ps']}],
+      {/loop}
+      ]);
+      {else}
       data3.addRows([
       {loop="$fsc->stats_last_years()"}
          ['{$value['year']}', {$value['total_cli']}, {$value['total_pro']}],
       {/loop}
       ]);
+      {/if}
       
       // Instantiate and draw our chart, passing in some options.
       var chart3 = new google.visualization.AreaChart(document.getElementById('chart_pedidos_year'));

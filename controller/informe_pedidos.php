@@ -25,6 +25,7 @@ class informe_pedidos extends fs_controller
    public $desde;
    public $hasta;
    public $mostrar;
+   public $prestashop;
    public $resultados;
    public $tipo;
    
@@ -38,6 +39,8 @@ class informe_pedidos extends fs_controller
       /// declaramos los objetos sólo para asegurarnos de que existen las tablas
       $pedido_cli = new pedido_cliente();
       $pedido_pro = new pedido_proveedor();
+      
+      $this->prestashop = $this->db->table_exists('ps_orders');
       
       $this->mostrar = 'stats';
       if( isset($_REQUEST['mostrar']) )
@@ -89,12 +92,23 @@ class informe_pedidos extends fs_controller
       }
       
       foreach($stats_pro as $i => $value)
+      {
          $stats[$i]['total_pro'] = $value['total'];
+      }
+      
+      if($this->prestashop)
+      {
+         $stats_ps = $this->stats_last_days_aux('ps_orders', 'totaliva');
+         foreach($stats_ps as $i => $value)
+         {
+            $stats[$i]['total_ps'] = $value['total'];
+         }
+      }
       
       return $stats;
    }
    
-   public function stats_last_days_aux($table_name='pedidoscli', $numdays = 25)
+   public function stats_last_days_aux($table_name = 'pedidoscli', $col_total = 'total', $numdays = 25)
    {
       $stats = array();
       $desde = Date('d-m-Y', strtotime( Date('d-m-Y').'-'.$numdays.' day'));
@@ -106,14 +120,18 @@ class informe_pedidos extends fs_controller
       }
       
       if( strtolower(FS_DB_TYPE) == 'postgresql')
+      {
          $sql_aux = "to_char(fecha,'FMDD')";
+      }
       else
          $sql_aux = "DATE_FORMAT(fecha, '%d')";
       
-      $data = $this->db->select("SELECT ".$sql_aux." as dia, sum(total) as total
+      $sql = "SELECT ".$sql_aux." as dia, SUM(".$col_total.") as total
          FROM ".$table_name." WHERE fecha >= ".$this->empresa->var2str($desde)."
          AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))."
-         GROUP BY ".$sql_aux." ORDER BY dia ASC;");
+         GROUP BY ".$sql_aux." ORDER BY dia ASC;";
+      
+      $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $d)
@@ -152,18 +170,29 @@ class informe_pedidos extends fs_controller
       {
          $stats[$i] = array(
              'month' => $meses[ $value['month'] ],
-             'total_cli' => round($value['total'], 2),
+             'total_cli' => round($value['total'], FS_NF0),
              'total_pro' => 0
          );
       }
       
       foreach($stats_pro as $i => $value)
-         $stats[$i]['total_pro'] = round($value['total'], 2);
+      {
+         $stats[$i]['total_pro'] = round($value['total'], FS_NF0);
+      }
+      
+      if($this->prestashop)
+      {
+         $stats_ps = $this->stats_last_months_aux('ps_orders', 'totaliva');
+         foreach($stats_ps as $i => $value)
+         {
+            $stats[$i]['total_ps'] = round($value['total'], FS_NF0);
+         }
+      }
       
       return $stats;
    }
    
-   public function stats_last_months_aux($table_name='pedidoscli', $num = 11)
+   public function stats_last_months_aux($table_name = 'pedidoscli', $col_total = 'total', $num = 11)
    {
       $stats = array();
       $desde = Date('d-m-Y', strtotime( Date('01-m-Y').'-'.$num.' month'));
@@ -175,14 +204,18 @@ class informe_pedidos extends fs_controller
       }
       
       if( strtolower(FS_DB_TYPE) == 'postgresql')
+      {
          $sql_aux = "to_char(fecha,'FMMM')";
+      }
       else
          $sql_aux = "DATE_FORMAT(fecha, '%m')";
       
-      $data = $this->db->select("SELECT ".$sql_aux." as mes, sum(total) as total
+      $sql = "SELECT ".$sql_aux." as mes, SUM(".$col_total.") as total
          FROM ".$table_name." WHERE fecha >= ".$this->empresa->var2str($desde)."
          AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))."
-         GROUP BY ".$sql_aux." ORDER BY mes ASC;");
+         GROUP BY ".$sql_aux." ORDER BY mes ASC;";
+      
+      $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $d)
@@ -207,18 +240,29 @@ class informe_pedidos extends fs_controller
       {
          $stats[$i] = array(
              'year' => $value['year'],
-             'total_cli' => round($value['total'], 2),
+             'total_cli' => round($value['total'], FS_NF0),
              'total_pro' => 0
          );
       }
       
       foreach($stats_pro as $i => $value)
-         $stats[$i]['total_pro'] = round($value['total'], 2);
+      {
+         $stats[$i]['total_pro'] = round($value['total'], FS_NF0);
+      }
+      
+      if($this->prestashop)
+      {
+         $stats_ps = $this->stats_last_years_aux('ps_orders', 'totaliva');
+         foreach($stats_ps as $i => $value)
+         {
+            $stats[$i]['total_ps'] = round($value['total'], FS_NF0);
+         }
+      }
       
       return $stats;
    }
    
-   public function stats_last_years_aux($table_name='pedidoscli', $num = 4)
+   public function stats_last_years_aux($table_name = 'pedidoscli', $col_total = 'total', $num = 4)
    {
       $stats = array();
       $desde = Date('d-m-Y', strtotime( Date('d-m-Y').'-'.$num.' year'));
@@ -230,14 +274,18 @@ class informe_pedidos extends fs_controller
       }
       
       if( strtolower(FS_DB_TYPE) == 'postgresql')
+      {
          $sql_aux = "to_char(fecha,'FMYYYY')";
+      }
       else
          $sql_aux = "DATE_FORMAT(fecha, '%Y')";
       
-      $data = $this->db->select("SELECT ".$sql_aux." as ano, sum(total) as total
+      $sql = "SELECT ".$sql_aux." as ano, SUM(".$col_total.") as total
          FROM ".$table_name." WHERE fecha >= ".$this->empresa->var2str($desde)."
          AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))."
-         GROUP BY ".$sql_aux." ORDER BY ano ASC;");
+         GROUP BY ".$sql_aux." ORDER BY ano ASC;";
+      
+      $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $d)
