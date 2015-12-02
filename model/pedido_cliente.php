@@ -224,8 +224,10 @@ class pedido_cliente extends fs_model
          $this->fecha = Date('d-m-Y', strtotime($p['fecha']));
 
          $this->hora = Date('H:i:s', strtotime($p['fecha']));
-         if (!is_null($p['hora']))
-            $this->hora = $p['hora'];
+         if( !is_null($p['hora']) )
+         {
+            $this->hora = date('H:i:s', strtotime($p['hora']));
+         }
 
          $this->neto = floatval($p['neto']);
          $this->total = floatval($p['total']);
@@ -802,7 +804,12 @@ class pedido_cliente extends fs_model
    
    public function cron_job()
    {
+      /// devolvemos al estado pendiente a los pedidos con estado 1 a los que se haya borrado el albarán
       $this->db->exec("UPDATE ".$this->table_name." SET status = '0', idalbaran = NULL "
               . "WHERE status = '1' AND idalbaran NOT IN (SELECT idalbaran FROM albaranescli);");
+      
+      /// marcamos como rechazados todos los presupuestos no editables y sin pedido asociado
+      $this->db->exec("UPDATE pedidoscli SET status = '2' WHERE idalbaran IS NULL AND"
+              . " editable = false;");
    }
 }

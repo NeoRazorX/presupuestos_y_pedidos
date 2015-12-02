@@ -193,8 +193,10 @@ class pedido_proveedor extends fs_model
          $this->fecha = Date('d-m-Y', strtotime($p['fecha']));
 
          $this->hora = Date('H:i:s', strtotime($p['fecha']));
-         if (!is_null($p['hora']))
-            $this->hora = $p['hora'];
+         if( !is_null($p['hora']) )
+         {
+            $this->hora = date('H:i:s', strtotime($p['hora']));
+         }
 
          $this->neto = floatval($p['neto']);
          $this->total = floatval($p['total']);

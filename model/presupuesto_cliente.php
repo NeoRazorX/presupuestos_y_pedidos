@@ -239,7 +239,7 @@ class presupuesto_cliente extends fs_model
          $this->hora = '00:00:00';
          if( !is_null($p['hora']) )
          {
-            $this->hora = $p['hora'];
+            $this->hora = date('H:i:s', strtotime($p['hora']));
          }
 
          $this->neto = floatval($p['neto']);
@@ -801,12 +801,16 @@ class presupuesto_cliente extends fs_model
    
    public function cron_job()
    {
-      /// devolvemos al estado 0 a los presupuestos con estado 1 a los que se haya borrado el pedido
+      /// devolvemos al estado pendiente a los presupuestos con estado 1 a los que se haya borrado el pedido
       $this->db->exec("UPDATE ".$this->table_name." SET status = '0', idpedido = NULL "
               . "WHERE status = '1' AND idpedido NOT IN (SELECT idpedido FROM pedidoscli);");
       
       /// marcamos como rechazados todos los presupuestos con finoferta ya pasada
       $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE finoferta IS NOT NULL AND"
-              . " finoferta < ".$this->var2str(Date('d-m-Y'))." AND idpedido is null;");
+              . " finoferta < ".$this->var2str(Date('d-m-Y'))." AND idpedido IS NULL;");
+      
+      /// marcamos como rechazados todos los presupuestos no editables y sin pedido asociado
+      $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE idpedido IS NULL AND"
+              . " editable = false;");
    }
 }
