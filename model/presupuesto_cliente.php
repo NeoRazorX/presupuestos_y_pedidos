@@ -802,7 +802,7 @@ class presupuesto_cliente extends fs_model
    public function cron_job()
    {
       /// devolvemos al estado pendiente a los presupuestos con estado 1 a los que se haya borrado el pedido
-      $this->db->exec("UPDATE ".$this->table_name." SET status = '0', idpedido = NULL "
+      $this->db->exec("UPDATE ".$this->table_name." SET status = '0', idpedido = NULL, editable = TRUE "
               . "WHERE status = '1' AND idpedido NOT IN (SELECT idpedido FROM pedidoscli);");
       
       /// marcamos como rechazados todos los presupuestos con finoferta ya pasada

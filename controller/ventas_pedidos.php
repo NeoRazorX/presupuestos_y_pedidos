@@ -181,7 +181,10 @@ class ventas_pedidos extends fs_controller
          {
             $order2 = ', codigo ASC';
          }
-
+         
+         /// ejecutamos el proceso del cron para pedidos.
+         $pedido->cron_job();
+         
          if($this->mostrar == 'pendientes')
          {
             $this->resultados = $pedido->all_ptealbaran($this->offset, $this->order.$order2);
@@ -216,8 +219,6 @@ class ventas_pedidos extends fs_controller
          }
          else
          {
-            /// ejecutamos el proceso del cron para pedidos.
-            $pedido->cron_job();
             $this->resultados = $pedido->all($this->offset, $this->order.$order2);
          }
       }

@@ -1,21 +1,5 @@
 {include="header"}
 
-<ul class="nav nav-tabs">
-   <li role="presentation"{if="$fsc->mostrar=='stats'"} class="active"{/if}>
-      <a href="{$fsc->url()}">
-         <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
-         <span class="hidden-xs">&nbsp; Estadísticas</span>
-      </a>
-   </li>
-   <li role="presentation"{if="$fsc->mostrar=='listado'"} class="active"{/if}>
-      <a href="{$fsc->url()}&mostrar=listado">
-         <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-         <span class="hidden-xs">&nbsp; Listado</span>
-      </a>
-   </li>
-</ul>
-
-{if="$fsc->mostrar=='stats'"}
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
    // Load the Visualization API and the piechart package.
@@ -103,9 +87,18 @@
    }
 </script>
 
-<div class="container-fluid" style="margin-top: 10px;">
+<div class="container-fluid">
    <div class="row">
       <div class="col-sm-12">
+         <div class="page-header">
+            <h1>
+               <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+               Informe de {#FS_PEDIDOS#}
+               <a class="btn btn-xs btn-default" href="{$fsc->url()}" title="Recargar la página">
+                  <span class="glyphicon glyphicon-refresh"></span>
+               </a>
+            </h1>
+         </div>
          <div class="panel panel-default">
             <div class="panel-heading">
                <h3 class="panel-title"><span class="text-capitalize">{#FS_PEDIDOS#}</span> de los últimos días</h3>
@@ -141,118 +134,5 @@
       </div>
    </div>
 </div>
-{elseif="$fsc->mostrar=='listado'"}
-<form action="{$fsc->url()}&mostrar=listado" method="post" class="form">
-   <div class="container-fluid" style="margin-top: 10px;">
-      <div class="row">
-         <div class="col-sm-2">
-            <div class="form-group">
-               Desde:
-               <input type="text" name="desde" value="{$fsc->desde}" class="form-control datepicker" autocomplete="off"/>
-            </div>
-         </div>
-         <div class="col-sm-2">
-            <div class="form-group">
-               Hasta:
-               <input type="text" name="hasta" value="{$fsc->hasta}" class="form-control datepicker" autocomplete="off"/>
-            </div>
-         </div>
-         <div class="col-sm-2">
-            <div class="form-group">
-               Tipo:
-               <select name="tipo" class="form-control" onchange="this.form.submit();">
-                  <option value="ventas"{if="$fsc->tipo=='ventas'"} selected=""{/if}>Ventas</option>
-                  <option value="compras"{if="$fsc->tipo=='compras'"} selected=""{/if}>Compras</option>
-               </select>
-            </div>
-         </div>
-         <div class="col-sm-6 text-right">
-            <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled = true;this.form.submit();">
-               <span class="glyphicon glyphicon-search"></span>
-               <span class="hidden-xs"> &nbsp; Buscar</span>
-            </button>
-         </div>
-      </div>
-      <div class="row">
-         <div class="col-sm-12">
-            <h2 class="text-capitalize">{#FS_PEDIDOS#}</h2>
-         </div>
-      </div>
-   </div>
-</form>
-
-<div class="table-responsive">
-   {if="$fsc->tipo=='ventas'"}
-   <table class="table table-hover">
-      <thead>
-         <tr>
-            <th></th>
-            <th class="text-left">Código + {#FS_NUMERO2#}</th>
-            <th class="text-left">Cliente</th>
-            <th class="text-left">Observaciones</th>
-            <th class="text-right">Total</th>
-            <th class="text-right">Fecha</th>
-            <th class="text-right">Hora</th>
-         </tr>
-      </thead>
-      {loop="$fsc->resultados"}
-      <tr class="clickableRow{if="$value->status==2"} bg-danger{elseif="$value->total<=0"} bg-warning{/if}" href="{$value->url()}">
-         <td class="text-center">
-            {if condition="$value->idalbaran"}
-            <span class="glyphicon glyphicon-paperclip" title="El {#FS_PEDIDO#} tiene vinculado un {#FS_ALBARAN#}"></span>
-            {/if}
-            {if condition="$value->status==2"}
-            <span class="glyphicon glyphicon-remove" title="El {#FS_PEDIDO#} ha sido rechazado"></span>
-            {/if}
-         </td>
-         <td><a href="{$value->url()}">{$value->codigo}</a> {$value->numero2}</td>
-         <td>{$value->nombrecliente}</td>
-         <td>{$value->observaciones_resume()}</td>
-         <td class="text-right">{$fsc->show_precio($value->total, $value->coddivisa)}</td>
-         <td class="text-right">{$value->fecha}</td>
-         <td class="text-right">{$value->show_hora()}</td>
-      </tr>
-      {else}
-      <tr class="bg-warning">
-         <td></td>
-         <td colspan="6">Ningún {#FS_PEDIDO#} encontrado.</td>
-      </tr>
-      {/loop}
-   </table>
-   {else}
-   <table class="table table-hover">
-      <thead>
-         <tr>
-            <th></th>
-            <th class="text-left">Código + Núm. Proveedor</th>
-            <th class="text-left">Proveedor</th>
-            <th class="text-left">Observaciones</th>
-            <th class="text-right">Total</th>
-            <th class="text-right">Fecha</th>
-         </tr>
-      </thead>
-      {loop="$fsc->resultados"}
-      <tr class="clickableRow{if="$value->total<=0"} bg-warning{/if}" href="{$value->url()}">
-         <td class="text-center">
-            {if condition="$value->idalbaran"}
-            <span class="glyphicon glyphicon-paperclip" title="El {#FS_PEDIDO#} tiene vinculado un {#FS_ALBARAN#}"></span>
-            {/if}
-         </td>
-         <td><a href="{$value->url()}">{$value->codigo}</a> {$value->numproveedor}</td>
-         <td>{$value->nombre}</td>
-         <td>{$value->observaciones_resume()}</td>
-         <td class="text-right">{$fsc->show_precio($value->total, $value->coddivisa)}</td>
-         <td class="text-right">{$value->fecha}</td>
-      </tr>
-      {else}
-      <tr class="bg-warning">
-         <td></td>
-         <td colspan="5">Ningún {#FS_PEDIDO#} encontrado.</td>
-      </tr>
-      {/loop}
-   </table>
-   {/if}
-</div>
-{/if}
 
 {include="footer"}

@@ -81,9 +81,17 @@ class compras_pedido extends fs_controller
       {
          $nuevopedp = $this->page->get('nueva_compra');
          if($nuevopedp)
+         {
             $this->nuevo_pedido_url = $nuevopedp->url();
+         }
       }
-
+      
+      /**
+       * Primero ejecutamos la función del cron para desbloquear los
+       * pedidos de albaranes eliminados y devolverlos al estado original.
+       */
+      $pedido->cron_job();
+      
       if (isset($_POST['idpedido']))
       {
          $this->pedido = $pedido->get($_POST['idpedido']);

@@ -83,7 +83,10 @@ class compras_pedidos extends fs_controller
          {
             $this->delete_pedido();
          }
-
+         
+         /// ejecutamos el proceso del cron para pedidos.
+         $pedido->cron_job();
+         
          if($this->query)
          {
             $this->resultados = $pedido->search($this->query, $this->offset);
@@ -94,8 +97,6 @@ class compras_pedidos extends fs_controller
          }
          else
          {
-            /// ejecutamos el proceso del cron para pedidos.
-            $pedido->cron_job();
             $this->resultados = $pedido->all($this->offset);
          }
       }

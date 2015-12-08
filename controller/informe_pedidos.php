@@ -22,12 +22,7 @@ require_model('pedido_proveedor.php');
 
 class informe_pedidos extends fs_controller
 {
-   public $desde;
-   public $hasta;
-   public $mostrar;
    public $prestashop;
-   public $resultados;
-   public $tipo;
    
    public function __construct()
    {
@@ -41,39 +36,6 @@ class informe_pedidos extends fs_controller
       $pedido_pro = new pedido_proveedor();
       
       $this->prestashop = $this->db->table_exists('ps_orders');
-      
-      $this->mostrar = 'stats';
-      if( isset($_REQUEST['mostrar']) )
-      {
-         $this->mostrar = $_REQUEST['mostrar'];
-      }
-      
-      $this->tipo = 'ventas';
-      if( isset($_REQUEST['tipo']) )
-      {
-         $this->tipo = $_REQUEST['tipo'];
-      }
-      
-      if($this->mostrar == 'listado')
-      {
-         $this->desde = Date('1-m-Y');
-         $this->hasta = Date('d-m-Y', mktime(0, 0, 0, date("m")+1, date("1")-1, date("Y")));
-         
-         if( isset($_POST['desde']) )
-         {
-            $this->desde = $_POST['desde'];
-            $this->hasta = $_POST['hasta'];
-         }
-         
-         if($this->tipo == 'ventas')
-         {
-            $this->resultados = $pedido_cli->all_desde($this->desde, $this->hasta);
-         }
-         else
-         {
-            $this->resultados = $pedido_pro->all_desde($this->desde, $this->hasta);
-         }
-      }
    }
    
    public function stats_last_days()

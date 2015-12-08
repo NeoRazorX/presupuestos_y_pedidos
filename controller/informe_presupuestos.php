@@ -22,11 +22,6 @@ require_model('pedido_cliente.php');
 
 class informe_presupuestos extends fs_controller
 {
-   public $desde;
-   public $hasta;
-   public $mostrar;
-   public $resultados;
-   
    public function __construct()
    {
       parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTOS), 'informes', FALSE, TRUE);
@@ -37,26 +32,6 @@ class informe_presupuestos extends fs_controller
       /// declaramos los objetos sólo para asegurarnos de que existen las tablas
       $presupuesto = new presupuesto_cliente();
       $pedido = new pedido_cliente();
-      
-      $this->mostrar = 'stats';
-      if( isset($_REQUEST['mostrar']) )
-      {
-         $this->mostrar = $_REQUEST['mostrar'];
-      }
-      
-      if($this->mostrar == 'listado')
-      {
-         $this->desde = Date('1-m-Y');
-         $this->hasta = Date('d-m-Y', mktime(0, 0, 0, date("m")+1, date("1")-1, date("Y")));
-         
-         if( isset($_POST['desde']) )
-         {
-            $this->desde = $_POST['desde'];
-            $this->hasta = $_POST['hasta'];
-         }
-         
-         $this->resultados = $presupuesto->all_desde($this->desde, $this->hasta);
-      }
    }
    
    public function stats_last_days()

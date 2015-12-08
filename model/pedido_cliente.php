@@ -805,7 +805,7 @@ class pedido_cliente extends fs_model
    public function cron_job()
    {
       /// devolvemos al estado pendiente a los pedidos con estado 1 a los que se haya borrado el albarán
-      $this->db->exec("UPDATE ".$this->table_name." SET status = '0', idalbaran = NULL "
+      $this->db->exec("UPDATE ".$this->table_name." SET status = '0', idalbaran = NULL, editable = TRUE "
               . "WHERE status = '1' AND idalbaran NOT IN (SELECT idalbaran FROM albaranescli);");
       
       /// marcamos como rechazados todos los presupuestos no editables y sin pedido asociado

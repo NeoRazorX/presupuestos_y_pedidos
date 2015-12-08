@@ -182,6 +182,9 @@ class ventas_presupuestos extends fs_controller
             $order2 = ', codigo ASC';
          }
          
+         /// ejecutamos la tarea del cron
+         $presupuesto->cron_job();
+         
          if($this->mostrar == 'pendientes')
          {
             $this->resultados = $presupuesto->all_ptepedir($this->offset, $this->order.$order2);
@@ -216,8 +219,6 @@ class ventas_presupuestos extends fs_controller
          }
          else
          {
-            /// ejecutamos la tarea del cron
-            $presupuesto->cron_job();
             $this->resultados = $presupuesto->all($this->offset, $this->order.$order2);
          }
       }
