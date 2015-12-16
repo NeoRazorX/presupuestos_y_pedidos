@@ -100,6 +100,19 @@
                <a class="btn btn-sm btn-default" href="{$fsc->url()}&aprobar=TRUE&petid={$fsc->random_string()}">
                   <span class="glyphicon glyphicon-paperclip"></span> &nbsp; Aprobar
                </a>
+                  {if="$fsc->pedido->fecha!=$fsc->today()"}
+                  <a href="#" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                     <span class="caret"></span>
+                     <span class="sr-only">Toggle Dropdown</span>
+                  </a>
+                  <ul class="dropdown-menu">
+                     <li>
+                        <a href="{$fsc->url()}&aprobar=TRUE&petid={$fsc->random_string()}&mismafecha=TRUE">
+                           Aprobar con fecha {$fsc->pedido->fecha}
+                        </a>
+                     </li>
+                  </ul>
+                  {/if}
                {else}
                <a class="btn btn-sm btn-warning" href="{$fsc->pedido->url()}&desbloquear=TRUE">
                   <span class="glyphicon glyphicon-lock"></span> &nbsp; Desbloquear

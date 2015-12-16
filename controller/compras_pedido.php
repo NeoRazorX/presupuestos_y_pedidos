@@ -390,7 +390,12 @@ class compras_pedido extends fs_controller
       $albaran->irpf = $this->pedido->irpf;
       $albaran->totalirpf = $this->pedido->totalirpf;
       $albaran->totalrecargo = $this->pedido->totalrecargo;
-
+      
+      if( isset($_GET['mismafecha']) )
+      {
+         $albaran->fecha = $this->pedido->fecha;
+      }
+      
       /**
        * Obtenemos el ejercicio para la fecha de hoy (puede que
        * no sea el mismo ejercicio que el del pedido, por ejemplo
