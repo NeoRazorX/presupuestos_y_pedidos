@@ -97,6 +97,10 @@ class ventas_presupuestos extends fs_controller
       {
          $this->order = $_COOKIE['ventas_pres_order'];
       }
+      else if( isset($_POST['rechazar']) )
+      {
+         $this->rechazar();
+      }
       
       if( isset($_POST['buscar_lineas']) )
       {
@@ -501,5 +505,26 @@ class ventas_presupuestos extends fs_controller
             $this->total_resultados_txt = 'Suma total de los resultados:';
          }
       }
+   }
+   
+   private function rechazar()
+   {
+      $pre0 = new presupuesto_cliente();
+      $offset = 0;
+      $presupuestos = $pre0->all_ptepedir();
+      while($presupuestos)
+      {
+         foreach($presupuestos as $pre)
+         {
+            $pre->status = 2;
+            $pre->save();
+            
+            $offset++;
+         }
+         
+         $presupuestos = $pre0->all_ptepedir();
+      }
+      
+      $this->new_message($offset.' '.FS_PRESUPUESTOS.' rechazados.');
    }
 }

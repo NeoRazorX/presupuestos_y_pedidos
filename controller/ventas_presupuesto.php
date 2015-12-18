@@ -22,13 +22,13 @@ require_model('articulo.php');
 require_model('cliente.php');
 require_model('divisa.php');
 require_model('ejercicio.php');
-require_model('pedido_cliente.php');
 require_model('fabricante.php');
 require_model('familia.php');
 require_model('forma_pago.php');
 require_model('impuesto.php');
 require_model('linea_presupuesto_cliente.php');
 require_model('pais.php');
+require_model('pedido_cliente.php');
 require_model('presupuesto_cliente.php');
 require_model('regularizacion_iva.php');
 require_model('serie.php');
@@ -48,6 +48,7 @@ class ventas_presupuesto extends fs_controller {
    public $pais;
    public $presupuesto;
    public $serie;
+   public $setup_validez;
 
    public function __construct()
    {
@@ -56,6 +57,9 @@ class ventas_presupuesto extends fs_controller {
 
    protected function private_core()
    {
+      /// ¿El usuario tiene permiso para eliminar en esta página?
+      $this->allow_delete = $this->user->allow_delete_on(__CLASS__);
+      
       $this->ppage = $this->page->get('ventas_presupuestos');
       $this->agente = FALSE;
 
@@ -72,9 +76,8 @@ class ventas_presupuesto extends fs_controller {
       $this->nuevo_presupuesto_url = FALSE;
       $this->pais = new pais();
       $this->serie = new serie();
-      
-      /// ¿El usuario tiene permiso para eliminar en esta página?
-      $this->allow_delete = $this->user->allow_delete_on(__CLASS__);
+      $this->setup_validez = 30;
+      $this->configurar_validez();
       
       /**
        * Comprobamos si el usuario tiene acceso a nueva_venta,
@@ -84,7 +87,9 @@ class ventas_presupuesto extends fs_controller {
       {
          $nuevoprep = $this->page->get('nueva_venta');
          if($nuevoprep)
+         {
             $this->nuevo_presupuesto_url = $nuevoprep->url();
+         }
       }
 
       if( isset($_POST['idpresupuesto']) )
@@ -539,5 +544,24 @@ class ventas_presupuesto extends fs_controller {
       }
       else
          $this->new_error_msg("¡Imposible guardar el " . FS_PEDIDO . "!");
+   }
+   
+   private function configurar_validez()
+   {
+      $fsvar = new fs_var();
+      if( isset($_POST['setup_validez']) )
+      {
+         $this->setup_validez = intval($_POST['setup_validez']);
+         $fsvar->simple_save('presu_validez', $this->setup_validez);
+         $this->new_message('Configuración modificada correctamente.');
+      }
+      else
+      {
+         $dias = $fsvar->simple_get('presu_validez');
+         if($dias)
+         {
+            $this->setup_validez = intval($dias);
+         }
+      }
    }
 }

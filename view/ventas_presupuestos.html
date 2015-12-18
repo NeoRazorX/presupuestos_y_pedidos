@@ -99,6 +99,10 @@
                <span class="glyphicon glyphicon-plus"></span>
                <span class="hidden-xs">&nbsp; Nuevo</span>
             </a>
+            <a class="btn btn-sm btn-warning" href="#" data-toggle="modal" data-target="#modal_rechazar">
+               <span class="glyphicon glyphicon-remove"></span>
+               <span class="hidden-xs">&nbsp; Rechazar...</span>
+            </a>
             {loop="$fsc->extensions"}
                {if="$value->type=='button'"}
                <a href="index.php?page={$value->from}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
@@ -108,8 +112,8 @@
       </div>
       <div class="col-sm-4 col-xs-6 text-right">
          <a id="b_buscar_lineas" class="btn btn-sm btn-info" title="Buscar en las líneas">
-               <span class="glyphicon glyphicon-search"></span> &nbsp; Líneas
-            </a>
+            <span class="glyphicon glyphicon-search"></span> &nbsp; Líneas
+         </a>
          <div class="btn-group">
             <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
@@ -145,8 +149,8 @@
                </li>
             </ul>
          </div>
-         </div>
       </div>
+   </div>
 </div>
 
 <ul class="nav nav-tabs" role="tablist">
@@ -274,7 +278,7 @@
             <th class="text-right">Fecha</th>
             <th class="text-right hidden-sm">Hora</th>
             {if="$fsc->mostrar!='todo'"}
-                <th class="text-right hidden-sm">Fecha Fin</th>
+                <th class="text-right hidden-sm">Validez</th>
             {/if}
          </tr>
       </thead>
@@ -357,17 +361,17 @@
                <input type="hidden" name="codcliente" value="{$fsc->cliente->codcliente}"/>
                <div class="container-fluid">
                   <div class="row">
-                     <div class="col-lg-6 col-md-6 col-sm-6">
-               <div class="input-group">
-                  <input class="form-control" type="text" name="buscar_lineas" placeholder="Referencia" autocomplete="off"/>
-                  <span class="input-group-btn">
-                     <button class="btn btn-primary" type="submit">
-                        <span class="glyphicon glyphicon-search"></span>
-                     </button>
-                  </span>
-               </div>
-            </div>
-                     <div class="col-lg-6 col-md-6 col-sm-6">
+                     <div class="col-sm-6">
+                        <div class="input-group">
+                           <input class="form-control" type="text" name="buscar_lineas" placeholder="Referencia" autocomplete="off"/>
+                           <span class="input-group-btn">
+                              <button class="btn btn-primary" type="submit">
+                                 <span class="glyphicon glyphicon-search"></span>
+                              </button>
+                           </span>
+                        </div>
+                     </div>
+                     <div class="col-sm-6">
                         <div class="form-group">
                            <input class="form-control" type="text" name="buscar_lineas_o" placeholder="Observaciones" autocomplete="off"/>
                         </div>
@@ -386,6 +390,33 @@
                {/if}
             </div>
             <div id="search_results" class="table-responsive"></div>
+         </div>
+      </div>
+   </div>
+</form>
+
+<form action="{$fsc->url()}" method="post" class="form">
+   <div class="modal fade" id="modal_rechazar" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-sm" role="document">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+               </button>
+               <h4 class="modal-title">
+                  <span class="glyphicon glyphicon-remove"></span>
+                  Rechazar...
+               </h4>
+            </div>
+            <div class="modal-body">
+               Rechazar todos los {#FS_PRESUPUESTOS#} anteriores a esta fecha
+               <input type="text" name="rechazar" value='{function="date('1-1-Y')"}' class="form-control datepicker" autocomplete="off"/>
+            </div>
+            <div class="modal-footer">
+               <button class="btn btn-warning" type="submit">
+                  <span class="glyphicon glyphicon-remove"></span> Rechazar {#FS_PRESUPUESTOS#}
+               </button>
+            </div>
          </div>
       </div>
    </div>

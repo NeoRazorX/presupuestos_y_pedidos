@@ -20,10 +20,10 @@
       $('#ac_cliente').autocomplete({
          serviceUrl: nueva_venta_url,
          paramName: 'buscar_cliente',
-         onSelect: function (suggestion) {
-            if (suggestion)
+         onSelect: function(suggestion) {
+            if(suggestion)
             {
-               if (document.f_presupuesto.cliente.value != suggestion.data && suggestion.data != '')
+               if(document.f_presupuesto.cliente.value != suggestion.data && suggestion.data != '')
                {
                   document.f_presupuesto.cliente.value = suggestion.data;
                   usar_cliente(suggestion.data);
@@ -251,10 +251,17 @@
             </div>
          </div>
          <div class="col-md-2 col-sm-3">
-            <div class="form-group{if="$fsc->presupuesto->finoferta()"} has-warning{/if}">
+            <div class='form-group{if="$fsc->presupuesto->finoferta()"} has-warning{/if}'>
                Fecha validez:
                {if="$fsc->presupuesto->editable"}
-               <input class="form-control datepicker" type="text" name="finoferta" value="{$fsc->presupuesto->finoferta}" autocomplete="off"/>
+               <div class='input-group'>
+                  <input class="form-control datepicker" type="text" name="finoferta" value="{$fsc->presupuesto->finoferta}" autocomplete="off"/>
+                  <span class="input-group-btn">
+                     <a href="#" class="btn btn-default" title="Configurar fecha de validez por defecto" data-toggle="modal" data-target="#modal_fechavalidez">
+                        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                     </a>
+                  </span>
+               </div>
                {else}
                <div class="form-control">{$fsc->presupuesto->finoferta}</div>
                {/if}
@@ -783,8 +790,42 @@
             </div>
             {/if}
             <div class="modal-footer">
-               <button class="btn btn-sm btn-danger" onclick="this.disabled = true;this.form.submit();">
+               <button type="button" class="btn btn-sm btn-danger" onclick="this.disabled = true;this.form.submit();">
                   <span class="glyphicon glyphicon-trash"></span> &nbsp; Eliminar
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+</form>
+
+<form action="{$fsc->url()}" method="post" class="form">
+   <div class="modal fade" id="modal_fechavalidez" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-sm" role="document">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+               </button>
+               <h4 class="modal-title">Fecha de validez</h4>
+            </div>
+            <div class="modal-body">
+               <p class="help-block">
+                  Por defecto la fecha de validez de los {#FS_PRESUPUESTOS#} es
+                  de <b>30</b> días tras la fecha del {#FS_PRESUPUESTO#}. Si lo
+                  deseas puedes cambiar esta cifra.
+               </p>
+               <div class="form-group">
+                  Validez:
+                  <div class="input-group">
+                     <input type="number" name="setup_validez" value="{$fsc->setup_validez}" class="form-control" autocomplete="off"/>
+                     <span class="input-group-addon">días</span>
+                  </div>
+               </div>
+            </div>
+            <div class="modal-footer">
+               <button type="submit" class="btn btn-sm btn-primary">
+                  <span class="glyphicon glyphicon-floppy-disk"></span> &nbsp; Guardar
                </button>
             </div>
          </div>
