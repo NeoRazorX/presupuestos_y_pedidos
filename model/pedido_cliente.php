@@ -479,8 +479,10 @@ class pedido_cliente extends fs_model
       $recargo = 0;
       foreach ($this->get_lineas() as $l)
       {
-         if (!$l->test())
+         if( !$l->test() )
+         {
             $status = FALSE;
+         }
 
          $neto += $l->pvptotal;
          $iva += $l->pvptotal * $l->iva / 100;
@@ -660,11 +662,14 @@ class pedido_cliente extends fs_model
    {
       $pedilist = array();
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name . " ORDER BY ".$order, FS_ITEM_LIMIT, $offset);
-      if ($data)
+      $sql = "SELECT * FROM ".$this->table_name." ORDER BY ".$order;
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if($data)
       {
-         foreach ($data as $p)
+         foreach($data as $p)
+         {
             $pedilist[] = new pedido_cliente($p);
+         }
       }
       
       return $pedilist;
@@ -674,12 +679,14 @@ class pedido_cliente extends fs_model
    {
       $pedilist = array();
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
-              " WHERE idalbaran IS NULL AND status=0 ORDER BY " . $order, FS_ITEM_LIMIT, $offset);
-      if ($data)
+      $sql = "SELECT * FROM ".$this->table_name." WHERE idalbaran IS NULL AND status=0 ORDER BY ".$order;
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if($data)
       {
-         foreach ($data as $p)
+         foreach($data as $p)
+         {
             $pedilist[] = new pedido_cliente($p);
+         }
       }
       
       return $pedilist;
@@ -689,12 +696,14 @@ class pedido_cliente extends fs_model
    {
       $preclist = array();
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
-              " WHERE status=2 ORDER BY " . $order, FS_ITEM_LIMIT, $offset);
-      if ($data)
+      $sql = "SELECT * FROM ".$this->table_name." WHERE status=2 ORDER BY ".$order;
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if($data)
       {
-         foreach ($data as $p)
+         foreach($data as $p)
+         {
             $preclist[] = new pedido_cliente($p);
+         }
       }
       
       return $preclist;
@@ -704,13 +713,15 @@ class pedido_cliente extends fs_model
    {
       $pedilist = array();
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
-              " WHERE codcliente = " . $this->var2str($codcliente) .
-              " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if ($data)
+      $sql = "SELECT * FROM ".$this->table_name." WHERE codcliente = ".$this->var2str($codcliente)
+              ." ORDER BY fecha DESC, codigo DESC";
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if($data)
       {
-         foreach ($data as $p)
+         foreach($data as $p)
+         {
             $pedilist[] = new pedido_cliente($p);
+         }
       }
       
       return $pedilist;
@@ -720,12 +731,15 @@ class pedido_cliente extends fs_model
    {
       $pedilist = array();
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
-              " WHERE codagente = " . $this->var2str($codagente) ." ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
+      $sql = "SELECT * FROM ".$this->table_name." WHERE codagente = ".$this->var2str($codagente)
+              ." ORDER BY fecha DESC, codigo DESC";
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
          foreach($data as $p)
+         {
             $pedilist[] = new pedido_cliente($p);
+         }
       }
       
       return $pedilist;
@@ -735,12 +749,15 @@ class pedido_cliente extends fs_model
    {
       $pedlist = array();
       
-      $data = $this->db->select("SELECT * FROM " . $this->table_name .
-              " WHERE fecha >= " . $this->var2str($desde) . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;");
+      $sql = "SELECT * FROM ".$this->table_name." WHERE fecha >= ".$this->var2str($desde)
+              ." AND fecha <= ".$this->var2str($hasta)." ORDER BY codigo ASC;";
+      $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $p)
+         {
             $pedlist[] = new pedido_cliente($p);
+         }
       }
       
       return $pedlist;
@@ -773,7 +790,9 @@ class pedido_cliente extends fs_model
       if($data)
       {
          foreach($data as $p)
+         {
             $pedilist[] = new pedido_cliente($p);
+         }
       }
       
       return $pedilist;
@@ -788,7 +807,9 @@ class pedido_cliente extends fs_model
               " AND codserie = " . $this->var2str($serie);
 
       if($obs != '')
+      {
          $sql .= " AND lower(observaciones) = " . $this->var2str(strtolower($obs));
+      }
 
       $sql .= " ORDER BY fecha DESC, codigo DESC;";
 
@@ -796,7 +817,9 @@ class pedido_cliente extends fs_model
       if($data)
       {
          foreach($data as $p)
+         {
             $pedilist[] = new pedido_cliente($p);
+         }
       }
       
       return $pedilist;
