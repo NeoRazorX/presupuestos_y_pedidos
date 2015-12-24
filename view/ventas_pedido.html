@@ -263,6 +263,13 @@
                <span class="hidden-xs">&nbsp; Líneas</span>
             </a>
          </li>
+         {if="$fsc->pedido->editable"}
+         <li role="presentation">
+            <a href="#stock" aria-controls="stock" role="tab" data-toggle="tab" title="Comprobar el stock de los artículos">
+               <span class="glyphicon glyphicon-tasks" aria-hidden="true"></span>
+            </a>
+         </li>
+         {/if}
          <li role="presentation">
             <a href="#detalles" aria-controls="detalles" role="tab" data-toggle="tab">
                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
@@ -469,6 +476,36 @@
                </div>
             </div>
          </div>
+         {if="$fsc->pedido->editable"}
+         <div role="tabpanel" class="tab-pane" id="stock">
+            <div class="table-responsive">
+               <table class="table table-hover">
+                  <thead>
+                     <tr>
+                        <th>Referencia</th>
+                        <th class="text-right">Cantidad</th>
+                        <th class="text-right">En almacén</th>
+                        <th class="text-right">Ubicación</th>
+                     </tr>
+                  </thead>
+                  {loop="$fsc->get_lineas_stock()"}
+                  <tr>
+                     <td>{$value['referencia']}</td>
+                     <td class="text-right">{$value['cantidad']}</td>
+                     <td class='text-right{if="$value['stock']>$value['cantidad']"} success{else} danger{/if}'>
+                        {$value['stock']}
+                     </td>
+                     <td>{$value['ubicacion']}</td>
+                  </tr>
+                  {else}
+                  <tr class="warning">
+                     <td colspan="4">Sin resultados.</td>
+                  </tr>
+                  {/loop}
+               </table>
+            </div>
+         </div>
+         {/if}
          <div role="tabpanel" class="tab-pane" id="detalles">
             <div class="container-fluid" style="margin-top: 10px;">
                <div class="row">

@@ -564,4 +564,29 @@ class ventas_presupuesto extends fs_controller {
          }
       }
    }
+   
+   public function get_lineas_stock()
+   {
+      $lineas = array();
+      
+      $sql = "select l.referencia,l.cantidad,s.cantidad as stock,s.ubicacion from lineaspresupuestoscli l, stocks s"
+              ." where l.idpresupuesto = ".$this->presupuesto->var2str($this->presupuesto->idpresupuesto)
+              ." AND l.referencia = s.referencia "
+              . "AND s.codalmacen = ".$this->presupuesto->var2str($this->presupuesto->codalmacen).";";
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $lineas[] = array(
+                'referencia' => $d['referencia'],
+                'cantidad' => floatval($d['cantidad']),
+                'stock' => floatval($d['stock']),
+                'ubicacion' => $d['ubicacion']
+            );
+         }
+      }
+      
+      return $lineas;
+   }
 }
