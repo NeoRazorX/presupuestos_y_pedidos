@@ -102,6 +102,10 @@
       <nulo>YES</nulo>
    </columna>
    <columna>
+      <nombre>femail</nombre>
+      <tipo>date</tipo>
+   </columna>
+   <columna>
       <nombre>idpedido</nombre>
       <tipo>serial</tipo>
       <nulo>NO</nulo>

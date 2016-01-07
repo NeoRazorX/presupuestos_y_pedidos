@@ -1040,6 +1040,18 @@ class imprimir_presu_pedi extends fs_controller
                if( $mail->Send() )
                {
                   $this->new_message('Mensaje enviado correctamente.');
+                  
+                  /// nos guardamos la fecha del envío
+                  if($doc == 'presupuesto')
+                  {
+                     $this->presupuesto->femail = $this->today();
+                     $this->presupuesto->save();
+                  }
+                  else
+                  {
+                     $this->pedido->femail = $this->today();
+                     $this->pedido->save();
+                  }
                }
                else
                   $this->new_error_msg("Error al enviar el email: " . $mail->ErrorInfo);

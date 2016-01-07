@@ -195,6 +195,13 @@ class pedido_cliente extends fs_model
    
    public $editable;
    
+   
+   /**
+    * Fecha en la que se envió el pedido por email.
+    * @var type 
+    */
+   public $femail;
+   
    public function __construct($p = FALSE)
    {
       parent::__construct('pedidoscli', 'plugins/presupuestos_y_pedidos/');
@@ -260,6 +267,12 @@ class pedido_cliente extends fs_model
          {
             $this->status = 2;
          }
+         
+         $this->femail = NULL;
+         if( !is_null($p['femail']) )
+         {
+            $this->femail = Date('d-m-Y', strtotime($p['femail']));
+         }
       }
       else
       {
@@ -298,6 +311,7 @@ class pedido_cliente extends fs_model
          $this->observaciones = NULL;
          $this->status = 0;
          $this->editable = TRUE;
+         $this->femail = NULL;
       }
    }
 
@@ -584,6 +598,7 @@ class pedido_cliente extends fs_model
                     . ", totalirpf = " . $this->var2str($this->totalirpf)
                     . ", totaliva = " . $this->var2str($this->totaliva)
                     . ", totalrecargo = " . $this->var2str($this->totalrecargo)
+                    . ", femail = " . $this->var2str($this->femail)
                     . "  WHERE idpedido = " . $this->var2str($this->idpedido) . ";";
             
             return $this->db->exec($sql);
@@ -595,7 +610,7 @@ class pedido_cliente extends fs_model
                codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,codpostal,codserie,
                direccion,editable,fecha,hora,idalbaran,irpf,neto,nombrecliente,
                numero,observaciones,status,porcomision,provincia,tasaconv,total,
-               totaleuros,totalirpf,totaliva,totalrecargo,numero2) VALUES ("
+               totaleuros,totalirpf,totaliva,totalrecargo,numero2,femail) VALUES ("
                     . $this->var2str($this->apartado) . ","
                     . $this->var2str($this->cifnif) . ","
                     . $this->var2str($this->ciudad) . ","
@@ -629,7 +644,8 @@ class pedido_cliente extends fs_model
                     . $this->var2str($this->totalirpf) . ","
                     . $this->var2str($this->totaliva) . ","
                     . $this->var2str($this->totalrecargo) . ","
-                    . $this->var2str($this->numero2) . ");";
+                    . $this->var2str($this->numero2) . ","
+                    . $this->var2str($this->femail) . ");";
             
             if( $this->db->exec($sql) )
             {

@@ -179,11 +179,11 @@ class ventas_presupuestos extends fs_controller
          $order2 = '';
          if($this->order == 'fecha DESC')
          {
-            $order2 = ', codigo DESC';
+            $order2 = ', hora DESC';
          }
          else if($this->order == 'fecha ASC')
          {
-            $order2 = ', codigo ASC';
+            $order2 = ', hora ASC';
          }
          
          /// ejecutamos la tarea del cron

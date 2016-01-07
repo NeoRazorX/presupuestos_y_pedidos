@@ -291,6 +291,9 @@
             {if="$value->status==2"}
             <span class="glyphicon glyphicon-remove" title="El {#FS_PRESUPUESTO#} ha sido rechazado"></span>
             {/if}
+            {if="$value->femail"}
+            <span class="glyphicon glyphicon-send" title="El {#FS_PRESUPUESTO#} fue enviado por email el {$value->femail}"></span>
+            {/if}
          </td>
          <td><a href="{$value->url()}">{$value->codigo}</a> {$value->numero2}</td>
          <td>

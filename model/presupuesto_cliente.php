@@ -201,6 +201,12 @@ class presupuesto_cliente extends fs_model
    public $status;
    
    public $editable;
+   
+   /**
+    * Fecha en la que se envió el presupuesto por email.
+    * @var type 
+    */
+   public $femail;
 
    public function __construct($p = FALSE)
    {
@@ -273,6 +279,12 @@ class presupuesto_cliente extends fs_model
          {
             $this->status = 2;
          }
+         
+         $this->femail = NULL;
+         if( !is_null($p['femail']) )
+         {
+            $this->femail = Date('d-m-Y', strtotime($p['femail']));
+         }
       }
       else
       {
@@ -312,6 +324,7 @@ class presupuesto_cliente extends fs_model
          $this->observaciones = NULL;
          $this->status = 0;
          $this->editable = TRUE;
+         $this->femail = NULL;
       }
    }
 
@@ -588,6 +601,7 @@ class presupuesto_cliente extends fs_model
                     . ", totalirpf = " . $this->var2str($this->totalirpf)
                     . ", totaliva = " . $this->var2str($this->totaliva)
                     . ", totalrecargo = " . $this->var2str($this->totalrecargo)
+                    . ", femail = " . $this->var2str($this->femail)
                     . "  WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";";
             
             return $this->db->exec($sql);
@@ -599,7 +613,7 @@ class presupuesto_cliente extends fs_model
                codalmacen,codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,
                codpostal,codserie,direccion,editable,fecha,finoferta,hora,idpedido,irpf,neto,
                nombrecliente,numero,observaciones,status,porcomision,provincia,
-               tasaconv,total,totaleuros,totalirpf,totaliva,totalrecargo,numero2) VALUES ("
+               tasaconv,total,totaleuros,totalirpf,totaliva,totalrecargo,numero2,femail) VALUES ("
                     . $this->var2str($this->apartado) . ","
                     . $this->var2str($this->cifnif) . ","
                     . $this->var2str($this->ciudad) . ","
@@ -634,7 +648,8 @@ class presupuesto_cliente extends fs_model
                     . $this->var2str($this->totalirpf) . ","
                     . $this->var2str($this->totaliva) . ","
                     . $this->var2str($this->totalrecargo) . ","
-                    . $this->var2str($this->numero2) . ");";
+                    . $this->var2str($this->numero2) . ","
+                    . $this->var2str($this->femail) . ");";
 
             if( $this->db->exec($sql) )
             {
