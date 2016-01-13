@@ -36,6 +36,7 @@ require_model('serie.php');
 class ventas_pedido extends fs_controller
 {
    public $agente;
+   public $allow_delete;
    public $cliente;
    public $cliente_s;
    public $divisa;
@@ -56,6 +57,9 @@ class ventas_pedido extends fs_controller
 
    protected function private_core()
    {
+      /// ¿El usuario tiene permiso para eliminar en esta página?
+      $this->allow_delete = $this->user->allow_delete_on(__CLASS__);
+      
       $this->ppage = $this->page->get('ventas_pedidos');
       $this->agente = FALSE;
 
@@ -73,9 +77,6 @@ class ventas_pedido extends fs_controller
       $this->pais = new pais();
       $this->serie = new serie();
       
-      /// ¿El usuario tiene permiso para eliminar en esta página?
-      $this->allow_delete = $this->user->allow_delete_on(__CLASS__);
-
       /**
        * Comprobamos si el usuario tiene acceso a nueva_venta,
        * necesario para poder añadir líneas.

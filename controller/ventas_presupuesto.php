@@ -36,6 +36,7 @@ require_model('serie.php');
 class ventas_presupuesto extends fs_controller {
 
    public $agente;
+   public $allow_delete;
    public $cliente;
    public $cliente_s;
    public $divisa;

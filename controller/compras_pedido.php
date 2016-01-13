@@ -35,6 +35,7 @@ require_model('serie.php');
 class compras_pedido extends fs_controller
 {
    public $agente;
+   public $allow_delete;
    public $divisa;
    public $ejercicio;
    public $fabricante;
@@ -54,6 +55,9 @@ class compras_pedido extends fs_controller
 
    protected function private_core()
    {
+      /// ¿El usuario tiene permiso para eliminar en esta página?
+      $this->allow_delete = $this->user->allow_delete_on(__CLASS__);
+      
       $this->ppage = $this->page->get('compras_pedidos');
       $this->agente = FALSE;
       
@@ -70,9 +74,6 @@ class compras_pedido extends fs_controller
       $this->proveedor_s = FALSE;
       $this->serie = new serie();
       
-      /// ¿El usuario tiene permiso para eliminar en esta página?
-      $this->allow_delete = $this->user->allow_delete_on(__CLASS__);
-
       /**
        * Comprobamos si el usuario tiene acceso a nueva_compra,
        * necesario para poder añadir líneas.
