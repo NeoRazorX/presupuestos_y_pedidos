@@ -29,7 +29,6 @@ require_model('impuesto.php');
 require_model('linea_pedido_proveedor.php');
 require_model('pedido_proveedor.php');
 require_model('proveedor.php');
-require_model('regularizacion_iva.php');
 require_model('serie.php');
 
 class compras_pedido extends fs_controller
@@ -93,17 +92,17 @@ class compras_pedido extends fs_controller
        */
       $pedido->cron_job();
       
-      if (isset($_POST['idpedido']))
+      if( isset($_POST['idpedido']) )
       {
          $this->pedido = $pedido->get($_POST['idpedido']);
          $this->modificar();
       }
-      else if (isset($_GET['id']))
+      else if( isset($_GET['id']) )
       {
          $this->pedido = $pedido->get($_GET['id']);
       }
 
-      if ($this->pedido)
+      if($this->pedido)
       {
          $this->page->title = $this->pedido->codigo;
 
@@ -120,9 +119,9 @@ class compras_pedido extends fs_controller
          /// comprobamos el pedido
          $this->pedido->full_test();
          
-         if( isset($_GET['aprobar']) AND isset($_GET['petid']) AND is_null($this->pedido->idalbaran) )
+         if( isset($_POST['aprobar']) AND isset($_POST['petid']) AND is_null($this->pedido->idalbaran) )
          {
-            if( $this->duplicated_petition($_GET['petid']) )
+            if( $this->duplicated_petition($_POST['petid']) )
             {
                $this->new_error_msg('Petición duplicada. Evita hacer doble clic sobre los botones.');
             }
@@ -162,16 +161,17 @@ class compras_pedido extends fs_controller
       
       if( is_null($this->pedido->idalbaran) )
       {
-         /// obtenemos los datos del ejercicio para acotar la fecha
-         $eje0 = $this->ejercicio->get($this->pedido->codejercicio);
-         if($eje0)
+         $eje0 = $this->ejercicio->get_by_fecha($_POST['fecha'], FALSE);
+         if(!$eje0)
          {
-            $this->pedido->fecha = $eje0->get_best_fecha($_POST['fecha'], TRUE);
-            $this->pedido->hora = $_POST['hora'];
+            $this->new_error_msg('Ningún ejercicio encontrado.');
          }
          else
-            $this->new_error_msg('No se encuentra el ejercicio asociado al ' . FS_PEDIDO);
-
+         {
+            $this->pedido->fecha = $_POST['fecha'];
+            $this->pedido->hora = $_POST['hora'];
+         }
+         
          /// ¿cambiamos el proveedor?
          if($_POST['proveedor'] != $this->pedido->codproveedor)
          {
@@ -197,7 +197,6 @@ class compras_pedido extends fs_controller
             if($serie2)
             {
                $this->pedido->codserie = $serie2->codserie;
-               $this->pedido->irpf = $serie2->irpf;
                $this->pedido->new_codigo();
 
                $serie = $serie2;
@@ -229,6 +228,8 @@ class compras_pedido extends fs_controller
             $this->pedido->totaliva = 0;
             $this->pedido->totalirpf = 0;
             $this->pedido->totalrecargo = 0;
+            $this->pedido->irpf = 0;
+            
             $lineas = $this->pedido->get_lineas();
             $articulo = new articulo();
 
@@ -295,6 +296,11 @@ class compras_pedido extends fs_controller
                            $this->pedido->totaliva += $value->pvptotal * $value->iva / 100;
                            $this->pedido->totalirpf += $value->pvptotal * $value->irpf / 100;
                            $this->pedido->totalrecargo += $value->pvptotal * $value->recargo / 100;
+                           
+                           if($value->irpf > $this->pedido->irpf)
+                           {
+                              $this->pedido->irpf = $value->irpf;
+                           }
                         }
                         else
                            $this->new_error_msg("¡Imposible modificar la línea del artículo " . $value->referencia . "!");
@@ -340,6 +346,11 @@ class compras_pedido extends fs_controller
                         $this->pedido->totaliva += $linea->pvptotal * $linea->iva / 100;
                         $this->pedido->totalirpf += $linea->pvptotal * $linea->irpf / 100;
                         $this->pedido->totalrecargo += $linea->pvptotal * $linea->recargo / 100;
+                        
+                        if($linea->irpf > $this->pedido->irpf)
+                        {
+                           $this->pedido->irpf = $linea->irpf;
+                        }
                      }
                      else
                         $this->new_error_msg("¡Imposible guardar la línea del artículo " . $linea->referencia . "!");
@@ -392,28 +403,23 @@ class compras_pedido extends fs_controller
       $albaran->totalirpf = $this->pedido->totalirpf;
       $albaran->totalrecargo = $this->pedido->totalrecargo;
       
-      if( isset($_GET['mismafecha']) )
+      /**
+       * Obtenemos el ejercicio para la fecha seleccionada.
+       */
+      $eje0 = $this->ejercicio->get_by_fecha($_POST['aprobar'], FALSE);
+      if($eje0)
       {
-         $albaran->fecha = $this->pedido->fecha;
+         $albaran->fecha = $_POST['aprobar'];
+         $albaran->codejercicio = $eje0->codejercicio;
       }
       
-      /**
-       * Obtenemos el ejercicio para la fecha de hoy (puede que
-       * no sea el mismo ejercicio que el del pedido, por ejemplo
-       * si hemos cambiado de año)
-       */
-      $eje0 = $this->ejercicio->get_by_fecha($albaran->fecha);
-      $albaran->codejercicio = $eje0->codejercicio;
-
-      $regularizacion = new regularizacion_iva();
-
-      if( !$eje0->abierto() )
+      if(!$eje0)
+      {
+         $this->new_error_msg("Ejercicio no encontrado o está cerrado.");
+      }
+      else if( !$eje0->abierto() )
       {
          $this->new_error_msg("El ejercicio está cerrado.");
-      }
-      else if( $regularizacion->get_fecha_inside($albaran->fecha) )
-      {
-         $this->new_error_msg("El IVA de ese periodo ya ha sido regularizado. No se pueden añadir más " . FS_ALBARANES . " en esa fecha.");
       }
       else if( $albaran->save() )
       {

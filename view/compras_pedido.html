@@ -49,6 +49,10 @@
          $('#modal_enviar').modal('show');
          document.enviar_email.email.select();
       });
+      $("#b_aprobar").click(function(event) {
+         event.preventDefault();
+         $("#modal_aprobar").modal('show');
+      });
       $('#b_eliminar').click(function (event) {
          event.preventDefault();
          $('#modal_eliminar').modal('show');
@@ -97,22 +101,10 @@
                   <span class="glyphicon glyphicon-eye-open"></span> &nbsp; Ver {#FS_ALBARAN#}
                </a>
                {elseif="$fsc->pedido->editable"}
-               <a class="btn btn-sm btn-default" href="{$fsc->url()}&aprobar=TRUE&petid={$fsc->random_string()}">
-                  <span class="glyphicon glyphicon-paperclip"></span> &nbsp; Aprobar
+               <a id="b_aprobar" class="btn btn-sm btn-default" href="#">
+                  <span class="glyphicon glyphicon-paperclip"></span>
+                  <span class="hidden-xs">&nbsp; Aprobar</span>
                </a>
-                  {if="$fsc->pedido->fecha!=$fsc->today()"}
-                  <a href="#" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                     <span class="caret"></span>
-                     <span class="sr-only">Toggle Dropdown</span>
-                  </a>
-                  <ul class="dropdown-menu">
-                     <li>
-                        <a href="{$fsc->url()}&aprobar=TRUE&petid={$fsc->random_string()}&mismafecha=TRUE">
-                           Aprobar con fecha {$fsc->pedido->fecha}
-                        </a>
-                     </li>
-                  </ul>
-                  {/if}
                {else}
                <a class="btn btn-sm btn-warning" href="{$fsc->pedido->url()}&desbloquear=TRUE">
                   <span class="glyphicon glyphicon-lock"></span> &nbsp; Desbloquear
@@ -487,8 +479,6 @@
          {/loop}
       </div>
    </div>
-
-   
 </form>
 
 <div class="modal" id="modal_articulos">
@@ -707,6 +697,32 @@
                   </button>
                   {/if}
                {/loop}
+            </div>
+         </div>
+      </div>
+   </div>
+</form>
+
+<form class="form" role="form" action="{$fsc->url()}" method="post">
+   <input type="hidden" name="petid" value="{$fsc->random_string()}"/>
+   <div class="modal" id="modal_aprobar">
+      <div class="modal-dialog modal-sm">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+               <h4 class="modal-title">Aprobar {#FS_PEDIDO#}</h4>
+            </div>
+            <div class="modal-body">
+               <div class="form-group">
+                  Fecha del {#FS_ALBARAN#}:
+                  <input class="form-control datepicker" type="text" name="aprobar" value="{$fsc->today()}" autocomplete="off"/>
+                  <p class="help-block">Se generará un {#FS_ALBARAN#}.</p>
+               </div>
+               <div class="text-right">
+                  <button class="btn btn-sm btn-primary" onclick="this.disabled=true;this.form.submit();">
+                     <span class="glyphicon glyphicon-paperclip"></span> &nbsp; Aprobar
+                  </button>
+               </div>
             </div>
          </div>
       </div>

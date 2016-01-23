@@ -30,7 +30,6 @@ require_model('impuesto.php');
 require_model('linea_pedido_cliente.php');
 require_model('pais.php');
 require_model('pedido_cliente.php');
-require_model('regularizacion_iva.php');
 require_model('serie.php');
 
 class ventas_pedido extends fs_controller
@@ -85,7 +84,9 @@ class ventas_pedido extends fs_controller
       {
          $nuevopedp = $this->page->get('nueva_venta');
          if($nuevopedp)
+         {
             $this->nuevo_pedido_url = $nuevopedp->url();
+         }
       }
 
       if( isset($_POST['idpedido']) )
@@ -103,7 +104,7 @@ class ventas_pedido extends fs_controller
          $this->page->title = $this->pedido->codigo;
 
          /// cargamos el agente
-         if (!is_null($this->pedido->codagente))
+         if( !is_null($this->pedido->codagente) )
          {
             $agente = new agente();
             $this->agente = $agente->get($this->pedido->codagente);
@@ -113,9 +114,9 @@ class ventas_pedido extends fs_controller
          $this->cliente_s = $this->cliente->get($this->pedido->codcliente);
 
          /// comprobamos el pedido
-         if ($this->pedido->full_test())
+         if( $this->pedido->full_test() )
          {
-            if (isset($_REQUEST['status']))
+            if( isset($_REQUEST['status']) )
             {
                $this->pedido->status = intval($_REQUEST['status']);
                
@@ -159,25 +160,26 @@ class ventas_pedido extends fs_controller
 
       if($this->pedido->editable)
       {
-         /// obtenemos los datos del ejercicio para acotar la fecha
-         $eje0 = $this->ejercicio->get($this->pedido->codejercicio);
-         if ($eje0)
+         $eje0 = $this->ejercicio->get_by_fecha($_POST['fecha'], FALSE);
+         if(!$eje0)
          {
-            $this->pedido->fecha = $eje0->get_best_fecha($_POST['fecha'], TRUE);
-            $this->pedido->hora = $_POST['hora'];
+            $this->new_error_msg('Ningún ejercicio encontrado.');
          }
          else
-            $this->new_error_msg('No se encuentra el ejercicio asociado al ' . FS_PEDIDO);
-
+         {
+            $this->pedido->fecha = $_POST['fecha'];
+            $this->pedido->hora = $_POST['hora'];
+         }
+         
          /// ¿cambiamos el cliente?
-         if ($_POST['cliente'] != $this->pedido->codcliente)
+         if($_POST['cliente'] != $this->pedido->codcliente)
          {
             $cliente = $this->cliente->get($_POST['cliente']);
-            if ($cliente)
+            if($cliente)
             {
-               foreach ($cliente->get_direcciones() as $d)
+               foreach($cliente->get_direcciones() as $d)
                {
-                  if ($d->domfacturacion)
+                  if($d->domfacturacion)
                   {
                      $this->pedido->codcliente = $cliente->codcliente;
                      $this->pedido->cifnif = $cliente->cifnif;
@@ -212,13 +214,12 @@ class ventas_pedido extends fs_controller
          $serie = $this->serie->get($this->pedido->codserie);
 
          /// ¿cambiamos la serie?
-         if ($_POST['serie'] != $this->pedido->codserie)
+         if($_POST['serie'] != $this->pedido->codserie)
          {
             $serie2 = $this->serie->get($_POST['serie']);
-            if ($serie2)
+            if($serie2)
             {
                $this->pedido->codserie = $serie2->codserie;
-               $this->pedido->irpf = $serie2->irpf;
                $this->pedido->new_codigo();
 
                $serie = $serie2;
@@ -242,7 +243,7 @@ class ventas_pedido extends fs_controller
             $this->pedido->tasaconv = floatval($_POST['tasaconv']);
          }
          
-         if (isset($_POST['numlineas']))
+         if( isset($_POST['numlineas']) )
          {
             $numlineas = intval($_POST['numlineas']);
 
@@ -250,41 +251,45 @@ class ventas_pedido extends fs_controller
             $this->pedido->totaliva = 0;
             $this->pedido->totalirpf = 0;
             $this->pedido->totalrecargo = 0;
+            $this->pedido->irpf = 0;
+            
             $lineas = $this->pedido->get_lineas();
             $articulo = new articulo();
 
             /// eliminamos las líneas que no encontremos en el $_POST
-            foreach ($lineas as $l)
+            foreach($lineas as $l)
             {
                $encontrada = FALSE;
-               for ($num = 0; $num <= $numlineas; $num++)
+               for($num = 0; $num <= $numlineas; $num++)
                {
-                  if (isset($_POST['idlinea_' . $num]))
+                  if( isset($_POST['idlinea_' . $num]) )
                   {
-                     if ($l->idlinea == intval($_POST['idlinea_' . $num]))
+                     if($l->idlinea == intval($_POST['idlinea_' . $num]))
                      {
                         $encontrada = TRUE;
                         break;
                      }
                   }
                }
-               if (!$encontrada)
+               if(!$encontrada)
                {
-                  if (!$l->delete())
+                  if( !$l->delete() )
+                  {
                      $this->new_error_msg("¡Imposible eliminar la línea del artículo " . $l->referencia . "!");
+                  }
                }
             }
 
             /// modificamos y/o añadimos las demás líneas
-            for ($num = 0; $num <= $numlineas; $num++)
+            for($num = 0; $num <= $numlineas; $num++)
             {
                $encontrada = FALSE;
-               if (isset($_POST['idlinea_' . $num]))
+               if( isset($_POST['idlinea_' . $num]) )
                {
-                  foreach ($lineas as $k => $value)
+                  foreach($lineas as $k => $value)
                   {
                      /// modificamos la línea
-                     if ($value->idlinea == intval($_POST['idlinea_' . $num]))
+                     if($value->idlinea == intval($_POST['idlinea_' . $num]))
                      {
                         $encontrada = TRUE;
                         $lineas[$k]->cantidad = floatval($_POST['cantidad_' . $num]);
@@ -310,12 +315,17 @@ class ventas_pedido extends fs_controller
                            $lineas[$k]->recargo = floatval($_POST['recargo_' . $num]);
                         }
 
-                        if ($lineas[$k]->save())
+                        if( $lineas[$k]->save() )
                         {
                            $this->pedido->neto += $value->pvptotal;
                            $this->pedido->totaliva += $value->pvptotal * $value->iva / 100;
                            $this->pedido->totalirpf += $value->pvptotal * $value->irpf / 100;
                            $this->pedido->totalrecargo += $value->pvptotal * $value->recargo / 100;
+                           
+                           if($value->irpf > $this->pedido->irpf)
+                           {
+                              $this->pedido->irpf = $value->irpf;
+                           }
                         }
                         else
                            $this->new_error_msg("¡Imposible modificar la línea del artículo " . $value->referencia . "!");
@@ -324,17 +334,19 @@ class ventas_pedido extends fs_controller
                   }
 
                   /// añadimos la línea
-                  if (!$encontrada AND intval($_POST['idlinea_' . $num]) == -1 AND isset($_POST['referencia_' . $num]))
+                  if(!$encontrada AND intval($_POST['idlinea_' . $num]) == -1 AND isset($_POST['referencia_' . $num]))
                   {
                      $linea = new linea_pedido_cliente();
                      $linea->idpedido = $this->pedido->idpedido;
                      $linea->descripcion = $_POST['desc_' . $num];
                      
-                     if (!$serie->siniva AND $cliente->regimeniva != 'Exento')
+                     if(!$serie->siniva AND $cliente->regimeniva != 'Exento')
                      {
                         $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
                         if($imp0)
+                        {
                            $linea->codimpuesto = $imp0->codimpuesto;
+                        }
                         
                         $linea->iva = floatval($_POST['iva_' . $num]);
                         $linea->recargo = floatval($_POST['recargo_' . $num]);
@@ -359,6 +371,11 @@ class ventas_pedido extends fs_controller
                         $this->pedido->totaliva += $linea->pvptotal * $linea->iva / 100;
                         $this->pedido->totalirpf += $linea->pvptotal * $linea->irpf / 100;
                         $this->pedido->totalrecargo += $linea->pvptotal * $linea->recargo / 100;
+                        
+                        if($linea->irpf > $this->pedido->irpf)
+                        {
+                           $this->pedido->irpf = $linea->irpf;
+                        }
                      }
                      else
                         $this->new_error_msg("¡Imposible guardar la línea del artículo " . $linea->referencia . "!");
@@ -381,7 +398,7 @@ class ventas_pedido extends fs_controller
          }
       }
 
-      if ($this->pedido->save())
+      if( $this->pedido->save() )
       {
          $this->new_message(ucfirst(FS_PEDIDO) . " modificado correctamente.");
          $this->new_change(ucfirst(FS_PEDIDO) . ' Cliente ' . $this->pedido->codigo, $this->pedido->url());
@@ -424,25 +441,26 @@ class ventas_pedido extends fs_controller
        * no sea el mismo ejercicio que el del pedido, por ejemplo
        * si hemos cambiado de año)
        */
-      $eje0 = $this->ejercicio->get_by_fecha($albaran->fecha);
-      $albaran->codejercicio = $eje0->codejercicio;
+      $eje0 = $this->ejercicio->get_by_fecha($albaran->fecha, FALSE);
+      if($eje0)
+      {
+         $albaran->codejercicio = $eje0->codejercicio;
+      }
 
-      $regularizacion = new regularizacion_iva();
-
-      if (!$eje0->abierto())
+      if(!$eje0)
+      {
+         $this->new_error_msg("Ejercicio no encontrado.");
+      }
+      else if( !$eje0->abierto() )
       {
          $this->new_error_msg("El ejercicio está cerrado.");
       }
-      else if ($regularizacion->get_fecha_inside($albaran->fecha))
-      {
-         $this->new_error_msg("El IVA de ese periodo ya ha sido regularizado. No se pueden añadir más " . FS_ALBARANES . " en esa fecha.");
-      }
-      else if ($albaran->save())
+      else if( $albaran->save() )
       {
          $continuar = TRUE;
          $art0 = new articulo();
 
-         foreach ($this->pedido->get_lineas() as $l)
+         foreach($this->pedido->get_lineas() as $l)
          {
             $n = new linea_albaran_cliente();
             $n->idlineapedido = $l->idlinea;
@@ -460,7 +478,7 @@ class ventas_pedido extends fs_controller
             $n->recargo = $l->recargo;
             $n->referencia = $l->referencia;
 
-            if ($n->save())
+            if( $n->save() )
             {
                /// descontamos del stock
                if( !is_null($n->referencia) )
@@ -480,7 +498,7 @@ class ventas_pedido extends fs_controller
             }
          }
 
-         if ($continuar)
+         if($continuar)
          {
             $this->pedido->idalbaran = $albaran->idalbaran;
             
