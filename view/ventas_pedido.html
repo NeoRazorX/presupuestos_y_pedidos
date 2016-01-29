@@ -135,6 +135,11 @@
                      {/if}
                      {if="$fsc->pedido->status!=1"}
                      <li><a href="{$fsc->url()}&status=1"><span class="glyphicon glyphicon-ok"></span> &nbsp; Aprobado</a></li>
+                     <li>
+                        <a href="#" data-toggle="modal" data-target="#modal_aprobar">
+                           <span class="glyphicon glyphicon-file"></span> &nbsp; Aprobar y facturar
+                        </a>
+                     </li>
                      {/if}
                      {if="$fsc->pedido->status!=2"}
                      <li><a href="{$fsc->url()}&status=2"><span class="glyphicon glyphicon-remove"></span> &nbsp; Rechazado</a></li>
@@ -816,6 +821,31 @@
                   </button>
                   {/if}
                {/loop}
+            </div>
+         </div>
+      </div>
+   </div>
+</form>
+
+<form class="form" role="form" action="{$fsc->url()}&status=1" method="post">
+   <div class="modal" id="modal_aprobar">
+      <div class="modal-dialog modal-sm">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+               <h4 class="modal-title">Aprobar {#FS_PEDIDO#} y facturar</h4>
+            </div>
+            <div class="modal-body">
+               <div class="form-group">
+                  Fecha de la {#FS_FACTURA#}:
+                  <input class="form-control datepicker" type="text" name="facturar" value="{$fsc->today()}" autocomplete="off"/>
+                  <p class="help-block">Se generará una {#FS_FACTURA#}.</p>
+               </div>
+               <div class="text-right">
+                  <button class="btn btn-sm btn-primary" onclick="this.disabled=true;this.form.submit();">
+                     <span class="glyphicon glyphicon-paperclip"></span> &nbsp; Aprobar
+                  </button>
+               </div>
             </div>
          </div>
       </div>

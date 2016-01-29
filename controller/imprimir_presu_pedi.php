@@ -2,7 +2,7 @@
 
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2014-2016  Carlos Garcia Gomez  neorazorx@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -306,7 +306,7 @@ class imprimir_presu_pedi extends fs_controller
       
       if( get_class($lineas[$linea_actual]) == 'linea_pedido_proveedor' )
       {
-         $table_header['referencia'] = '<b>Ref. Prov. + Descripción</b>';
+         $table_header['descripcion'] = '<b>Ref. Prov. + Descripción</b>';
       }
       
       if($this->impresion['print_dto'])

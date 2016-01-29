@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014-2015  Carlos Garcia Gomez       neorazorx@gmail.com
+ * Copyright (C) 2014-2016  Carlos Garcia Gomez       neorazorx@gmail.com
  * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -435,7 +435,12 @@ class ventas_pedido extends fs_controller
       $albaran->porcomision = $this->pedido->porcomision;
       $albaran->totalirpf = $this->pedido->totalirpf;
       $albaran->totalrecargo = $this->pedido->totalrecargo;
-
+      
+      if( isset($_POST['facturar']) )
+      {
+         $albaran->fecha = $_POST['facturar'];
+      }
+      
       /**
        * Obtenemos el ejercicio para la fecha de hoy (puede que
        * no sea el mismo ejercicio que el del pedido, por ejemplo
@@ -505,6 +510,11 @@ class ventas_pedido extends fs_controller
             if( $this->pedido->save() )
             {
                $this->new_message("<a href='" . $albaran->url() . "'>" . ucfirst(FS_ALBARAN) . '</a> generado correctamente.');
+               
+               if( isset($_POST['facturar']) )
+               {
+                  header('Location: '.$albaran->url().'&facturar='.$_POST['facturar'].'&petid='.$this->random_string());
+               }
             }
             else
             {
