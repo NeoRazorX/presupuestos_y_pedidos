@@ -586,21 +586,29 @@ class ventas_presupuesto extends fs_controller {
    {
       $lineas = array();
       
-      $sql = "select l.referencia,l.cantidad,s.cantidad as stock,s.ubicacion from lineaspresupuestoscli l, stocks s"
-              ." where l.idpresupuesto = ".$this->presupuesto->var2str($this->presupuesto->idpresupuesto)
-              ." AND l.referencia = s.referencia "
-              . "AND s.codalmacen = ".$this->presupuesto->var2str($this->presupuesto->codalmacen).";";
+      $sql = "SELECT l.referencia,l.descripcion,l.cantidad,s.cantidad as stock,s.ubicacion FROM lineaspresupuestoscli l, stocks s"
+              . " WHERE l.idpresupuesto = ".$this->presupuesto->var2str($this->presupuesto->idpresupuesto)
+              . " AND l.referencia = s.referencia"
+              . " AND s.codalmacen = ".$this->presupuesto->var2str($this->presupuesto->codalmacen)
+              . " ORDER BY referencia ASC;";
       $data = $this->db->select($sql);
       if($data)
       {
+         $art0 = new articulo();
+         
          foreach($data as $d)
          {
-            $lineas[] = array(
-                'referencia' => $d['referencia'],
-                'cantidad' => floatval($d['cantidad']),
-                'stock' => floatval($d['stock']),
-                'ubicacion' => $d['ubicacion']
-            );
+            $articulo = $art0->get($d['referencia']);
+            if($articulo)
+            {
+               $lineas[] = array(
+                   'articulo' => $articulo,
+                   'descripcion' => $d['descripcion'],
+                   'cantidad' => floatval($d['cantidad']),
+                   'stock' => floatval($d['stock']),
+                   'ubicacion' => $d['ubicacion']
+               );
+            }
          }
       }
       

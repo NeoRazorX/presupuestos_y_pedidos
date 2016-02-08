@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014-2015    Carlos Garcia Gomez        neorazorx@gmail.com
+ * Copyright (C) 2014-2016    Carlos Garcia Gomez        neorazorx@gmail.com
  * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -195,12 +195,17 @@ class pedido_cliente extends fs_model
    
    public $editable;
    
-   
    /**
     * Fecha en la que se envió el pedido por email.
     * @var type 
     */
    public $femail;
+   
+   /**
+    * Fecha de salida prevista del material.
+    * @var type 
+    */
+   public $fechasalida;
    
    public function __construct($p = FALSE)
    {
@@ -273,6 +278,12 @@ class pedido_cliente extends fs_model
          {
             $this->femail = Date('d-m-Y', strtotime($p['femail']));
          }
+         
+         $this->fechasalida = NULL;
+         if( !is_null($p['fechasalida']) )
+         {
+            $this->fechasalida = Date('d-m-Y', strtotime($p['fechasalida']));
+         }
       }
       else
       {
@@ -312,6 +323,7 @@ class pedido_cliente extends fs_model
          $this->status = 0;
          $this->editable = TRUE;
          $this->femail = NULL;
+         $this->fechasalida = NULL;
       }
    }
 
@@ -599,6 +611,7 @@ class pedido_cliente extends fs_model
                     . ", totaliva = " . $this->var2str($this->totaliva)
                     . ", totalrecargo = " . $this->var2str($this->totalrecargo)
                     . ", femail = " . $this->var2str($this->femail)
+                    . ", fechasalida = " . $this->var2str($this->fechasalida)
                     . "  WHERE idpedido = " . $this->var2str($this->idpedido) . ";";
             
             return $this->db->exec($sql);
@@ -610,7 +623,7 @@ class pedido_cliente extends fs_model
                codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,codpostal,codserie,
                direccion,editable,fecha,hora,idalbaran,irpf,neto,nombrecliente,
                numero,observaciones,status,porcomision,provincia,tasaconv,total,
-               totaleuros,totalirpf,totaliva,totalrecargo,numero2,femail) VALUES ("
+               totaleuros,totalirpf,totaliva,totalrecargo,numero2,femail,fechasalida) VALUES ("
                     . $this->var2str($this->apartado) . ","
                     . $this->var2str($this->cifnif) . ","
                     . $this->var2str($this->ciudad) . ","
@@ -645,7 +658,8 @@ class pedido_cliente extends fs_model
                     . $this->var2str($this->totaliva) . ","
                     . $this->var2str($this->totalrecargo) . ","
                     . $this->var2str($this->numero2) . ","
-                    . $this->var2str($this->femail) . ");";
+                    . $this->var2str($this->femail) . ","
+                    . $this->var2str($this->fechasalida) . ");";
             
             if( $this->db->exec($sql) )
             {
@@ -843,6 +857,10 @@ class pedido_cliente extends fs_model
    
    public function cron_job()
    {
+      /// marcamos como aprobados los presupuestos con idpedido
+      $this->db->exec("UPDATE ".$this->table_name." SET status = '1', editable = FALSE"
+              . " WHERE status != '1' AND idalbaran IS NOT NULL;");
+      
       /// devolvemos al estado pendiente a los pedidos con estado 1 a los que se haya borrado el albarán
       $this->db->exec("UPDATE ".$this->table_name." SET status = '0', idalbaran = NULL, editable = TRUE "
               . "WHERE status = '1' AND idalbaran NOT IN (SELECT idalbaran FROM albaranescli);");

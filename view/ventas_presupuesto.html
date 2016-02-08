@@ -323,7 +323,7 @@
                            <input type="hidden" name="idlinea_{$counter}" value="{$value->idlinea}"/>
                            <input type="hidden" name="referencia_{$counter}" value="{$value->referencia}"/>
                            <div class="form-control">
-                              <a target="_blank" href="{$value->articulo_url()}">{$value->referencia}</a>
+                              <small><a target="_blank" href="{$value->articulo_url()}">{$value->referencia}</a></small>
                            </div>
                         </td>
                         <td><textarea class="form-control" name="desc_{$counter}" rows="1" onclick="this.select()">{$value->descripcion}</textarea></td>
@@ -479,24 +479,33 @@
                <table class="table table-hover">
                   <thead>
                      <tr>
-                        <th>Referencia</th>
+                        <th>Referencia + Descripción</th>
                         <th class="text-right">Cantidad</th>
                         <th class="text-right">En almacén</th>
-                        <th class="text-right">Ubicación</th>
+                        <th>Ubicación</th>
+                        <th class="text-right">En Almacenes</th>
                      </tr>
                   </thead>
                   {loop="$fsc->get_lineas_stock()"}
                   <tr>
-                     <td>{$value['referencia']}</td>
+                     <td>
+                        <a href="{$value['articulo']->url()}" target="_blank">{$value['articulo']->referencia}</a>
+                        {$value['descripcion']}
+                     </td>
                      <td class="text-right">{$value['cantidad']}</td>
                      <td class='text-right{if="$value['stock']>$value['cantidad']"} success{else} danger{/if}'>
                         {$value['stock']}
                      </td>
-                     <td>{$value['ubicacion']}</td>
+                     <td>
+                        {if="$value['ubicacion']"}{$value['ubicacion']}{else}-{/if}
+                     </td>
+                     <td class='text-right{if="$value['articulo']->stockfis>$value['cantidad']"} success{else} danger{/if}'>
+                        {$value['articulo']->stockfis}
+                     </td>
                   </tr>
                   {else}
                   <tr class="warning">
-                     <td colspan="4">Sin resultados.</td>
+                     <td colspan="5">Sin resultados.</td>
                   </tr>
                   {/loop}
                </table>

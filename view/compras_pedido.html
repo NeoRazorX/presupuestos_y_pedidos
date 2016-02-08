@@ -271,7 +271,7 @@
                            <input type="hidden" name="idlinea_{$counter}" value="{$value->idlinea}"/>
                            <input type="hidden" name="referencia_{$counter}" value="{$value->referencia}"/>
                            <div class="form-control">
-                              <a target="_blank" href="{$value->articulo_url()}">{$value->referencia}</a>
+                              <small><a target="_blank" href="{$value->articulo_url()}">{$value->referencia}</a></small>
                            </div>
                         </td>
                         <td><textarea class="form-control" name="desc_{$counter}" rows="1" onclick="this.select()">{$value->descripcion}</textarea></td>

@@ -82,13 +82,13 @@ class ventas_presupuestos extends fs_controller
          {
             $this->order = 'fecha ASC';
          }
-         else if($_GET['order'] == 'codigo_desc')
+         else if($_GET['order'] == 'finoferta_desc')
          {
-            $this->order = 'codigo DESC';
+            $this->order = 'finoferta DESC';
          }
-         else if($_GET['order'] == 'codigo_asc')
+         else if($_GET['order'] == 'finoferta_asc')
          {
-            $this->order = 'codigo ASC';
+            $this->order = 'finoferta ASC';
          }
          else if($_GET['order'] == 'total_desc')
          {
@@ -100,10 +100,6 @@ class ventas_presupuestos extends fs_controller
       else if( isset($_COOKIE['ventas_pres_order']) )
       {
          $this->order = $_COOKIE['ventas_pres_order'];
-      }
-      else if( isset($_POST['rechazar']) )
-      {
-         $this->rechazar();
       }
       
       if( isset($_POST['buscar_lineas']) )
@@ -139,6 +135,10 @@ class ventas_presupuestos extends fs_controller
          if( isset($_POST['delete']) )
          {
             $this->delete_presupuesto();
+         }
+         else if( isset($_POST['rechazar']) )
+         {
+            $this->rechazar();
          }
          else
          {
@@ -188,6 +188,10 @@ class ventas_presupuestos extends fs_controller
          else if($this->order == 'fecha ASC')
          {
             $order2 = ', hora ASC';
+         }
+         else if( strtolower(FS_DB_TYPE) == 'postgresql' AND ($this->order == 'finoferta DESC' OR $this->order == 'finoferta ASC') )
+         {
+            $order2 = ' NULLS LAST';
          }
          
          /// ejecutamos la tarea del cron
@@ -527,21 +531,26 @@ class ventas_presupuestos extends fs_controller
    private function rechazar()
    {
       $pre0 = new presupuesto_cliente();
+      $num = 0;
       $offset = 0;
       $presupuestos = $pre0->all_ptepedir();
       while($presupuestos)
       {
          foreach($presupuestos as $pre)
          {
-            $pre->status = 2;
-            $pre->save();
+            if( strtotime($pre->fecha) < strtotime($_POST['rechazar']) )
+            {
+               $pre->status = 2;
+               $pre->save();
+               $num++;
+            }
             
             $offset++;
          }
          
-         $presupuestos = $pre0->all_ptepedir();
+         $presupuestos = $pre0->all_ptepedir($offset);
       }
       
-      $this->new_message($offset.' '.FS_PRESUPUESTOS.' rechazados.');
+      $this->new_message($num.' '.FS_PRESUPUESTOS.' rechazados.');
    }
 }

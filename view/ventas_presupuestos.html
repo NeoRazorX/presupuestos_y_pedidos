@@ -134,17 +134,17 @@
                   </a>
                </li>
                <li>
-                  <a href="{$fsc->url(TRUE)}&order=codigo_desc">
+                  <a href="{$fsc->url(TRUE)}&order=finoferta_desc">
                      <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
-                     &nbsp; Código &nbsp;
-                     {if="$fsc->order=='codigo DESC'"}<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>{/if}
+                     &nbsp; Validez &nbsp;
+                     {if="$fsc->order=='finoferta DESC'"}<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>{/if}
                   </a>
                </li>
                <li>
-                  <a href="{$fsc->url(TRUE)}&order=codigo_asc">
+                  <a href="{$fsc->url(TRUE)}&order=finoferta_asc">
                      <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
-                     &nbsp; Código &nbsp;
-                     {if="$fsc->order=='codigo ASC'"}<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>{/if}
+                     &nbsp; Validez &nbsp;
+                     {if="$fsc->order=='finoferta ASC'"}<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>{/if}
                   </a>
                </li>
                <li>
@@ -283,10 +283,7 @@
             <th class="text-left">Observaciones</th>
             <th class="text-right">Total</th>
             <th class="text-right">Fecha</th>
-            <th class="text-right hidden-sm">Hora</th>
-            {if="$fsc->mostrar!='todo'"}
-                <th class="text-right hidden-sm">Validez</th>
-            {/if}
+            <th class="text-right hidden-sm">Validez</th>
          </tr>
       </thead>
       {loop="$fsc->resultados"}
@@ -309,20 +306,17 @@
          </td>
          <td>{$value->observaciones_resume()}</td>
          <td class="text-right">{$fsc->show_precio($value->total, $value->coddivisa)}</td>
-         <td class="text-right">
+         <td class="text-right" title="Hora {$value->hora}">
             {if="$value->fecha==$fsc->today()"}<b>{$value->fecha}</b>{else}{$value->fecha}{/if}
          </td>
-         <td class="text-right hidden-sm">{$value->hora}</td>
-         {if="$fsc->mostrar!='todo'"}
-         <td class="text-right hidden-sm hidden-md">
-            {if="$value->status==0"}{$value->finoferta}{else}-{/if}
+         <td class="text-right hidden-sm">
+            {if="$value->status!=0 OR !$value->finoferta"}-{else}{$value->finoferta}{/if}
          </td>
-         {/if}
       </tr>
       {else}
       <tr class="warning">
          <td></td>
-         <td colspan="7">Ningún {#FS_PRESUPUESTO#} encontrado. Pulsa el botón <b>Nuevo</b> para crear uno.</td>
+         <td colspan="6">Ningún {#FS_PRESUPUESTO#} encontrado. Pulsa el botón <b>Nuevo</b> para crear uno.</td>
       </tr>
       {/loop}
       {if="$fsc->total_resultados!==''"}
@@ -330,7 +324,7 @@
          <td colspan="5" class="text-right">
             {$fsc->total_resultados_txt} &nbsp; <b>{$fsc->show_precio($fsc->total_resultados)}</b>
          </td>
-         <td colspan="3"></td>
+         <td colspan="2"></td>
       </tr>
       {/if}
    </table>
@@ -419,11 +413,16 @@
                </h4>
             </div>
             <div class="modal-body">
-               Rechazar todos los {#FS_PRESUPUESTOS#} anteriores a esta fecha
-               <input type="text" name="rechazar" value='{function="date('1-1-Y')"}' class="form-control datepicker" autocomplete="off"/>
-            </div>
-            <div class="modal-footer">
-               <button class="btn btn-warning" type="submit">
+               <div class="form-group">
+                  Rechazar todos los {#FS_PRESUPUESTOS#} anteriores a esta fecha
+                  <div class="input-group">
+                     <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                     </span>
+                     <input type="text" name="rechazar" value='{function="date('1-1-Y')"}' class="form-control datepicker" autocomplete="off"/>
+                  </div>
+               </div>
+               <button class="btn btn-sm btn-block btn-warning" type="submit">
                   <span class="glyphicon glyphicon-remove"></span> Rechazar {#FS_PRESUPUESTOS#}
                </button>
             </div>

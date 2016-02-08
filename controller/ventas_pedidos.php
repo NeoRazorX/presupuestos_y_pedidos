@@ -83,13 +83,13 @@ class ventas_pedidos extends fs_controller
          {
             $this->order = 'fecha ASC';
          }
-         else if($_GET['order'] == 'codigo_desc')
+         else if($_GET['order'] == 'fechasalida_desc')
          {
-            $this->order = 'codigo DESC';
+            $this->order = 'fechasalida DESC';
          }
-         else if($_GET['order'] == 'codigo_asc')
+         else if($_GET['order'] == 'fechasalida_asc')
          {
-            $this->order = 'codigo ASC';
+            $this->order = 'fechasalida ASC';
          }
          else if($_GET['order'] == 'total_desc')
          {
@@ -184,6 +184,10 @@ class ventas_pedidos extends fs_controller
          else if($this->order == 'fecha ASC')
          {
             $order2 = ', hora ASC';
+         }
+         else if( strtolower(FS_DB_TYPE) == 'postgresql' AND ($this->order == 'fechasalida DESC' OR $this->order == 'fechasalida ASC') )
+         {
+            $order2 = ' NULLS LAST';
          }
          
          /// ejecutamos el proceso del cron para pedidos.

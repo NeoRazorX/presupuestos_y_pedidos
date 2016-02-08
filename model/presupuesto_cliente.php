@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014-2015    Carlos Garcia Gomez        neorazorx@gmail.com
+ * Copyright (C) 2014-2016    Carlos Garcia Gomez        neorazorx@gmail.com
  * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -678,7 +678,9 @@ class presupuesto_cliente extends fs_model
       if($data)
       {
          foreach($data as $p)
+         {
             $preslist[] = new presupuesto_cliente($p);
+         }
       }
       
       return $preslist;
@@ -688,12 +690,15 @@ class presupuesto_cliente extends fs_model
    {
       $preslist = array();
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
-              " WHERE idpedido IS NULL AND status=0 ORDER BY ".$order, FS_ITEM_LIMIT, $offset);
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE idpedido IS NULL"
+              . " AND status = 0 ORDER BY ".$order;
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
          foreach($data as $p)
+         {
             $preslist[] = new presupuesto_cliente($p);
+         }
       }
       
       return $preslist;
@@ -703,11 +708,14 @@ class presupuesto_cliente extends fs_model
    {
       $preclist = array();
       
-      $data = $this->db->select_limit("SELECT * FROM ".$this->table_name ." WHERE status=2 ORDER BY ".$order, FS_ITEM_LIMIT, $offset);
+      $sql = "SELECT * FROM ".$this->table_name ." WHERE status=2 ORDER BY ".$order;
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
          foreach($data as $p)
+         {
             $preclist[] = new presupuesto_cliente($p);
+         }
       }
       
       return $preclist;
@@ -717,12 +725,15 @@ class presupuesto_cliente extends fs_model
    {
       $preslist = array();
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
-              " WHERE codcliente = " . $this->var2str($codcliente) . " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE codcliente = " . $this->var2str($codcliente)
+              . " ORDER BY fecha DESC, codigo DESC";
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
          foreach($data as $p)
+         {
             $preslist[] = new presupuesto_cliente($p);
+         }
       }
       
       return $preslist;
@@ -732,12 +743,15 @@ class presupuesto_cliente extends fs_model
    {
       $preslist = array();
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
-              " WHERE codagente = " . $this->var2str($codagente) ." ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE codagente = " . $this->var2str($codagente)
+              . " ORDER BY fecha DESC, codigo DESC";
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
          foreach($data as $p)
+         {
             $preslist[] = new presupuesto_cliente($p);
+         }
       }
       
       return $preslist;
@@ -747,12 +761,15 @@ class presupuesto_cliente extends fs_model
    {
       $preslist = array();
       
-      $data = $this->db->select("SELECT * FROM " . $this->table_name .
-              " WHERE fecha >= " . $this->var2str($desde) . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;");
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE fecha >= " . $this->var2str($desde)
+              . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;";
+      $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $p)
+         {
             $preslist[] = new presupuesto_cliente($p);
+         }
       }
       
       return $preslist;
@@ -785,7 +802,9 @@ class presupuesto_cliente extends fs_model
       if($data)
       {
          foreach($data as $p)
+         {
             $preslist[] = new presupuesto_cliente($p);
+         }
       }
       
       return $preslist;
@@ -800,7 +819,9 @@ class presupuesto_cliente extends fs_model
               " AND codserie = " . $this->var2str($serie);
 
       if($obs != '')
+      {
          $sql .= " AND lower(observaciones) = " . $this->var2str(strtolower($obs));
+      }
 
       $sql .= " ORDER BY fecha DESC, codigo DESC;";
 
@@ -808,7 +829,9 @@ class presupuesto_cliente extends fs_model
       if($data)
       {
          foreach($data as $p)
+         {
             $preslist[] = new presupuesto_cliente($p);
+         }
       }
       
       return $preslist;
@@ -816,9 +839,13 @@ class presupuesto_cliente extends fs_model
    
    public function cron_job()
    {
+      /// marcamos como aprobados los presupuestos con idpedido
+      $this->db->exec("UPDATE ".$this->table_name." SET status = '1', editable = FALSE"
+              . " WHERE status != '1' AND idpedido IS NOT NULL;");
+      
       /// devolvemos al estado pendiente a los presupuestos con estado 1 a los que se haya borrado el pedido
-      $this->db->exec("UPDATE ".$this->table_name." SET status = '0', idpedido = NULL, editable = TRUE "
-              . "WHERE status = '1' AND idpedido NOT IN (SELECT idpedido FROM pedidoscli);");
+      $this->db->exec("UPDATE ".$this->table_name." SET status = '0', idpedido = NULL, editable = TRUE"
+              . " WHERE status = '1' AND idpedido NOT IN (SELECT idpedido FROM pedidoscli);");
       
       /// marcamos como rechazados todos los presupuestos con finoferta ya pasada
       $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE finoferta IS NOT NULL AND"
