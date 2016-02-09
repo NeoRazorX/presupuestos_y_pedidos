@@ -123,6 +123,12 @@ class ventas_presupuesto extends fs_controller {
             {
                $this->presupuesto->status = intval($_REQUEST['status']);
                
+               /// ¿El presupuesto tiene una fecha de validez pasada y queremos ponerlo pendiente?
+               if($this->presupuesto->finoferta() AND intval($_REQUEST['status']) == 0 )
+               {
+                  $this->presupuesto->finoferta = date('d-m-Y', strtotime('+'.$this->setup_validez.'days'));
+               }
+               
                if($this->presupuesto->status == 1 AND is_null($this->presupuesto->idpedido))
                {
                   $this->generar_pedido();
