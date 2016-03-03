@@ -592,10 +592,10 @@ class ventas_presupuesto extends fs_controller {
    {
       $lineas = array();
       
-      $sql = "SELECT l.referencia,l.descripcion,l.cantidad,s.cantidad as stock,s.ubicacion FROM lineaspresupuestoscli l, stocks s"
-              . " WHERE l.idpresupuesto = ".$this->presupuesto->var2str($this->presupuesto->idpresupuesto)
-              . " AND l.referencia = s.referencia"
+      $sql = "SELECT l.referencia,l.descripcion,l.cantidad,s.cantidad as stock,s.ubicacion FROM lineaspresupuestoscli l"
+              . " LEFT JOIN stocks s ON l.referencia = s.referencia"
               . " AND s.codalmacen = ".$this->presupuesto->var2str($this->presupuesto->codalmacen)
+              . " WHERE l.idpresupuesto = ".$this->presupuesto->var2str($this->presupuesto->idpresupuesto)
               . " ORDER BY referencia ASC;";
       $data = $this->db->select($sql);
       if($data)
