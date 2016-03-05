@@ -88,10 +88,13 @@
                {loop="$fsc->extensions"}
                   {if="$value->type=='button'"}
                   <a href="index.php?page={$value->from}&id={$fsc->presupuesto->idpresupuesto}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
+                  {elseif="$value->type=='modal'"}
+                  <!--{$txt=base64_encode($value->text)}-->
+                  <!--{$url='index.php?page='.$value->from.'&id='.$fsc->presupuesto->idpresupuesto.$value->params}-->
+                  <a href="#" class="btn btn-sm btn-default" onclick="fs_modal('{$txt}','{$url}')">{$value->text}</a>
                   {/if}
                {/loop}
             </div>
-            
             {if="$fsc->presupuesto->idpedido"}
             <div class="btn-group">
                <a class="btn btn-sm btn-info text-capitalize" href="{$fsc->presupuesto->pedido_url()}">
@@ -473,45 +476,6 @@
                </div>
             </div>
          </div>
-         {if="$fsc->presupuesto->editable"}
-         <div role="tabpanel" class="tab-pane" id="stock">
-            <div class="table-responsive">
-               <table class="table table-hover">
-                  <thead>
-                     <tr>
-                        <th>Referencia + Descripción</th>
-                        <th class="text-right">Cantidad</th>
-                        <th class="text-right">En almacén</th>
-                        <th>Ubicación</th>
-                        <th class="text-right">En Almacenes</th>
-                     </tr>
-                  </thead>
-                  {loop="$fsc->get_lineas_stock()"}
-                  <tr>
-                     <td>
-                        <a href="{$value['articulo']->url()}" target="_blank">{$value['articulo']->referencia}</a>
-                        {$value['descripcion']}
-                     </td>
-                     <td class="text-right">{$value['cantidad']}</td>
-                     <td class='text-right{if="$value['stock']>=$value['cantidad']"} success{else} danger{/if}'>
-                        {$value['stock']}
-                     </td>
-                     <td>
-                        {if="$value['ubicacion']"}{$value['ubicacion']}{else}-{/if}
-                     </td>
-                     <td class='text-right{if="$value['articulo']->stockfis>=$value['cantidad']"} success{else} danger{/if}'>
-                        {$value['articulo']->stockfis}
-                     </td>
-                  </tr>
-                  {else}
-                  <tr class="warning">
-                     <td colspan="5">Sin resultados.</td>
-                  </tr>
-                  {/loop}
-               </table>
-            </div>
-         </div>
-         {/if}
          <div role="tabpanel" class="tab-pane" id="detalles">
             <div class="container-fluid" style="margin-top: 10px;">
                <div class="row">
@@ -604,6 +568,53 @@
                </div>
             </div>
          </div>
+         {if="$fsc->presupuesto->editable"}
+         <div role="tabpanel" class="tab-pane" id="stock">
+            <div class="table-responsive">
+               <table class="table table-hover">
+                  <thead>
+                     <tr>
+                        <th>Referencia + Descripción</th>
+                        <th class="text-right">Cantidad</th>
+                        <th class="text-right">En almacén</th>
+                        <th>Ubicación</th>
+                        <th class="text-right">En Almacenes</th>
+                     </tr>
+                  </thead>
+                  {loop="$fsc->get_lineas_stock()"}
+                  <tr>
+                     <td>
+                        <a href="{$value['articulo']->url()}" target="_blank">{$value['articulo']->referencia}</a>
+                        {$value['descripcion']}
+                     </td>
+                     <td class="text-right">{$value['cantidad']}</td>
+                     {if="$value['articulo']->nostock"}
+                     <td class='text-right success'>No controlar</td>
+                     {else}
+                     <td class='text-right{if="$value['stock']>=$value['cantidad']"} success{else} danger{/if}'>
+                        {$value['stock']}
+                     </td>
+                     {/if}
+                     <td>
+                        {if="$value['ubicacion']"}{$value['ubicacion']}{else}-{/if}
+                     </td>
+                     {if="$value['articulo']->nostock"}
+                     <td class='text-right success'>No controlar</td>
+                     {else}
+                     <td class='text-right{if="$value['articulo']->stockfis>=$value['cantidad']"} success{else} danger{/if}'>
+                        {$value['articulo']->stockfis}
+                     </td>
+                     {/if}
+                  </tr>
+                  {else}
+                  <tr class="warning">
+                     <td colspan="5">Sin resultados.</td>
+                  </tr>
+                  {/loop}
+               </table>
+            </div>
+         </div>
+         {/if}
          {loop="$fsc->extensions"}
             {if="$value->type=='tab'"}
             <div role="tabpanel" class="tab-pane" id="ext_{$value->name}">

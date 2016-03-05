@@ -92,10 +92,13 @@
                {loop="$fsc->extensions"}
                   {if="$value->type=='button'"}
                   <a href="index.php?page={$value->from}&id={$fsc->pedido->idpedido}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
+                  {elseif="$value->type=='modal'"}
+                  <!--{$txt=base64_encode($value->text)}-->
+                  <!--{$url='index.php?page='.$value->from.'&id='.$fsc->pedido->idpedido.$value->params}-->
+                  <a href="#" class="btn btn-sm btn-default" onclick="fs_modal('{$txt}','{$url}')">{$value->text}</a>
                   {/if}
                {/loop}
             </div>
-            
             <div class="btn-group">
                {if="$fsc->pedido->idalbaran"}
                <a class="btn btn-sm btn-info text-capitalize" href="{$fsc->pedido->albaran_url()}">
