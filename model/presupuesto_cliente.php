@@ -210,7 +210,7 @@ class presupuesto_cliente extends fs_model
 
    public function __construct($p = FALSE)
    {
-      parent::__construct('presupuestoscli', 'plugins/presupuestos_y_pedidos/');
+      parent::__construct('presupuestoscli');
       if($p)
       {
          $this->idpresupuesto = $this->intval($p['idpresupuesto']);
@@ -669,29 +669,18 @@ class presupuesto_cliente extends fs_model
       return $this->db->exec("DELETE FROM " . $this->table_name . " WHERE idpresupuesto = "
               . $this->var2str($this->idpresupuesto) . ";");
    }
-
+   
+   /**
+    * Devuelve un array con los últimos presupuestos
+    * @param type $offset
+    * @param type $order
+    * @return \presupuesto_cliente
+    */
    public function all($offset = 0, $order='fecha DESC')
    {
       $preslist = array();
+      $sql = "SELECT * FROM " . $this->table_name . " ORDER BY ".$order;
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name . " ORDER BY ".$order, FS_ITEM_LIMIT, $offset);
-      if($data)
-      {
-         foreach($data as $p)
-         {
-            $preslist[] = new presupuesto_cliente($p);
-         }
-      }
-      
-      return $preslist;
-   }
-
-   public function all_ptepedir($offset = 0, $order = 'fecha ASC')
-   {
-      $preslist = array();
-      
-      $sql = "SELECT * FROM " . $this->table_name . " WHERE idpedido IS NULL"
-              . " AND status = 0 ORDER BY ".$order;
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
@@ -703,12 +692,42 @@ class presupuesto_cliente extends fs_model
       
       return $preslist;
    }
-
+   
+   /**
+    * Devuelve un array con los presupuestos de venta pendientes.
+    * @param type $offset
+    * @param type $order
+    * @return \presupuesto_cliente
+    */
+   public function all_ptepedir($offset = 0, $order = 'fecha ASC')
+   {
+      $preslist = array();
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE idpedido IS NULL"
+              . " AND status = 0 ORDER BY ".$order;
+      
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if($data)
+      {
+         foreach($data as $p)
+         {
+            $preslist[] = new presupuesto_cliente($p);
+         }
+      }
+      
+      return $preslist;
+   }
+   
+   /**
+    * Devuelve un array con los presupuestos rechazados.
+    * @param type $offset
+    * @param type $order
+    * @return \presupuesto_cliente
+    */
    public function all_rechazados($offset = 0, $order = 'fecha DESC')
    {
       $preclist = array();
-      
       $sql = "SELECT * FROM ".$this->table_name ." WHERE status=2 ORDER BY ".$order;
+      
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
@@ -720,13 +739,19 @@ class presupuesto_cliente extends fs_model
       
       return $preclist;
    }
-
+   
+   /**
+    * Devuelve un array con los presupuestos del cliente.
+    * @param type $codcliente
+    * @param type $offset
+    * @return \presupuesto_cliente
+    */
    public function all_from_cliente($codcliente, $offset = 0)
    {
       $preslist = array();
-      
       $sql = "SELECT * FROM " . $this->table_name . " WHERE codcliente = " . $this->var2str($codcliente)
               . " ORDER BY fecha DESC, codigo DESC";
+      
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
@@ -738,13 +763,19 @@ class presupuesto_cliente extends fs_model
       
       return $preslist;
    }
-
+   
+   /**
+    * Devuelve un array con los presupuestos del agente/empleado.
+    * @param type $codagente
+    * @param type $offset
+    * @return \presupuesto_cliente
+    */
    public function all_from_agente($codagente, $offset = 0)
    {
       $preslist = array();
-      
       $sql = "SELECT * FROM " . $this->table_name . " WHERE codagente = " . $this->var2str($codagente)
               . " ORDER BY fecha DESC, codigo DESC";
+      
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
@@ -756,13 +787,18 @@ class presupuesto_cliente extends fs_model
       
       return $preslist;
    }
-
-   public function all_desde($desde, $hasta)
+   
+   /**
+    * Devuelve todos los presupuestos relacionados con el pedido.
+    * @param type $id
+    * @return \presupuesto_cliente
+    */
+   public function all_from_pedido($id)
    {
       $preslist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($id)
+              . " ORDER BY fecha DESC, codigo DESC;";
       
-      $sql = "SELECT * FROM " . $this->table_name . " WHERE fecha >= " . $this->var2str($desde)
-              . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;";
       $data = $this->db->select($sql);
       if($data)
       {
@@ -774,7 +810,37 @@ class presupuesto_cliente extends fs_model
       
       return $preslist;
    }
-
+   
+   /**
+    * Devuelve un array con los presupuestos comprendidos entre $desde y $hasta
+    * @param type $desde
+    * @param type $hasta
+    * @return \presupuesto_cliente
+    */
+   public function all_desde($desde, $hasta)
+   {
+      $preslist = array();
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE fecha >= " . $this->var2str($desde)
+              . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;";
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $p)
+         {
+            $preslist[] = new presupuesto_cliente($p);
+         }
+      }
+      
+      return $preslist;
+   }
+   
+   /**
+    * Devuelve un array con los presupuestos que coinciden con $query
+    * @param type $query
+    * @param type $offset
+    * @return \presupuesto_cliente
+    */
    public function search($query, $offset = 0)
    {
       $preslist = array();
@@ -809,7 +875,16 @@ class presupuesto_cliente extends fs_model
       
       return $preslist;
    }
-
+   
+   /**
+    * Devuelve un array con los presupuestos del cliente $codcliente que coinciden con $query
+    * @param type $codcliente
+    * @param type $desde
+    * @param type $hasta
+    * @param type $serie
+    * @param type $obs
+    * @return \presupuesto_cliente
+    */
    public function search_from_cliente($codcliente, $desde, $hasta, $serie, $obs = '')
    {
       $pedilist = array();

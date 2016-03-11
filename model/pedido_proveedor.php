@@ -173,7 +173,7 @@ class pedido_proveedor extends fs_model
 
    public function __construct($p = FALSE)
    {
-      parent::__construct('pedidosprov', 'plugins/presupuestos_y_pedidos/');
+      parent::__construct('pedidosprov');
       if($p)
       {
          $this->idpedido = $this->intval($p['idpedido']);
@@ -553,82 +553,156 @@ class pedido_proveedor extends fs_model
    {
       return $this->db->exec("DELETE FROM " . $this->table_name . " WHERE idpedido = " . $this->var2str($this->idpedido) . ";");
    }
-
+   
+   /**
+    * Devuelve un array con los últimos pedidos de compra.
+    * @param type $offset
+    * @return \pedido_proveedor
+    */
    public function all($offset = 0)
    {
       $pedilist = array();
+      $sql = "SELECT * FROM " . $this->table_name . " ORDER BY fecha DESC, codigo DESC";
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name . " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if ($data)
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if($data)
       {
-         foreach ($data as $p)
+         foreach($data as $p)
+         {
             $pedilist[] = new pedido_proveedor($p);
-      }
-      
-      return $pedilist;
-   }
-
-   public function all_ptealbaran($offset = 0, $order = 'ASC')
-   {
-      $pedilist = array();
-      
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
-              " WHERE idalbaran IS NULL ORDER BY fecha " . $order . ", codigo " . $order, FS_ITEM_LIMIT, $offset);
-      if ($data)
-      {
-         foreach ($data as $p)
-            $pedilist[] = new pedido_proveedor($p);
+         }
       }
       
       return $pedilist;
    }
    
+   /**
+    * Devuelve un array con los pedidos de compra pendientes
+    * @param type $offset
+    * @param type $order
+    * @return \pedido_proveedor
+    */
+   public function all_ptealbaran($offset = 0, $order = 'ASC')
+   {
+      $pedilist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE idalbaran IS NULL"
+              . " ORDER BY fecha " . $order . ", codigo " . $order;
+      
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if($data)
+      {
+         foreach($data as $p)
+         {
+            $pedilist[] = new pedido_proveedor($p);
+         }
+      }
+      
+      return $pedilist;
+   }
+   
+   /**
+    * Devuelve un array con todos los pedidos del proveedor.
+    * @param type $codproveedor
+    * @param type $offset
+    * @return \pedido_proveedor
+    */
    public function all_from_proveedor($codproveedor, $offset = 0)
    {
       $pedilist = array();
-      
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
+      $sql = "SELECT * FROM " . $this->table_name .
               " WHERE codproveedor = " . $this->var2str($codproveedor) .
-              " ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if ($data)
+              " ORDER BY fecha DESC, codigo DESC";
+      
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if($data)
       {
-         foreach ($data as $p)
+         foreach($data as $p)
+         {
             $pedilist[] = new pedido_proveedor($p);
+         }
       }
       
       return $pedilist;
    }
-
+   
+   /**
+    * Devuelve un array con todos los pedidos del agente/empleado
+    * @param type $codagente
+    * @param type $offset
+    * @return \pedido_proveedor
+    */
    public function all_from_agente($codagente, $offset = 0)
    {
       $pedilist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE codagente = ".$this->var2str($codagente)
+              ." ORDER BY fecha DESC, codigo DESC";
       
-      $data = $this->db->select_limit("SELECT * FROM " . $this->table_name .
-              " WHERE codagente = " . $this->var2str($codagente) ." ORDER BY fecha DESC, codigo DESC", FS_ITEM_LIMIT, $offset);
-      if ($data)
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if($data)
       {
-         foreach ($data as $p)
+         foreach($data as $p)
+         {
             $pedilist[] = new pedido_proveedor($p);
+         }
       }
       
       return $pedilist;
    }
-
+   
+   /**
+    * Devuelve todos los pedidos relacionados con el albarán.
+    * @param type $id
+    * @return \pedido_proveedor
+    */
+   public function all_from_albaran($id)
+   {
+      $pedilist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE idalbaran = ".$this->var2str($id)
+              ." ORDER BY fecha DESC, codigo DESC;";
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $p)
+         {
+            $pedilist[] = new pedido_proveedor($p);
+         }
+      }
+      
+      return $pedilist;
+   }
+   
+   /**
+    * Devuelve un array con todos los pedidos comprendidos entre $desde y $hasta
+    * @param type $desde
+    * @param type $hasta
+    * @return \pedido_proveedor
+    */
    public function all_desde($desde, $hasta)
    {
       $pedlist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE fecha >= ".$this->var2str($desde)
+              ." AND fecha <= ".$this->var2str($hasta)
+              ." ORDER BY codigo ASC;";
       
-      $data = $this->db->select("SELECT * FROM " . $this->table_name .
-              " WHERE fecha >= " . $this->var2str($desde) . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;");
-      if ($data)
+      $data = $this->db->select($sql);
+      if($data)
       {
-         foreach ($data as $p)
+         foreach($data as $p)
+         {
             $pedlist[] = new pedido_proveedor($p);
+         }
       }
       
       return $pedlist;
    }
    
+   /**
+    * Devuelve un array con los pedidos que coinciden con $query
+    * @param type $query
+    * @param type $offset
+    * @return \pedido_proveedor
+    */
    public function search($query, $offset = 0)
    {
       $pedilist = array();
@@ -653,10 +727,12 @@ class pedido_proveedor extends fs_model
       $consulta .= " ORDER BY fecha DESC, codigo DESC";
 
       $data = $this->db->select_limit($consulta, FS_ITEM_LIMIT, $offset);
-      if ($data)
+      if($data)
       {
-         foreach ($data as $p)
+         foreach($data as $p)
+         {
             $pedilist[] = new pedido_proveedor($p);
+         }
       }
       
       return $pedilist;

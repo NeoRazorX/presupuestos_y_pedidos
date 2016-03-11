@@ -209,7 +209,7 @@ class pedido_cliente extends fs_model
    
    public function __construct($p = FALSE)
    {
-      parent::__construct('pedidoscli', 'plugins/presupuestos_y_pedidos/');
+      parent::__construct('pedidoscli');
       if ($p)
       {
          $this->idpedido = $this->intval($p['idpedido']);
@@ -687,7 +687,13 @@ class pedido_cliente extends fs_model
       else
          return FALSE;
    }
-
+   
+   /**
+    * Devuelve un array con los pedidos de venta.
+    * @param type $offset
+    * @param type $order
+    * @return \pedido_cliente
+    */
    public function all($offset = 0, $order='fecha DESC')
    {
       $pedilist = array();
@@ -704,7 +710,13 @@ class pedido_cliente extends fs_model
       
       return $pedilist;
    }
-
+   
+   /**
+    * Devuelve un array con los pedidos de venta pendientes
+    * @param type $offset
+    * @param type $order
+    * @return \pedido_cliente
+    */
    public function all_ptealbaran($offset = 0, $order = 'fecha ASC')
    {
       $pedilist = array();
@@ -721,7 +733,13 @@ class pedido_cliente extends fs_model
       
       return $pedilist;
    }
-
+   
+   /**
+    * Devuelve un array con los pedidos de venta rechazados
+    * @param type $offset
+    * @param type $order
+    * @return \pedido_cliente
+    */
    public function all_rechazados($offset = 0, $order = 'fecha DESC')
    {
       $preclist = array();
@@ -738,7 +756,13 @@ class pedido_cliente extends fs_model
       
       return $preclist;
    }
-
+   
+   /**
+    * Devuelve un array con los pedidos del cliente $codcliente
+    * @param type $codcliente
+    * @param type $offset
+    * @return \pedido_cliente
+    */
    public function all_from_cliente($codcliente, $offset = 0)
    {
       $pedilist = array();
@@ -756,7 +780,13 @@ class pedido_cliente extends fs_model
       
       return $pedilist;
    }
-
+   
+   /**
+    * Devuelve un array con los pedidos del agente/empleado
+    * @param type $codagente
+    * @param type $offset
+    * @return \pedido_cliente
+    */
    public function all_from_agente($codagente, $offset = 0)
    {
       $pedilist = array();
@@ -774,7 +804,36 @@ class pedido_cliente extends fs_model
       
       return $pedilist;
    }
-
+   
+   /**
+    * Devuelve todos los pedidos relacionados con el albarán.
+    * @param type $id
+    * @return \pedido_cliente
+    */
+   public function all_from_albaran($id)
+   {
+      $pedilist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE idalbaran = ".$this->var2str($id)
+              ." ORDER BY fecha DESC, codigo DESC;";
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $p)
+         {
+            $pedilist[] = new pedido_cliente($p);
+         }
+      }
+      
+      return $pedilist;
+   }
+   
+   /**
+    * Devuelve un array con los pedidos entre $desde y $hasta
+    * @param type $desde
+    * @param type $hasta
+    * @return \pedido_cliente
+    */
    public function all_desde($desde, $hasta)
    {
       $pedlist = array();
@@ -792,7 +851,13 @@ class pedido_cliente extends fs_model
       
       return $pedlist;
    }
-
+   
+   /**
+    * Devuelve un array con todos los pedidos que coinciden con $query
+    * @param type $query
+    * @param type $offset
+    * @return \pedido_cliente
+    */
    public function search($query, $offset = 0)
    {
       $pedilist = array();
@@ -827,7 +892,16 @@ class pedido_cliente extends fs_model
       
       return $pedilist;
    }
-
+   
+   /**
+    * Devuelve un array con todos los pedidos que coincicen con $query del cliente $codcliente
+    * @param type $codcliente
+    * @param type $desde
+    * @param type $hasta
+    * @param type $serie
+    * @param type $obs
+    * @return \pedido_cliente
+    */
    public function search_from_cliente($codcliente, $desde, $hasta, $serie, $obs = '')
    {
       $pedilist = array();

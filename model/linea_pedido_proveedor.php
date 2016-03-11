@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2016  Carlos Garcia Gomez       neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,17 +20,22 @@
 
 class linea_pedido_proveedor extends fs_model
 {
-   public $cantidad;
-   public $codimpuesto;
-   public $descripcion;
-   public $dtopor;
-   
    /**
     * Clave primaria.
     * @var type 
     */
    public $idlinea;
+   
+   /**
+    * ID del pedido.
+    * @var type 
+    */
    public $idpedido;
+   
+   public $cantidad;
+   public $codimpuesto;
+   public $descripcion;
+   public $dtopor;
    public $irpf;
    public $iva;
    public $pvpsindto;
@@ -43,10 +48,12 @@ class linea_pedido_proveedor extends fs_model
    
    public function __construct($l = FALSE)
    {
-      parent::__construct('lineaspedidosprov', 'plugins/presupuestos_y_pedidos/');
+      parent::__construct('lineaspedidosprov');
       
       if( !isset(self::$pedidos) )
+      {
          self::$pedidos = array();
+      }
       
       if($l)
       {
@@ -223,25 +230,38 @@ class linea_pedido_proveedor extends fs_model
       {
          if( $this->exists() )
          {
-            $sql = "UPDATE ".$this->table_name." SET cantidad = ".$this->var2str($this->cantidad).",
-               codimpuesto = ".$this->var2str($this->codimpuesto).", descripcion = ".$this->var2str($this->descripcion).",
-               dtopor = ".$this->var2str($this->dtopor).", idpedido = ".$this->var2str($this->idpedido).",
-               irpf = ".$this->var2str($this->irpf).", iva = ".$this->var2str($this->iva).",
-               pvpsindto = ".$this->var2str($this->pvpsindto).", pvptotal = ".$this->var2str($this->pvptotal).",
-               pvpunitario = ".$this->var2str($this->pvpunitario).", recargo = ".$this->var2str($this->recargo).",
-               referencia = ".$this->var2str($this->referencia)." WHERE idlinea = ".$this->var2str($this->idlinea).";";
+            $sql = "UPDATE ".$this->table_name." SET cantidad = ".$this->var2str($this->cantidad)
+                    .", codimpuesto = ".$this->var2str($this->codimpuesto)
+                    .", descripcion = ".$this->var2str($this->descripcion)
+                    .", dtopor = ".$this->var2str($this->dtopor)
+                    .", idpedido = ".$this->var2str($this->idpedido)
+                    .", irpf = ".$this->var2str($this->irpf)
+                    .", iva = ".$this->var2str($this->iva)
+                    .", pvpsindto = ".$this->var2str($this->pvpsindto)
+                    .", pvptotal = ".$this->var2str($this->pvptotal)
+                    .", pvpunitario = ".$this->var2str($this->pvpunitario)
+                    .", recargo = ".$this->var2str($this->recargo)
+                    .", referencia = ".$this->var2str($this->referencia)
+                    ."  WHERE idlinea = ".$this->var2str($this->idlinea).";";
             
             return $this->db->exec($sql);
          }
          else
          {
-            $sql = "INSERT INTO ".$this->table_name." (cantidad,codimpuesto,descripcion,dtopor,idpedido,
-               irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia)
-               VALUES (".$this->var2str($this->cantidad).",".$this->var2str($this->codimpuesto).",
-               ".$this->var2str($this->descripcion).",".$this->var2str($this->dtopor).",
-               ".$this->var2str($this->idpedido).",".$this->var2str($this->irpf).",".$this->var2str($this->iva).",
-               ".$this->var2str($this->pvpsindto).",".$this->var2str($this->pvptotal).",".$this->var2str($this->pvpunitario).",
-               ".$this->var2str($this->recargo).",".$this->var2str($this->referencia).");";
+            $sql = "INSERT INTO ".$this->table_name." (cantidad,codimpuesto,descripcion,dtopor,
+               idpedido,irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia)
+               VALUES (".$this->var2str($this->cantidad)
+                    .",".$this->var2str($this->codimpuesto)
+                    .",".$this->var2str($this->descripcion)
+                    .",".$this->var2str($this->dtopor)
+                    .",".$this->var2str($this->idpedido)
+                    .",".$this->var2str($this->irpf)
+                    .",".$this->var2str($this->iva)
+                    .",".$this->var2str($this->pvpsindto)
+                    .",".$this->var2str($this->pvptotal)
+                    .",".$this->var2str($this->pvpunitario)
+                    .",".$this->var2str($this->recargo)
+                    .",".$this->var2str($this->referencia).");";
             
             if( $this->db->exec($sql) )
             {
@@ -261,34 +281,60 @@ class linea_pedido_proveedor extends fs_model
       return $this->db->exec("DELETE FROM ".$this->table_name." WHERE idlinea = ".$this->var2str($this->idlinea).";");
    }
    
+   /**
+    * Devuelve todas las líneas del pedido $idp
+    * @param type $idp
+    * @return \linea_pedido_proveedor
+    */
    public function all_from_pedido($idp)
    {
       $plist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($idp)
+              ." ORDER BY idlinea ASC;";
       
-      $data = $this->db->select("SELECT * FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($idp)." ORDER BY idlinea ASC;");
+      $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $d)
+         {
             $plist[] = new linea_pedido_proveedor($d);
+         }
       }
       
       return $plist;
    }
    
+   /**
+    * Devuelve todas las líneas que hagan referencia al artículo $ref
+    * @param type $ref
+    * @param type $offset
+    * @param type $limit
+    * @return \linea_pedido_proveedor
+    */
    public function all_from_articulo($ref, $offset=0, $limit=FS_ITEM_LIMIT)
    {
       $linealist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE referencia = ".$this->var2str($ref)
+              ." ORDER BY idpedido DESC";
       
-      $lineas = $this->db->select_limit("SELECT * FROM ".$this->table_name." WHERE referencia = ".$this->var2str($ref)." ORDER BY idpedido DESC", $limit, $offset);
-      if( $lineas )
+      $data = $this->db->select_limit($sql, $limit, $offset);
+      if($data)
       {
-         foreach($lineas as $l)
+         foreach($data as $l)
+         {
             $linealist[] = new linea_pedido_proveedor($l);
+         }
       }
       
       return $linealist;
    }
    
+   /**
+    * Busca todas las coincidencias de $query en las líneas.
+    * @param type $query
+    * @param type $offset
+    * @return \linea_pedido_proveedor
+    */
    public function search($query='', $offset=0)
    {
       $linealist = array();
@@ -306,11 +352,13 @@ class linea_pedido_proveedor extends fs_model
       }
       $sql .= " ORDER BY idpedido DESC, idlinea ASC";
       
-      $lineas = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
-      if( $lineas )
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if($data)
       {
-         foreach($lineas as $l)
+         foreach($data as $l)
+         {
             $linealist[] = new linea_pedido_proveedor($l);
+         }
       }
       
       return $linealist;

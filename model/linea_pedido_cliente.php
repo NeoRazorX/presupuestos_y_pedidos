@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2014-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2016    Carlos Garcia Gomez        neorazorx@gmail.com
+ * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -107,10 +107,12 @@ class linea_pedido_cliente extends fs_model
    
    public function __construct($l = FALSE)
    {
-      parent::__construct('lineaspedidoscli', 'plugins/presupuestos_y_pedidos/');
+      parent::__construct('lineaspedidoscli');
       
       if( !isset(self::$pedidos) )
+      {
          self::$pedidos = array();
+      }
       
       if($l)
       {
@@ -351,34 +353,60 @@ class linea_pedido_cliente extends fs_model
       return $this->db->exec("DELETE FROM ".$this->table_name." WHERE idlinea = ".$this->var2str($this->idlinea).";");
    }
    
+   /**
+    * Devuelve todas las líneas del pedido $idp
+    * @param type $idp
+    * @return \linea_pedido_cliente
+    */
    public function all_from_pedido($idp)
    {
       $plist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($idp)
+              ." ORDER BY idlinea ASC;";
       
-      $data = $this->db->select("SELECT * FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($idp)." ORDER BY idlinea ASC;");
+      $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $d)
+         {
             $plist[] = new linea_pedido_cliente($d);
+         }
       }
       
       return $plist;
    }
    
+   /**
+    * Devuelve todas las líneas que hagan referencia al artículo $ref
+    * @param type $ref
+    * @param type $offset
+    * @param type $limit
+    * @return \linea_pedido_cliente
+    */
    public function all_from_articulo($ref, $offset=0, $limit=FS_ITEM_LIMIT)
    {
       $linealist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE referencia = ".$this->var2str($ref)
+              ." ORDER BY idpedido DESC";
       
-      $lineas = $this->db->select_limit("SELECT * FROM ".$this->table_name." WHERE referencia = ".$this->var2str($ref)." ORDER BY idpedido DESC", $limit, $offset);
-      if( $lineas )
+      $data = $this->db->select_limit($sql, $limit, $offset);
+      if($data)
       {
-         foreach($lineas as $l)
+         foreach($data as $l)
+         {
             $linealist[] = new linea_pedido_cliente($l);
+         }
       }
       
       return $linealist;
    }
    
+   /**
+    * Busca todas las coincidencias de $query en las líneas.
+    * @param type $query
+    * @param type $offset
+    * @return \linea_pedido_cliente
+    */
    public function search($query='', $offset=0)
    {
       $linealist = array();
@@ -396,41 +424,15 @@ class linea_pedido_cliente extends fs_model
       }
       $sql .= " ORDER BY idpedido DESC, idlinea ASC";
       
-      $lineas = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
-      if( $lineas )
+      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      if($data)
       {
-         foreach($lineas as $l)
+         foreach($data as $l)
+         {
             $linealist[] = new linea_pedido_cliente($l);
+         }
       }
       
-      return $linealist;
-   }
-   
-   public function search_from_cliente2($codcliente, $ref='', $obs='', $offset=0)
-   {
-      $linealist = array();
-      $ref = strtolower( $this->no_html($ref) );
-      
-      $sql = "SELECT * FROM ".$this->table_name." WHERE idpedido IN
-         (SELECT idpedido FROM pedidoscli WHERE codcliente = ".$this->var2str($codcliente)."
-         AND lower(observaciones) LIKE '".strtolower($obs)."%') AND ";
-      if( is_numeric($ref) )
-      {
-         $sql .= "(referencia LIKE '%".$ref."%' OR descripcion LIKE '%".$ref."%')";
-      }
-      else
-      {
-         $buscar = str_replace(' ', '%', $ref);
-         $sql .= "(lower(referencia) LIKE '%".$ref."%' OR lower(descripcion) LIKE '%".$ref."%')";
-      }
-      $sql .= " ORDER BY idpedido DESC, idlinea ASC";
-      
-      $lineas = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
-      if( $lineas )
-      {
-         foreach($lineas as $l)
-            $linealist[] = new linea_albaran_cliente($l);
-      }
       return $linealist;
    }
 }
