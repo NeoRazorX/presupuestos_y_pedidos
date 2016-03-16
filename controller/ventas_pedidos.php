@@ -5,16 +5,16 @@
  * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
+ * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -312,16 +312,17 @@ class ventas_pedidos extends fs_controller
 
    private function delete_pedido()
    {
-      $ped = new pedido_cliente();
-      $ped1 = $ped->get($_POST['delete']);
-      if ($ped1)
+      $ped0 = new pedido_cliente();
+      $pedido = $ped0->get($_POST['delete']);
+      if($pedido)
       {
-         if ($ped1->delete())
+         if( $pedido->delete() )
          {
-            $this->new_message(ucfirst(FS_PEDIDO) . ' ' . $ped1->codigo . " borrado correctamente.");
+            $this->new_message(ucfirst(FS_PEDIDO) . ' ' . $pedido->codigo . " eliminado correctamente.", TRUE);
+            $this->clean_last_changes();
          }
          else
-            $this->new_error_msg("¡Imposible borrar el " . FS_PEDIDO . "!");
+            $this->new_error_msg("¡Imposible eliminar el " . FS_PEDIDO . "!");
       }
       else
          $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " no encontrado!");

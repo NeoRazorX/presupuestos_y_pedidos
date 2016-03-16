@@ -5,16 +5,16 @@
  * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
+ * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -465,7 +465,17 @@ class presupuesto_cliente extends fs_model
       }
       else
       {
-         $this->codigo = strtoupper(substr(FS_PRESUPUESTO, 0, 3)).$this->codejercicio.$this->codserie.$this->numero;
+         /**
+          * Para evitar confusiones, si se elige "factura proforma" o algo similar
+          * como traducción de FS_PRESUPUESTO, mejor ponemos "PRO" como inicio de código.
+          */
+         $start = strtoupper(substr(FS_PRESUPUESTO, 0, 3));
+         if($start == 'FAC')
+         {
+            $start = 'PRO';
+         }
+         
+         $this->codigo = $start.$this->codejercicio.$this->codserie.$this->numero;
       }
    }
 

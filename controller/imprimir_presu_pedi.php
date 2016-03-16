@@ -5,16 +5,16 @@
  * Copyright (C) 2014-2016  Carlos Garcia Gomez  neorazorx@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
+ * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -257,6 +257,7 @@ class imprimir_presu_pedi extends fs_controller
          }
       }
       
+      $dec_cantidad = 0;
       $multi_iva = FALSE;
       $multi_re = FALSE;
       $multi_irpf = FALSE;
@@ -266,6 +267,11 @@ class imprimir_presu_pedi extends fs_controller
       /// leemos las líneas para ver si hay que mostrar los tipos de iva, re o irpf
       foreach($lineas as $lin)
       {
+         if( $lin->cantidad != intval($lin->cantidad) )
+         {
+            $dec_cantidad = 2;
+         }
+         
          if($iva === FALSE)
          {
             $iva = $lin->iva;
@@ -301,12 +307,18 @@ class imprimir_presu_pedi extends fs_controller
       $table_header = array(
           'cantidad' => '<b>Cant.</b>',
           'descripcion' => '<b>Ref. + Descripción</b>',
+          'cantidad2' => '<b>Cant.</b>',
           'pvp' => '<b>PVP</b>',
       );
       
       if( get_class($lineas[$linea_actual]) == 'linea_pedido_proveedor' )
       {
+         unset($table_header['cantidad2']);
          $table_header['descripcion'] = '<b>Ref. Prov. + Descripción</b>';
+      }
+      else
+      {
+         unset($table_header['cantidad']);
       }
       
       if($this->impresion['print_dto'])
@@ -349,7 +361,8 @@ class imprimir_presu_pedi extends fs_controller
          }
          
          $fila = array(
-             'cantidad' => $lineas[$linea_actual]->cantidad,
+             'cantidad' => $this->show_numero($lineas[$linea_actual]->cantidad, $dec_cantidad),
+             'cantidad2' => $this->show_numero($lineas[$linea_actual]->cantidad, $dec_cantidad),
              'descripcion' => $descripcion,
              'pvp' => $this->show_precio($lineas[$linea_actual]->pvpunitario, $documento->coddivisa, TRUE, FS_NF0_ART),
              'dto' => $this->show_numero($lineas[$linea_actual]->dtopor) . " %",
@@ -368,6 +381,7 @@ class imprimir_presu_pedi extends fs_controller
                   'fontSize' => 8,
                   'cols' => array(
                       'cantidad' => array('justification' => 'right'),
+                      'cantidad2' => array('justification' => 'right'),
                       'pvp' => array('justification' => 'right'),
                       'dto' => array('justification' => 'right'),
                       'iva' => array('justification' => 'right'),

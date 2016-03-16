@@ -4,16 +4,16 @@
  * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
+ * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -384,16 +384,17 @@ class ventas_presupuestos extends fs_controller
 
    private function delete_presupuesto()
    {
-      $pre = new presupuesto_cliente();
-      $pre1 = $pre->get($_POST['delete']);
-      if ($pre1)
+      $pre0 = new presupuesto_cliente();
+      $presup = $pre0->get($_POST['delete']);
+      if($presup)
       {
-         if ($pre1->delete())
+         if( $presup->delete() )
          {
-            $this->new_message(ucfirst(FS_PRESUPUESTO) . " " . $pre1->codigo . " borrado correctamente.");
+            $this->new_message(ucfirst(FS_PRESUPUESTO) . " " . $presup->codigo . " eliminado correctamente.", TRUE);
+            $this->clean_last_changes();
          }
          else
-            $this->new_error_msg("¡Imposible borrar el " . FS_PRESUPUESTO . "!");
+            $this->new_error_msg("¡Imposible eliminar el " . FS_PRESUPUESTO . "!");
       }
       else
          $this->new_error_msg("¡" . ucfirst(FS_PRESUPUESTO) . " no encontrado!");

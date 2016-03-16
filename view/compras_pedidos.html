@@ -98,7 +98,8 @@
    <li{if="!isset($_GET['pendientes'])"} class="active"{/if}>
       <a href="{$fsc->url()}">
          {if="$fsc->query==''"}
-         Todos los {#FS_PEDIDOS#}
+         <span class="text-capitalize hidden-xs">{#FS_PEDIDOS#} (todo)</span>
+         <span class="visible-xs">Todo</span>
          {else}
          <span class="glyphicon glyphicon-search"></span>
          <span class="hidden-xs">&nbsp; Resultados de "{$fsc->query}"</span>
