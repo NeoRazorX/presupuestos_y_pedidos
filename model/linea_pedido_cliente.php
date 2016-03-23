@@ -103,6 +103,10 @@ class linea_pedido_cliente extends fs_model
     */
    public $referencia;
    
+   public $orden;
+   public $mostrar_cantidad;
+   public $mostrar_precio;
+   
    private static $pedidos;
    
    public function __construct($l = FALSE)
@@ -116,14 +120,14 @@ class linea_pedido_cliente extends fs_model
       
       if($l)
       {
-         $this->cantidad = floatval($l['cantidad']);
-         $this->codimpuesto = $l['codimpuesto'];
-         $this->descripcion = $l['descripcion'];
-         $this->dtopor = floatval($l['dtopor']);
          $this->idlinea = $this->intval($l['idlinea']);
          $this->idlineapresupuesto = $this->intval($l['idlineapresupuesto']);
          $this->idpedido = $this->intval($l['idpedido']);
          $this->idpresupuesto = $this->intval($l['idpresupuesto']);
+         $this->cantidad = floatval($l['cantidad']);
+         $this->codimpuesto = $l['codimpuesto'];
+         $this->descripcion = $l['descripcion'];
+         $this->dtopor = floatval($l['dtopor']);
          $this->irpf = floatval($l['irpf']);
          $this->iva = floatval($l['iva']);
          $this->pvpsindto = floatval($l['pvpsindto']);
@@ -131,17 +135,21 @@ class linea_pedido_cliente extends fs_model
          $this->pvpunitario = floatval($l['pvpunitario']);
          $this->recargo = floatval($l['recargo']);
          $this->referencia = $l['referencia'];
+         
+         $this->orden = intval($l['orden']);
+         $this->mostrar_cantidad = $this->str2bool($l['mostrar_cantidad']);
+         $this->mostrar_precio = $this->str2bool($l['mostrar_precio']);
       }
       else
       {
-         $this->cantidad = 0;
-         $this->codimpuesto = NULL;
-         $this->descripcion = '';
-         $this->dtopor = 0;
          $this->idlinea = NULL;
          $this->idlineapresupuesto = NULL;
          $this->idpedido = NULL;
          $this->idpresupuesto = NULL;
+         $this->cantidad = 0;
+         $this->codimpuesto = NULL;
+         $this->descripcion = '';
+         $this->dtopor = 0;
          $this->irpf = 0;
          $this->iva = 0;
          $this->pvpsindto = 0;
@@ -149,6 +157,10 @@ class linea_pedido_cliente extends fs_model
          $this->pvpunitario = 0;
          $this->recargo = 0;
          $this->referencia = NULL;
+         
+         $this->orden = 0;
+         $this->mostrar_cantidad = TRUE;
+         $this->mostrar_precio = TRUE;
       }
    }
    
@@ -312,6 +324,9 @@ class linea_pedido_cliente extends fs_model
                     .", pvpunitario = ".$this->var2str($this->pvpunitario)
                     .", recargo = ".$this->var2str($this->recargo)
                     .", referencia = ".$this->var2str($this->referencia)
+                    .", orden = ".$this->var2str($this->orden)
+                    .", mostrar_cantidad = ".$this->var2str($this->mostrar_cantidad)
+                    .", mostrar_precio = ".$this->var2str($this->mostrar_precio)
                     ."  WHERE idlinea = ".$this->var2str($this->idlinea).";";
             
             return $this->db->exec($sql);
@@ -319,8 +334,8 @@ class linea_pedido_cliente extends fs_model
          else
          {
             $sql = "INSERT INTO ".$this->table_name." (cantidad,codimpuesto,descripcion,dtopor,idpedido,
-               irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,idlineapresupuesto,idpresupuesto)
-               VALUES (".$this->var2str($this->cantidad)
+               irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,idlineapresupuesto,idpresupuesto,
+               orden,mostrar_cantidad,mostrar_precio) VALUES (".$this->var2str($this->cantidad)
                     .",".$this->var2str($this->codimpuesto)
                     .",".$this->var2str($this->descripcion)
                     .",".$this->var2str($this->dtopor)
@@ -333,7 +348,10 @@ class linea_pedido_cliente extends fs_model
                     .",".$this->var2str($this->recargo)
                     .",".$this->var2str($this->referencia)
                     .",".$this->var2str($this->idlineapresupuesto)
-                    .",".$this->var2str($this->idpresupuesto).");";
+                    .",".$this->var2str($this->idpresupuesto)
+                    .",".$this->var2str($this->orden)
+                    .",".$this->var2str($this->mostrar_cantidad)
+                    .",".$this->var2str($this->mostrar_precio).");";
             
             if( $this->db->exec($sql) )
             {
@@ -362,7 +380,7 @@ class linea_pedido_cliente extends fs_model
    {
       $plist = array();
       $sql = "SELECT * FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($idp)
-              ." ORDER BY idlinea ASC;";
+              ." ORDER BY orden DESC, idlinea ASC;";
       
       $data = $this->db->select($sql);
       if($data)

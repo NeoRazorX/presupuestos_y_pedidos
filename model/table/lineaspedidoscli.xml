@@ -89,6 +89,21 @@
       <tipo>double precision</tipo>
       <nulo>YES</nulo>
    </columna>
+   <columna>
+      <nombre>orden</nombre>
+      <tipo>integer</tipo>
+      <defecto>0</defecto>
+   </columna>
+   <columna>
+      <nombre>mostrar_cantidad</nombre>
+      <tipo>boolean</tipo>
+      <defecto>true</defecto>
+   </columna>
+   <columna>
+      <nombre>mostrar_precio</nombre>
+      <tipo>boolean</tipo>
+      <defecto>true</defecto>
+   </columna>
    <restriccion>
       <nombre>lineaspedidoscli_pkey</nombre>
       <consulta>PRIMARY KEY (idlinea)</consulta>

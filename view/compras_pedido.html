@@ -189,7 +189,7 @@
          {if="$fsc->pedido->editable"}
          <div class="col-md-2 col-sm-2">
             <div class="form-group">
-               <a href="{$fsc->serie->url()}">Serie</a>:
+               <a href="{$fsc->serie->url()}" class="text-capitalize">{#FS_SERIE#}</a>:
                <select class="form-control" name="serie" id="codserie" onchange="usar_serie();recalcular();">
                {loop="$fsc->serie->all()"}
                   {if="$value->codserie==$fsc->pedido->codserie"}

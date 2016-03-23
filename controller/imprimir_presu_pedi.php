@@ -156,7 +156,7 @@ class imprimir_presu_pedi extends fs_controller
               'page_from' => __CLASS__,
               'page_to' => 'ventas_pedido',
               'type' => 'pdf',
-              'text' => ucfirst(FS_PEDIDO).' simple',
+              'text' => '<span class="glyphicon glyphicon-print"></span>&nbsp; '.ucfirst(FS_PEDIDO).' simple',
               'params' => '&pedido=TRUE'
           ),
           array(
@@ -172,7 +172,7 @@ class imprimir_presu_pedi extends fs_controller
               'page_from' => __CLASS__,
               'page_to' => 'ventas_presupuesto',
               'type' => 'pdf',
-              'text' => ucfirst(FS_PRESUPUESTO).' simple',
+              'text' => '<span class="glyphicon glyphicon-print"></span>&nbsp; '.ucfirst(FS_PRESUPUESTO).' simple',
               'params' => '&presupuesto=TRUE'
           ),
           array(
@@ -372,6 +372,25 @@ class imprimir_presu_pedi extends fs_controller
              'importe' => $this->show_precio($lineas[$linea_actual]->pvptotal, $documento->coddivisa)
          );
          
+         if( get_class($lineas[$linea_actual]) != 'linea_pedido_proveedor' )
+         {
+            if( !$lineas[$linea_actual]->mostrar_cantidad )
+            {
+               $fila['cantidad'] = '';
+               $fila['cantidad2'] = '';
+            }
+            
+            if( !$lineas[$linea_actual]->mostrar_precio )
+            {
+               $fila['pvp'] = '';
+               $fila['dto'] = '';
+               $fila['iva'] = '';
+               $fila['re'] = '';
+               $fila['irpf'] = '';
+               $fila['importe'] = '';
+            }
+         }
+         
          $pdf_doc->add_table_row($fila);
          $linea_actual++;
       }
@@ -554,7 +573,9 @@ class imprimir_presu_pedi extends fs_controller
       if($archivo)
       {
          if( !file_exists('tmp/'.FS_TMP_NAME.'enviar') )
+         {
             mkdir('tmp/'.FS_TMP_NAME.'enviar');
+         }
          
          $pdf_doc->save('tmp/'.FS_TMP_NAME.'enviar/'.$archivo);
       }
@@ -701,7 +722,9 @@ class imprimir_presu_pedi extends fs_controller
       if($archivo)
       {
          if( !file_exists('tmp/'.FS_TMP_NAME.'enviar') )
+         {
             mkdir('tmp/'.FS_TMP_NAME.'enviar');
+         }
          
          $pdf_doc->save('tmp/'.FS_TMP_NAME.'enviar/'.$archivo);
       }
@@ -870,7 +893,9 @@ class imprimir_presu_pedi extends fs_controller
       if($archivo)
       {
          if( !file_exists('tmp/'.FS_TMP_NAME.'enviar') )
+         {
             mkdir('tmp/'.FS_TMP_NAME.'enviar');
+         }
          
          $pdf_doc->save('tmp/'.FS_TMP_NAME.'enviar/'.$archivo);
       }

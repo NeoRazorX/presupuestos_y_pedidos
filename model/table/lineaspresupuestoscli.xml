@@ -76,6 +76,21 @@
       <tipo>character varying(18)</tipo>
       <nulo>YES</nulo>
    </columna>
+   <columna>
+      <nombre>orden</nombre>
+      <tipo>integer</tipo>
+      <defecto>0</defecto>
+   </columna>
+   <columna>
+      <nombre>mostrar_cantidad</nombre>
+      <tipo>boolean</tipo>
+      <defecto>true</defecto>
+   </columna>
+   <columna>
+      <nombre>mostrar_precio</nombre>
+      <tipo>boolean</tipo>
+      <defecto>true</defecto>
+   </columna>
    <restriccion>
       <nombre>lineaspresupuestoscli_pkey</nombre>
       <consulta>PRIMARY KEY (idlinea)</consulta>
