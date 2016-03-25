@@ -372,6 +372,11 @@ class imprimir_presu_pedi extends fs_controller
              'importe' => $this->show_precio($lineas[$linea_actual]->pvptotal, $documento->coddivisa)
          );
          
+         if($lineas[$linea_actual]->dtopor == 0)
+         {
+            $fila['dto'] = '';
+         }
+         
          if( get_class($lineas[$linea_actual]) != 'linea_pedido_proveedor' )
          {
             if( !$lineas[$linea_actual]->mostrar_cantidad )

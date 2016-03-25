@@ -17,17 +17,20 @@
 </script>
 
 <div class="container-fluid">
-   <div class="row">
-      <div class="col-xs-6">
-         <a class="btn btn-xs btn-default" href="{$fsc->documento->url()}">
-            <span class="glyphicon glyphicon-arrow-left"></span>
-         </a>
-      </div>
-      <div class="col-xs-6 text-right">
-         
-      </div>
-   </div>
    <form action="{$fsc->url()}" method="post" class="form">
+      <div class="row">
+         <div class="col-xs-6">
+            <a class="btn btn-xs btn-default" href="{$fsc->documento->url()}">
+               <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+         </div>
+         <div class="col-xs-6 text-right">
+            <button class="btn btn-xs btn-primary" type="button" onclick="this.disabled = true;this.form.submit();">
+               <span class="glyphicon glyphicon-floppy-disk"></span>
+               <span class="hidden-xs"> &nbsp; Guardar</span>
+            </button>
+         </div>
+      </div>
       <div class="row">
          <div class="col-sm-12">
             <div class="page-header">
@@ -56,11 +59,11 @@
                   </thead>
                   <tbody>
                      {loop="$fsc->lineas"}
-                     <tr style="cursor: pointer;">
+                     <tr{if="!$value->mostrar_precio"} class="warning"{/if} style="cursor: pointer;">
                         <td><span class="glyphicon glyphicon-resize-vertical"></span></td>
                         <td>
                            <input type="hidden" name="idlinea[]" value="{$value->idlinea}"/>
-                           <b>{$value->referencia}</b> {$value->descripcion}
+                           <b>{$value->referencia}</b> {$value->descripcion()}
                         </td>
                         <td class="text-center" title="mostrar cantidad">
                            {if="$value->mostrar_cantidad"}
