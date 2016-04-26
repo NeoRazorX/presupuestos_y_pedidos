@@ -112,31 +112,38 @@
                   {if="$fsc->presupuesto->status==0"}
                   <button type="button" class="btn btn-sm btn-warning dropdown-toggle" data-toggle="dropdown">
                      <span class="glyphicon glyphicon-time"></span>
-                     <span class="hidden-xs"> &nbsp; Pendiente</span>
+                     <span class="hidden-xs">&nbsp; Pendiente</span>
                      <span class="caret"></span>
                   </button>
                   {elseif="$fsc->presupuesto->status==1"}
                   <button type="button" class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown">
                      <span class="glyphicon glyphicon-ok"></span>
-                     <span class="hidden-xs"> &nbsp; Aprobado</span>
+                     <span class="hidden-xs">&nbsp; Aprobado</span>
                      <span class="caret"></span>
                   </button>
                   {elseif="$fsc->presupuesto->status==2"}
                   <button type="button" class="btn btn-sm btn-danger dropdown-toggle" data-toggle="dropdown">
                      <span class="glyphicon glyphicon-remove"></span>
-                     <span class="hidden-xs"> &nbsp; Rechazado</span>
+                     <span class="hidden-xs">&nbsp; Rechazado</span>
                      <span class="caret"></span>
                   </button>
                   {/if}
                   <ul class="dropdown-menu" role="menu">
                      {if="$fsc->presupuesto->status!=0"}
-                     <li><a href="{$fsc->url()}&status=0"><span class="glyphicon glyphicon-time"></span> &nbsp; Pendiente</a></li>
+                     <li><a href="{$fsc->url()}&status=0"><span class="glyphicon glyphicon-time"></span>&nbsp; Pendiente</a></li>
                      {/if}
                      {if="$fsc->presupuesto->status!=1"}
-                     <li><a href="{$fsc->url()}&status=1"><span class="glyphicon glyphicon-ok"></span> &nbsp; Aprobado</a></li>
+                     <li><a href="{$fsc->url()}&status=1"><span class="glyphicon glyphicon-ok"></span>&nbsp; Aprobado</a></li>
+                     {/if}
+                     {if="$fsc->presupuesto->status==0 AND $fsc->user->have_access_to('ventas_agrupar_presup')"}
+                     <li>
+                        <a href="index.php?page=ventas_agrupar_presup&codcliente={$fsc->presupuesto->codcliente}&codserie={$fsc->presupuesto->codserie}&desde={$fsc->presupuesto->fecha}">
+                           <span class="glyphicon glyphicon-duplicate"></span>&nbsp; Agrupar...
+                        </a>
+                     </li>
                      {/if}
                      {if="$fsc->presupuesto->status!=2"}
-                     <li><a href="{$fsc->url()}&status=2"><span class="glyphicon glyphicon-remove"></span> &nbsp; Rechazado</a></li>
+                     <li><a href="{$fsc->url()}&status=2"><span class="glyphicon glyphicon-remove"></span>&nbsp; Rechazado</a></li>
                      {/if}
                   </ul>
                </div>

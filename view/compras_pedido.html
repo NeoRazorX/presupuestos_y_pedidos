@@ -102,16 +102,29 @@
             <div class="btn-group">
                {if="$fsc->pedido->idalbaran"}
                <a class="btn btn-sm btn-info text-capitalize" href="{$fsc->pedido->albaran_url()}">
-                  <span class="glyphicon glyphicon-eye-open"></span> &nbsp; Ver {#FS_ALBARAN#}
+                  <span class="glyphicon glyphicon-eye-open"></span>&nbsp; Ver {#FS_ALBARAN#}
                </a>
                {elseif="$fsc->pedido->editable"}
-               <a id="b_aprobar" class="btn btn-sm btn-default" href="#">
-                  <span class="glyphicon glyphicon-paperclip"></span>
-                  <span class="hidden-xs">&nbsp; Aprobar</span>
-               </a>
+               <button type="button" class="btn btn-sm btn-warning dropdown-toggle" data-toggle="dropdown">
+                  <span class="glyphicon glyphicon-time"></span>
+                  <span class="hidden-xs">&nbsp; Pendiente</span>
+                  <span class="caret"></span>
+               </button>
+               <ul class="dropdown-menu" role="menu">
+                  <li>
+                     <a id="b_aprobar" href="#">
+                        <span class="glyphicon glyphicon-ok"></span>&nbsp; Aprobado
+                     </a>
+                  </li>
+                  <li>
+                     <a href="index.php?page=compras_agrupar_pedidos&codproveedor={$fsc->pedido->codproveedor}&codserie={$fsc->pedido->codserie}&desde={$fsc->pedido->fecha}">
+                        <span class="glyphicon glyphicon-duplicate"></span>&nbsp; Agrupar...
+                     </a>
+                  </li>
+               </ul>
                {else}
                <a class="btn btn-sm btn-warning" href="{$fsc->pedido->url()}&desbloquear=TRUE">
-                  <span class="glyphicon glyphicon-lock"></span> &nbsp; Desbloquear
+                  <span class="glyphicon glyphicon-lock"></span>&nbsp; Desbloquear
                </a>
                {/if}
             </div>
