@@ -76,92 +76,99 @@ class articulos_pedidos extends fs_controller
    {
       $artlist = array();
       $art0 = new articulo();
-
-      $sql = "SELECT sum(cantidad) as cantidadcompras,referencia,lineaspedidosprov.idpedido "
-              . "FROM lineaspedidosprov LEFT JOIN pedidosprov ON lineaspedidosprov.idpedido = pedidosprov.idpedido "
-              . "WHERE pedidosprov.idalbaran IS NULL AND editable AND lineaspedidosprov.referencia IS NOT NULL "
-              . "GROUP BY referencia,lineaspedidosprov.idpedido "
-              . "ORDER BY idpedido DESC, referencia ASC;";
-      $data = $this->db->select($sql);
-      if($data)
+      
+      /// compras
+      if( $this->db->table_exists('lineaspedidosprov') )
       {
-         foreach($data as $d)
+         $sql = "SELECT sum(cantidad) as cantidadcompras,referencia,lineaspedidosprov.idpedido "
+                 . "FROM lineaspedidosprov LEFT JOIN pedidosprov ON lineaspedidosprov.idpedido = pedidosprov.idpedido "
+                 . "WHERE pedidosprov.idalbaran IS NULL AND editable AND lineaspedidosprov.referencia IS NOT NULL "
+                 . "GROUP BY referencia,lineaspedidosprov.idpedido "
+                 . "ORDER BY idpedido DESC, referencia ASC;";
+         $data = $this->db->select($sql);
+         if($data)
          {
-            $articulo = $art0->get($d['referencia']);
-            if($articulo)
+            foreach($data as $d)
             {
-               if( isset($artlist[$articulo->referencia]) )
+               $articulo = $art0->get($d['referencia']);
+               if($articulo)
                {
-                  $artlist[$articulo->referencia]['cantidadcompras'] += floatval($d['cantidadcompras']);
-               }
-               else
-               {
-                  $artlist[$articulo->referencia] = array(
-                      'referencia' => $d['referencia'],
-                      'cantidadcompras' => floatval($d['cantidadcompras']),
-                      'cantidadventas' => 0,
-                      'descripcion' => $articulo->descripcion,
-                      'stockfisico' => $articulo->stockfis,
-                      'pedidoscompras' => array(),
-                      'pedidosventas' => array(),
-                  );
-               }
-               
-               $pedido = $this->pedidoprov->get($d['idpedido']);
-               if($pedido)
-               {
-                  if($pedido->idpedido == $d['idpedido'])
+                  if( isset($artlist[$articulo->referencia]) )
                   {
-                     $pedido->cantidadpedido = $d['cantidadcompras'];
+                     $artlist[$articulo->referencia]['cantidadcompras'] += floatval($d['cantidadcompras']);
+                  }
+                  else
+                  {
+                     $artlist[$articulo->referencia] = array(
+                         'referencia' => $d['referencia'],
+                         'cantidadcompras' => floatval($d['cantidadcompras']),
+                         'cantidadventas' => 0,
+                         'descripcion' => $articulo->descripcion,
+                         'stockfisico' => $articulo->stockfis,
+                         'pedidoscompras' => array(),
+                         'pedidosventas' => array(),
+                     );
                   }
                   
-                  $artlist[$articulo->referencia]['pedidoscompras'][] = $pedido;
+                  $pedido = $this->pedidoprov->get($d['idpedido']);
+                  if($pedido)
+                  {
+                     if($pedido->idpedido == $d['idpedido'])
+                     {
+                        $pedido->cantidadpedido = $d['cantidadcompras'];
+                     }
+                     
+                     $artlist[$articulo->referencia]['pedidoscompras'][] = $pedido;
+                  }
                }
             }
          }
       }
-
-      //ventas
-      $sql1= "SELECT sum(cantidad) as cantidadventas,referencia,lineaspedidoscli.idpedido "
-              . "FROM lineaspedidoscli LEFT JOIN pedidoscli ON lineaspedidoscli.idpedido = pedidoscli.idpedido "
-              . "WHERE pedidoscli.idalbaran IS NULL AND status = '0' "
-              . "AND lineaspedidoscli.referencia IS NOT NULL AND lineaspedidoscli.referencia != '' "
-              . "GROUP BY referencia,lineaspedidoscli.idpedido "
-              . "ORDER BY idpedido DESC, referencia ASC;";
-      $data1 = $this->db->select($sql1);
-      if($data1)
+      
+      /// ventas
+      if( $this->db->table_exists('lineaspedidoscli') )
       {
-         foreach ($data1 as $d1)
+         $sql1= "SELECT sum(cantidad) as cantidadventas,referencia,lineaspedidoscli.idpedido "
+                 . "FROM lineaspedidoscli LEFT JOIN pedidoscli ON lineaspedidoscli.idpedido = pedidoscli.idpedido "
+                 . "WHERE pedidoscli.idalbaran IS NULL AND status = '0' "
+                 . "AND lineaspedidoscli.referencia IS NOT NULL AND lineaspedidoscli.referencia != '' "
+                 . "GROUP BY referencia,lineaspedidoscli.idpedido "
+                 . "ORDER BY idpedido DESC, referencia ASC;";
+         $data1 = $this->db->select($sql1);
+         if($data1)
          {
-            $articulo = $art0->get($d1['referencia']);
-            if($articulo)
+            foreach ($data1 as $d1)
             {
-               if( isset($artlist[$articulo->referencia]) )
+               $articulo = $art0->get($d1['referencia']);
+               if($articulo)
                {
-                  $artlist[$articulo->referencia]['cantidadventas'] += floatval($d1['cantidadventas']);
-               }
-               else
-               {
-                  $artlist[$articulo->referencia] = array(
-                      'referencia' => $d1['referencia'],
-                      'cantidadcompras' => 0,
-                      'cantidadventas' => floatval($d1['cantidadventas']),
-                      'descripcion' => $articulo->descripcion,
-                      'stockfisico' => $articulo->stockfis,
-                      'pedidoscompras' => array(),
-                      'pedidosventas' => array(),
-                  );
-               }
-               
-               $pedido1 = $this->pedidocli->get($d1['idpedido']);
-               if($pedido1)
-               {
-                  if($pedido1->idpedido == $d1['idpedido'])
+                  if( isset($artlist[$articulo->referencia]) )
                   {
-                     $pedido1->cantidadpedido = $d1['cantidadventas'];
+                     $artlist[$articulo->referencia]['cantidadventas'] += floatval($d1['cantidadventas']);
+                  }
+                  else
+                  {
+                     $artlist[$articulo->referencia] = array(
+                         'referencia' => $d1['referencia'],
+                         'cantidadcompras' => 0,
+                         'cantidadventas' => floatval($d1['cantidadventas']),
+                         'descripcion' => $articulo->descripcion,
+                         'stockfisico' => $articulo->stockfis,
+                         'pedidoscompras' => array(),
+                         'pedidosventas' => array(),
+                     );
                   }
                   
-                  $artlist[$articulo->referencia]['pedidosventas'][] = $pedido1;
+                  $pedido1 = $this->pedidocli->get($d1['idpedido']);
+                  if($pedido1)
+                  {
+                     if($pedido1->idpedido == $d1['idpedido'])
+                     {
+                        $pedido1->cantidadpedido = $d1['cantidadventas'];
+                     }
+                     
+                     $artlist[$articulo->referencia]['pedidosventas'][] = $pedido1;
+                  }
                }
             }
          }
