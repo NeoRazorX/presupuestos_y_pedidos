@@ -116,11 +116,13 @@
                         <span class="glyphicon glyphicon-ok"></span>&nbsp; Aprobado
                      </a>
                   </li>
+                  {if="$fsc->user->have_access_to('compras_agrupar_pedidos')"}
                   <li>
                      <a href="index.php?page=compras_agrupar_pedidos&codproveedor={$fsc->pedido->codproveedor}&codserie={$fsc->pedido->codserie}&desde={$fsc->pedido->fecha}">
                         <span class="glyphicon glyphicon-duplicate"></span>&nbsp; Agrupar...
                      </a>
                   </li>
+                  {/if}
                </ul>
                {else}
                <a class="btn btn-sm btn-warning" href="{$fsc->pedido->url()}&desbloquear=TRUE">
