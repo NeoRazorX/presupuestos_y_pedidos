@@ -3,79 +3,75 @@
 <div class="container-fluid">
    <div class="row">
       <div class="col-sm-12">
-         <a class="btn btn-sm btn-default" href="index.php?page=compras_pedidos">
-            <span class="glyphicon glyphicon-arrow-left"></span>
-            <span class="hidden-xs">&nbsp; Volver</span>
-         </a>
-         <a class="btn btn-sm btn-default" href="{$fsc->url()}" title="Recargar la página">
-            <span class="glyphicon glyphicon-refresh"></span>
-         </a>
          <div class="btn-group">
-            {loop="$fsc->extensions"}
+            <a class="btn btn-sm btn-default" href="index.php?page=compras_pedidos">
+               <span class="glyphicon glyphicon-arrow-left"></span>
+               <span class="hidden-xs">&nbsp; Volver</span>
+            </a>
+            <a class="btn btn-sm btn-default" href="{$fsc->url()}" title="Recargar la página">
+               <span class="glyphicon glyphicon-refresh"></span>
+            </a>
+         </div>
+         <div class="btn-group">
+         {loop="$fsc->extensions"}
             {if="$value->type=='button'"}
             <a href="index.php?page={$value->from}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
             {/if}
-            {/loop}
+         {/loop}
          </div>
          <div class="page-header">
             <h1>
-               <span class="glyphicon glyphicon-import"></span>
-               Artículos pedidos
+               <span class="glyphicon glyphicon-tasks"></span>
+               Artículos en {#FS_PEDIDOS#}
+               <small>{function="count($fsc->resultados)"}</small>
             </h1>
-         </div>
-      </div>
-   </div>
-   <div class="row">
-      <div class="col-sm-6">
-         <div class="alert alert-danger text-center" role="alert">
-            <b>Compras</b>
-         </div>
-      </div>
-      <div class="col-sm-6">
-         <div class="alert alert-success text-center" role="alert">
-            <b>Ventas</b>
+            <p class="help-block">
+               Estos son los artículos que hay en {#FS_PEDIDOS#} de compra y de venta pendientes.
+            </p>
          </div>
       </div>
    </div>
    {loop="$fsc->resultados"}
    <div class="row">
       <div class="col-sm-12">
-         <div class="panel panel-default">
-           <div class="panel-heading">
-                  <a href="index.php?page=ventas_articulo&ref={$value['referencia']}">{$value['referencia']}</a> {$value['descripcion']}
-                  <span class="hidden-xs badge">{$value['stockfisico']}</span>
-           </div>
+         <div class='panel {if="$value['cantidadventas']<=$value['stockfisico']+$value['cantidadcompras']"}panel-default{else}panel-warning{/if}'>
+            <div class="panel-heading">
+               <a href="index.php?page=ventas_articulo&ref={$value['referencia']}">{$value['referencia']}</a>
+               {$value['descripcion']}
+            </div>
             <div class="row">
                <div class="col-sm-6">
                   <div class="table-responsive">
                      <table class="table table-responsive">
                         <thead>
                            <tr>
-                              <th>{#FS_PEDIDO#}</th>
-                             <th>Proveedor</th>
-                             <th class="text-right">Fecha pedido</th>
-                             <th class="text-right">Fecha de entrada</th>
-                             <th class="text-right">Cantidad</th>                        
-                          </tr>
-                       </thead>
-                       {loop="$value['pedidoscompras']"}
-                       <tr>
-                          <td><a href="index.php?page=compras_pedido&id={$value2->idpedido}">{$value2->codigo}</a></td>
-                          <td>{$value2->nombre}</td>
-                          <td class="text-right">{$value2->fecha}</td>
-                          <td class="text-right">{$value2->fechaentrada}</td>
-                          <td class="text-right">{$value2->cantidadpedido}</td>
-                       </tr>
-                       {/loop}
-                    </table>
-                 </div>
+                              <th>Compras</th>
+                              <th>Proveedor</th>
+                              <th class="text-right">Fecha pedido</th>
+                              <th class="text-right">Cantidad</th>                        
+                           </tr>
+                        </thead>
+                        {loop="$value['pedidoscompras']"}
+                        <tr>
+                           <td><a href="index.php?page=compras_pedido&id={$value2->idpedido}">{$value2->codigo}</a></td>
+                           <td>{$value2->nombre}</td>
+                           <td class="text-right">{$value2->fecha}</td>
+                           <td class="text-right">{$value2->cantidadpedido}</td>
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="4">Ningún {#FS_PEDIDO#} pendiente.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
                </div>
                <div class="col-sm-6">
                   <div class="table-responsive">
                      <table class="table table-responsive">
                         <thead>
                            <tr>
-                              <th>{#FS_PEDIDO#}</th>
+                              <th>Ventas</th>
                               <th>Cliente</th>
                               <th class="text-right">Fecha pedido</th>
                               <th class="text-right">Fecha de salida</th>
@@ -90,20 +86,25 @@
                            <td class="text-right">{$value2->fechasalida}</td>
                            <td class="text-right">{$value2->cantidadpedido}</td>
                         </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="5">Ningún {#FS_PEDIDO#} pendiente.</td>
+                        </tr>
                         {/loop}
                      </table>
                   </div>
                </div>
             </div>
-            <div class="row">
-               <div class="col-sm-6">
-                  <div class="panel-body text-right">                     
-                     <b>Total Pendientes de recibir: {$value['cantidadcompras']}</b>
+            <div class="panel-footer small">
+               <div class="row">
+                  <div class="col-sm-4">
+                     <b>Pendiente de recibir: {$value['cantidadcompras']}</b>
                   </div>
-               </div>
-               <div class="col-sm-6">
-                  <div class="panel-body text-right">                     
-                     <b>Total Pendientes de enviar: {$value['cantidadventas']}</b>
+                  <div class="col-sm-4 text-center">
+                     <b>En stock: {$value['stockfisico']}</b>
+                  </div>
+                  <div class="col-sm-4 text-right">
+                     <b>Pendiente de enviar: {$value['cantidadventas']}</b>
                   </div>
                </div>
             </div>
@@ -112,4 +113,5 @@
    </div>
    {/loop}
 </div>
+
 {include="footer"}

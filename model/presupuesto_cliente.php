@@ -736,7 +736,7 @@ class presupuesto_cliente extends fs_model
    public function all_rechazados($offset = 0, $order = 'fecha DESC')
    {
       $preclist = array();
-      $sql = "SELECT * FROM ".$this->table_name ." WHERE status=2 ORDER BY ".$order;
+      $sql = "SELECT * FROM ".$this->table_name ." WHERE status = 2 ORDER BY ".$order;
       
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)

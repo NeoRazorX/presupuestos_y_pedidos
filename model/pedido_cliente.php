@@ -697,8 +697,8 @@ class pedido_cliente extends fs_model
    public function all($offset = 0, $order='fecha DESC')
    {
       $pedilist = array();
-      
       $sql = "SELECT * FROM ".$this->table_name." ORDER BY ".$order;
+      
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
@@ -720,8 +720,8 @@ class pedido_cliente extends fs_model
    public function all_ptealbaran($offset = 0, $order = 'fecha ASC')
    {
       $pedilist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE idalbaran IS NULL AND status = 0 ORDER BY ".$order;
       
-      $sql = "SELECT * FROM ".$this->table_name." WHERE idalbaran IS NULL AND status=0 ORDER BY ".$order;
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
@@ -743,8 +743,8 @@ class pedido_cliente extends fs_model
    public function all_rechazados($offset = 0, $order = 'fecha DESC')
    {
       $preclist = array();
+      $sql = "SELECT * FROM ".$this->table_name." WHERE status = 2 ORDER BY ".$order;
       
-      $sql = "SELECT * FROM ".$this->table_name." WHERE status=2 ORDER BY ".$order;
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
@@ -766,9 +766,9 @@ class pedido_cliente extends fs_model
    public function all_from_cliente($codcliente, $offset = 0)
    {
       $pedilist = array();
-      
       $sql = "SELECT * FROM ".$this->table_name." WHERE codcliente = ".$this->var2str($codcliente)
               ." ORDER BY fecha DESC, codigo DESC";
+      
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
@@ -790,9 +790,9 @@ class pedido_cliente extends fs_model
    public function all_from_agente($codagente, $offset = 0)
    {
       $pedilist = array();
-      
       $sql = "SELECT * FROM ".$this->table_name." WHERE codagente = ".$this->var2str($codagente)
               ." ORDER BY fecha DESC, codigo DESC";
+      
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
       if($data)
       {
@@ -837,9 +837,9 @@ class pedido_cliente extends fs_model
    public function all_desde($desde, $hasta)
    {
       $pedlist = array();
-      
       $sql = "SELECT * FROM ".$this->table_name." WHERE fecha >= ".$this->var2str($desde)
               ." AND fecha <= ".$this->var2str($hasta)." ORDER BY codigo ASC;";
+      
       $data = $this->db->select($sql);
       if($data)
       {

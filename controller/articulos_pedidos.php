@@ -1,21 +1,33 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of articulos_compras
+ * This file is part of FacturaSctipts
+ * Copyright (C) 2016  Carlos Garcia Gomez      neorazorx@gmail.com
+ * Copyright (C) 2016  Luismipr                 luismipr@gmail.com
  *
- * @author Luismipr <luismipr@gmail.com>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 require_model('articulos.php');
 require_model('pedido_proveedor.php');
 require_model('pedido_cliente.php');
 
+/**
+ * Description of articulos_compras
+ *
+ * @author Luismipr <luismipr@gmail.com>
+ */
 class articulos_pedidos extends fs_controller
 {
    public $resultados;
@@ -31,44 +43,34 @@ class articulos_pedidos extends fs_controller
    {
       //cargamos extensiones
       $this->share_extensions();
+      
       $this->pedidoprov = new pedido_proveedor();
       $this->pedidocli = new pedido_cliente();
 
       //mostramos resultados
       $this->resultados = $this->buscar_articulos();
-      
    }
    
    public function share_extensions()
    {
       //botón articulos pendientes de recibir en copras_pedidos
       $fsext = new fs_extension();
-      $fsext->name = 'button_articulos_pedidos_compras';
+      $fsext->name = 'articulos_pedidos_compras';
       $fsext->from = __CLASS__;
       $fsext->to = 'compras_pedidos';
       $fsext->type = 'button';
-      $fsext->text = '<span class="glyphicon glyphicon-import" aria-hidden="true"></span> &nbsp; Artículos pedidos';
+      $fsext->text = '<span class="glyphicon glyphicon-tasks" aria-hidden="true"></span><span class="hidden-xs">&nbsp; Artículos</span>';
       $fsext->save();
       
       //botón articulos pendientes de recibir en ventas_pedidos
       $fsext1 = new fs_extension();
-      $fsext1->name = 'button_articulos_pedidos_ventas';
+      $fsext1->name = 'articulos_pedidos_ventas';
       $fsext1->from = __CLASS__;
       $fsext1->to = 'ventas_pedidos';
       $fsext1->type = 'button';
-      $fsext1->text = '<span class="glyphicon glyphicon-import" aria-hidden="true"></span> &nbsp; Artículos pedidos';
+      $fsext1->text = '<span class="glyphicon glyphicon-tasks" aria-hidden="true"></span><span class="hidden-xs">&nbsp; Artículos</span>';
       $fsext1->save();
-      
-      //botón articulos pendientes de recibir en ventas_articulos
-      $fsext2 = new fs_extension();
-      $fsext2->name = 'button_articulos_pedidos_articulos';
-      $fsext2->from = __CLASS__;
-      $fsext2->to = 'ventas_articulos';
-      $fsext2->type = 'button';
-      $fsext2->text = '<span class="glyphicon glyphicon-import" aria-hidden="true"></span> &nbsp; Artículos pedidos';
-      $fsext2->save();
    }
-   
    
    public function buscar_articulos()
    {
@@ -76,18 +78,19 @@ class articulos_pedidos extends fs_controller
       $art0 = new articulo();
 
       $sql = "SELECT sum(cantidad) as cantidadcompras,referencia,lineaspedidosprov.idpedido "
-              . "FROM lineaspedidosprov INNER JOIN pedidosprov ON lineaspedidosprov.idpedido = pedidosprov.idpedido "
-              . "WHERE pedidosprov.idalbaran IS NULL AND lineaspedidosprov.referencia IS NOT NULL "
-              . "GROUP BY referencia,lineaspedidosprov.idpedido ORDER BY referencia;";
+              . "FROM lineaspedidosprov LEFT JOIN pedidosprov ON lineaspedidosprov.idpedido = pedidosprov.idpedido "
+              . "WHERE pedidosprov.idalbaran IS NULL AND editable AND lineaspedidosprov.referencia IS NOT NULL "
+              . "GROUP BY referencia,lineaspedidosprov.idpedido "
+              . "ORDER BY idpedido DESC, referencia ASC;";
       $data = $this->db->select($sql);
-      if ($data)
+      if($data)
       {
-         foreach ($data as $d)
+         foreach($data as $d)
          {
             $articulo = $art0->get($d['referencia']);
-            if ($articulo)
+            if($articulo)
             {
-               if (isset($artlist[$articulo->referencia]))
+               if( isset($artlist[$articulo->referencia]) )
                {
                   $artlist[$articulo->referencia]['cantidadcompras'] += floatval($d['cantidadcompras']);
                }
@@ -99,16 +102,19 @@ class articulos_pedidos extends fs_controller
                       'cantidadventas' => 0,
                       'descripcion' => $articulo->descripcion,
                       'stockfisico' => $articulo->stockfis,
-                      'pedidoscompras' => array()
+                      'pedidoscompras' => array(),
+                      'pedidosventas' => array(),
                   );
                }
+               
                $pedido = $this->pedidoprov->get($d['idpedido']);
-               if ($pedido)
+               if($pedido)
                {
-                  if ($pedido->idpedido == $d['idpedido'])
+                  if($pedido->idpedido == $d['idpedido'])
                   {
                      $pedido->cantidadpedido = $d['cantidadcompras'];
                   }
+                  
                   $artlist[$articulo->referencia]['pedidoscompras'][] = $pedido;
                }
             }
@@ -117,18 +123,20 @@ class articulos_pedidos extends fs_controller
 
       //ventas
       $sql1= "SELECT sum(cantidad) as cantidadventas,referencia,lineaspedidoscli.idpedido "
-              . "FROM lineaspedidoscli INNER JOIN pedidoscli ON lineaspedidoscli.idpedido = pedidoscli.idpedido "
-              . "WHERE pedidoscli.idalbaran IS NULL AND status = '0' AND lineaspedidoscli.referencia IS NOT NULL "
-              . "GROUP BY referencia,lineaspedidoscli.idpedido ORDER BY referencia;";
+              . "FROM lineaspedidoscli LEFT JOIN pedidoscli ON lineaspedidoscli.idpedido = pedidoscli.idpedido "
+              . "WHERE pedidoscli.idalbaran IS NULL AND status = '0' "
+              . "AND lineaspedidoscli.referencia IS NOT NULL AND lineaspedidoscli.referencia != '' "
+              . "GROUP BY referencia,lineaspedidoscli.idpedido "
+              . "ORDER BY idpedido DESC, referencia ASC;";
       $data1 = $this->db->select($sql1);
-      if ($data1)
+      if($data1)
       {
          foreach ($data1 as $d1)
          {
             $articulo = $art0->get($d1['referencia']);
-            if ($articulo)
+            if($articulo)
             {
-               if (isset($artlist[$articulo->referencia]))
+               if( isset($artlist[$articulo->referencia]) )
                {
                   $artlist[$articulo->referencia]['cantidadventas'] += floatval($d1['cantidadventas']);
                }
@@ -139,22 +147,26 @@ class articulos_pedidos extends fs_controller
                       'cantidadcompras' => 0,
                       'cantidadventas' => floatval($d1['cantidadventas']),
                       'descripcion' => $articulo->descripcion,
-                      'pedidosventas' => array()
+                      'stockfisico' => $articulo->stockfis,
+                      'pedidoscompras' => array(),
+                      'pedidosventas' => array(),
                   );
                }
+               
                $pedido1 = $this->pedidocli->get($d1['idpedido']);
-               if ($pedido1)
+               if($pedido1)
                {
-                  if ($pedido1->idpedido == $d1['idpedido'])
+                  if($pedido1->idpedido == $d1['idpedido'])
                   {
                      $pedido1->cantidadpedido = $d1['cantidadventas'];
                   }
+                  
                   $artlist[$articulo->referencia]['pedidosventas'][] = $pedido1;
                }
             }
          }
       }
-    return $artlist;
+      
+      return $artlist;
    }
-
 }
