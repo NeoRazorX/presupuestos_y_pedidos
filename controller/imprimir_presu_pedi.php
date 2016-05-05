@@ -43,6 +43,7 @@ class imprimir_presu_pedi extends fs_controller
    public $proveedor;
    
    private $logo;
+   private $mostrar_totales;
    
    public function __construct()
    {
@@ -76,6 +77,8 @@ class imprimir_presu_pedi extends fs_controller
       {
          $this->logo = 'tmp/'.FS_TMP_NAME.'logo.jpg';
       }
+      
+      $this->mostrar_totales = FALSE;
       
       if( isset($_REQUEST['pedido_p']) AND isset($_REQUEST['id']) )
       {
@@ -394,7 +397,11 @@ class imprimir_presu_pedi extends fs_controller
                $fila['irpf'] = '';
                $fila['importe'] = '';
             }
+            else
+               $this->mostrar_totales = TRUE;
          }
+         else
+            $this->mostrar_totales = TRUE;
          
          $pdf_doc->add_table_row($fila);
          $linea_actual++;
@@ -513,57 +520,60 @@ class imprimir_presu_pedi extends fs_controller
             
             $pdf_doc->set_y(80);
             
-            /*
-             * Rellenamos la última tabla de la página:
-             * 
-             * Página            Neto    IVA   Total
-             */
-            $pdf_doc->new_table();
-            $titulo = array('pagina' => '<b>Página</b>', 'neto' => '<b>Neto</b>',);
-            $fila = array(
-                'pagina' => $pagina . '/' . ceil(count($lineas) / $lppag),
-                'neto' => $this->show_precio($this->presupuesto->neto, $this->presupuesto->coddivisa),
-            );
-            $opciones = array(
-                'cols' => array(
-                    'neto' => array('justification' => 'right'),
-                ),
-                'showLines' => 4,
-                'width' => 520
-            );
-            foreach($lineas_iva as $li)
+            if($this->mostrar_totales)
             {
-               $imp = $this->impuesto->get($li['codimpuesto']);
-               if($imp)
+               /*
+                * Rellenamos la última tabla de la página:
+                * 
+                * Página            Neto    IVA   Total
+                */
+               $pdf_doc->new_table();
+               $titulo = array('pagina' => '<b>Página</b>', 'neto' => '<b>Neto</b>',);
+               $fila = array(
+                   'pagina' => $pagina . '/' . ceil(count($lineas) / $lppag),
+                   'neto' => $this->show_precio($this->presupuesto->neto, $this->presupuesto->coddivisa),
+               );
+               $opciones = array(
+                   'cols' => array(
+                       'neto' => array('justification' => 'right'),
+                   ),
+                   'showLines' => 4,
+                   'width' => 520
+               );
+               foreach($lineas_iva as $li)
                {
-                  $titulo['iva'.$li['iva']] = '<b>'.$imp->descripcion.'</b>';
+                  $imp = $this->impuesto->get($li['codimpuesto']);
+                  if($imp)
+                  {
+                     $titulo['iva'.$li['iva']] = '<b>'.$imp->descripcion.'</b>';
+                  }
+                  else
+                     $titulo['iva'.$li['iva']] = '<b>'.FS_IVA.' '.$li['iva'].'%</b>';
+                  
+                  $fila['iva'.$li['iva']] = $this->show_precio($li['totaliva'], $this->presupuesto->coddivisa);
+                  
+                  if($li['totalrecargo'] != 0)
+                  {
+                     $fila['iva'.$li['iva']] .= ' (RE: '.$this->show_precio($li['totalrecargo'], $this->presupuesto->coddivisa).')';
+                  }
+                  
+                  $opciones['cols']['iva'.$li['iva']] = array('justification' => 'right');
                }
-               else
-                  $titulo['iva'.$li['iva']] = '<b>'.FS_IVA.' '.$li['iva'].'%</b>';
                
-               $fila['iva'.$li['iva']] = $this->show_precio($li['totaliva'], $this->presupuesto->coddivisa);
-               
-               if($li['totalrecargo'] != 0)
+               if($this->presupuesto->totalirpf != 0)
                {
-                  $fila['iva'.$li['iva']] .= ' (RE: '.$this->show_precio($li['totalrecargo'], $this->presupuesto->coddivisa).')';
+                  $titulo['irpf'] = '<b>'.FS_IRPF.' '.$this->presupuesto->irpf.'%</b>';
+                  $fila['irpf'] = $this->show_precio($this->presupuesto->totalirpf);
+                  $opciones['cols']['irpf'] = array('justification' => 'right');
                }
                
-               $opciones['cols']['iva'.$li['iva']] = array('justification' => 'right');
+               $titulo['liquido'] = '<b>Total</b>';
+               $fila['liquido'] = $this->show_precio($this->presupuesto->total, $this->presupuesto->coddivisa);
+               $opciones['cols']['liquido'] = array('justification' => 'right');
+               $pdf_doc->add_table_header($titulo);
+               $pdf_doc->add_table_row($fila);
+               $pdf_doc->save_table($opciones);
             }
-            
-            if($this->presupuesto->totalirpf != 0)
-            {
-               $titulo['irpf'] = '<b>'.FS_IRPF.' '.$this->presupuesto->irpf.'%</b>';
-               $fila['irpf'] = $this->show_precio($this->presupuesto->totalirpf);
-               $opciones['cols']['irpf'] = array('justification' => 'right');
-            }
-            
-            $titulo['liquido'] = '<b>Total</b>';
-            $fila['liquido'] = $this->show_precio($this->presupuesto->total, $this->presupuesto->coddivisa);
-            $opciones['cols']['liquido'] = array('justification' => 'right');
-            $pdf_doc->add_table_header($titulo);
-            $pdf_doc->add_table_row($fila);
-            $pdf_doc->save_table($opciones);
             
             $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->fix_html($this->empresa->pie_factura), 153), 0, 1.5);
             
@@ -833,57 +843,60 @@ class imprimir_presu_pedi extends fs_controller
             
             $pdf_doc->set_y(80);
             
-            /*
-             * Rellenamos la última tabla de la página:
-             * 
-             * Página            Neto    IVA   Total
-             */
-            $pdf_doc->new_table();
-            $titulo = array('pagina' => '<b>Página</b>', 'neto' => '<b>Neto</b>',);
-            $fila = array(
-                'pagina' => $pagina . '/' . ceil(count($lineas) / $lppag),
-                'neto' => $this->show_precio($this->pedido->neto, $this->pedido->coddivisa),
-            );
-            $opciones = array(
-                'cols' => array(
-                    'neto' => array('justification' => 'right'),
-                ),
-                'showLines' => 4,
-                'width' => 520
-            );
-            foreach($lineas_iva as $li)
+            if($this->mostrar_totales)
             {
-               $imp = $this->impuesto->get($li['codimpuesto']);
-               if($imp)
+               /*
+                * Rellenamos la última tabla de la página:
+                * 
+                * Página            Neto    IVA   Total
+                */
+               $pdf_doc->new_table();
+               $titulo = array('pagina' => '<b>Página</b>', 'neto' => '<b>Neto</b>',);
+               $fila = array(
+                   'pagina' => $pagina . '/' . ceil(count($lineas) / $lppag),
+                   'neto' => $this->show_precio($this->pedido->neto, $this->pedido->coddivisa),
+               );
+               $opciones = array(
+                   'cols' => array(
+                       'neto' => array('justification' => 'right'),
+                   ),
+                   'showLines' => 4,
+                   'width' => 520
+               );
+               foreach($lineas_iva as $li)
                {
-                  $titulo['iva'.$li['iva']] = '<b>'.$imp->descripcion.'</b>';
+                  $imp = $this->impuesto->get($li['codimpuesto']);
+                  if($imp)
+                  {
+                     $titulo['iva'.$li['iva']] = '<b>'.$imp->descripcion.'</b>';
+                  }
+                  else
+                     $titulo['iva'.$li['iva']] = '<b>'.FS_IVA.' '.$li['iva'].'%</b>';
+                  
+                  $fila['iva'.$li['iva']] = $this->show_precio($li['totaliva'], $this->pedido->coddivisa);
+                  
+                  if($li['totalrecargo'] != 0)
+                  {
+                     $fila['iva'.$li['iva']] .= ' (RE: '.$this->show_precio($li['totalrecargo'], $this->pedido->coddivisa).')';
+                  }
+                  
+                  $opciones['cols']['iva'.$li['iva']] = array('justification' => 'right');
                }
-               else
-                  $titulo['iva'.$li['iva']] = '<b>'.FS_IVA.' '.$li['iva'].'%</b>';
                
-               $fila['iva'.$li['iva']] = $this->show_precio($li['totaliva'], $this->pedido->coddivisa);
-               
-               if($li['totalrecargo'] != 0)
+               if($this->pedido->totalirpf != 0)
                {
-                  $fila['iva'.$li['iva']] .= ' (RE: '.$this->show_precio($li['totalrecargo'], $this->pedido->coddivisa).')';
+                  $titulo['irpf'] = '<b>'.FS_IRPF.' '.$this->pedido->irpf.'%</b>';
+                  $fila['irpf'] = $this->show_precio($this->pedido->totalirpf);
+                  $opciones['cols']['irpf'] = array('justification' => 'right');
                }
                
-               $opciones['cols']['iva'.$li['iva']] = array('justification' => 'right');
+               $titulo['liquido'] = '<b>Total</b>';
+               $fila['liquido'] = $this->show_precio($this->pedido->total, $this->pedido->coddivisa);
+               $opciones['cols']['liquido'] = array('justification' => 'right');
+               $pdf_doc->add_table_header($titulo);
+               $pdf_doc->add_table_row($fila);
+               $pdf_doc->save_table($opciones);
             }
-            
-            if($this->pedido->totalirpf != 0)
-            {
-               $titulo['irpf'] = '<b>'.FS_IRPF.' '.$this->pedido->irpf.'%</b>';
-               $fila['irpf'] = $this->show_precio($this->pedido->totalirpf);
-               $opciones['cols']['irpf'] = array('justification' => 'right');
-            }
-            
-            $titulo['liquido'] = '<b>Total</b>';
-            $fila['liquido'] = $this->show_precio($this->pedido->total, $this->pedido->coddivisa);
-            $opciones['cols']['liquido'] = array('justification' => 'right');
-            $pdf_doc->add_table_header($titulo);
-            $pdf_doc->add_table_row($fila);
-            $pdf_doc->save_table($opciones);
             
             $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->fix_html($this->empresa->pie_factura), 153), 0, 1.5);
             

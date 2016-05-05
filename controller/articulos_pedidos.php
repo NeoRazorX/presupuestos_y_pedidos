@@ -36,7 +36,7 @@ class articulos_pedidos extends fs_controller
    
    public function __construct()
    {
-       parent::__construct(__CLASS__, 'Artículos Pedidos', 'compras', FALSE, FALSE);
+       parent::__construct(__CLASS__, 'Artículos Pedidos', 'ventas', FALSE, FALSE);
    }
    
    protected function private_core()
