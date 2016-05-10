@@ -390,7 +390,7 @@ class ventas_presupuestos extends fs_controller
       {
          if( $presup->delete() )
          {
-            $this->new_message(ucfirst(FS_PRESUPUESTO) . " " . $presup->codigo . " eliminado correctamente.", TRUE);
+            $this->new_message(ucfirst(FS_PRESUPUESTO) . " de venta " . $presup->codigo . " eliminado correctamente.", TRUE);
             $this->clean_last_changes();
          }
          else
