@@ -174,6 +174,20 @@ class articulos_pedidos extends fs_controller
          }
       }
       
+      /// ordenamos para poner primero los que no hay suficiente stock
+      usort($artlist, function($a,$b) {
+         if( $a['stockfisico']+$a['cantidadcompras']-$a['cantidadventas'] == $b['stockfisico']+$b['cantidadcompras']-$b['cantidadventas'] )
+         {
+            return 0;
+         }
+         else if( $a['stockfisico']+$a['cantidadcompras']-$a['cantidadventas'] < $b['stockfisico']+$b['cantidadcompras']-$b['cantidadventas'] )
+         {
+            return -1;
+         }
+         else
+            return 1;
+      });
+      
       return $artlist;
    }
 }

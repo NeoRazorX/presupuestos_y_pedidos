@@ -43,7 +43,6 @@ class imprimir_presu_pedi extends fs_controller
    public $proveedor;
    
    private $logo;
-   private $mostrar_totales;
    
    public function __construct()
    {
@@ -77,8 +76,6 @@ class imprimir_presu_pedi extends fs_controller
       {
          $this->logo = 'tmp/'.FS_TMP_NAME.'logo.jpg';
       }
-      
-      $this->mostrar_totales = FALSE;
       
       if( isset($_REQUEST['pedido_p']) AND isset($_REQUEST['id']) )
       {
@@ -163,6 +160,14 @@ class imprimir_presu_pedi extends fs_controller
               'params' => '&pedido=TRUE'
           ),
           array(
+              'name' => 'imprimir_pedido_noval',
+              'page_from' => __CLASS__,
+              'page_to' => 'ventas_pedido',
+              'type' => 'pdf',
+              'text' => '<span class="glyphicon glyphicon-print"></span>&nbsp; '.ucfirst(FS_PEDIDO).' simple sin valorar',
+              'params' => '&pedido=TRUE&noval=TRUE'
+          ),
+          array(
               'name' => 'email_pedido',
               'page_from' => __CLASS__,
               'page_to' => 'ventas_pedido',
@@ -197,6 +202,11 @@ class imprimir_presu_pedi extends fs_controller
       }
    }
    
+   /**
+    * Genera la parte de arriba de la página del pdf.
+    * @param fs_pdf $pdf_doc
+    * @param int $lppag
+    */
    private function generar_pdf_cabecera(&$pdf_doc, &$lppag)
    {
       /// ¿Añadimos el logo?
@@ -204,8 +214,44 @@ class imprimir_presu_pedi extends fs_controller
       {
          if( function_exists('imagecreatefromstring') )
          {
-            $pdf_doc->pdf->ezImage($this->logo, 0, 150, 'none');
             $lppag -= 2; /// si metemos el logo, caben menos líneas
+            
+            if( substr( strtolower($this->logo), -4 ) == '.png' )
+            {
+               $pdf_doc->pdf->addPngFromFile($this->logo, 35, 740, 80, 80);
+            }
+            else
+            {
+               $pdf_doc->pdf->addJpegFromFile($this->logo, 35, 740, 80, 80);
+            }
+            
+            $pdf_doc->pdf->ez['rightMargin'] = 40;
+            $pdf_doc->pdf->ezText("<b>".$this->empresa->nombre."</b>", 12, array('justification' => 'right'));
+            $pdf_doc->pdf->ezText(FS_CIFNIF.": ".$this->empresa->cifnif, 8, array('justification' => 'right'));
+            
+            $direccion = $this->empresa->direccion;
+            if($this->empresa->codpostal)
+            {
+               $direccion .= "\nCP: " . $this->empresa->codpostal;
+            }
+            
+            if($this->empresa->ciudad)
+            {
+               $direccion .= ' - ' . $this->empresa->ciudad;
+            }
+            
+            if($this->empresa->provincia)
+            {
+               $direccion .= ' (' . $this->empresa->provincia . ')';
+            }
+            
+            if($this->empresa->telefono)
+            {
+               $direccion .= "\nTeléfono: " . $this->empresa->telefono;
+            }
+            
+            $pdf_doc->pdf->ezText($this->fix_html($direccion)."\n", 9, array('justification' => 'right'));
+            $pdf_doc->set_y(750);
          }
          else
          {
@@ -243,6 +289,14 @@ class imprimir_presu_pedi extends fs_controller
       }
    }
    
+   /**
+    * Añade las líneas al documento pdf.
+    * @param fs_pdf $pdf_doc
+    * @param type $lineas
+    * @param type $linea_actual
+    * @param type $lppag
+    * @param type $documento
+    */
    private function generar_pdf_lineas(&$pdf_doc, &$lineas, &$linea_actual, &$lppag, &$documento)
    {
       if($this->impresion['print_dto'])
@@ -397,11 +451,7 @@ class imprimir_presu_pedi extends fs_controller
                $fila['irpf'] = '';
                $fila['importe'] = '';
             }
-            else
-               $this->mostrar_totales = TRUE;
          }
-         else
-            $this->mostrar_totales = TRUE;
          
          $pdf_doc->add_table_row($fila);
          $linea_actual++;
@@ -470,43 +520,43 @@ class imprimir_presu_pedi extends fs_controller
             /*
              * Esta es la tabla con los datos del cliente:
              * Presupuesto:             Fecha:
-             * Cliente:             CIF/NIF:
+             * Cliente:               CIF/NIF:
              * Dirección:           Teléfonos:
              */
             $pdf_doc->new_table();
             $pdf_doc->add_table_row(
                array(
-                   'campo1' => "<b>".ucfirst(FS_PRESUPUESTO).":</b>",
+                   'campo1' => "<b>".ucfirst(FS_PRESUPUESTO).":</b> ",
                    'dato1' => $this->presupuesto->codigo,
-                   'campo2' => "<b>Fecha:</b>",
-                   'dato2' => $this->presupuesto->fecha
+                   'campo2' => "<b>Fecha:</b> ".$this->presupuesto->fecha
                )
             );
             $pdf_doc->add_table_row(
                array(
-                   'campo1' => "<b>Cliente:</b>",
+                   'campo1' => "<b>Cliente:</b> ",
                    'dato1' => $this->fix_html($this->presupuesto->nombrecliente),
-                   'campo2' => "<b>".FS_CIFNIF.":</b>",
-                   'dato2' => $this->presupuesto->cifnif
+                   'campo2' => "<b>".$this->cliente->tipoidfiscal.":</b> ".$this->presupuesto->cifnif
                )
             );
-            $pdf_doc->add_table_row(
-               array(
-                   'campo1' => "<b>Dirección:</b>",
-                   'dato1' => $this->fix_html($this->presupuesto->direccion.' CP: '.
-                           $this->presupuesto->codpostal.' - '.$this->presupuesto->ciudad.
-                           ' ('.$this->presupuesto->provincia.')'),
-                   'campo2' => "<b>Teléfonos:</b>",
-                   'dato2' => $this->cliente->telefono1.'  '.$this->cliente->telefono2
-               )
+            $row = array(
+                'campo1' => "<b>Dirección:</b>",
+                'dato1' => $this->fix_html($this->presupuesto->direccion.' CP: '.
+                        $this->presupuesto->codpostal.' - '.$this->presupuesto->ciudad.
+                        ' ('.$this->presupuesto->provincia.')'),
+                'campo2' => ''
             );
+            if($this->cliente->telefono1 OR $this->cliente->telefono1)
+            {
+               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1.'  '.$this->cliente->telefono2;
+            }
+            $pdf_doc->add_table_row($row);
+            
             $pdf_doc->save_table(
                array(
                    'cols' => array(
-                       'campo1' => array('justification' => 'right'),
+                       'campo1' => array('width' => 90, 'justification' => 'right'),
                        'dato1' => array('justification' => 'left'),
-                       'campo2' => array('justification' => 'right'),
-                       'dato2' => array('justification' => 'left')
+                       'campo2' => array('justification' => 'right')
                    ),
                    'showLines' => 0,
                    'width' => 520,
@@ -520,7 +570,7 @@ class imprimir_presu_pedi extends fs_controller
             
             $pdf_doc->set_y(80);
             
-            if($this->mostrar_totales)
+            if( !isset($_GET['noval']) )
             {
                /*
                 * Rellenamos la última tabla de la página:
@@ -574,8 +624,6 @@ class imprimir_presu_pedi extends fs_controller
                $pdf_doc->add_table_row($fila);
                $pdf_doc->save_table($opciones);
             }
-            
-            $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->fix_html($this->empresa->pie_factura), 153), 0, 1.5);
             
             $pagina++;
          }
@@ -632,35 +680,31 @@ class imprimir_presu_pedi extends fs_controller
             $this->generar_pdf_cabecera($pdf_doc, $lppag);
             
             /*
-             * Esta es la tabla con los datos del cliente:
-             * Pedido:              Fecha:
-             * Cliente:             CIF/NIF:
-             * Dirección:           Teléfonos:
+             * Esta es la tabla con los datos del proveedor:
+             * Pedido:                  Fecha:
+             * Cliente:               CIF/NIF:
              */
             $pdf_doc->new_table();
             $pdf_doc->add_table_row(
                array(
                    'campo1' => "<b>".ucfirst(FS_PEDIDO).":</b>",
                    'dato1' => $this->pedido->codigo,
-                   'campo2' => "<b>Fecha:</b>",
-                   'dato2' => $this->pedido->fecha
+                   'campo2' => "<b>Fecha:</b> ".$this->pedido->fecha
                )
             );
             $pdf_doc->add_table_row(
                array(
                    'campo1' => "<b>Proveedor:</b>",
                    'dato1' => $this->fix_html($this->pedido->nombre),
-                   'campo2' => "<b>".FS_CIFNIF.":</b>",
-                   'dato2' => $this->pedido->cifnif
+                   'campo2' => "<b>".$this->proveedor->tipoidfiscal.":</b> ".$this->pedido->cifnif
                )
             );
             $pdf_doc->save_table(
                array(
                    'cols' => array(
-                       'campo1' => array('justification' => 'right'),
+                       'campo1' => array('width' => 90, 'justification' => 'right'),
                        'dato1' => array('justification' => 'left'),
-                       'campo2' => array('justification' => 'right'),
-                       'dato2' => array('justification' => 'left')
+                       'campo2' => array('justification' => 'right')
                    ),
                    'showLines' => 0,
                    'width' => 520,
@@ -793,43 +837,43 @@ class imprimir_presu_pedi extends fs_controller
             
             /*
              * Esta es la tabla con los datos del cliente:
-             * Pedido:             Fecha:
-             * Cliente:             CIF/NIF:
+             * Pedido:                  Fecha:
+             * Cliente:               CIF/NIF:
              * Dirección:           Teléfonos:
              */
             $pdf_doc->new_table();
             $pdf_doc->add_table_row(
                array(
-                   'campo1' => "<b>".ucfirst(FS_PEDIDO).":</b>",
+                   'campo1' => "<b>".ucfirst(FS_PEDIDO).":</b> ",
                    'dato1' => $this->pedido->codigo,
-                   'campo2' => "<b>Fecha:</b>",
-                   'dato2' => $this->pedido->fecha
+                   'campo2' => "<b>Fecha:</b> ".$this->pedido->fecha
                )
             );
             $pdf_doc->add_table_row(
                array(
-                   'campo1' => "<b>Cliente:</b>",
+                   'campo1' => "<b>Cliente:</b> ",
                    'dato1' => $this->fix_html($this->pedido->nombrecliente),
-                   'campo2' => "<b>".FS_CIFNIF.":</b>",
-                   'dato2' => $this->pedido->cifnif
+                   'campo2' => "<b>".$this->cliente->tipoidfiscal.":</b> ".$this->pedido->cifnif
                )
             );
-            $pdf_doc->add_table_row(
-               array(
-                   'campo1' => "<b>Dirección:</b>",
-                   'dato1' => $this->fix_html($this->pedido->direccion.' CP: '.$this->pedido->codpostal.
-                           ' - '.$this->pedido->ciudad.' ('.$this->pedido->provincia.')'),
-                   'campo2' => "<b>Teléfonos:</b>",
-                   'dato2' => $this->cliente->telefono1.'  '.$this->cliente->telefono2
-               )
+            $row = array(
+                'campo1' => "<b>Dirección:</b>",
+                'dato1' => $this->fix_html($this->pedido->direccion.' CP: '.$this->pedido->codpostal.
+                        ' - '.$this->pedido->ciudad.' ('.$this->pedido->provincia.')'),
+                'campo2' => ''
             );
+            if($this->cliente->telefono1 OR $this->cliente->telefono1)
+            {
+               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1.'  '.$this->cliente->telefono2;
+            }
+            $pdf_doc->add_table_row($row);
+            
             $pdf_doc->save_table(
                array(
                    'cols' => array(
-                       'campo1' => array('justification' => 'right'),
+                       'campo1' => array('width' => 90, 'justification' => 'right'),
                        'dato1' => array('justification' => 'left'),
-                       'campo2' => array('justification' => 'right'),
-                       'dato2' => array('justification' => 'left')
+                       'campo2' => array('justification' => 'right')
                    ),
                    'showLines' => 0,
                    'width' => 520,
@@ -843,7 +887,11 @@ class imprimir_presu_pedi extends fs_controller
             
             $pdf_doc->set_y(80);
             
-            if($this->mostrar_totales)
+            if( isset($_GET['noval']) )
+            {
+               $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text('Página '.$pagina . '/' . ceil(count($lineas) / $lppag), 153), 0, 1.5);
+            }
+            else
             {
                /*
                 * Rellenamos la última tabla de la página:
@@ -897,8 +945,6 @@ class imprimir_presu_pedi extends fs_controller
                $pdf_doc->add_table_row($fila);
                $pdf_doc->save_table($opciones);
             }
-            
-            $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text($this->fix_html($this->empresa->pie_factura), 153), 0, 1.5);
             
             $pagina++;
          }

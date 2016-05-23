@@ -36,6 +36,7 @@ class ventas_presupuesto extends fs_controller {
 
    public $agente;
    public $allow_delete;
+   public $almacen;
    public $cliente;
    public $cliente_s;
    public $divisa;
@@ -65,6 +66,7 @@ class ventas_presupuesto extends fs_controller {
 
       $presupuesto = new presupuesto_cliente();
       $this->presupuesto = FALSE;
+      $this->almacen = new almacen();
       $this->cliente = new cliente();
       $this->cliente_s = FALSE;
       $this->divisa = new divisa();
