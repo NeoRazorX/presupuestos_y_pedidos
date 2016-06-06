@@ -545,9 +545,17 @@ class imprimir_presu_pedi extends fs_controller
                         ' ('.$this->presupuesto->provincia.')'),
                 'campo2' => ''
             );
-            if($this->cliente->telefono1 OR $this->cliente->telefono1)
+            if($this->cliente->telefono1 OR $this->cliente->telefono2)
             {
-               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1.'  '.$this->cliente->telefono2;
+               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1;
+               if($this->cliente->telefono2)
+               {
+                  $row['campo2'] .= '  '.$this->cliente->telefono2;
+               }
+            }
+            else if($this->cliente->telefono2)
+            {
+               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono2;
             }
             $pdf_doc->add_table_row($row);
             
@@ -567,6 +575,12 @@ class imprimir_presu_pedi extends fs_controller
             
             /// lineas + observaciones
             $this->generar_pdf_lineas($pdf_doc, $lineas, $linea_actual, $lppag, $this->presupuesto);
+            
+            /// ¿Fecha de validez?
+            if($this->presupuesto->finoferta)
+            {
+               $pdf_doc->pdf->ezText( "\n<b>".ucfirst(FS_PRESUPUESTO).' válido hasta:</b> '.$this->presupuesto->finoferta, 10 );
+            }
             
             $pdf_doc->set_y(80);
             
@@ -862,9 +876,17 @@ class imprimir_presu_pedi extends fs_controller
                         ' - '.$this->pedido->ciudad.' ('.$this->pedido->provincia.')'),
                 'campo2' => ''
             );
-            if($this->cliente->telefono1 OR $this->cliente->telefono1)
+            if($this->cliente->telefono1 OR $this->cliente->telefono2)
             {
-               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1.'  '.$this->cliente->telefono2;
+               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1;
+               if($this->cliente->telefono2)
+               {
+                  $row['campo2'] .= '  '.$this->cliente->telefono2;
+               }
+            }
+            else if($this->cliente->telefono2)
+            {
+               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono2;
             }
             $pdf_doc->add_table_row($row);
             

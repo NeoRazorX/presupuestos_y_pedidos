@@ -8,6 +8,7 @@
 <script type="text/javascript">
    numlineas = {function="count($fsc->presupuesto->get_lineas())"};
    fs_nf0 = {#FS_NF0#};
+   fs_nf0_art = {#FS_NF0_ART#};
    all_impuestos = {function="json_encode($fsc->impuesto->all())"};
    all_series = {function="json_encode($fsc->serie->all())"};
    cliente = {function="json_encode($fsc->cliente_s)"};
@@ -264,7 +265,7 @@
          </div>
          <div class="col-md-2 col-sm-3">
             <div class='form-group{if="$fsc->presupuesto->finoferta()"} has-warning{/if}'>
-               Fecha validez:
+               Válido hasta:
                {if="$fsc->presupuesto->editable"}
                <div class='input-group'>
                   <input class="form-control datepicker" type="text" name="finoferta" value="{$fsc->presupuesto->finoferta}" autocomplete="off"/>
