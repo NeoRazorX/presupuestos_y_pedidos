@@ -30,24 +30,26 @@ require_model('pedido_cliente.php');
  */
 class articulos_pedidos extends fs_controller
 {
-   public $resultados;
-   public $pedidoprov;
+   public $compras;
    public $pedidocli;
+   public $pedidoprov;
+   public $resultados;
    
    public function __construct()
    {
-       parent::__construct(__CLASS__, 'Artículos Pedidos', 'ventas', FALSE, FALSE);
+      parent::__construct(__CLASS__, 'Artículos Pedidos', 'ventas', FALSE, FALSE);
    }
    
    protected function private_core()
    {
-      //cargamos extensiones
+      /// Cargamos extensiones
       $this->share_extensions();
       
-      $this->pedidoprov = new pedido_proveedor();
+      $this->compras = isset($_GET['compras']);
       $this->pedidocli = new pedido_cliente();
-
-      //mostramos resultados
+      $this->pedidoprov = new pedido_proveedor();
+      
+      /// Mostramos resultados
       $this->resultados = $this->buscar_articulos();
    }
    
@@ -60,6 +62,7 @@ class articulos_pedidos extends fs_controller
       $fsext->to = 'compras_pedidos';
       $fsext->type = 'button';
       $fsext->text = '<span class="glyphicon glyphicon-tasks" aria-hidden="true"></span><span class="hidden-xs">&nbsp; Artículos</span>';
+      $fsext->params = '&compras=TRUE';
       $fsext->save();
       
       //botón articulos pendientes de recibir en ventas_pedidos
