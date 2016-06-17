@@ -20,6 +20,11 @@
 
 namespace FacturaScripts\model;
 
+/**
+ * Línea de presupuesto de cliente.
+ * 
+ * @author Carlos García Gómez <neorazorx@gmail.com>
+ */
 class linea_presupuesto_cliente extends \fs_model
 {
    /**

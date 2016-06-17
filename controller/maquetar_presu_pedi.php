@@ -24,7 +24,7 @@ require_model('presupuesto_cliente.php');
 /**
  * Description of maquetar_presu_pedi
  *
- * @author carlos
+ * @author Carlos García Gómez <neorazorx@gmail.com>
  */
 class maquetar_presu_pedi extends fs_controller
 {
@@ -163,14 +163,14 @@ class maquetar_presu_pedi extends fs_controller
    
    public function url()
    {
-      switch( get_class($this->documento) )
+      switch( get_class_name($this->documento) )
       {
          case 'presupuesto_cliente':
-            return 'index.php?page='.__CLASS__.'&presu=TRUE&id='.  $this->documento->idpresupuesto;
+            return 'index.php?page='.__CLASS__.'&presu=TRUE&id='.$this->documento->idpresupuesto;
             break;
          
          case 'pedido_cliente':
-            return 'index.php?page='.__CLASS__.'&pedido=TRUE&id='.  $this->documento->idpedido;
+            return 'index.php?page='.__CLASS__.'&pedido=TRUE&id='.$this->documento->idpedido;
             break;
          
          default:

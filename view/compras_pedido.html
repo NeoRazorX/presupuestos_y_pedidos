@@ -383,14 +383,14 @@
                   <thead>
                      <tr>
                         <th class="text-left">Artículo</th>
-                        <th class="text-right">Cantidad</th>
-                        <th class="text-right">Precio</th>
-                        <th class="text-right">Dto</th>
-                        <th class="text-right">Neto</th>
-                        <th class="text-right">IVA</th>
-                        <th class="text-right recargo">RE</th>
-                        <th class="text-right irpf">IRPF</th>
-                        <th class="text-right">Total</th>
+                        <th class="text-right" width="70">Cantidad</th>
+                        <th class="text-right" width="80">Precio</th>
+                        <th class="text-right" width="70">Dto</th>
+                        <th class="text-right" width="80">Neto</th>
+                        <th class="text-right" width="75">IVA</th>
+                        <th class="text-right recargo" width="70">RE</th>
+                        <th class="text-right irpf" width="70">IRPF</th>
+                        <th class="text-right" width="90">Total</th>
                      </tr>
                   </thead>
                   {loop="$fsc->pedido->get_lineas()"}
@@ -399,7 +399,7 @@
                         <a target="_blank" href="{$value->articulo_url()}">{$value->referencia}</a> {$value->descripcion}
                      </td>
                      <td class="text-right">{$value->cantidad}</td>
-                     <td class="text-right">{$fsc->show_precio($value->pvpunitario, $fsc->pedido->coddivisa)}</td>
+                     <td class="text-right">{$fsc->show_precio($value->pvpunitario, $fsc->pedido->coddivisa, TRUE, FS_NF0_ART)}</td>
                      <td class="text-right">{$fsc->show_numero($value->dtopor, 2)} %</td>
                      <td class="text-right">{$fsc->show_precio($value->pvptotal, $fsc->pedido->coddivisa)}</td>
                      <td class="text-right">{$fsc->show_numero($value->iva, 2)} %</td>

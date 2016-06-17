@@ -20,6 +20,11 @@
 
 namespace FacturaScripts\model;
 
+/**
+ * Línea de pedido de proveedor.
+ * 
+ * @author Carlos García Gómez <neorazorx@gmail.com>
+ */
 class linea_pedido_proveedor extends \fs_model
 {
    /**

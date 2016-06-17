@@ -463,7 +463,7 @@
                         <a target="_blank" href="{$value->articulo_url()}">{$value->referencia}</a> {$value->descripcion()}
                      </td>
                      <td class="text-right">{$value->cantidad}</td>
-                     <td class="text-right">{$fsc->show_precio($value->pvpunitario, $fsc->pedido->coddivisa)}</td>
+                     <td class="text-right">{$fsc->show_precio($value->pvpunitario, $fsc->pedido->coddivisa, TRUE, FS_NF0_ART)}</td>
                      <td class="text-right">{$fsc->show_numero($value->dtopor, 2)} %</td>
                      <td class="text-right">{$fsc->show_precio($value->pvptotal, $fsc->pedido->coddivisa)}</td>
                      <td class="text-right">{$fsc->show_numero($value->iva, 2)} %</td>

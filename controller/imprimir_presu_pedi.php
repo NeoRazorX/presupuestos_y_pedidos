@@ -368,7 +368,7 @@ class imprimir_presu_pedi extends fs_controller
           'pvp' => '<b>PVP</b>',
       );
       
-      if( get_class($lineas[$linea_actual]) == 'linea_pedido_proveedor' )
+      if( get_class_name($lineas[$linea_actual]) == 'linea_pedido_proveedor' )
       {
          unset($table_header['cantidad2']);
          $table_header['descripcion'] = '<b>Ref. Prov. + Descripción</b>';
@@ -406,7 +406,7 @@ class imprimir_presu_pedi extends fs_controller
          $descripcion = $this->fix_html($lineas[$linea_actual]->descripcion);
          if( !is_null($lineas[$linea_actual]->referencia) )
          {
-            if( get_class($lineas[$linea_actual]) == 'linea_pedido_proveedor' )
+            if( get_class_name($lineas[$linea_actual]) == 'linea_pedido_proveedor' )
             {
                $descripcion = '<b>'.$this->get_referencia_proveedor($lineas[$linea_actual]->referencia, $documento->codproveedor)
                        .'</b> '.$descripcion;
@@ -434,7 +434,7 @@ class imprimir_presu_pedi extends fs_controller
             $fila['dto'] = '';
          }
          
-         if( get_class($lineas[$linea_actual]) != 'linea_pedido_proveedor' )
+         if( get_class_name($lineas[$linea_actual]) != 'linea_pedido_proveedor' )
          {
             if( !$lineas[$linea_actual]->mostrar_cantidad )
             {
@@ -550,7 +550,7 @@ class imprimir_presu_pedi extends fs_controller
                $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1;
                if($this->cliente->telefono2)
                {
-                  $row['campo2'] .= '  '.$this->cliente->telefono2;
+                  $row['campo2'] .= "\n".$this->cliente->telefono2;
                }
             }
             else if($this->cliente->telefono2)
@@ -881,7 +881,7 @@ class imprimir_presu_pedi extends fs_controller
                $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1;
                if($this->cliente->telefono2)
                {
-                  $row['campo2'] .= '  '.$this->cliente->telefono2;
+                  $row['campo2'] .= "\n".$this->cliente->telefono2;
                }
             }
             else if($this->cliente->telefono2)
