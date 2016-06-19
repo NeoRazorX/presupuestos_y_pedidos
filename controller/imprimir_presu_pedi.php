@@ -297,7 +297,7 @@ class imprimir_presu_pedi extends fs_controller
     * @param type $lppag
     * @param type $documento
     */
-   private function generar_pdf_lineas(&$pdf_doc, &$lineas, &$linea_actual, &$lppag, &$documento)
+   private function generar_pdf_lineas(&$pdf_doc, &$lineas, &$linea_actual, $lppag, $documento)
    {
       if($this->impresion['print_dto'])
       {
@@ -354,6 +354,23 @@ class imprimir_presu_pedi extends fs_controller
          else if($lin->irpf != $irpf)
          {
             $multi_irpf = TRUE;
+         }
+         
+         /// restamos líneas al documento en función del tamaño de la descripción
+         if($lppag > 1)
+         {
+            $len = mb_strlen($lin->referencia.' '.$lin->descripcion);
+            while($len > 85)
+            {
+               $len -= 85;
+               $lppag -= 0.4;
+            }
+            
+            $aux = explode("\n", $lin->descripcion);
+            if( count($aux) > 1 )
+            {
+               $lppag -= 0.4 * ( count($aux) - 1);
+            }
          }
       }
       
@@ -434,6 +451,16 @@ class imprimir_presu_pedi extends fs_controller
             $fila['dto'] = '';
          }
          
+         if($lineas[$linea_actual]->recargo == 0)
+         {
+            $fila['re'] = '';
+         }
+         
+         if($lineas[$linea_actual]->irpf == 0)
+         {
+            $fila['irpf'] = '';
+         }
+         
          if( get_class_name($lineas[$linea_actual]) != 'linea_pedido_proveedor' )
          {
             if( !$lineas[$linea_actual]->mostrar_cantidad )
@@ -471,7 +498,9 @@ class imprimir_presu_pedi extends fs_controller
                       'importe' => array('justification' => 'right')
                   ),
                   'width' => 520,
-                  'shaded' => 0
+                  'shaded' => 1,
+                  'shadeCol' => array(0.95, 0.95, 0.95),
+                  'lineCol' => array(0.3, 0.3, 0.3),
               )
       );
       
@@ -545,7 +574,7 @@ class imprimir_presu_pedi extends fs_controller
                         ' ('.$this->presupuesto->provincia.')'),
                 'campo2' => ''
             );
-            if($this->cliente->telefono1 OR $this->cliente->telefono2)
+            if($this->cliente->telefono1)
             {
                $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1;
                if($this->cliente->telefono2)
@@ -558,6 +587,16 @@ class imprimir_presu_pedi extends fs_controller
                $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono2;
             }
             $pdf_doc->add_table_row($row);
+            if($this->empresa->codpais != 'ESP')
+            {
+               $pdf_doc->add_table_row(
+                  array(
+                      'campo1' => "<b>Régimen ".FS_IVA.":</b> ",
+                      'dato1' => $this->cliente->regimeniva,
+                      'campo2' => ''
+                  )
+               );
+            }
             
             $pdf_doc->save_table(
                array(
@@ -577,7 +616,7 @@ class imprimir_presu_pedi extends fs_controller
             $this->generar_pdf_lineas($pdf_doc, $lineas, $linea_actual, $lppag, $this->presupuesto);
             
             /// ¿Fecha de validez?
-            if($this->presupuesto->finoferta)
+            if( $linea_actual == count($lineas) AND $this->presupuesto->finoferta)
             {
                $pdf_doc->pdf->ezText( "\n<b>".ucfirst(FS_PRESUPUESTO).' válido hasta:</b> '.$this->presupuesto->finoferta, 10 );
             }
@@ -601,7 +640,10 @@ class imprimir_presu_pedi extends fs_controller
                    'cols' => array(
                        'neto' => array('justification' => 'right'),
                    ),
-                   'showLines' => 4,
+                   'showLines' => 3,
+                   'shaded' => 2,
+                   'shadeCol2' => array(0.95, 0.95, 0.95),
+                   'lineCol' => array(0.3, 0.3, 0.3),
                    'width' => 520
                );
                foreach($lineas_iva as $li)
@@ -747,8 +789,11 @@ class imprimir_presu_pedi extends fs_controller
                 'cols' => array(
                     'neto' => array('justification' => 'right'),
                 ),
-                'showLines' => 4,
-                'width' => 520
+                'showLines' => 3,
+                   'shaded' => 2,
+                   'shadeCol2' => array(0.95, 0.95, 0.95),
+                   'lineCol' => array(0.3, 0.3, 0.3),
+                   'width' => 520
             );
             foreach($lineas_iva as $li)
             {
@@ -876,7 +921,7 @@ class imprimir_presu_pedi extends fs_controller
                         ' - '.$this->pedido->ciudad.' ('.$this->pedido->provincia.')'),
                 'campo2' => ''
             );
-            if($this->cliente->telefono1 OR $this->cliente->telefono2)
+            if($this->cliente->telefono1)
             {
                $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1;
                if($this->cliente->telefono2)
@@ -889,6 +934,16 @@ class imprimir_presu_pedi extends fs_controller
                $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono2;
             }
             $pdf_doc->add_table_row($row);
+            if($this->empresa->codpais != 'ESP')
+            {
+               $pdf_doc->add_table_row(
+                  array(
+                      'campo1' => "<b>Régimen ".FS_IVA.":</b> ",
+                      'dato1' => $this->cliente->regimeniva,
+                      'campo2' => ''
+                  )
+               );
+            }
             
             $pdf_doc->save_table(
                array(
@@ -930,7 +985,10 @@ class imprimir_presu_pedi extends fs_controller
                    'cols' => array(
                        'neto' => array('justification' => 'right'),
                    ),
-                   'showLines' => 4,
+                   'showLines' => 3,
+                   'shaded' => 2,
+                   'shadeCol2' => array(0.95, 0.95, 0.95),
+                   'lineCol' => array(0.3, 0.3, 0.3),
                    'width' => 520
                );
                foreach($lineas_iva as $li)
