@@ -146,12 +146,12 @@ class pedido_cliente extends \fs_model
    public $totaliva;
    
    /**
-    * Total expresado en euros, por si no fuese la divisa del albarán.
-    * Se calcula de forma automática.
-    * totaleuros = total * tasaconv
+    * Total expresado en euros, por si no fuese la divisa del pedido.
+    * totaleuros = total/tasaconv
+    * No hace falta rellenarlo, al hacer save() se calcula el valor.
     * @var type 
     */
-   private $totaleuros;
+   public $totaleuros;
    
    /**
     * % de retención IRPF del pedido. Se obtiene de la serie.
@@ -468,7 +468,7 @@ class pedido_cliente extends \fs_model
    public function test()
    {
       $this->observaciones = $this->no_html($this->observaciones);
-      $this->totaleuros = $this->total * $this->tasaconv;
+      $this->totaleuros = round($this->total / $this->tasaconv, 2);
       
       /// comprobamos que editable se corresponda con el status
       if($this->idalbaran)
@@ -547,12 +547,6 @@ class pedido_cliente extends \fs_model
       else if (!$this->floatcmp($this->total, $total, FS_NF0, TRUE))
       {
          $this->new_error_msg("Valor total de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $total);
-         $status = FALSE;
-      }
-      else if (!$this->floatcmp($this->totaleuros, $this->total * $this->tasaconv, FS_NF0, TRUE))
-      {
-         $this->new_error_msg("Valor totaleuros de " . FS_PEDIDO . " incorrecto.
-            Valor correcto: " . round($this->total * $this->tasaconv, FS_NF0));
          $status = FALSE;
       }
 

@@ -153,12 +153,12 @@ class presupuesto_cliente extends \fs_model
    public $totaliva;
    
    /**
-    * Total expresado en euros, por si no fuese la divisa del albarán.
-    * Se calcula de forma automática.
-    * totaleuros = total * tasaconv
+    * Total expresado en euros, por si no fuese la divisa del presupuesto.
+    * totaleuros = total/tasaconv
+    * No hace falta rellenarlo, al hacer save() se calcula el valor.
     * @var type 
     */
-   private $totaleuros;
+   public $totaleuros;
    
    /**
     * % de retención IRPF del presupuesto. Se obtiene de la serie.
@@ -484,7 +484,7 @@ class presupuesto_cliente extends \fs_model
    public function test()
    {
       $this->observaciones = $this->no_html($this->observaciones);
-      $this->totaleuros = $this->total * $this->tasaconv;
+      $this->totaleuros = round($this->total / $this->tasaconv, 2);
       
       /// comprobamos que editable se corresponda con el status
       if($this->idpedido)
@@ -524,7 +524,9 @@ class presupuesto_cliente extends \fs_model
       foreach($this->get_lineas() as $l)
       {
          if( !$l->test() )
+         {
             $status = FALSE;
+         }
 
          $neto += $l->pvptotal;
          $iva += $l->pvptotal * $l->iva / 100;
@@ -561,11 +563,6 @@ class presupuesto_cliente extends \fs_model
       else if( !$this->floatcmp($this->total, $total, FS_NF0, TRUE) )
       {
          $this->new_error_msg("Valor total de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $total);
-         $status = FALSE;
-      }
-      else if( !$this->floatcmp($this->totaleuros, $this->total * $this->tasaconv, FS_NF0, TRUE) )
-      {
-         $this->new_error_msg("Valor totaleuros de ".FS_PRESUPUESTO." incorrecto. Valor correcto: ".round($this->total*$this->tasaconv, FS_NF0));
          $status = FALSE;
       }
 

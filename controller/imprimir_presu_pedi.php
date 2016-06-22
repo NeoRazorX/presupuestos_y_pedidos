@@ -297,7 +297,7 @@ class imprimir_presu_pedi extends fs_controller
     * @param type $lppag
     * @param type $documento
     */
-   private function generar_pdf_lineas(&$pdf_doc, &$lineas, &$linea_actual, $lppag, $documento)
+   private function generar_pdf_lineas(&$pdf_doc, &$lineas, &$linea_actual, &$lppag, $documento)
    {
       if($this->impresion['print_dto'])
       {
@@ -363,13 +363,13 @@ class imprimir_presu_pedi extends fs_controller
             while($len > 85)
             {
                $len -= 85;
-               $lppag -= 0.4;
+               $lppag -= 0.3;
             }
             
             $aux = explode("\n", $lin->descripcion);
             if( count($aux) > 1 )
             {
-               $lppag -= 0.4 * ( count($aux) - 1);
+               $lppag -= 0.3 * ( count($aux) - 1);
             }
          }
       }
@@ -580,6 +580,7 @@ class imprimir_presu_pedi extends fs_controller
                if($this->cliente->telefono2)
                {
                   $row['campo2'] .= "\n".$this->cliente->telefono2;
+                  $lppag -= 2;
                }
             }
             else if($this->cliente->telefono2)
@@ -927,6 +928,7 @@ class imprimir_presu_pedi extends fs_controller
                if($this->cliente->telefono2)
                {
                   $row['campo2'] .= "\n".$this->cliente->telefono2;
+                  $lppag -= 2;
                }
             }
             else if($this->cliente->telefono2)

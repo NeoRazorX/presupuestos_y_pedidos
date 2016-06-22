@@ -474,6 +474,16 @@
                      <td class="text-right irpf"><b>-{$fsc->show_precio($fsc->presupuesto->totalirpf, $fsc->presupuesto->coddivisa)}</b></td>
                      <td class="text-right"><b>{$fsc->show_precio($fsc->presupuesto->total, $fsc->presupuesto->coddivisa)}</b></td>
                   </tr>
+                  {if="$fsc->presupuesto->coddivisa!=$fsc->empresa->coddivisa"}
+                  <tr class="warning">
+                     <td colspan="4" class="text-right"><b>EUR:</b></td>
+                     <td></td>
+                     <td></td>
+                     <td class="recargo"></td>
+                     <td class="irpf"></td>
+                     <td class="text-right"><b>{$fsc->show_precio($fsc->presupuesto->totaleuros)}</b></td>
+                  </tr>
+                  {/if}
                </table>
                {/if}
             </div>
