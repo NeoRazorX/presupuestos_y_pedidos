@@ -70,7 +70,7 @@ class informe_pedidos extends fs_controller
       return $stats;
    }
    
-   public function stats_last_days_aux($table_name = 'pedidoscli', $col_total = 'total', $numdays = 25)
+   public function stats_last_days_aux($table_name = 'pedidoscli', $col_total = 'totaleuros', $numdays = 25)
    {
       $stats = array();
       $desde = Date('d-m-Y', strtotime( Date('d-m-Y').'-'.$numdays.' day'));
@@ -101,7 +101,7 @@ class informe_pedidos extends fs_controller
             $i = intval($d['dia']);
             $stats[$i] = array(
                 'day' => $i,
-                'total' => floatval($d['total'])
+                'total' => $this->euro_convert( floatval($d['total']) )
             );
          }
       }
@@ -154,7 +154,7 @@ class informe_pedidos extends fs_controller
       return $stats;
    }
    
-   public function stats_last_months_aux($table_name = 'pedidoscli', $col_total = 'total', $num = 11)
+   public function stats_last_months_aux($table_name = 'pedidoscli', $col_total = 'totaleuros', $num = 11)
    {
       $stats = array();
       $desde = Date('d-m-Y', strtotime( Date('01-m-Y').'-'.$num.' month'));
@@ -185,7 +185,7 @@ class informe_pedidos extends fs_controller
             $i = intval($d['mes']);
             $stats[$i] = array(
                 'month' => $i,
-                'total' => floatval($d['total'])
+                'total' => $this->euro_convert( floatval($d['total']) )
             );
          }
       }
@@ -224,7 +224,7 @@ class informe_pedidos extends fs_controller
       return $stats;
    }
    
-   public function stats_last_years_aux($table_name = 'pedidoscli', $col_total = 'total', $num = 4)
+   public function stats_last_years_aux($table_name = 'pedidoscli', $col_total = 'totaleuros', $num = 4)
    {
       $stats = array();
       $desde = Date('d-m-Y', strtotime( Date('d-m-Y').'-'.$num.' year'));
@@ -255,7 +255,7 @@ class informe_pedidos extends fs_controller
             $i = intval($d['ano']);
             $stats[$i] = array(
                 'year' => $i,
-                'total' => floatval($d['total'])
+                'total' => $this->euro_convert( floatval($d['total']) )
             );
          }
       }

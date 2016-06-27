@@ -145,7 +145,7 @@ class linea_presupuesto_cliente extends \fs_model
       
       if( !$encontrado )
       {
-         $pre = new presupuesto_cliente();
+         $pre = new \presupuesto_cliente();
          self::$presupuestos[] = $pre->get($this->idpresupuesto);
          $codigo = self::$presupuestos[ count(self::$presupuestos)-1 ]->codigo;
       }
@@ -170,7 +170,7 @@ class linea_presupuesto_cliente extends \fs_model
       
       if( !$encontrado )
       {
-         $pre = new presupuesto_cliente();
+         $pre = new \presupuesto_cliente();
          self::$presupuestos[] = $pre->get($this->idpresupuesto);
          $fecha = self::$presupuestos[ count(self::$presupuestos)-1 ]->fecha;
       }
@@ -195,7 +195,7 @@ class linea_presupuesto_cliente extends \fs_model
       
       if( !$encontrado )
       {
-         $pre = new presupuesto_cliente();
+         $pre = new \presupuesto_cliente();
          self::$presupuestos[] = $pre->get($this->idpresupuesto);
          $nombre = self::$presupuestos[ count(self::$presupuestos)-1 ]->nombrecliente;
       }
@@ -327,7 +327,7 @@ class linea_presupuesto_cliente extends \fs_model
       {
          foreach($data as $d)
          {
-            $plist[] = new linea_presupuesto_cliente($d);
+            $plist[] = new \linea_presupuesto_cliente($d);
          }
       }
       
@@ -352,7 +352,7 @@ class linea_presupuesto_cliente extends \fs_model
       {
          foreach($data as $l)
          {
-            $linealist[] = new linea_presupuesto_cliente($l);
+            $linealist[] = new \linea_presupuesto_cliente($l);
          }
       }
       
@@ -387,7 +387,7 @@ class linea_presupuesto_cliente extends \fs_model
       {
          foreach($data as $l)
          {
-            $linealist[] = new linea_presupuesto_cliente($l);
+            $linealist[] = new \linea_presupuesto_cliente($l);
          }
       }
       
@@ -427,7 +427,7 @@ class linea_presupuesto_cliente extends \fs_model
       {
          foreach($data as $l)
          {
-            $linealist[] = new linea_presupuesto_cliente($l);
+            $linealist[] = new \linea_presupuesto_cliente($l);
          }
       }
       

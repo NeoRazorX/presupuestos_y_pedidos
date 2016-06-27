@@ -406,7 +406,7 @@ class presupuesto_cliente extends \fs_model
 
    public function get_lineas()
    {
-      $linea = new linea_presupuesto_cliente();
+      $linea = new \linea_presupuesto_cliente();
       return $linea->all_from_presupuesto($this->idpresupuesto);
    }
 
@@ -415,7 +415,7 @@ class presupuesto_cliente extends \fs_model
       $presupuesto = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idpresupuesto = " . $this->var2str($id) . ";");
       if($presupuesto)
       {
-         return new presupuesto_cliente($presupuesto[0]);
+         return new \presupuesto_cliente($presupuesto[0]);
       }
       else
          return FALSE;
@@ -433,7 +433,7 @@ class presupuesto_cliente extends \fs_model
 
    public function new_codigo()
    {
-      $sec = new secuencia();
+      $sec = new \secuencia();
       $sec = $sec->get_by_params2($this->codejercicio, $this->codserie, 'npresupuestocli');
       if($sec)
       {
@@ -480,9 +480,17 @@ class presupuesto_cliente extends \fs_model
          $this->codigo = $start.$this->codejercicio.$this->codserie.$this->numero;
       }
    }
-
+   
+   /**
+    * Comprueba los datos del presupuesto, devuelve TRUE si está todo correcto
+    * @return boolean
+    */
    public function test()
    {
+      $this->nombrecliente = $this->no_html($this->nombrecliente);
+      $this->direccion = $this->no_html($this->direccion);
+      $this->ciudad = $this->no_html($this->ciudad);
+      $this->provincia = $this->no_html($this->provincia);
       $this->observaciones = $this->no_html($this->observaciones);
       $this->totaleuros = round($this->total / $this->tasaconv, 2);
       
@@ -695,7 +703,7 @@ class presupuesto_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $preslist[] = new presupuesto_cliente($p);
+            $preslist[] = new \presupuesto_cliente($p);
          }
       }
       
@@ -719,7 +727,7 @@ class presupuesto_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $preslist[] = new presupuesto_cliente($p);
+            $preslist[] = new \presupuesto_cliente($p);
          }
       }
       
@@ -742,7 +750,7 @@ class presupuesto_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $preclist[] = new presupuesto_cliente($p);
+            $preclist[] = new \presupuesto_cliente($p);
          }
       }
       
@@ -766,7 +774,7 @@ class presupuesto_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $preslist[] = new presupuesto_cliente($p);
+            $preslist[] = new \presupuesto_cliente($p);
          }
       }
       
@@ -790,7 +798,7 @@ class presupuesto_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $preslist[] = new presupuesto_cliente($p);
+            $preslist[] = new \presupuesto_cliente($p);
          }
       }
       
@@ -813,7 +821,7 @@ class presupuesto_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $preslist[] = new presupuesto_cliente($p);
+            $preslist[] = new \presupuesto_cliente($p);
          }
       }
       
@@ -837,7 +845,7 @@ class presupuesto_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $preslist[] = new presupuesto_cliente($p);
+            $preslist[] = new \presupuesto_cliente($p);
          }
       }
       
@@ -878,7 +886,7 @@ class presupuesto_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $preslist[] = new presupuesto_cliente($p);
+            $preslist[] = new \presupuesto_cliente($p);
          }
       }
       
@@ -914,7 +922,7 @@ class presupuesto_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $preslist[] = new presupuesto_cliente($p);
+            $preslist[] = new \presupuesto_cliente($p);
          }
       }
       

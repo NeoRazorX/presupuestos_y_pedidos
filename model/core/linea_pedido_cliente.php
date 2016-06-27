@@ -208,7 +208,7 @@ class linea_pedido_cliente extends \fs_model
       
       if( !$encontrado )
       {
-         $pre = new pedido_cliente();
+         $pre = new \pedido_cliente();
          self::$pedidos[] = $pre->get($this->idpedido);
          $codigo = self::$pedidos[ count(self::$pedidos)-1 ]->codigo;
       }
@@ -233,7 +233,7 @@ class linea_pedido_cliente extends \fs_model
       
       if( !$encontrado )
       {
-         $pre = new pedido_cliente();
+         $pre = new \pedido_cliente();
          self::$pedidos[] = $pre->get($this->idpedido);
          $fecha = self::$pedidos[ count(self::$pedidos)-1 ]->fecha;
       }
@@ -258,7 +258,7 @@ class linea_pedido_cliente extends \fs_model
       
       if( !$encontrado )
       {
-         $pre = new pedido_cliente();
+         $pre = new \pedido_cliente();
          self::$pedidos[] = $pre->get($this->idpedido);
          $nombre = self::$pedidos[ count(self::$pedidos)-1 ]->nombrecliente;
       }
@@ -394,7 +394,7 @@ class linea_pedido_cliente extends \fs_model
       {
          foreach($data as $d)
          {
-            $plist[] = new linea_pedido_cliente($d);
+            $plist[] = new \linea_pedido_cliente($d);
          }
       }
       
@@ -419,7 +419,7 @@ class linea_pedido_cliente extends \fs_model
       {
          foreach($data as $l)
          {
-            $linealist[] = new linea_pedido_cliente($l);
+            $linealist[] = new \linea_pedido_cliente($l);
          }
       }
       
@@ -454,7 +454,7 @@ class linea_pedido_cliente extends \fs_model
       {
          foreach($data as $l)
          {
-            $linealist[] = new linea_pedido_cliente($l);
+            $linealist[] = new \linea_pedido_cliente($l);
          }
       }
       

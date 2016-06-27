@@ -161,7 +161,7 @@ class ventas_presupuesto extends fs_controller {
     */
    private function check_lineas()
    {
-      if($this->presupuesto->status == 0)
+      if($this->presupuesto->status == 0 AND $this->presupuesto->coddivisa == $this->empresa->coddivisa)
       {
          foreach($this->presupuesto->get_lineas() as $l)
          {

@@ -400,7 +400,7 @@ class pedido_cliente extends \fs_model
 
    public function get_lineas()
    {
-      $linea = new linea_pedido_cliente();
+      $linea = new \linea_pedido_cliente();
       return $linea->all_from_pedido($this->idpedido);
    }
 
@@ -409,7 +409,7 @@ class pedido_cliente extends \fs_model
       $pedido = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idpedido = " . $this->var2str($id) . ";");
       if($pedido)
       {
-         return new pedido_cliente($pedido[0]);
+         return new \pedido_cliente($pedido[0]);
       }
       else
          return FALSE;
@@ -424,10 +424,13 @@ class pedido_cliente extends \fs_model
       else
          return $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idpedido = " . $this->var2str($this->idpedido) . ";");
    }
-
+   
+   /**
+    * Genera un nuevo código y número para el pedido
+    */
    public function new_codigo()
    {
-      $sec = new secuencia();
+      $sec = new \secuencia();
       $sec = $sec->get_by_params2($this->codejercicio, $this->codserie, 'npedidocli');
       if($sec)
       {
@@ -464,9 +467,17 @@ class pedido_cliente extends \fs_model
          $this->codigo = strtoupper(substr(FS_PEDIDO, 0, 3)).$this->codejercicio.$this->codserie.$this->numero;
       }
    }
-
+   
+   /**
+    * Comprueba los datos del pedido, devuelve TRUE si está todo correcto
+    * @return boolean
+    */
    public function test()
    {
+      $this->nombrecliente = $this->no_html($this->nombrecliente);
+      $this->direccion = $this->no_html($this->direccion);
+      $this->ciudad = $this->no_html($this->ciudad);
+      $this->provincia = $this->no_html($this->provincia);
       $this->observaciones = $this->no_html($this->observaciones);
       $this->totaleuros = round($this->total / $this->tasaconv, 2);
       
@@ -552,7 +563,7 @@ class pedido_cliente extends \fs_model
 
       if($this->idalbaran)
       {
-         $alb0 = new albaran_cliente();
+         $alb0 = new \albaran_cliente();
          $albaran = $alb0->get($this->idalbaran);
          if(!$albaran)
          {
@@ -700,7 +711,7 @@ class pedido_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_cliente($p);
+            $pedilist[] = new \pedido_cliente($p);
          }
       }
       
@@ -723,7 +734,7 @@ class pedido_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_cliente($p);
+            $pedilist[] = new \pedido_cliente($p);
          }
       }
       
@@ -746,7 +757,7 @@ class pedido_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $preclist[] = new pedido_cliente($p);
+            $preclist[] = new \pedido_cliente($p);
          }
       }
       
@@ -770,7 +781,7 @@ class pedido_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_cliente($p);
+            $pedilist[] = new \pedido_cliente($p);
          }
       }
       
@@ -794,7 +805,7 @@ class pedido_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_cliente($p);
+            $pedilist[] = new \pedido_cliente($p);
          }
       }
       
@@ -817,7 +828,7 @@ class pedido_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_cliente($p);
+            $pedilist[] = new \pedido_cliente($p);
          }
       }
       
@@ -841,7 +852,7 @@ class pedido_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedlist[] = new pedido_cliente($p);
+            $pedlist[] = new \pedido_cliente($p);
          }
       }
       
@@ -882,7 +893,7 @@ class pedido_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_cliente($p);
+            $pedilist[] = new \pedido_cliente($p);
          }
       }
       
@@ -918,7 +929,7 @@ class pedido_cliente extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_cliente($p);
+            $pedilist[] = new \pedido_cliente($p);
          }
       }
       

@@ -128,7 +128,7 @@ class linea_pedido_proveedor extends \fs_model
       
       if( !$encontrado )
       {
-         $pre = new pedido_proveedor();
+         $pre = new \pedido_proveedor();
          self::$pedidos[] = $pre->get($this->idpedido);
          $codigo = self::$pedidos[ count(self::$pedidos)-1 ]->codigo;
       }
@@ -153,7 +153,7 @@ class linea_pedido_proveedor extends \fs_model
       
       if( !$encontrado )
       {
-         $pre = new pedido_proveedor();
+         $pre = new \pedido_proveedor();
          self::$pedidos[] = $pre->get($this->idpedido);
          $fecha = self::$pedidos[ count(self::$pedidos)-1 ]->fecha;
       }
@@ -178,7 +178,7 @@ class linea_pedido_proveedor extends \fs_model
       
       if( !$encontrado )
       {
-         $pre = new pedido_proveedor();
+         $pre = new \pedido_proveedor();
          self::$pedidos[] = $pre->get($this->idpedido);
          $nombre = self::$pedidos[ count(self::$pedidos)-1 ]->nombre;
       }
@@ -304,7 +304,7 @@ class linea_pedido_proveedor extends \fs_model
       {
          foreach($data as $d)
          {
-            $plist[] = new linea_pedido_proveedor($d);
+            $plist[] = new \linea_pedido_proveedor($d);
          }
       }
       
@@ -329,7 +329,7 @@ class linea_pedido_proveedor extends \fs_model
       {
          foreach($data as $l)
          {
-            $linealist[] = new linea_pedido_proveedor($l);
+            $linealist[] = new \linea_pedido_proveedor($l);
          }
       }
       
@@ -364,7 +364,7 @@ class linea_pedido_proveedor extends \fs_model
       {
          foreach($data as $l)
          {
-            $linealist[] = new linea_pedido_proveedor($l);
+            $linealist[] = new \linea_pedido_proveedor($l);
          }
       }
       

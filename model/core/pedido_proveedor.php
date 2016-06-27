@@ -318,7 +318,7 @@ class pedido_proveedor extends \fs_model
 
    public function get_lineas()
    {
-      $linea = new linea_pedido_proveedor();
+      $linea = new \linea_pedido_proveedor();
       return $linea->all_from_pedido($this->idpedido);
    }
 
@@ -327,7 +327,7 @@ class pedido_proveedor extends \fs_model
       $pedido = $this->db->select("SELECT * FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($id).";");
       if($pedido)
       {
-         return new pedido_proveedor($pedido[0]);
+         return new \pedido_proveedor($pedido[0]);
       }
       else
          return FALSE;
@@ -345,7 +345,7 @@ class pedido_proveedor extends \fs_model
 
    public function new_codigo()
    {
-      $sec = new secuencia();
+      $sec = new \secuencia();
       $sec = $sec->get_by_params2($this->codejercicio, $this->codserie, 'npedidoprov');
       if($sec)
       {
@@ -382,9 +382,14 @@ class pedido_proveedor extends \fs_model
          $this->codigo = strtoupper(substr(FS_PEDIDO, 0, 3)).$this->codejercicio.$this->codserie.$this->numero.'C';
       }
    }
-
+   
+   /**
+    * Comprueba los daros del pedido, devuelve TRUE si está todo correcto
+    * @return boolean
+    */
    public function test()
    {
+      $this->nombre = $this->no_html($this->nombre);
       $this->observaciones = $this->no_html($this->observaciones);
       $this->totaleuros = round($this->total / $this->tasaconv, 2);
 
@@ -453,7 +458,7 @@ class pedido_proveedor extends \fs_model
       
       if($this->idalbaran)
       {
-         $alb0 = new albaran_proveedor();
+         $alb0 = new \albaran_proveedor();
          $albaran = $alb0->get($this->idalbaran);
          if (!$albaran)
          {
@@ -565,7 +570,7 @@ class pedido_proveedor extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_proveedor($p);
+            $pedilist[] = new \pedido_proveedor($p);
          }
       }
       
@@ -589,7 +594,7 @@ class pedido_proveedor extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_proveedor($p);
+            $pedilist[] = new \pedido_proveedor($p);
          }
       }
       
@@ -614,7 +619,7 @@ class pedido_proveedor extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_proveedor($p);
+            $pedilist[] = new \pedido_proveedor($p);
          }
       }
       
@@ -638,7 +643,7 @@ class pedido_proveedor extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_proveedor($p);
+            $pedilist[] = new \pedido_proveedor($p);
          }
       }
       
@@ -661,7 +666,7 @@ class pedido_proveedor extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_proveedor($p);
+            $pedilist[] = new \pedido_proveedor($p);
          }
       }
       
@@ -686,7 +691,7 @@ class pedido_proveedor extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedlist[] = new pedido_proveedor($p);
+            $pedlist[] = new \pedido_proveedor($p);
          }
       }
       
@@ -727,7 +732,7 @@ class pedido_proveedor extends \fs_model
       {
          foreach($data as $p)
          {
-            $pedilist[] = new pedido_proveedor($p);
+            $pedilist[] = new \pedido_proveedor($p);
          }
       }
       
