@@ -85,12 +85,12 @@
             <div class="btn-group">
                <a id="b_imprimir" class="btn btn-sm btn-default" href="#">
                   <span class="glyphicon glyphicon-print"></span>
-                  <span class="hidden-xs"> &nbsp; Imprimir</span>
+                  <span class="hidden-xs">&nbsp; Imprimir</span>
                </a>
                {if="$fsc->empresa->can_send_mail()"}
                <a id="b_enviar" class="btn btn-sm btn-default" href="#">
                   <span class="glyphicon glyphicon-envelope"></span>
-                  <span class="hidden-xs"> &nbsp; Enviar</span>
+                  <span class="hidden-xs">&nbsp; Enviar</span>
                </a>
                {/if}
                {loop="$fsc->extensions"}
@@ -143,12 +143,12 @@
                {if="$fsc->allow_delete"}
                <a id="b_eliminar" class="btn btn-sm btn-danger" href="#">
                   <span class="glyphicon glyphicon-trash"></span>
-                  <span class="hidden-xs"> &nbsp; Eliminar</span>
+                  <span class="hidden-xs">&nbsp; Eliminar</span>
                </a>
                {/if}
                <button class="btn btn-sm btn-primary" type="button" onclick="this.disabled = true;this.form.submit();">
                   <span class="glyphicon glyphicon-floppy-disk"></span>
-                  <span class="hidden-xs"> &nbsp; Guardar</span>
+                  <span class="hidden-xs">&nbsp; Guardar</span>
                </button>
             </div>
          </div>
@@ -159,7 +159,15 @@
             <ol class="breadcrumb" style="margin-bottom: 5px;">
                <li><a href="{$fsc->ppage->url()}">Compras</a></li>
                <li><a href="{$fsc->ppage->url()}" class="text-capitalize">{#FS_PEDIDOS#}</a></li>
-               <li>
+               <li><a href="#" title="almacén: {$fsc->pedido->codalmacen}">{$fsc->pedido->codalmacen}</a></li>
+               <li title="{#FS_SERIE#}: {$fsc->pedido->codserie}">
+                  {loop="$fsc->serie->all()"}
+                     {if="$value->codserie==$fsc->pedido->codserie"}
+                     <a href="#" class="text-capitalize">{$value->descripcion}</a>
+                     {/if}
+                  {/loop}
+               </li>
+               <li title="proveedor: {$fsc->pedido->codproveedor}">
                   <a href="{$fsc->pedido->proveedor_url()}">{$fsc->pedido->nombre}</a>
                </li>
                {if="$fsc->proveedor_s"}
@@ -205,10 +213,10 @@
                <input class="form-control" type="text" name="numproveedor" value="{$fsc->pedido->numproveedor}"/>
             </div>
          </div>
-         {if="$fsc->pedido->editable"}
          <div class="col-md-2 col-sm-2">
             <div class="form-group">
                <a href="{$fsc->serie->url()}" class="text-capitalize">{#FS_SERIE#}</a>:
+               {if="$fsc->pedido->editable"}
                <select class="form-control" name="serie" id="codserie" onchange="usar_serie();recalcular();">
                {loop="$fsc->serie->all()"}
                   {if="$value->codserie==$fsc->pedido->codserie"}
@@ -218,9 +226,19 @@
                   {/if}
                {/loop}
                </select>
+               {else}
+               <select class="form-control" name="serie" disabled="">
+               {loop="$fsc->serie->all()"}
+                  {if="$value->codserie==$fsc->pedido->codserie"}
+                  <option value="{$value->codserie}" selected="">{$value->descripcion}</option>
+                  {else}
+                  <option value="{$value->codserie}">{$value->descripcion}</option>
+                  {/if}
+               {/loop}
+               </select>
+               {/if}
             </div>
          </div>
-         {/if}
          <div class="col-md-2 col-sm-3">
             <div class="form-group">
                Fecha:
@@ -443,7 +461,6 @@
                </table>
                {/if}
             </div>
-            
             <div class="container-fluid">
                <div class="row">
                   <div class="col-sm-12">
@@ -457,8 +474,16 @@
          </div>
          <div role="tabpanel" class="tab-pane" id="detalles">
             <div class="container-fluid" style="margin-top: 10px;">
+               {if="!$fsc->pedido->editable"}
                <div class="row">
-                  <div class="col-sm-3">
+                  <div class="col-sm-12">
+                     <div class="alert alert-warning">Estos datos ya no pueden ser modificados.</div>
+                     <br/>
+                  </div>
+               </div>
+               {/if}
+               <div class="row">
+                  <div class="col-sm-2">
                      <div class="form-group">
                         Nombre del proveedor:
                         <input class="form-control" type="text" name="nombre" value="{$fsc->pedido->nombre}" autocomplete="off"/>
@@ -470,13 +495,31 @@
                         <input class="form-control" type="text" name="cifnif" value="{$fsc->pedido->cifnif}" autocomplete="off"/>
                      </div>
                   </div>
-                  <div class="col-sm-3">
+                  <div class="col-sm-2">
                      <div class="form-group">
                         <a href="{$fsc->forma_pago->url()}">Forma de pago</a>:
                         <select name="forma_pago" class="form-control">
-                           {loop="$fsc->forma_pago->all()"}
-                           <option value="{$value->codpago}"{if="$value->codpago==$fsc->pedido->codpago"} selected=""{/if}>{$value->descripcion}</option>
-                           {/loop}
+                        {loop="$fsc->forma_pago->all()"}
+                           {if="$value->codpago==$fsc->pedido->codpago"}
+                           <option value="{$value->codpago}" selected="">{$value->descripcion}</option>
+                           {else}
+                           <option value="{$value->codpago}">{$value->descripcion}</option>
+                           {/if}
+                        {/loop}
+                        </select>
+                     </div>
+                  </div>
+                  <div class="col-sm-2">
+                     <div class="form-group">
+                        <a href="{$fsc->almacen->url()}">Almacén</a>:
+                        <select name="almacen" class="form-control" disabled="">
+                        {loop="$fsc->almacen->all()"}
+                           {if="$value->codalmacen==$fsc->pedido->codalmacen"}
+                           <option value="{$value->codalmacen}" selected="">{$value->nombre}</option>
+                           {else}
+                           <option value="{$value->codalmacen}">{$value->nombre}</option>
+                           {/if}
+                        {/loop}
                         </select>
                      </div>
                   </div>

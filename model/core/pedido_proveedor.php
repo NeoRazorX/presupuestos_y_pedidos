@@ -390,6 +390,11 @@ class pedido_proveedor extends \fs_model
    public function test()
    {
       $this->nombre = $this->no_html($this->nombre);
+      if($this->nombre == '')
+      {
+         $this->nombre = '-';
+      }
+      
       $this->observaciones = $this->no_html($this->observaciones);
       $this->totaleuros = round($this->total / $this->tasaconv, 2);
 
@@ -413,10 +418,12 @@ class pedido_proveedor extends \fs_model
       $iva = 0;
       $irpf = 0;
       $recargo = 0;
-      foreach ($this->get_lineas() as $l)
+      foreach($this->get_lineas() as $l)
       {
-         if (!$l->test())
+         if( !$l->test() )
+         {
             $status = FALSE;
+         }
 
          $neto += $l->pvptotal;
          $iva += $l->pvptotal * $l->iva / 100;
@@ -430,27 +437,27 @@ class pedido_proveedor extends \fs_model
       $recargo = round($recargo, FS_NF0);
       $total = $neto + $iva - $irpf + $recargo;
 
-      if (!$this->floatcmp($this->neto, $neto, FS_NF0, TRUE))
+      if( !$this->floatcmp($this->neto, $neto, FS_NF0, TRUE) )
       {
          $this->new_error_msg("Valor neto de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $neto);
          $status = FALSE;
       }
-      else if (!$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE))
+      else if( !$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE) )
       {
          $this->new_error_msg("Valor totaliva de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $iva);
          $status = FALSE;
       }
-      else if (!$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE))
+      else if( !$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE) )
       {
          $this->new_error_msg("Valor totalirpf de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $irpf);
          $status = FALSE;
       }
-      else if (!$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE))
+      else if( !$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE) )
       {
          $this->new_error_msg("Valor totalrecargo de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $recargo);
          $status = FALSE;
       }
-      else if (!$this->floatcmp($this->total, $total, FS_NF0, TRUE))
+      else if( !$this->floatcmp($this->total, $total, FS_NF0, TRUE) )
       {
          $this->new_error_msg("Valor total de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $total);
          $status = FALSE;
