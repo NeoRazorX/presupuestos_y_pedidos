@@ -31,6 +31,8 @@ require_model('linea_pedido_cliente.php');
 require_model('pais.php');
 require_model('pedido_cliente.php');
 require_model('serie.php');
+require_model('agencia_transporte.php');
+
 
 class ventas_pedido extends fs_controller
 {
@@ -49,6 +51,8 @@ class ventas_pedido extends fs_controller
    public $pais;
    public $pedido;
    public $serie;
+   public $agencia;
+
 
    public function __construct()
    {
@@ -77,6 +81,8 @@ class ventas_pedido extends fs_controller
       $this->nuevo_pedido_url = FALSE;
       $this->pais = new pais();
       $this->serie = new serie();
+      $this->agencia = new agencia_transporte();
+
       
       /**
        * Comprobamos si el usuario tiene acceso a nueva_venta,
@@ -215,6 +221,20 @@ class ventas_pedido extends fs_controller
             $this->pedido->ciudad = $_POST['ciudad'];
             $this->pedido->codpostal = $_POST['codpostal'];
             $this->pedido->direccion = $_POST['direccion'];
+            
+            //transporte
+            $this->pedido->envio_nombre = $_POST['envio_nombre'];
+            $this->pedido->envio_apellidos = $_POST['envio_apellidos'];
+            $this->pedido->envio_codtrans = NULL;
+            if($_POST['envio_codtrans'] != '')
+            {
+               $this->pedido->envio_codtrans = $_POST['envio_codtrans'];
+            }
+            $this->pedido->envio_codigo = $_POST['envio_codigo'];
+            $this->pedido->envio_provincia = $_POST['envio_provincia'];
+            $this->pedido->envio_ciudad = $_POST['envio_ciudad'];
+            $this->pedido->envio_codpostal = $_POST['envio_codpostal'];
+            $this->pedido->envio_direccion = $_POST['envio_direccion'];
             
             $cliente = $this->cliente->get($this->pedido->codcliente);
          }
@@ -443,6 +463,15 @@ class ventas_pedido extends fs_controller
       $albaran->porcomision = $this->pedido->porcomision;
       $albaran->totalirpf = $this->pedido->totalirpf;
       $albaran->totalrecargo = $this->pedido->totalrecargo;
+      //transporte
+      $albaran->envio_nombre = $this->pedido->envio_nombre;
+      $albaran->envio_apellidos = $this->pedido->envio_apellidos;
+      $albaran->envio_codtrans = $this->pedido->envio_codtrans;
+      $albaran->envio_codigo = $this->pedido->envio_codigo;
+      $albaran->envio_provincia = $this->pedido->envio_provincia;
+      $albaran->envio_ciudad = $this->pedido->envio_ciudad;
+      $albaran->envio_codpostal = $this->pedido->envio_codpostal;
+      $albaran->envio_direccion = $this->pedido->envio_direccion;
       
       if( isset($_POST['facturar']) )
       {

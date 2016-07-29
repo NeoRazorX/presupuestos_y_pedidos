@@ -209,6 +209,16 @@ class presupuesto_cliente extends \fs_model
     * @var type 
     */
    public $femail;
+   
+   /// datos de transporte
+   public $envio_codtrans;
+   public $envio_codigo;
+   public $envio_nombre;
+   public $envio_apellidos;
+   public $envio_direccion;
+   public $envio_codpostal;
+   public $envio_ciudad;
+   public $envio_provincia;
 
    public function __construct($p = FALSE)
    {
@@ -287,6 +297,15 @@ class presupuesto_cliente extends \fs_model
          {
             $this->femail = Date('d-m-Y', strtotime($p['femail']));
          }
+         
+         $this->envio_codtrans = $p['codtrans'];
+         $this->envio_codigo = $p['codigoenv'];
+         $this->envio_nombre = $p['nombreenv'];
+         $this->envio_apellidos = $p['apellidosenv'];
+         $this->envio_direccion = $p['direccionenv'];
+         $this->envio_codpostal = $p['codpostalenv'];
+         $this->envio_ciudad = $p['ciudadenv'];
+         $this->envio_provincia = $p['provinciaenv'];
       }
       else
       {
@@ -327,6 +346,15 @@ class presupuesto_cliente extends \fs_model
          $this->status = 0;
          $this->editable = TRUE;
          $this->femail = NULL;
+         //transporte
+         $this->envio_codtrans = NULL;
+         $this->envio_codigo = NULL;
+         $this->envio_nombre = NULL;
+         $this->envio_apellidos = NULL;
+         $this->envio_direccion = NULL;
+         $this->envio_codpostal = NULL;
+         $this->envio_ciudad = NULL;
+         $this->envio_provincia = NULL;
       }
    }
 
@@ -624,6 +652,14 @@ class presupuesto_cliente extends \fs_model
                     . ", totaliva = " . $this->var2str($this->totaliva)
                     . ", totalrecargo = " . $this->var2str($this->totalrecargo)
                     . ", femail = " . $this->var2str($this->femail)
+                    . ", codtrans = ".$this->var2str($this->envio_codtrans)
+                    . ", codigoenv = ".$this->var2str($this->envio_codigo)
+                    . ", nombreenv = ".$this->var2str($this->envio_nombre)
+                    . ", apellidosenv = ".$this->var2str($this->envio_apellidos)
+                    . ", direccionenv = ".$this->var2str($this->envio_direccion)
+                    . ", codpostalenv = ".$this->var2str($this->envio_codpostal)
+                    . ", ciudadenv = ".$this->var2str($this->envio_ciudad)
+                    . ", provinciaenv = ".$this->var2str($this->envio_provincia)
                     . "  WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";";
             
             return $this->db->exec($sql);
@@ -635,7 +671,8 @@ class presupuesto_cliente extends \fs_model
                codalmacen,codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,
                codpostal,codserie,direccion,editable,fecha,finoferta,hora,idpedido,irpf,neto,
                nombrecliente,numero,observaciones,status,porcomision,provincia,
-               tasaconv,total,totaleuros,totalirpf,totaliva,totalrecargo,numero2,femail) VALUES ("
+               tasaconv,total,totaleuros,totalirpf,totaliva,totalrecargo,numero2,femail,codtrans,codigoenv,nombreenv,
+               apellidosenv,direccionenv,codpostalenv,ciudadenv,provinciaenv) VALUES ("
                     . $this->var2str($this->apartado) . ","
                     . $this->var2str($this->cifnif) . ","
                     . $this->var2str($this->ciudad) . ","
@@ -671,7 +708,15 @@ class presupuesto_cliente extends \fs_model
                     . $this->var2str($this->totaliva) . ","
                     . $this->var2str($this->totalrecargo) . ","
                     . $this->var2str($this->numero2) . ","
-                    . $this->var2str($this->femail) . ");";
+                    . $this->var2str($this->femail) . ","
+                    . $this->var2str($this->envio_codtrans) . ","
+                    . $this->var2str($this->envio_codigo) . ","
+                    . $this->var2str($this->envio_nombre) . ","
+                    . $this->var2str($this->envio_apellidos) . ","
+                    . $this->var2str($this->envio_direccion) . ","
+                    . $this->var2str($this->envio_codpostal) . ","
+                    . $this->var2str($this->envio_ciudad) . ","
+                    . $this->var2str($this->envio_provincia).");";
 
             if( $this->db->exec($sql) )
             {
