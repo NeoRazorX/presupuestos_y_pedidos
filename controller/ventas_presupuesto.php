@@ -31,6 +31,8 @@ require_model('pais.php');
 require_model('pedido_cliente.php');
 require_model('presupuesto_cliente.php');
 require_model('serie.php');
+require_model('agencia_transporte.php');
+
 
 class ventas_presupuesto extends fs_controller {
 
@@ -50,6 +52,8 @@ class ventas_presupuesto extends fs_controller {
    public $presupuesto;
    public $serie;
    public $setup_validez;
+   public $agencia;
+
 
    public function __construct()
    {
@@ -80,6 +84,8 @@ class ventas_presupuesto extends fs_controller {
       $this->serie = new serie();
       $this->setup_validez = 30;
       $this->configurar_validez();
+      $this->agencia = new agencia_transporte();
+
       
       /**
        * Comprobamos si el usuario tiene acceso a nueva_venta,
@@ -263,6 +269,20 @@ class ventas_presupuesto extends fs_controller {
             $this->presupuesto->ciudad = $_POST['ciudad'];
             $this->presupuesto->codpostal = $_POST['codpostal'];
             $this->presupuesto->direccion = $_POST['direccion'];
+            
+            //transporte
+            $this->presupuesto->envio_nombre = $_POST['envio_nombre'];
+            $this->presupuesto->envio_apellidos = $_POST['envio_apellidos'];
+            $this->presupuesto->envio_codtrans = NULL;
+            if($_POST['envio_codtrans'] != '')
+            {
+               $this->presupuesto->envio_codtrans = $_POST['envio_codtrans'];
+            }
+            $this->presupuesto->envio_codigo = $_POST['envio_codigo'];
+            $this->presupuesto->envio_provincia = $_POST['envio_provincia'];
+            $this->presupuesto->envio_ciudad = $_POST['envio_ciudad'];
+            $this->presupuesto->envio_codpostal = $_POST['envio_codpostal'];
+            $this->presupuesto->envio_direccion = $_POST['envio_direccion'];
             
             $cliente = $this->cliente->get($this->presupuesto->codcliente);
          }
@@ -491,6 +511,15 @@ class ventas_presupuesto extends fs_controller {
       $pedido->porcomision = $this->presupuesto->porcomision;
       $pedido->totalirpf = $this->presupuesto->totalirpf;
       $pedido->totalrecargo = $this->presupuesto->totalrecargo;
+      //transporte
+      $pedido->envio_nombre = $this->presupuesto->envio_nombre;
+      $pedido->envio_apellidos = $this->presupuesto->envio_apellidos;
+      $pedido->envio_codtrans = $this->presupuesto->envio_codtrans;
+      $pedido->envio_codigo = $this->presupuesto->envio_codigo;
+      $pedido->envio_provincia = $this->presupuesto->envio_provincia;
+      $pedido->envio_ciudad = $this->presupuesto->envio_ciudad;
+      $pedido->envio_codpostal = $this->presupuesto->envio_codpostal;
+      $pedido->envio_direccion = $this->presupuesto->envio_direccion;
 
       /**
        * Obtenemos el ejercicio para la fecha de hoy (puede que no sea

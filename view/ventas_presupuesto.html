@@ -317,6 +317,12 @@
                <span class="glyphicon glyphicon-tasks" aria-hidden="true"></span>
             </a>
          </li>
+         <li role="presentation">
+            <a href="#envio" aria-controls="envio" role="tab" data-toggle="tab">
+               <span class="glyphicon glyphicon-road" aria-hidden="true"></span>
+               <span class="hidden-xs">&nbsp; Envío</span>
+            </a>
+         </li>
          {/if}
          {loop="$fsc->extensions"}
             {if="$value->type=='tab'"}
@@ -629,6 +635,94 @@
                      <div class="form-group">
                         Dirección:
                         <input class="form-control" type="text" name="direccion" value="{$fsc->presupuesto->direccion}" autocomplete="off"/>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div role="tabpanel" class="tab-pane" id="envio">
+            <div class="container-fluid" style="margin-top: 10px;">
+               {if="!$fsc->presupuesto->editable"}
+               <div class="row">
+                  <div class="col-sm-12">
+                     <div class="alert alert-warning">Estos datos ya no pueden ser modificados.</div>
+                     <br/>
+                  </div>
+               </div>
+               {/if}
+               <div class="row">
+                  <div class="col-sm-2">
+                     <div class="form-group">
+                        Direcciones Cliente:
+                        <select id="coddireccion" class="form-control" onchange="usar_direccion();">
+                           <option value="">Seleccione</option>
+                           <option value="">------</option>
+                           {loop="$fsc->cliente_s->get_direcciones()"}
+                           {if="$value->domenvio"}
+                           <option value="{$value->id}">{$value->descripcion}</option>
+                           {/if}
+                           {/loop}
+                        </select>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-2">
+                     <div class="form-group">
+                        Nombre:
+                        <input type="text" id="envio_nombre" name="envio_nombre" value="{$fsc->presupuesto->envio_nombre}" class="form-control" autocomplete="off"/>
+                     </div>
+                  </div>
+                  <div class="col-sm-4">
+                     <div class="form-group">
+                        Apellidos:
+                        <input type="text" name="envio_apellidos" value="{$fsc->presupuesto->envio_apellidos}" class="form-control" autocomplete="off"/>
+                     </div>
+                  </div>
+                  <div class="col-sm-2">
+                     <div class="form-group">
+                        <a href="{$fsc->agencia->url()}">Agencia</a>:
+                        <select name="envio_codtrans" class="form-control">
+                           <option value="">Ninguna</option>
+                           <option value="">------</option>
+                           {loop="$fsc->agencia->all()"}
+                              {if="$fsc->presupuesto->envio_codtrans==$value->codtrans"}
+                              <option value="{$value->codtrans}" selected="">{$value->nombre}</option>
+                              {else}
+                              <option value="{$value->codtrans}">{$value->nombre}</option>
+                              {/if}
+                           {/loop}
+                        </select>
+                     </div>
+                  </div>
+                  <div class="col-sm-4">
+                     <div class="form-group">
+                        Código de seguimiento:
+                        <input type="text" name="envio_codigo" value="{$fsc->presupuesto->envio_codigo}" class="form-control" autocomplete="off"/>
+                     </div>
+                  </div>
+                  <div class="col-sm-2">
+                     <div class="form-group">
+                        <span class="text-capitalize">{#FS_PROVINCIA#}</span>:
+                        <input type="text" name="envio_provincia" value="{$fsc->presupuesto->envio_provincia}" id="ac_provincia2" class="form-control" autocomplete="off"/>
+                     </div>
+                  </div>
+                  <div class="col-sm-2">
+                     <div class="form-group">
+                        Ciudad:
+                        <input type="text" name="envio_ciudad" value="{$fsc->presupuesto->envio_ciudad}" class="form-control" autocomplete="off"/>
+                     </div>
+                  </div>
+                  <div class="col-sm-2">
+                     <div class="form-group">
+                        Código Postal:
+                        <input type="text" name="envio_codpostal" value="{$fsc->presupuesto->envio_codpostal}" class="form-control" autocomplete="off"/>
+                     </div>
+                  </div>
+                  <div class="col-sm-6">
+                     <div class="form-group">
+                        Dirección:
+                        <input type="text" name="envio_direccion" value="{$fsc->presupuesto->envio_direccion}" class="form-control" autocomplete="off"/>
                      </div>
                   </div>
                </div>
