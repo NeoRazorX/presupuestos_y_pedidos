@@ -866,6 +866,12 @@
                   <input class="form-control datepicker" type="text" name="aprobar" value="{$fsc->today()}" autocomplete="off"/>
                   <p class="help-block">Se generará un {#FS_ALBARAN#}.</p>
                </div>
+               <div class="checkbox">
+                  <label>
+                     <input type="checkbox" name="costemedio" value="TRUE"{if="FS_COST_IS_AVERAGE"} checked="checked"{/if}/>
+                     Actualizar precio de coste de los artículos
+                  </label>
+               </div>
                <div class="text-right">
                   <button class="btn btn-sm btn-primary" onclick="this.disabled=true;this.form.submit();">
                      <span class="glyphicon glyphicon-paperclip"></span>&nbsp; Aprobar
