@@ -445,27 +445,36 @@ class imprimir_presu_pedi extends fs_controller
          unset($table_header['cantidad']);
       }
       
-      if($this->impresion['print_dto'])
+      if( isset($_GET['noval']) )
+      {
+         unset($table_header['pvp']);
+      }
+      
+      if( $this->impresion['print_dto'] AND !isset($_GET['noval']) )
       {
          $table_header['dto'] = '<b>Dto.</b>';
       }
       
-      if($multi_iva)
+      if( $multi_iva AND !isset($_GET['noval']) )
       {
          $table_header['iva'] = '<b>'.FS_IVA.'</b>';
       }
       
-      if($multi_re)
+      if( $multi_re AND !isset($_GET['noval']) )
       {
          $table_header['re'] = '<b>R.E.</b>';
       }
       
-      if($multi_irpf)
+      if( $multi_irpf AND !isset($_GET['noval']) )
       {
          $table_header['irpf'] = '<b>'.FS_IRPF.'</b>';
       }
       
-      $table_header['importe'] = '<b>Importe</b>';
+      if( !isset($_GET['noval']) )
+      {
+         $table_header['importe'] = '<b>Importe</b>';
+      }
+      
       $pdf_doc->add_table_header($table_header);
       
       for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
@@ -711,7 +720,7 @@ class imprimir_presu_pedi extends fs_controller
                   
                   if($li['totalrecargo'] != 0)
                   {
-                     $fila['iva'.$li['iva']] .= ' (RE: '.$this->show_precio($li['totalrecargo'], $this->presupuesto->coddivisa).')';
+                     $fila['iva'.$li['iva']] .= "\nR.E. ".$li['recargo']."%: ".$this->show_precio($li['totalrecargo'], $this->presupuesto->coddivisa);
                   }
                   
                   $opciones['cols']['iva'.$li['iva']] = array('justification' => 'right');
@@ -860,7 +869,7 @@ class imprimir_presu_pedi extends fs_controller
                
                if($li['totalrecargo'] != 0)
                {
-                  $fila['iva'.$li['iva']] .= ' (RE: '.$this->show_precio($li['totalrecargo'], $this->pedido->coddivisa).')';
+                  $fila['iva'.$li['iva']] .= "\nR.E. ".$li['recargo']."%: ".$this->show_precio($li['totalrecargo'], $this->pedido->coddivisa);
                }
                
                $opciones['cols']['iva'.$li['iva']] = array('justification' => 'right');
@@ -1018,7 +1027,7 @@ class imprimir_presu_pedi extends fs_controller
             
             if( isset($_GET['noval']) )
             {
-               $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text('Página '.$pagina . '/' . ceil(count($lineas) / $lppag), 153), 0, 1.5);
+               $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text('Página '.$pagina . '/' . $this->numpaginas, 250) );
             }
             else
             {
@@ -1057,7 +1066,7 @@ class imprimir_presu_pedi extends fs_controller
                   
                   if($li['totalrecargo'] != 0)
                   {
-                     $fila['iva'.$li['iva']] .= ' (RE: '.$this->show_precio($li['totalrecargo'], $this->pedido->coddivisa).')';
+                     $fila['iva'.$li['iva']] .= "\nR.E. ".$li['recargo']."%: ".$this->show_precio($li['totalrecargo'], $this->pedido->coddivisa);
                   }
                   
                   $opciones['cols']['iva'.$li['iva']] = array('justification' => 'right');
@@ -1274,6 +1283,11 @@ class imprimir_presu_pedi extends fs_controller
       {
          if( isset($lineasiva[$lin->codimpuesto]) )
          {
+            if($lin->recargo > $lineasiva[$lin->codimpuesto]['recargo'])
+            {
+               $lineasiva[$lin->codimpuesto]['recargo'] = $lin->recargo;
+            }
+            
             $lineasiva[$lin->codimpuesto]['neto'] += $lin->pvptotal;
             $lineasiva[$lin->codimpuesto]['totaliva'] += ($lin->pvptotal*$lin->iva)/100;
             $lineasiva[$lin->codimpuesto]['totalrecargo'] += ($lin->pvptotal*$lin->recargo)/100;
