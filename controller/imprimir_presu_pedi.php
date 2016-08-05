@@ -230,20 +230,25 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->pdf->ezText("<b>".$this->empresa->nombre."</b>", 12, array('justification' => 'right'));
             $pdf_doc->pdf->ezText(FS_CIFNIF.": ".$this->empresa->cifnif, 8, array('justification' => 'right'));
             
-            $direccion = $this->empresa->direccion;
+            $direccion = $this->empresa->direccion . "\n";
+            if($this->empresa->apartado)
+            {
+               $direccion .= ucfirst(FS_APARTADO) . ': ' . $this->empresa->apartado . ' - ';
+            }
+            
             if($this->empresa->codpostal)
             {
-               $direccion .= "\nCP: " . $this->empresa->codpostal;
+               $direccion .= 'CP: ' . $this->empresa->codpostal . ' - ';
             }
             
             if($this->empresa->ciudad)
             {
-               $direccion .= ' - ' . $this->empresa->ciudad;
+               $direccion .= $this->empresa->ciudad . ' - ';
             }
             
             if($this->empresa->provincia)
             {
-               $direccion .= ' (' . $this->empresa->provincia . ')';
+               $direccion .= '(' . $this->empresa->provincia . ')';
             }
             
             if($this->empresa->telefono)
@@ -266,9 +271,14 @@ class imprimir_presu_pedi extends fs_controller
          $pdf_doc->pdf->ezText(FS_CIFNIF.": ".$this->empresa->cifnif, 8, array('justification' => 'center'));
          
          $direccion = $this->empresa->direccion;
+         if($this->empresa->apartado)
+         {
+            $direccion .= ' - '.ucfirst(FS_APARTADO).': ' . $this->empresa->apartado;
+         }
+            
          if($this->empresa->codpostal)
          {
-            $direccion .= ' - ' . $this->empresa->codpostal;
+            $direccion .= ' - CP: ' . $this->empresa->codpostal;
          }
          
          if($this->empresa->ciudad)
@@ -626,11 +636,19 @@ class imprimir_presu_pedi extends fs_controller
                    'campo2' => "<b>".$this->cliente->tipoidfiscal.":</b> ".$this->presupuesto->cifnif
                )
             );
+            $direccion = $this->presupuesto->direccion;
+            if($this->presupuesto->apartado)
+            {
+               $direccion .= ' - '.ucfirst(FS_APARTADO).': '.$this->presupuesto->apartado;
+            }
+            if($this->presupuesto->codpostal)
+            {
+               $direccion .= ' - CP: '.$this->presupuesto->codpostal;
+            }
+            $direccion .= ' - '.$this->presupuesto->ciudad.' ('.$this->presupuesto->provincia.')';
             $row = array(
                 'campo1' => "<b>Dirección:</b>",
-                'dato1' => $this->fix_html($this->presupuesto->direccion.' CP: '.
-                        $this->presupuesto->codpostal.' - '.$this->presupuesto->ciudad.
-                        ' ('.$this->presupuesto->provincia.')'),
+                'dato1' => $this->fix_html($direccion),
                 'campo2' => ''
             );
             if($this->cliente->telefono1)
@@ -975,10 +993,19 @@ class imprimir_presu_pedi extends fs_controller
                    'campo2' => "<b>".$this->cliente->tipoidfiscal.":</b> ".$this->pedido->cifnif
                )
             );
+            $direccion = $this->pedido->direccion;
+            if($this->pedido->apartado)
+            {
+               $direccion .= ' - '.ucfirst(FS_APARTADO).': '.$this->pedido->apartado;
+            }
+            if($this->pedido->codpostal)
+            {
+               $direccion .= ' - CP: '.$this->pedido->codpostal;
+            }
+            $direccion .= ' - '.$this->pedido->ciudad.' ('.$this->pedido->provincia.')';
             $row = array(
                 'campo1' => "<b>Dirección:</b>",
-                'dato1' => $this->fix_html($this->pedido->direccion.' CP: '.$this->pedido->codpostal.
-                        ' - '.$this->pedido->ciudad.' ('.$this->pedido->provincia.')'),
+                'dato1' => $this->fix_html($direccion),
                 'campo2' => ''
             );
             if($this->cliente->telefono1)

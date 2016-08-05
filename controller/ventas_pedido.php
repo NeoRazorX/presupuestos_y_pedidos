@@ -221,8 +221,8 @@ class ventas_pedido extends fs_controller
             $this->pedido->ciudad = $_POST['ciudad'];
             $this->pedido->codpostal = $_POST['codpostal'];
             $this->pedido->direccion = $_POST['direccion'];
+            $this->pedido->apartado = $_POST['apartado'];
             
-            //transporte
             $this->pedido->envio_nombre = $_POST['envio_nombre'];
             $this->pedido->envio_apellidos = $_POST['envio_apellidos'];
             $this->pedido->envio_codtrans = NULL;
@@ -231,10 +231,12 @@ class ventas_pedido extends fs_controller
                $this->pedido->envio_codtrans = $_POST['envio_codtrans'];
             }
             $this->pedido->envio_codigo = $_POST['envio_codigo'];
+            $this->pedido->envio_codpais = $_POST['envio_codpais'];
             $this->pedido->envio_provincia = $_POST['envio_provincia'];
             $this->pedido->envio_ciudad = $_POST['envio_ciudad'];
             $this->pedido->envio_codpostal = $_POST['envio_codpostal'];
             $this->pedido->envio_direccion = $_POST['envio_direccion'];
+            $this->pedido->envio_apartado = $_POST['envio_apartado'];
             
             $cliente = $this->cliente->get($this->pedido->codcliente);
          }
@@ -463,15 +465,17 @@ class ventas_pedido extends fs_controller
       $albaran->porcomision = $this->pedido->porcomision;
       $albaran->totalirpf = $this->pedido->totalirpf;
       $albaran->totalrecargo = $this->pedido->totalrecargo;
-      //transporte
+      
       $albaran->envio_nombre = $this->pedido->envio_nombre;
       $albaran->envio_apellidos = $this->pedido->envio_apellidos;
       $albaran->envio_codtrans = $this->pedido->envio_codtrans;
       $albaran->envio_codigo = $this->pedido->envio_codigo;
+      $albaran->envio_codpais = $this->pedido->envio_codpais;
       $albaran->envio_provincia = $this->pedido->envio_provincia;
       $albaran->envio_ciudad = $this->pedido->envio_ciudad;
       $albaran->envio_codpostal = $this->pedido->envio_codpostal;
       $albaran->envio_direccion = $this->pedido->envio_direccion;
+      $albaran->envio_apartado = $this->pedido->envio_apartado;
       
       if( isset($_POST['facturar']) )
       {
