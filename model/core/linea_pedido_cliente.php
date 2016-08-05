@@ -20,6 +20,8 @@
 
 namespace FacturaScripts\model;
 
+require_model('pedido_cliente.php');
+
 /**
  * Línea de pedido de cliente.
  * 

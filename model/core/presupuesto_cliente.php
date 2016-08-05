@@ -215,10 +215,12 @@ class presupuesto_cliente extends \fs_model
    public $envio_codigo;
    public $envio_nombre;
    public $envio_apellidos;
+   public $envio_apartado;
    public $envio_direccion;
    public $envio_codpostal;
    public $envio_ciudad;
    public $envio_provincia;
+   public $envio_codpais;
 
    public function __construct($p = FALSE)
    {
@@ -302,10 +304,12 @@ class presupuesto_cliente extends \fs_model
          $this->envio_codigo = $p['codigoenv'];
          $this->envio_nombre = $p['nombreenv'];
          $this->envio_apellidos = $p['apellidosenv'];
+         $this->envio_apartado = $p['apartadoenv'];
          $this->envio_direccion = $p['direccionenv'];
          $this->envio_codpostal = $p['codpostalenv'];
          $this->envio_ciudad = $p['ciudadenv'];
          $this->envio_provincia = $p['provinciaenv'];
+         $this->envio_codpais = $p['codpaisenv'];
       }
       else
       {
@@ -346,15 +350,17 @@ class presupuesto_cliente extends \fs_model
          $this->status = 0;
          $this->editable = TRUE;
          $this->femail = NULL;
-         //transporte
+         
          $this->envio_codtrans = NULL;
          $this->envio_codigo = NULL;
          $this->envio_nombre = NULL;
          $this->envio_apellidos = NULL;
+         $this->envio_apartado = NULL;
          $this->envio_direccion = NULL;
          $this->envio_codpostal = NULL;
          $this->envio_ciudad = NULL;
          $this->envio_provincia = NULL;
+         $this->envio_codpais = NULL;
       }
    }
 
@@ -616,107 +622,111 @@ class presupuesto_cliente extends \fs_model
       {
          if( $this->exists() )
          {
-            $sql = "UPDATE " . $this->table_name . " SET apartado = " . $this->var2str($this->apartado)
-                    . ", cifnif = " . $this->var2str($this->cifnif)
-                    . ", ciudad = " . $this->var2str($this->ciudad)
-                    . ", codagente = " . $this->var2str($this->codagente)
-                    . ", codalmacen = " . $this->var2str($this->codalmacen)
-                    . ", codcliente = " . $this->var2str($this->codcliente)
-                    . ", coddir = " . $this->var2str($this->coddir)
-                    . ", coddivisa = " . $this->var2str($this->coddivisa)
-                    . ", codejercicio = " . $this->var2str($this->codejercicio)
-                    . ", codigo = " . $this->var2str($this->codigo)
-                    . ", codpago = " . $this->var2str($this->codpago)
-                    . ", codpais = " . $this->var2str($this->codpais)
-                    . ", codpostal = " . $this->var2str($this->codpostal)
-                    . ", codserie = " . $this->var2str($this->codserie)
-                    . ", direccion = " . $this->var2str($this->direccion)
-                    . ", editable = " . $this->var2str($this->editable)
-                    . ", fecha = " . $this->var2str($this->fecha)
-                    . ", finoferta = " . $this->var2str($this->finoferta)
-                    . ", hora = " . $this->var2str($this->hora)
-                    . ", idpedido = " . $this->var2str($this->idpedido)
-                    . ", irpf = " . $this->var2str($this->irpf)
-                    . ", neto = " . $this->var2str($this->neto)
-                    . ", nombrecliente = " . $this->var2str($this->nombrecliente)
-                    . ", numero = " . $this->var2str($this->numero)
-                    . ", numero2 = " . $this->var2str($this->numero2)
-                    . ", observaciones = " . $this->var2str($this->observaciones)
-                    . ", status = " . $this->var2str($this->status)
-                    . ", porcomision = " . $this->var2str($this->porcomision)
-                    . ", provincia = " . $this->var2str($this->provincia)
-                    . ", tasaconv = " . $this->var2str($this->tasaconv)
-                    . ", total = " . $this->var2str($this->total)
-                    . ", totaleuros = " . $this->var2str($this->totaleuros)
-                    . ", totalirpf = " . $this->var2str($this->totalirpf)
-                    . ", totaliva = " . $this->var2str($this->totaliva)
-                    . ", totalrecargo = " . $this->var2str($this->totalrecargo)
-                    . ", femail = " . $this->var2str($this->femail)
+            $sql = "UPDATE ".$this->table_name . " SET apartado = ".$this->var2str($this->apartado)
+                    . ", cifnif = ".$this->var2str($this->cifnif)
+                    . ", ciudad = ".$this->var2str($this->ciudad)
+                    . ", codagente = ".$this->var2str($this->codagente)
+                    . ", codalmacen = ".$this->var2str($this->codalmacen)
+                    . ", codcliente = ".$this->var2str($this->codcliente)
+                    . ", coddir = ".$this->var2str($this->coddir)
+                    . ", coddivisa = ".$this->var2str($this->coddivisa)
+                    . ", codejercicio = ".$this->var2str($this->codejercicio)
+                    . ", codigo = ".$this->var2str($this->codigo)
+                    . ", codpago = ".$this->var2str($this->codpago)
+                    . ", codpais = ".$this->var2str($this->codpais)
+                    . ", codpostal = ".$this->var2str($this->codpostal)
+                    . ", codserie = ".$this->var2str($this->codserie)
+                    . ", direccion = ".$this->var2str($this->direccion)
+                    . ", editable = ".$this->var2str($this->editable)
+                    . ", fecha = ".$this->var2str($this->fecha)
+                    . ", finoferta = ".$this->var2str($this->finoferta)
+                    . ", hora = ".$this->var2str($this->hora)
+                    . ", idpedido = ".$this->var2str($this->idpedido)
+                    . ", irpf = ".$this->var2str($this->irpf)
+                    . ", neto = ".$this->var2str($this->neto)
+                    . ", nombrecliente = ".$this->var2str($this->nombrecliente)
+                    . ", numero = ".$this->var2str($this->numero)
+                    . ", numero2 = ".$this->var2str($this->numero2)
+                    . ", observaciones = ".$this->var2str($this->observaciones)
+                    . ", status = ".$this->var2str($this->status)
+                    . ", porcomision = ".$this->var2str($this->porcomision)
+                    . ", provincia = ".$this->var2str($this->provincia)
+                    . ", tasaconv = ".$this->var2str($this->tasaconv)
+                    . ", total = ".$this->var2str($this->total)
+                    . ", totaleuros = ".$this->var2str($this->totaleuros)
+                    . ", totalirpf = ".$this->var2str($this->totalirpf)
+                    . ", totaliva = ".$this->var2str($this->totaliva)
+                    . ", totalrecargo = ".$this->var2str($this->totalrecargo)
+                    . ", femail = ".$this->var2str($this->femail)
                     . ", codtrans = ".$this->var2str($this->envio_codtrans)
                     . ", codigoenv = ".$this->var2str($this->envio_codigo)
                     . ", nombreenv = ".$this->var2str($this->envio_nombre)
                     . ", apellidosenv = ".$this->var2str($this->envio_apellidos)
+                    . ", apartadoenv = ".$this->var2str($this->envio_apartado)
                     . ", direccionenv = ".$this->var2str($this->envio_direccion)
                     . ", codpostalenv = ".$this->var2str($this->envio_codpostal)
                     . ", ciudadenv = ".$this->var2str($this->envio_ciudad)
                     . ", provinciaenv = ".$this->var2str($this->envio_provincia)
-                    . "  WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";";
+                    . ", codpaisenv = ".$this->var2str($this->envio_codpais)
+                    . "  WHERE idpresupuesto = ".$this->var2str($this->idpresupuesto).";";
             
             return $this->db->exec($sql);
          }
          else
          {
             $this->new_codigo();
-            $sql = "INSERT INTO " . $this->table_name . " (apartado,cifnif,ciudad,codagente,
+            $sql = "INSERT INTO ".$this->table_name." (apartado,cifnif,ciudad,codagente,
                codalmacen,codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,
                codpostal,codserie,direccion,editable,fecha,finoferta,hora,idpedido,irpf,neto,
                nombrecliente,numero,observaciones,status,porcomision,provincia,
                tasaconv,total,totaleuros,totalirpf,totaliva,totalrecargo,numero2,femail,codtrans,codigoenv,nombreenv,
-               apellidosenv,direccionenv,codpostalenv,ciudadenv,provinciaenv) VALUES ("
-                    . $this->var2str($this->apartado) . ","
-                    . $this->var2str($this->cifnif) . ","
-                    . $this->var2str($this->ciudad) . ","
-                    . $this->var2str($this->codagente) . ","
-                    . $this->var2str($this->codalmacen) . ","
-                    . $this->var2str($this->codcliente) . ","
-                    . $this->var2str($this->coddir) . ","
-                    . $this->var2str($this->coddivisa) . ","
-                    . $this->var2str($this->codejercicio) . ","
-                    . $this->var2str($this->codigo) . ","
-                    . $this->var2str($this->codpais) . ","
-                    . $this->var2str($this->codpago) . ","
-                    . $this->var2str($this->codpostal) . ","
-                    . $this->var2str($this->codserie) . ","
-                    . $this->var2str($this->direccion) . ","
-                    . $this->var2str($this->editable) . ","
-                    . $this->var2str($this->fecha) . ","
-                    . $this->var2str($this->finoferta) . ","
-                    . $this->var2str($this->hora) . ","
-                    . $this->var2str($this->idpedido) . ","
-                    . $this->var2str($this->irpf) . ","
-                    . $this->var2str($this->neto) . ","
-                    . $this->var2str($this->nombrecliente) . ","
-                    . $this->var2str($this->numero) . ","
-                    . $this->var2str($this->observaciones) . ","
-                    . $this->var2str($this->status) . ","
-                    . $this->var2str($this->porcomision) . ","
-                    . $this->var2str($this->provincia) . ","
-                    . $this->var2str($this->tasaconv) . ","
-                    . $this->var2str($this->total) . ","
-                    . $this->var2str($this->totaleuros) . ","
-                    . $this->var2str($this->totalirpf) . ","
-                    . $this->var2str($this->totaliva) . ","
-                    . $this->var2str($this->totalrecargo) . ","
-                    . $this->var2str($this->numero2) . ","
-                    . $this->var2str($this->femail) . ","
-                    . $this->var2str($this->envio_codtrans) . ","
-                    . $this->var2str($this->envio_codigo) . ","
-                    . $this->var2str($this->envio_nombre) . ","
-                    . $this->var2str($this->envio_apellidos) . ","
-                    . $this->var2str($this->envio_direccion) . ","
-                    . $this->var2str($this->envio_codpostal) . ","
-                    . $this->var2str($this->envio_ciudad) . ","
-                    . $this->var2str($this->envio_provincia).");";
+               apellidosenv,apartadoenv,direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv) VALUES ("
+                    . $this->var2str($this->apartado).","
+                    . $this->var2str($this->cifnif).","
+                    . $this->var2str($this->ciudad).","
+                    . $this->var2str($this->codagente).","
+                    . $this->var2str($this->codalmacen).","
+                    . $this->var2str($this->codcliente).","
+                    . $this->var2str($this->coddir).","
+                    . $this->var2str($this->coddivisa).","
+                    . $this->var2str($this->codejercicio).","
+                    . $this->var2str($this->codigo).","
+                    . $this->var2str($this->codpais).","
+                    . $this->var2str($this->codpago).","
+                    . $this->var2str($this->codpostal).","
+                    . $this->var2str($this->codserie).","
+                    . $this->var2str($this->direccion).","
+                    . $this->var2str($this->editable).","
+                    . $this->var2str($this->fecha).","
+                    . $this->var2str($this->finoferta).","
+                    . $this->var2str($this->hora).","
+                    . $this->var2str($this->idpedido).","
+                    . $this->var2str($this->irpf).","
+                    . $this->var2str($this->neto).","
+                    . $this->var2str($this->nombrecliente).","
+                    . $this->var2str($this->numero).","
+                    . $this->var2str($this->observaciones).","
+                    . $this->var2str($this->status).","
+                    . $this->var2str($this->porcomision).","
+                    . $this->var2str($this->provincia).","
+                    . $this->var2str($this->tasaconv).","
+                    . $this->var2str($this->total).","
+                    . $this->var2str($this->totaleuros).","
+                    . $this->var2str($this->totalirpf).","
+                    . $this->var2str($this->totaliva).","
+                    . $this->var2str($this->totalrecargo).","
+                    . $this->var2str($this->numero2).","
+                    . $this->var2str($this->femail).","
+                    . $this->var2str($this->envio_codtrans).","
+                    . $this->var2str($this->envio_codigo).","
+                    . $this->var2str($this->envio_nombre).","
+                    . $this->var2str($this->envio_apellidos).","
+                    . $this->var2str($this->envio_apartado).","
+                    . $this->var2str($this->envio_direccion).","
+                    . $this->var2str($this->envio_codpostal).","
+                    . $this->var2str($this->envio_ciudad).","
+                    . $this->var2str($this->envio_provincia).","
+                    . $this->var2str($this->envio_codpais).");";
 
             if( $this->db->exec($sql) )
             {

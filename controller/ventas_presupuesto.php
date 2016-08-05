@@ -269,8 +269,9 @@ class ventas_presupuesto extends fs_controller {
             $this->presupuesto->ciudad = $_POST['ciudad'];
             $this->presupuesto->codpostal = $_POST['codpostal'];
             $this->presupuesto->direccion = $_POST['direccion'];
+            $this->presupuesto->apartado = $_POST['apartado'];
             
-            //transporte
+            /// envío
             $this->presupuesto->envio_nombre = $_POST['envio_nombre'];
             $this->presupuesto->envio_apellidos = $_POST['envio_apellidos'];
             $this->presupuesto->envio_codtrans = NULL;
@@ -279,10 +280,12 @@ class ventas_presupuesto extends fs_controller {
                $this->presupuesto->envio_codtrans = $_POST['envio_codtrans'];
             }
             $this->presupuesto->envio_codigo = $_POST['envio_codigo'];
+            $this->presupuesto->envio_codpais = $_POST['envio_codpais'];
             $this->presupuesto->envio_provincia = $_POST['envio_provincia'];
             $this->presupuesto->envio_ciudad = $_POST['envio_ciudad'];
             $this->presupuesto->envio_codpostal = $_POST['envio_codpostal'];
             $this->presupuesto->envio_direccion = $_POST['envio_direccion'];
+            $this->presupuesto->envio_apartado = $_POST['envio_apartado'];
             
             $cliente = $this->cliente->get($this->presupuesto->codcliente);
          }
@@ -347,7 +350,7 @@ class ventas_presupuesto extends fs_controller {
                      }
                   }
                }
-               if (!$encontrada)
+               if(!$encontrada)
                {
                   if( !$l->delete() )
                   {
@@ -511,15 +514,17 @@ class ventas_presupuesto extends fs_controller {
       $pedido->porcomision = $this->presupuesto->porcomision;
       $pedido->totalirpf = $this->presupuesto->totalirpf;
       $pedido->totalrecargo = $this->presupuesto->totalrecargo;
-      //transporte
+      
       $pedido->envio_nombre = $this->presupuesto->envio_nombre;
       $pedido->envio_apellidos = $this->presupuesto->envio_apellidos;
       $pedido->envio_codtrans = $this->presupuesto->envio_codtrans;
       $pedido->envio_codigo = $this->presupuesto->envio_codigo;
+      $pedido->envio_codpais = $this->presupuesto->envio_codpais;
       $pedido->envio_provincia = $this->presupuesto->envio_provincia;
       $pedido->envio_ciudad = $this->presupuesto->envio_ciudad;
       $pedido->envio_codpostal = $this->presupuesto->envio_codpostal;
       $pedido->envio_direccion = $this->presupuesto->envio_direccion;
+      $pedido->envio_apartado = $this->presupuesto->envio_apartado;
 
       /**
        * Obtenemos el ejercicio para la fecha de hoy (puede que no sea
