@@ -142,7 +142,9 @@
          </td>
          <td>
             {$value->nombre}
+            {if="$value->codproveedor"}
             <a href="{$fsc->url()}&codproveedor={$value->codproveedor}" class="cancel_clickable" title="Ver más {#FS_PEDIDOS#} de {$value->nombre}">[+]</a>
+            {/if}
          </td>
          <td>{$value->observaciones_resume()}</td>
          <td class="text-right" title="{$fsc->show_precio($fsc->euro_convert($value->totaleuros))}">{$fsc->show_precio($value->total, $value->coddivisa)}</td>

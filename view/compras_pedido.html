@@ -858,13 +858,20 @@
          <div class="modal-content">
             <div class="modal-header">
                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-               <h4 class="modal-title">Aprobar {#FS_PEDIDO#}</h4>
+               <h4 class="modal-title">
+                  <span class="glyphicon glyphicon-ok-sign"></span> Aprobar {#FS_PEDIDO#}
+               </h4>
             </div>
             <div class="modal-body">
                <div class="form-group">
                   Fecha del {#FS_ALBARAN#}:
-                  <input class="form-control datepicker" type="text" name="aprobar" value="{$fsc->today()}" autocomplete="off"/>
-                  <p class="help-block">Se generará un {#FS_ALBARAN#}.</p>
+                  <div class="input-group">
+                     <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                     </span>
+                     <input class="form-control datepicker" type="text" name="aprobar" value="{$fsc->today()}" autocomplete="off"/>
+                  </div>
+                  <p class="help-block">Se generará un {#FS_ALBARAN#} de compra.</p>
                </div>
                <div class="checkbox">
                   <label>
@@ -872,9 +879,15 @@
                      Actualizar precio de coste de los artículos
                   </label>
                </div>
+               <div class="checkbox">
+                  <label>
+                     <input type="checkbox" name="stock" value="TRUE" checked="checked"/>
+                     Añadir al stock
+                  </label>
+               </div>
                <div class="text-right">
                   <button class="btn btn-sm btn-primary" onclick="this.disabled=true;this.form.submit();">
-                     <span class="glyphicon glyphicon-paperclip"></span>&nbsp; Aprobar
+                     <span class="glyphicon glyphicon-ok"></span>&nbsp; Aprobar
                   </button>
                </div>
             </div>

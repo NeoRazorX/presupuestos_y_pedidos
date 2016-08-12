@@ -406,6 +406,11 @@ class compras_pedido extends fs_controller
       $albaran->totalirpf = $this->pedido->totalirpf;
       $albaran->totalrecargo = $this->pedido->totalrecargo;
       
+      if( is_null($albaran->codagente) )
+      {
+         $albaran->codagente = $this->user->codagente;
+      }
+      
       /**
        * Obtenemos el ejercicio para la fecha seleccionada.
        */
@@ -450,7 +455,7 @@ class compras_pedido extends fs_controller
             if( $n->save() )
             {
                /// añadimos al stock
-               if( !is_null($n->referencia) )
+               if( $n->referencia AND isset($_POST['stock']) )
                {
                   $articulo = $art0->get($n->referencia);
                   if($articulo)

@@ -315,12 +315,12 @@ class pedido_cliente extends \fs_model
          $this->idalbaran = NULL;
          $this->codigo = NULL;
          $this->codagente = NULL;
-         $this->codpago = NULL;
-         $this->codserie = NULL;
+         $this->codpago = $this->default_items->codpago();
+         $this->codserie = $this->default_items->codserie();
          $this->codejercicio = NULL;
          $this->codcliente = NULL;
          $this->coddivisa = NULL;
-         $this->codalmacen = NULL;
+         $this->codalmacen = $this->default_items->codalmacen();
          $this->codpais = NULL;
          $this->coddir = NULL;
          $this->codpostal = '';
@@ -760,12 +760,12 @@ class pedido_cliente extends \fs_model
     * @param type $order
     * @return \pedido_cliente
     */
-   public function all($offset = 0, $order='fecha DESC')
+   public function all($offset = 0, $order = 'fecha DESC', $limit = FS_ITEM_LIMIT)
    {
       $pedilist = array();
       $sql = "SELECT * FROM ".$this->table_name." ORDER BY ".$order;
       
-      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      $data = $this->db->select_limit($sql, $limit, $offset);
       if($data)
       {
          foreach($data as $p)
@@ -783,12 +783,12 @@ class pedido_cliente extends \fs_model
     * @param type $order
     * @return \pedido_cliente
     */
-   public function all_ptealbaran($offset = 0, $order = 'fecha ASC')
+   public function all_ptealbaran($offset = 0, $order = 'fecha ASC', $limit = FS_ITEM_LIMIT)
    {
       $pedilist = array();
       $sql = "SELECT * FROM ".$this->table_name." WHERE idalbaran IS NULL AND status = 0 ORDER BY ".$order;
       
-      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      $data = $this->db->select_limit($sql, $limit, $offset);
       if($data)
       {
          foreach($data as $p)
@@ -806,12 +806,12 @@ class pedido_cliente extends \fs_model
     * @param type $order
     * @return \pedido_cliente
     */
-   public function all_rechazados($offset = 0, $order = 'fecha DESC')
+   public function all_rechazados($offset = 0, $order = 'fecha DESC', $limit = FS_ITEM_LIMIT)
    {
       $preclist = array();
       $sql = "SELECT * FROM ".$this->table_name." WHERE status = 2 ORDER BY ".$order;
       
-      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      $data = $this->db->select_limit($sql, $limit, $offset);
       if($data)
       {
          foreach($data as $p)

@@ -525,7 +525,12 @@ class ventas_presupuesto extends fs_controller {
       $pedido->envio_codpostal = $this->presupuesto->envio_codpostal;
       $pedido->envio_direccion = $this->presupuesto->envio_direccion;
       $pedido->envio_apartado = $this->presupuesto->envio_apartado;
-
+      
+      if( is_null($pedido->codagente) )
+      {
+         $pedido->codagente = $this->user->codagente;
+      }
+      
       /**
        * Obtenemos el ejercicio para la fecha de hoy (puede que no sea
        * el mismo ejercicio que el del presupuesto, por ejemplo si hemos cambiado de año).

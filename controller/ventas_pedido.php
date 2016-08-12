@@ -482,6 +482,11 @@ class ventas_pedido extends fs_controller
          $albaran->fecha = $_POST['facturar'];
       }
       
+      if( is_null($albaran->codagente) )
+      {
+         $albaran->codagente = $this->user->codagente;
+      }
+      
       /**
        * Obtenemos el ejercicio para la fecha de hoy (puede que
        * no sea el mismo ejercicio que el del pedido, por ejemplo

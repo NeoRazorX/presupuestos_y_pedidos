@@ -222,12 +222,12 @@ class pedido_proveedor extends \fs_model
          $this->idalbaran = NULL;
          $this->codigo = NULL;
          $this->codagente = NULL;
-         $this->codpago = NULL;
-         $this->codserie = NULL;
+         $this->codpago = $this->default_items->codpago();
+         $this->codserie = $this->default_items->codserie();
          $this->codejercicio = NULL;
          $this->codproveedor = NULL;
          $this->coddivisa = NULL;
-         $this->codalmacen = NULL;
+         $this->codalmacen = $this->default_items->codalmacen();
          $this->numero = NULL;
          $this->numproveedor = NULL;
          $this->nombre = NULL;
@@ -567,12 +567,12 @@ class pedido_proveedor extends \fs_model
     * @param type $offset
     * @return \pedido_proveedor
     */
-   public function all($offset = 0)
+   public function all($offset = 0, $order = 'fecha DESC, codigo DESC', $limit = FS_ITEM_LIMIT)
    {
       $pedilist = array();
-      $sql = "SELECT * FROM " . $this->table_name . " ORDER BY fecha DESC, codigo DESC";
+      $sql = "SELECT * FROM " . $this->table_name . " ORDER BY ".$order;
       
-      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      $data = $this->db->select_limit($sql, $limit, $offset);
       if($data)
       {
          foreach($data as $p)
@@ -590,13 +590,13 @@ class pedido_proveedor extends \fs_model
     * @param type $order
     * @return \pedido_proveedor
     */
-   public function all_ptealbaran($offset = 0, $order = 'ASC')
+   public function all_ptealbaran($offset = 0, $order = 'ASC', $limit = FS_ITEM_LIMIT)
    {
       $pedilist = array();
       $sql = "SELECT * FROM ".$this->table_name." WHERE idalbaran IS NULL"
               . " ORDER BY fecha " . $order . ", codigo " . $order;
       
-      $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
+      $data = $this->db->select_limit($sql, $limit, $offset);
       if($data)
       {
          foreach($data as $p)
