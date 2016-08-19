@@ -190,7 +190,11 @@
                   {/loop}
                </li>
                <li title="cliente: {$fsc->presupuesto->codcliente}">
-                  <a href="{$fsc->presupuesto->cliente_url()}">{$fsc->presupuesto->nombrecliente}</a>
+                  {if="$fsc->cliente_s"}
+                     <a href="{$fsc->cliente_s->url()}">{$fsc->presupuesto->nombrecliente}</a>
+                  {else}
+                     ???
+                  {/if}
                </li>
                {if="$fsc->cliente_s"}
                   {if="$fsc->cliente_s->nombre!=$fsc->presupuesto->nombrecliente"}
@@ -216,7 +220,7 @@
       <div class="row">
          {if="$fsc->presupuesto->editable"}
          <div class="col-md-2 col-sm-12">
-            <div class="form-group">
+            <div class='form-group{if="!$fsc->cliente_s"} has-warning{/if}'>
                Cliente actual:
                <div class="input-group">
                   <input class="form-control" type="text" name="ac_cliente" id="ac_cliente" value="{$fsc->presupuesto->nombrecliente}" placeholder="Buscar" autocomplete="off"/>
@@ -505,7 +509,7 @@
                      <td></td>
                      <td class="recargo"></td>
                      <td class="irpf"></td>
-                     <td class="text-right"><b>{$fsc->show_precio($fsc->euro_convert($fsc->presupuesto->totaleuros))}</b></td>
+                     <td class="text-right"><b>{$fsc->show_precio($fsc->euro_convert($fsc->presupuesto->totaleuros, $fsc->presupuesto->coddivisa, $fsc->presupuesto->tasaconv))}</b></td>
                   </tr>
                   {/if}
                </table>

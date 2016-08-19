@@ -371,6 +371,12 @@ class ventas_presupuesto extends fs_controller {
                      if ($value->idlinea == intval($_POST['idlinea_' . $num]))
                      {
                         $encontrada = TRUE;
+                        $regimeniva = 'general';
+                        if($cliente)
+                        {
+                           $regimeniva = $cliente->regimeniva;
+                        }
+                        
                         $lineas[$k]->cantidad = floatval($_POST['cantidad_' . $num]);
                         $lineas[$k]->pvpunitario = floatval($_POST['pvp_' . $num]);
                         $lineas[$k]->dtopor = floatval($_POST['dto_' . $num]);
@@ -382,7 +388,7 @@ class ventas_presupuesto extends fs_controller {
                         $lineas[$k]->iva = 0;
                         $lineas[$k]->recargo = 0;
                         $lineas[$k]->irpf = floatval($_POST['irpf_' . $num]);
-                        if(!$serie->siniva AND $cliente->regimeniva != 'Exento')
+                        if(!$serie->siniva AND $regimeniva != 'Exento')
                         {
                            $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
                            if($imp0)
@@ -408,6 +414,7 @@ class ventas_presupuesto extends fs_controller {
                         }
                         else
                            $this->new_error_msg("¡Imposible modificar la línea del artículo " . $value->referencia . "!");
+                        
                         break;
                      }
                   }

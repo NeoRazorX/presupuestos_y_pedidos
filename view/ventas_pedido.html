@@ -196,9 +196,9 @@
                </li>
                <li title="cliente: {$fsc->pedido->codcliente}">
                   {if="$fsc->cliente_s"}
-                  <a href="{$fsc->pedido->cliente_url()}">{$fsc->pedido->nombrecliente}</a>
+                     <a href="{$fsc->cliente_s->url()}">{$fsc->pedido->nombrecliente}</a>
                   {else}
-                  ???
+                     ???
                   {/if}
                </li>
                {if="$fsc->cliente_s"}
@@ -225,7 +225,7 @@
       <div class="row">
          {if="$fsc->pedido->editable"}
          <div class="col-md-2 col-sm-12">
-            <div class="form-group">
+            <div class='form-group{if="!$fsc->cliente_s"} has-warning{/if}'>
                Cliente actual:
                <div class="input-group">
                   <input class="form-control" type="text" name="ac_cliente" id="ac_cliente" value="{$fsc->pedido->nombrecliente}" placeholder="Buscar" autocomplete="off"/>
@@ -526,7 +526,7 @@
                      <td></td>
                      <td class="recargo"></td>
                      <td class="irpf"></td>
-                     <td class="text-right"><b>{$fsc->show_precio($fsc->euro_convert($fsc->pedido->totaleuros))}</b></td>
+                     <td class="text-right"><b>{$fsc->show_precio($fsc->euro_convert($fsc->pedido->totaleuros, $fsc->pedido->coddivisa, $fsc->pedido->tasaconv))}</b></td>
                   </tr>
                   {/if}
                </table>

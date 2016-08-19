@@ -60,7 +60,7 @@ class informe_pedidos extends fs_controller
       
       if($this->prestashop)
       {
-         $stats_ps = $this->stats_last_days_aux('ps_orders', 'totaliva');
+         $stats_ps = $this->stats_last_days_aux('ps_orders');
          foreach($stats_ps as $i => $value)
          {
             $stats[$i]['total_ps'] = $value['total'];
@@ -70,11 +70,12 @@ class informe_pedidos extends fs_controller
       return $stats;
    }
    
-   public function stats_last_days_aux($table_name = 'pedidoscli', $col_total = 'totaleuros', $numdays = 25)
+   private function stats_last_days_aux($table_name = 'pedidoscli', $numdays = 25)
    {
       $stats = array();
       $desde = Date('d-m-Y', strtotime( Date('d-m-Y').'-'.$numdays.' day'));
       
+      /// inicializamos los resultados
       foreach($this->date_range($desde, Date('d-m-Y'), '+1 day', 'd') as $date)
       {
          $i = intval($date);
@@ -88,23 +89,57 @@ class informe_pedidos extends fs_controller
       else
          $sql_aux = "DATE_FORMAT(fecha, '%d')";
       
-      $sql = "SELECT ".$sql_aux." as dia, SUM(".$col_total.") as total
-         FROM ".$table_name." WHERE fecha >= ".$this->empresa->var2str($desde)."
-         AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))."
-         GROUP BY ".$sql_aux." ORDER BY dia ASC;";
-      
-      $data = $this->db->select($sql);
-      if($data)
+      if($table_name == 'ps_orders')
       {
-         foreach($data as $d)
+         $sql = "SELECT ".$sql_aux." as dia, SUM(totaliva) as total FROM ".$table_name
+                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
+                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
+                 ." GROUP BY ".$sql_aux." ORDER BY dia ASC;";
+         $data = $this->db->select($sql);
+         if($data)
          {
-            $i = intval($d['dia']);
-            $stats[$i] = array(
-                'day' => $i,
-                'total' => $this->euro_convert( floatval($d['total']) )
-            );
+            foreach($data as $d)
+            {
+               $i = intval($d['dia']);
+               $stats[$i]['total'] = floatval($d['total']);
+            }
          }
       }
+      else
+      {
+         /// primero consultamos con la divisa de la empresa
+         $sql = "SELECT ".$sql_aux." as dia, SUM(total) as total FROM ".$table_name
+                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
+                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
+                 ." AND coddivisa = ".$this->empresa->var2str($this->empresa->coddivisa)
+                 ." GROUP BY ".$sql_aux." ORDER BY dia ASC;";
+         $data = $this->db->select($sql);
+         if($data)
+         {
+            foreach($data as $d)
+            {
+               $i = intval($d['dia']);
+               $stats[$i]['total'] = floatval($d['total']);
+            }
+         }
+         
+         /// primero consultamos con la divisa de la empresa
+         $sql = "SELECT ".$sql_aux." as dia, SUM(totaleuros) as total FROM ".$table_name
+                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
+                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
+                 ." AND coddivisa != ".$this->empresa->var2str($this->empresa->coddivisa)
+                 ." GROUP BY ".$sql_aux." ORDER BY dia ASC;";
+         $data = $this->db->select($sql);
+         if($data)
+         {
+            foreach($data as $d)
+            {
+               $i = intval($d['dia']);
+               $stats[$i]['total'] += $this->euro_convert( floatval($d['total']) );
+            }
+         }
+      }
+      
       return $stats;
    }
    
@@ -144,7 +179,7 @@ class informe_pedidos extends fs_controller
       
       if($this->prestashop)
       {
-         $stats_ps = $this->stats_last_months_aux('ps_orders', 'totaliva');
+         $stats_ps = $this->stats_last_months_aux('ps_orders');
          foreach($stats_ps as $i => $value)
          {
             $stats[$i]['total_ps'] = round($value['total'], FS_NF0);
@@ -154,11 +189,12 @@ class informe_pedidos extends fs_controller
       return $stats;
    }
    
-   public function stats_last_months_aux($table_name = 'pedidoscli', $col_total = 'totaleuros', $num = 11)
+   private function stats_last_months_aux($table_name = 'pedidoscli', $num = 11)
    {
       $stats = array();
       $desde = Date('d-m-Y', strtotime( Date('01-m-Y').'-'.$num.' month'));
       
+      /// inicializamos los resultados
       foreach($this->date_range($desde, Date('d-m-Y'), '+1 month', 'm') as $date)
       {
          $i = intval($date);
@@ -172,23 +208,57 @@ class informe_pedidos extends fs_controller
       else
          $sql_aux = "DATE_FORMAT(fecha, '%m')";
       
-      $sql = "SELECT ".$sql_aux." as mes, SUM(".$col_total.") as total
-         FROM ".$table_name." WHERE fecha >= ".$this->empresa->var2str($desde)."
-         AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))."
-         GROUP BY ".$sql_aux." ORDER BY mes ASC;";
-      
-      $data = $this->db->select($sql);
-      if($data)
+      if($table_name == 'ps_orders')
       {
-         foreach($data as $d)
+         $sql = "SELECT ".$sql_aux." as mes, SUM(totaliva) as total FROM ".$table_name
+                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
+                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
+                 ." GROUP BY ".$sql_aux." ORDER BY mes ASC;";
+         $data = $this->db->select($sql);
+         if($data)
          {
-            $i = intval($d['mes']);
-            $stats[$i] = array(
-                'month' => $i,
-                'total' => $this->euro_convert( floatval($d['total']) )
-            );
+            foreach($data as $d)
+            {
+               $i = intval($d['mes']);
+               $stats[$i]['total'] = floatval($d['total']);
+            }
          }
       }
+      else
+      {
+         /// primero consultamos la divisa de la empresa
+         $sql = "SELECT ".$sql_aux." as mes, SUM(total) as total FROM ".$table_name
+                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
+                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
+                 ." AND coddivisa = ".$this->empresa->var2str($this->empresa->coddivisa)
+                 ." GROUP BY ".$sql_aux." ORDER BY mes ASC;";
+         $data = $this->db->select($sql);
+         if($data)
+         {
+            foreach($data as $d)
+            {
+               $i = intval($d['mes']);
+               $stats[$i]['total'] = floatval($d['total']);
+            }
+         }
+         
+         /// ahora consultamos el resto de divisas
+         $sql = "SELECT ".$sql_aux." as mes, SUM(totaleuros) as total FROM ".$table_name
+                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
+                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
+                 ." AND coddivisa != ".$this->empresa->var2str($this->empresa->coddivisa)
+                 ." GROUP BY ".$sql_aux." ORDER BY mes ASC;";
+         $data = $this->db->select($sql);
+         if($data)
+         {
+            foreach($data as $d)
+            {
+               $i = intval($d['mes']);
+               $stats[$i]['total'] += $this->euro_convert( floatval($d['total']) );
+            }
+         }
+      }
+      
       return $stats;
    }
    
@@ -214,7 +284,7 @@ class informe_pedidos extends fs_controller
       
       if($this->prestashop)
       {
-         $stats_ps = $this->stats_last_years_aux('ps_orders', 'totaliva');
+         $stats_ps = $this->stats_last_years_aux('ps_orders');
          foreach($stats_ps as $i => $value)
          {
             $stats[$i]['total_ps'] = round($value['total'], FS_NF0);
@@ -224,11 +294,12 @@ class informe_pedidos extends fs_controller
       return $stats;
    }
    
-   public function stats_last_years_aux($table_name = 'pedidoscli', $col_total = 'totaleuros', $num = 4)
+   private function stats_last_years_aux($table_name = 'pedidoscli', $num = 4)
    {
       $stats = array();
       $desde = Date('d-m-Y', strtotime( Date('d-m-Y').'-'.$num.' year'));
       
+      /// inicializamos los resultados
       foreach($this->date_range($desde, Date('d-m-Y'), '+1 year', 'Y') as $date)
       {
          $i = intval($date);
@@ -242,23 +313,57 @@ class informe_pedidos extends fs_controller
       else
          $sql_aux = "DATE_FORMAT(fecha, '%Y')";
       
-      $sql = "SELECT ".$sql_aux." as ano, SUM(".$col_total.") as total
-         FROM ".$table_name." WHERE fecha >= ".$this->empresa->var2str($desde)."
-         AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))."
-         GROUP BY ".$sql_aux." ORDER BY ano ASC;";
-      
-      $data = $this->db->select($sql);
-      if($data)
+      if($table_name == 'ps_orders')
       {
-         foreach($data as $d)
+         $sql = "SELECT ".$sql_aux." as ano, SUM(totaliva) as total FROM ".$table_name
+                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
+                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
+                 ." GROUP BY ".$sql_aux." ORDER BY ano ASC;";
+         $data = $this->db->select($sql);
+         if($data)
          {
-            $i = intval($d['ano']);
-            $stats[$i] = array(
-                'year' => $i,
-                'total' => $this->euro_convert( floatval($d['total']) )
-            );
+            foreach($data as $d)
+            {
+               $i = intval($d['ano']);
+               $stats[$i]['total'] = floatval($d['total']);
+            }
          }
       }
+      else
+      {
+         /// primero consultamos en la divisa de la empresa
+         $sql = "SELECT ".$sql_aux." as ano, SUM(total) as total FROM ".$table_name
+                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
+                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
+                 ." AND coddivisa = ".$this->empresa->var2str($this->empresa->coddivisa)
+                 ." GROUP BY ".$sql_aux." ORDER BY ano ASC;";
+         $data = $this->db->select($sql);
+         if($data)
+         {
+            foreach($data as $d)
+            {
+               $i = intval($d['ano']);
+               $stats[$i]['total'] = floatval($d['total']);
+            }
+         }
+         
+         /// ahora consultamos en el resto de divisas
+         $sql = "SELECT ".$sql_aux." as ano, SUM(totaleuros) as total FROM ".$table_name
+                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
+                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
+                 ." AND coddivisa != ".$this->empresa->var2str($this->empresa->coddivisa)
+                 ." GROUP BY ".$sql_aux." ORDER BY ano ASC;";
+         $data = $this->db->select($sql);
+         if($data)
+         {
+            foreach($data as $d)
+            {
+               $i = intval($d['ano']);
+               $stats[$i]['total'] += $this->euro_convert( floatval($d['total']) );
+            }
+         }
+      }
+      
       return $stats;
    }
    

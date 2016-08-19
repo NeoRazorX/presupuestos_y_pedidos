@@ -531,7 +531,13 @@ class presupuesto_cliente extends \fs_model
       $this->ciudad = $this->no_html($this->ciudad);
       $this->provincia = $this->no_html($this->provincia);
       $this->observaciones = $this->no_html($this->observaciones);
-      $this->totaleuros = round($this->total / $this->tasaconv, 2);
+      
+      /**
+       * Usamos el euro como divisa puente a la hora de sumar, comparar
+       * o convertir cantidades en varias divisas. Por este motivo necesimos
+       * muchos decimales.
+       */
+      $this->totaleuros = round($this->total / $this->tasaconv, 5);
       
       /// comprobamos que editable se corresponda con el status
       if($this->idpedido)
