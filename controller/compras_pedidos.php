@@ -101,15 +101,93 @@ class compras_pedidos extends fs_controller
          }
       }
    }
+   
+   public function paginas()
+   {
+      $url = $this->url();
 
+      if( isset($_GET['pendientes']) )
+      {
+         $url .= '&pendientes=TRUE';
+      }
+      else if( isset($_GET['codagente']) )
+      {
+         $url .= '&codagente=' . $_GET['codagente'];
+      }
+      else if( isset($_GET['codproveedor']) )
+      {
+         $url .= '&codproveedor=' . $_GET['codproveedor'];
+      }
+      else if( isset($_GET['ref']) )
+      {
+         $url .= '&ref=' . $_GET['ref'];
+      }
+      
+      $paginas = array();
+      $i = 0;
+      $num = 0;
+      $actual = 1;
+      
+      if( isset($_GET['pendientes']) )
+      {
+         $total = $this->total_pendientes();
+      }
+      else
+      {
+         $total = $this->total_resultados();
+      }
+      
+      /// añadimos todas la página
+      while($num < $total)
+      {
+         $paginas[$i] = array(
+             'url' => $url."&offset=".($i*FS_ITEM_LIMIT),
+             'num' => $i + 1,
+             'actual' => ($num == $this->offset)
+         );
+         
+         if($num == $this->offset)
+         {
+            $actual = $i;
+         }
+         
+         $i++;
+         $num += FS_ITEM_LIMIT;
+      }
+      
+      /// ahora descartamos
+      foreach($paginas as $j => $value)
+      {
+         $enmedio = intval($i/2);
+         
+         /**
+          * descartamos todo excepto la primera, la última, la de enmedio,
+          * la actual, las 5 anteriores y las 5 siguientes
+          */
+         if( ($j>1 AND $j<$actual-5 AND $j!=$enmedio) OR ($j>$actual+5 AND $j<$i-1 AND $j!=$enmedio) )
+         {
+            unset($paginas[$j]);
+         }
+      }
+      
+      if( count($paginas) > 1 )
+      {
+         return $paginas;
+      }
+      else
+      {
+         return array();
+      }
+   }
+   
    public function anterior_url()
    {
       $url = '';
       $extra = '';
 
-      if( isset($_GET['ptealbaran']) )
+      if( isset($_GET['pendientes']) )
       {
-         $extra = '&ptealbaran=TRUE';
+         $extra = '&pendientes=TRUE';
       }
       else if( isset($_GET['codagente']) )
       {
@@ -141,9 +219,9 @@ class compras_pedidos extends fs_controller
       $url = '';
       $extra = '';
 
-      if( isset($_GET['ptealbaran']) )
+      if( isset($_GET['pendientes']) )
       {
-         $extra = '&ptealbaran=TRUE';
+         $extra = '&pendientes=TRUE';
       }
       else if( isset($_GET['codagente']) )
       {
@@ -234,6 +312,19 @@ class compras_pedidos extends fs_controller
          {
             $this->new_error_msg('Imposible guardar los datos de la extensión ' . $ext['name'] . '.');
          }
+      }
+   }
+   
+   private function total_resultados()
+   {
+      $data = $this->db->select("SELECT COUNT(*) as total FROM pedidosprov;");
+      if($data)
+      {
+         return intval($data[0]['total']);
+      }
+      else
+      {
+         return 0;
       }
    }
    

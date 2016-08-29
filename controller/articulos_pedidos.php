@@ -87,8 +87,8 @@ class articulos_pedidos extends fs_controller
                  . "FROM lineaspedidosprov LEFT JOIN pedidosprov ON lineaspedidosprov.idpedido = pedidosprov.idpedido "
                  . "WHERE pedidosprov.idalbaran IS NULL AND editable AND lineaspedidosprov.referencia IS NOT NULL "
                  . "GROUP BY referencia,lineaspedidosprov.idpedido "
-                 . "ORDER BY idpedido DESC, referencia ASC;";
-         $data = $this->db->select($sql);
+                 . "ORDER BY idpedido DESC, referencia ASC";
+         $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, 0);
          if($data)
          {
             foreach($data as $d)
@@ -131,16 +131,16 @@ class articulos_pedidos extends fs_controller
       /// ventas
       if( $this->db->table_exists('lineaspedidoscli') )
       {
-         $sql1= "SELECT sum(cantidad) as cantidadventas,referencia,lineaspedidoscli.idpedido "
+         $sql1 = "SELECT sum(cantidad) as cantidadventas,referencia,lineaspedidoscli.idpedido "
                  . "FROM lineaspedidoscli LEFT JOIN pedidoscli ON lineaspedidoscli.idpedido = pedidoscli.idpedido "
                  . "WHERE pedidoscli.idalbaran IS NULL AND status = '0' "
                  . "AND lineaspedidoscli.referencia IS NOT NULL AND lineaspedidoscli.referencia != '' "
                  . "GROUP BY referencia,lineaspedidoscli.idpedido "
-                 . "ORDER BY idpedido DESC, referencia ASC;";
-         $data1 = $this->db->select($sql1);
+                 . "ORDER BY idpedido DESC, referencia ASC";
+         $data1 = $this->db->select_limit($sql1, FS_ITEM_LIMIT, 0);
          if($data1)
          {
-            foreach ($data1 as $d1)
+            foreach($data1 as $d1)
             {
                $articulo = $art0->get($d1['referencia']);
                if($articulo)
