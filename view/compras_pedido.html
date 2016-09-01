@@ -122,7 +122,7 @@
                   </li>
                   {if="$fsc->user->have_access_to('compras_agrupar_pedidos')"}
                   <li>
-                     <a href="index.php?page=compras_agrupar_pedidos&codproveedor={$fsc->pedido->codproveedor}&codserie={$fsc->pedido->codserie}&desde={$fsc->pedido->fecha}">
+                     <a href="index.php?page=compras_agrupar_pedidos&codproveedor={$fsc->pedido->codproveedor}&codserie={$fsc->pedido->codserie}&desde={$fsc->pedido->fecha}&coddivisa={$fsc->pedido->coddivisa}">
                         <span class="glyphicon glyphicon-duplicate"></span>&nbsp; Agrupar...
                      </a>
                   </li>
@@ -644,7 +644,7 @@
          <div id="kiwimaru_results"></div>
          <div id="nuevo_articulo" class="modal-body" style="display: none;">
             <form name="f_nuevo_articulo" action="{$fsc->url()}" method="post" class="form">
-               <input type="hidden" name="codproveedor" value="{$fsc->proveedor_s->codproveedor}"/>
+               <input type="hidden" name="codproveedor" value="{$fsc->pedido->codproveedor}"/>
                <div class="container-fluid">
                   <div class="row">
                      <div class="col-sm-3">
@@ -811,7 +811,11 @@
                <div class="form-group">
                   <div class="input-group">
                      <span class="input-group-addon">Para</span>
+                     {if="$fsc->proveedor_s"}
                      <input id="ac_email" class="form-control" type="text" name="email" value="{$fsc->proveedor_s->email}" autocomplete="off"/>
+                     {else}
+                     <input id="ac_email" class="form-control" type="text" name="email" autocomplete="off"/>
+                     {/if}
                      <span class="input-group-addon" title="Asignar email al proveedor">
                         <input type="checkbox" name="guardar" value="TRUE"/>
                         <span class="glyphicon glyphicon-floppy-disk"></span>
