@@ -159,9 +159,8 @@ class compras_pedido extends fs_controller
    {
       $this->pedido->observaciones = $_POST['observaciones'];
       $this->pedido->numproveedor = $_POST['numproveedor'];
-      $this->pedido->nombre = $_POST['nombre'];
-      $this->pedido->cifnif = $_POST['cifnif'];
       
+      /// ¿El pedido es editable o ya ha sido aprobado?
       if( is_null($this->pedido->idalbaran) )
       {
          $eje0 = $this->ejercicio->get_by_fecha($_POST['fecha'], FALSE);
@@ -186,10 +185,18 @@ class compras_pedido extends fs_controller
                $this->pedido->cifnif = $proveedor->cifnif;
             }
             else
-               die('No se ha encontrado el proveedor.');
+            {
+               $this->pedido->codproveedor = NULL;
+               $this->pedido->nombre = $_POST['nombre'];
+               $this->pedido->cifnif = $_POST['cifnif'];
+            }
          }
          else
+         {
+            $this->pedido->nombre = $_POST['nombre'];
+            $this->pedido->cifnif = $_POST['cifnif'];
             $proveedor = $this->proveedor->get($this->pedido->codproveedor);
+         }
 
          $serie = $this->serie->get($this->pedido->codserie);
 
@@ -254,10 +261,18 @@ class compras_pedido extends fs_controller
                if(!$encontrada)
                {
                   if( !$l->delete() )
+                  {
                      $this->new_error_msg("¡Imposible eliminar la línea del artículo " . $l->referencia . "!");
+                  }
                }
             }
-
+            
+            $regimeniva = 'general';
+            if($proveedor)
+            {
+               $regimeniva = $proveedor->regimeniva;
+            }
+            
             /// modificamos y/o añadimos las demás líneas
             for($num = 0; $num <= $numlineas; $num++)
             {
@@ -270,12 +285,6 @@ class compras_pedido extends fs_controller
                      if($value->idlinea == intval($_POST['idlinea_' . $num]))
                      {
                         $encontrada = TRUE;
-                        $regimeniva = 'general';
-                        if($proveedor)
-                        {
-                           $regimeniva = $proveedor->regimeniva;
-                        }
-                        
                         $lineas[$k]->cantidad = floatval($_POST['cantidad_' . $num]);
                         $lineas[$k]->pvpunitario = floatval($_POST['pvp_' . $num]);
                         $lineas[$k]->dtopor = floatval($_POST['dto_' . $num]);
@@ -325,7 +334,7 @@ class compras_pedido extends fs_controller
                      $linea->idpedido = $this->pedido->idpedido;
                      $linea->descripcion = $_POST['desc_' . $num];
                      
-                     if(!$serie->siniva AND $proveedor->regimeniva != 'Exento')
+                     if(!$serie->siniva AND $regimeniva != 'Exento')
                      {
                         $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
                         if($imp0)

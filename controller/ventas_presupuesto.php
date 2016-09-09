@@ -213,7 +213,8 @@ class ventas_presupuesto extends fs_controller {
    {
       $this->presupuesto->observaciones = $_POST['observaciones'];
       $this->presupuesto->numero2 = $_POST['numero2'];
-
+      
+      /// ¿El presupuesto es editable o ya ha sido aprobado?
       if($this->presupuesto->editable)
       {
          $eje0 = $this->ejercicio->get_by_fecha($_POST['fecha'], FALSE);
@@ -239,13 +240,21 @@ class ventas_presupuesto extends fs_controller {
             $cliente = $this->cliente->get($_POST['cliente']);
             if($cliente)
             {
+               $this->presupuesto->codcliente = $cliente->codcliente;
+               $this->presupuesto->cifnif = $cliente->cifnif;
+               $this->presupuesto->nombrecliente = $cliente->razonsocial;
+               $this->presupuesto->apartado = NULL;
+               $this->presupuesto->ciudad = NULL;
+               $this->presupuesto->coddir = NULL;
+               $this->presupuesto->codpais = NULL;
+               $this->presupuesto->codpostal = NULL;
+               $this->presupuesto->direccion = NULL;
+               $this->presupuesto->provincia = NULL;
+               
                foreach($cliente->get_direcciones() as $d)
                {
                   if($d->domfacturacion)
                   {
-                     $this->presupuesto->codcliente = $cliente->codcliente;
-                     $this->presupuesto->cifnif = $cliente->cifnif;
-                     $this->presupuesto->nombrecliente = $cliente->razonsocial;
                      $this->presupuesto->apartado = $d->apartado;
                      $this->presupuesto->ciudad = $d->ciudad;
                      $this->presupuesto->coddir = $d->id;
@@ -258,7 +267,12 @@ class ventas_presupuesto extends fs_controller {
                }
             }
             else
-               die('No se ha encontrado el cliente.');
+            {
+               $this->presupuesto->codcliente = NULL;
+               $this->presupuesto->nombrecliente = $_POST['nombrecliente'];
+               $this->presupuesto->cifnif = $_POST['cifnif'];
+               $this->presupuesto->coddir = NULL;
+            }
          }
          else
          {
@@ -358,7 +372,13 @@ class ventas_presupuesto extends fs_controller {
                   }
                }
             }
-
+            
+            $regimeniva = 'general';
+            if($cliente)
+            {
+               $regimeniva = $cliente->regimeniva;
+            }
+            
             /// modificamos y/o añadimos las demás líneas
             for ($num = 0; $num <= $numlineas; $num++)
             {
@@ -371,12 +391,6 @@ class ventas_presupuesto extends fs_controller {
                      if ($value->idlinea == intval($_POST['idlinea_' . $num]))
                      {
                         $encontrada = TRUE;
-                        $regimeniva = 'general';
-                        if($cliente)
-                        {
-                           $regimeniva = $cliente->regimeniva;
-                        }
-                        
                         $lineas[$k]->cantidad = floatval($_POST['cantidad_' . $num]);
                         $lineas[$k]->pvpunitario = floatval($_POST['pvp_' . $num]);
                         $lineas[$k]->dtopor = floatval($_POST['dto_' . $num]);
@@ -426,7 +440,7 @@ class ventas_presupuesto extends fs_controller {
                      $linea->idpresupuesto = $this->presupuesto->idpresupuesto;
                      $linea->descripcion = $_POST['desc_' . $num];
                      
-                     if(!$serie->siniva AND $cliente->regimeniva != 'Exento')
+                     if(!$serie->siniva AND $regimeniva != 'Exento')
                      {
                         $imp0 = $this->impuesto->get_by_iva($_POST['iva_'.$num]);
                         if($imp0)
