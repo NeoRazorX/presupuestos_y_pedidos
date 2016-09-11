@@ -144,7 +144,9 @@ class ventas_pedido extends fs_controller
          }
       }
       else
-         $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " de cliente no encontrado!");
+      {
+         $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " de cliente no encontrado!", 'error', FALSE, FALSE);
+      }
    }
 
    public function url()

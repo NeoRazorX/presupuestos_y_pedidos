@@ -138,7 +138,9 @@ class compras_pedido extends fs_controller
          }
       }
       else
-         $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " de proveedor no encontrado!");
+      {
+         $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " de proveedor no encontrado!", 'error', FALSE, FALSE);
+      }
    }
 
    public function url()

@@ -158,7 +158,9 @@ class ventas_presupuesto extends fs_controller {
          }
       }
       else
-         $this->new_error_msg("¡" . ucfirst(FS_PRESUPUESTO) . " de cliente no encontrado!");
+      {
+         $this->new_error_msg("¡" . ucfirst(FS_PRESUPUESTO) . " de cliente no encontrado!", 'error', FALSE, FALSE);
+      }
    }
 
    /**
