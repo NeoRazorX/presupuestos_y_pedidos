@@ -430,7 +430,11 @@ class pedido_cliente extends \fs_model
       else
          return "index.php?page=ventas_cliente&cod=" . $this->codcliente;
    }
-
+   
+   /**
+    * Devuelve las líneas del pedido.
+    * @return \linea_pedido_cliente
+    */
    public function get_lineas()
    {
       $linea = new \linea_pedido_cliente();
