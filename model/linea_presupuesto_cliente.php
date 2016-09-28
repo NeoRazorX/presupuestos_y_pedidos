@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once 'plugins/presupuestos_y_pedidos/model/core/linea_presupuesto_cliente.php';
+require_once __DIR__.'/core/linea_presupuesto_cliente.php';
 
 class linea_presupuesto_cliente extends FacturaScripts\model\linea_presupuesto_cliente
 {

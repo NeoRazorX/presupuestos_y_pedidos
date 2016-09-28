@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once 'plugins/presupuestos_y_pedidos/model/core/presupuesto_cliente.php';
+require_once __DIR__.'/core/presupuesto_cliente.php';
 
 /**
  * Presupuesto de cliente
