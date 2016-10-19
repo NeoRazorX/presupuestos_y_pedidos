@@ -328,8 +328,8 @@ class presupuesto_cliente extends \fs_model
          $this->codpostal = '';
          $this->numero = NULL;
          $this->numero2 = NULL;
-         $this->nombrecliente = NULL;
-         $this->cifnif = NULL;
+         $this->nombrecliente = '';
+         $this->cifnif = '';
          $this->direccion = NULL;
          $this->ciudad = NULL;
          $this->provincia = NULL;

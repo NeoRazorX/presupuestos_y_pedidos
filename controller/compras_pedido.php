@@ -215,6 +215,7 @@ class compras_pedido extends fs_controller
             }
          }
          
+         $this->pedido->codalmacen = $_POST['almacen'];
          $this->pedido->codpago = $_POST['forma_pago'];
          
          /// ¿Cambiamos la divisa?

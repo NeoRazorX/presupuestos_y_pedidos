@@ -230,8 +230,8 @@ class pedido_proveedor extends \fs_model
          $this->codalmacen = $this->default_items->codalmacen();
          $this->numero = NULL;
          $this->numproveedor = NULL;
-         $this->nombre = NULL;
-         $this->cifnif = NULL;
+         $this->nombre = '';
+         $this->cifnif = '';
          $this->fecha = Date('d-m-Y');
          $this->hora = Date('H:i:s');
          $this->neto = 0;

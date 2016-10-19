@@ -321,6 +321,7 @@ class ventas_presupuesto extends fs_controller {
             }
          }
          
+         $this->presupuesto->codalmacen = $_POST['almacen'];
          $this->presupuesto->codpago = $_POST['forma_pago'];
          
          /// ¿Cambiamos la divisa?

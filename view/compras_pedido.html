@@ -74,7 +74,6 @@
 <form name="f_pedido" action="{$fsc->pedido->url()}" method="post" class="form">
    <input type="hidden" name="idpedido" value="{$fsc->pedido->idpedido}"/>
    <input type="hidden" name="proveedor" value="{$fsc->pedido->codproveedor}"/>
-   <input type="hidden" name="almacen" id="codalmacen" value="{$fsc->pedido->codalmacen}"/>
    <input type="hidden" id="numlineas" name="numlineas" value="0"/>
    <div class="container-fluid">
       <div class="row">
@@ -516,7 +515,7 @@
                   <div class="col-sm-2">
                      <div class="form-group">
                         <a href="{$fsc->almacen->url()}">Almacén</a>:
-                        <select name="almacen" class="form-control" disabled="">
+                        <select name="almacen" id="codalmacen" class="form-control">
                         {loop="$fsc->almacen->all()"}
                            {if="$value->codalmacen==$fsc->pedido->codalmacen"}
                            <option value="{$value->codalmacen}" selected="">{$value->nombre}</option>
