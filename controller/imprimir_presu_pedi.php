@@ -1129,10 +1129,16 @@ class imprimir_presu_pedi extends fs_controller
    {
       if( $this->empresa->can_send_mail() )
       {
-         if( $_POST['email'] != $this->cliente->email AND isset($_POST['guardar']) )
+         $razonsocial = $_POST['email'];
+         if($this->cliente)
          {
-            $this->cliente->email = $_POST['email'];
-            $this->cliente->save();
+            $razonsocial = $this->cliente->razonsocial;
+            
+            if( $_POST['email'] != $this->cliente->email AND isset($_POST['guardar']) )
+            {
+               $this->cliente->email = $_POST['email'];
+               $this->cliente->save();
+            }
          }
          
          if($doc == 'presupuesto')
@@ -1152,16 +1158,16 @@ class imprimir_presu_pedi extends fs_controller
             $mail->FromName = $this->user->get_agente_fullname();
             $mail->addReplyTo($_POST['de'], $mail->FromName);
             
-            $mail->addAddress($_POST['email'], $this->cliente->razonsocial);
+            $mail->addAddress($_POST['email'], $razonsocial);
             if($_POST['email_copia'])
             {
                if( isset($_POST['cco']) )
                {
-                  $mail->addBCC($_POST['email_copia'], $this->cliente->razonsocial);
+                  $mail->addBCC($_POST['email_copia'], $razonsocial);
                }
                else
                {
-                  $mail->addCC($_POST['email_copia'], $this->cliente->razonsocial);
+                  $mail->addCC($_POST['email_copia'], $razonsocial);
                }
             }
             
