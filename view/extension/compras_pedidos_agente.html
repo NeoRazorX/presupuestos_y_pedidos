@@ -23,6 +23,7 @@
             <th></th>
             <th class="text-left text-capitalize">{#FS_PEDIDO#} + Núm. Proveedor</th>
             <th>Proveedor</th>
+            <th class="hidden-sm"></th>
             <th class="text-left">Observaciones</th>
             <th class="text-right">Total</th>
             <th class="text-right">Fecha</th>
@@ -40,6 +41,15 @@
             {$value->numproveedor}
          </td>
          <td>{$value->nombre}</td>
+         <td class="text-right hidden-sm">
+            <span title="{$value->numdocs} documentos adjuntos">
+               {if="$value->numdocs==1"}
+               <i class="fa fa-file" aria-hidden="true"></i>
+               {elseif="$value->numdocs>1"}
+               {$value->numdocs} <i class="fa fa-file" aria-hidden="true"></i>
+               {/if}
+            </span>
+         </td>
          <td>{$value->observaciones_resume()}</td>
          <td class="text-right">{$fsc->show_precio($value->total, $value->coddivisa)}</td>
          <td class="text-right">{$value->fecha}</td>
@@ -47,7 +57,7 @@
       {else}
       <tr class="warning">
          <td></td>
-         <td colspan="5">Ningún {#FS_PEDIDO#} encontrado.</td>
+         <td colspan="6">Ningún {#FS_PEDIDO#} encontrado.</td>
       </tr>
       {/loop}
    </table>

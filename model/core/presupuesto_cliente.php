@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of FacturaSctipts
+ * This file is part of FacturaScripts
  * Copyright (C) 2014-2016    Carlos Garcia Gomez        neorazorx@gmail.com
  * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
  *
@@ -222,6 +222,12 @@ class presupuesto_cliente extends \fs_model
    public $envio_provincia;
    public $envio_codpais;
 
+   /**
+    * Número de documentos asjuntos
+    * @var integer 
+    */
+   public $numdocs;
+   
    public function __construct($p = FALSE)
    {
       parent::__construct('presupuestoscli');
@@ -310,6 +316,8 @@ class presupuesto_cliente extends \fs_model
          $this->envio_ciudad = $p['ciudadenv'];
          $this->envio_provincia = $p['provinciaenv'];
          $this->envio_codpais = $p['codpaisenv'];
+         
+         $this->numdocs = intval($p['numdocs']);
       }
       else
       {
@@ -361,6 +369,8 @@ class presupuesto_cliente extends \fs_model
          $this->envio_ciudad = NULL;
          $this->envio_provincia = NULL;
          $this->envio_codpais = NULL;
+         
+         $this->numdocs = 0;
       }
    }
 
@@ -674,6 +684,7 @@ class presupuesto_cliente extends \fs_model
                     . ", ciudadenv = ".$this->var2str($this->envio_ciudad)
                     . ", provinciaenv = ".$this->var2str($this->envio_provincia)
                     . ", codpaisenv = ".$this->var2str($this->envio_codpais)
+                    . ", numdocs = ".$this->var2str($this->numdocs)
                     . "  WHERE idpresupuesto = ".$this->var2str($this->idpresupuesto).";";
             
             return $this->db->exec($sql);
@@ -681,12 +692,12 @@ class presupuesto_cliente extends \fs_model
          else
          {
             $this->new_codigo();
-            $sql = "INSERT INTO ".$this->table_name." (apartado,cifnif,ciudad,codagente,
-               codalmacen,codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,
-               codpostal,codserie,direccion,editable,fecha,finoferta,hora,idpedido,irpf,neto,
-               nombrecliente,numero,observaciones,status,porcomision,provincia,
-               tasaconv,total,totaleuros,totalirpf,totaliva,totalrecargo,numero2,femail,codtrans,codigoenv,nombreenv,
-               apellidosenv,apartadoenv,direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv) VALUES ("
+            $sql = "INSERT INTO ".$this->table_name." (apartado,cifnif,ciudad,codagente,codalmacen,
+               codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,codpostal,codserie,
+               direccion,editable,fecha,finoferta,hora,idpedido,irpf,neto,nombrecliente,numero,
+               observaciones,status,porcomision,provincia,tasaconv,total,totaleuros,totalirpf,
+               totaliva,totalrecargo,numero2,femail,codtrans,codigoenv,nombreenv,apellidosenv,apartadoenv,
+               direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs) VALUES ("
                     . $this->var2str($this->apartado).","
                     . $this->var2str($this->cifnif).","
                     . $this->var2str($this->ciudad).","
@@ -732,7 +743,8 @@ class presupuesto_cliente extends \fs_model
                     . $this->var2str($this->envio_codpostal).","
                     . $this->var2str($this->envio_ciudad).","
                     . $this->var2str($this->envio_provincia).","
-                    . $this->var2str($this->envio_codpais).");";
+                    . $this->var2str($this->envio_codpais).","
+                    . $this->var2str($this->numdocs).");";
 
             if( $this->db->exec($sql) )
             {

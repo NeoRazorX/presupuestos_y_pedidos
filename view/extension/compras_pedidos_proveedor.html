@@ -22,11 +22,15 @@
          <tr>
             <th></th>
             <th class="text-left">Código + Núm. Proveedor</th>
+            <th class="hidden-sm"></th>
             <th class="text-left">Observaciones</th>
+            <th class="text-right">Neto</th>
             <th class="text-right">Total</th>
             <th class="text-right">Fecha</th>
          </tr>
       </thead>
+      <!--{$neto=0}-->
+      <!--{$total=0}-->
       {loop="$fsc->resultados"}
       <tr class="clickableRow{if="$value->total<=0"} warning{/if}" href="{$value->url()}">
          <td class="text-center">
@@ -38,16 +42,43 @@
             <a href="{$value->url()}">{$value->codigo}</a>
             {$value->numproveedor}
          </td>
+         <td class="text-right hidden-sm">
+            <span title="{$value->numdocs} documentos adjuntos">
+               {if="$value->numdocs==1"}
+               <i class="fa fa-file" aria-hidden="true"></i>
+               {elseif="$value->numdocs>1"}
+               {$value->numdocs} <i class="fa fa-file" aria-hidden="true"></i>
+               {/if}
+            </span>
+         </td>
          <td>{$value->observaciones_resume()}</td>
-         <td class="text-right">{$fsc->show_precio($value->total, $value->coddivisa)}</td>
+         <td class="text-right">
+            <!--{$neto=$neto+($value->neto/$value->tasaconv)}-->
+            {$fsc->show_precio($value->neto, $value->coddivisa)}
+         </td>
+         <td class="text-right">
+            <!--{$total=$total+$value->totaleuros}-->
+            {$fsc->show_precio($value->total, $value->coddivisa)}
+         </td>
          <td class="text-right">{$value->fecha}</td>
       </tr>
       {else}
       <tr class="warning">
          <td></td>
-         <td colspan="4">Ningún {#FS_PEDIDO#} encontrado.</td>
+         <td colspan="6">Ningún {#FS_PEDIDO#} encontrado.</td>
       </tr>
       {/loop}
+      <tr>
+         <td colspan="3"></td>
+         <td class="hidden-sm"></td>
+         <td class="text-right">
+            <b>{$fsc->show_precio($fsc->euro_convert($neto))}</b>
+         </td>
+         <td class="text-right">
+            <b>{$fsc->show_precio($fsc->euro_convert($total))}</b>
+         </td>
+         <td></td>
+      </tr>
    </table>
 </div>
 

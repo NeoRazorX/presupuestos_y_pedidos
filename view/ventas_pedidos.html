@@ -107,9 +107,9 @@
          </div>
       </div>
       <div class="col-sm-4 col-xs-6 text-right">
-            <a id="b_buscar_lineas" class="btn btn-sm btn-info" title="Buscar en las líneas">
-               <span class="glyphicon glyphicon-search"></span>&nbsp; Líneas
-            </a>
+         <a id="b_buscar_lineas" class="btn btn-sm btn-info" title="Buscar en las líneas">
+            <span class="glyphicon glyphicon-search"></span>&nbsp; Líneas
+         </a>
          <div class="btn-group">
             <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true">
                <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
@@ -285,6 +285,7 @@
             <th></th>
             <th class="text-left">Código + {#FS_NUMERO2#}</th>
             <th class="text-left">Cliente</th>
+            <th class="hidden-sm"></th>
             <th class="text-left">Observaciones</th>
             <th class="text-right">Total</th>
             <th class="text-right">Fecha</th>
@@ -318,6 +319,15 @@
             <span class="label label-danger" title="Cliente desconocido">???</span>
             {/if}
          </td>
+         <td class="text-right hidden-sm">
+            <span title="{$value->numdocs} documentos adjuntos">
+               {if="$value->numdocs==1"}
+               <i class="fa fa-file" aria-hidden="true"></i>
+               {elseif="$value->numdocs>1"}
+               {$value->numdocs} <i class="fa fa-file" aria-hidden="true"></i>
+               {/if}
+            </span>
+         </td>
          <td>{$value->observaciones_resume()}</td>
          <td class="text-right" title="{$fsc->show_precio($fsc->euro_convert($value->totaleuros, $value->coddivisa, $value->tasaconv))}">
             {$fsc->show_precio($value->total, $value->coddivisa)}
@@ -332,11 +342,12 @@
       {else}
       <tr class="warning">
          <td></td>
-         <td colspan="6">Ningún {#FS_PEDIDO#} encontrado. Pulsa el botón <b>Nuevo</b> para crear uno.</td>
+         <td colspan="7">Ningún {#FS_PEDIDO#} encontrado. Pulsa el botón <b>Nuevo</b> para crear uno.</td>
       </tr>
       {/loop}
       {if="$fsc->total_resultados"}
       <tr>
+         <th class="hidden-sm"></th>
          <td colspan="5" class="text-right">
             {$fsc->total_resultados_txt}
             {loop="$fsc->total_resultados"}

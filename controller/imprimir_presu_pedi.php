@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of FacturaSctipts
+ * This file is part of FacturaScripts
  * Copyright (C) 2014-2016  Carlos Garcia Gomez  neorazorx@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1066,14 +1066,18 @@ class imprimir_presu_pedi extends fs_controller
    {
       if( $this->empresa->can_send_mail() )
       {
-         if( $_POST['email'] != $this->proveedor->email AND isset($_POST['guardar']) )
+         if($this->proveedor)
          {
-            $this->proveedor->email = $_POST['email'];
-            $this->proveedor->save();
+            if( $_POST['email'] != $this->proveedor->email AND isset($_POST['guardar']) )
+            {
+               $this->proveedor->email = $_POST['email'];
+               $this->proveedor->save();
+            }
          }
          
          $filename = 'pedido_'.$this->pedido->codigo.'.pdf';
          $this->generar_pdf_pedido_proveedor($filename);
+         $razonsocial = $this->pedido->nombre;
          
          if( file_exists('tmp/'.FS_TMP_NAME.'enviar/'.$filename) )
          {
@@ -1081,23 +1085,30 @@ class imprimir_presu_pedi extends fs_controller
             $mail->FromName = $this->user->get_agente_fullname();
             $mail->addReplyTo($_POST['de'], $mail->FromName);
             
-            $mail->addAddress($_POST['email'], $this->proveedor->razonsocial);
+            $mail->addAddress($_POST['email'], $razonsocial);
             if($_POST['email_copia'])
             {
                if( isset($_POST['cco']) )
                {
-                  $mail->addBCC($_POST['email_copia'], $this->proveedor->razonsocial);
+                  $mail->addBCC($_POST['email_copia'], $razonsocial);
                }
                else
                {
-                  $mail->addCC($_POST['email_copia'], $this->proveedor->razonsocial);
+                  $mail->addCC($_POST['email_copia'], $razonsocial);
                }
             }
             
             $mail->Subject = $this->empresa->nombre . ': Mi '.FS_PEDIDO.' '.$this->pedido->codigo;
-            $mail->AltBody = $_POST['mensaje'];
-            $mail->msgHTML( nl2br($_POST['mensaje']) );
-            $mail->isHTML(TRUE);
+            if( $this->is_html($_POST['mensaje']) )
+            {
+               $mail->AltBody = strip_tags($_POST['mensaje']);
+               $mail->msgHTML($_POST['mensaje']);
+               $mail->isHTML(TRUE);
+            }
+            else
+            {
+               $mail->Body = $_POST['mensaje'];
+            }
             
             $mail->addAttachment('tmp/'.FS_TMP_NAME.'enviar/'.$filename);
             if( is_uploaded_file($_FILES['adjunto']['tmp_name']) )
@@ -1129,27 +1140,26 @@ class imprimir_presu_pedi extends fs_controller
    {
       if( $this->empresa->can_send_mail() )
       {
-         $razonsocial = $_POST['email'];
-         if($this->cliente)
-         {
-            $razonsocial = $this->cliente->razonsocial;
-            
-            if( $_POST['email'] != $this->cliente->email AND isset($_POST['guardar']) )
-            {
-               $this->cliente->email = $_POST['email'];
-               $this->cliente->save();
-            }
-         }
-         
          if($doc == 'presupuesto')
          {
             $filename = 'presupuesto_'.$this->presupuesto->codigo.'.pdf';
             $this->generar_pdf_presupuesto($filename);
+            $razonsocial = $this->presupuesto->nombrecliente;
          }
          else
          {
             $filename = 'pedido_'.$this->pedido->codigo.'.pdf';
             $this->generar_pdf_pedido($filename);
+            $razonsocial = $this->pedido->nombrecliente;
+         }
+         
+         if($this->cliente)
+         {
+            if( $_POST['email'] != $this->cliente->email AND isset($_POST['guardar']) )
+            {
+               $this->cliente->email = $_POST['email'];
+               $this->cliente->save();
+            }
          }
          
          if( file_exists('tmp/'.FS_TMP_NAME.'enviar/'.$filename) )
@@ -1180,9 +1190,16 @@ class imprimir_presu_pedi extends fs_controller
                $mail->Subject = $this->empresa->nombre . ': Su '.FS_PEDIDO.' '.$this->pedido->codigo;
             }
             
-            $mail->AltBody = $_POST['mensaje'];
-            $mail->msgHTML( nl2br($_POST['mensaje']) );
-            $mail->isHTML(TRUE);
+            if( $this->is_html($_POST['mensaje']) )
+            {
+               $mail->AltBody = strip_tags($_POST['mensaje']);
+               $mail->msgHTML($_POST['mensaje']);
+               $mail->isHTML(TRUE);
+            }
+            else
+            {
+               $mail->Body = $_POST['mensaje'];
+            }
             
             $mail->addAttachment('tmp/'.FS_TMP_NAME.'enviar/'.$filename);
             if( is_uploaded_file($_FILES['adjunto']['tmp_name']) )
@@ -1265,5 +1282,17 @@ class imprimir_presu_pedi extends fs_controller
       }
       
       return $retorno;
+   }
+   
+   public function is_html($txt)
+   {
+      if( stripos($txt, '<html') === FALSE )
+      {
+         return FALSE;
+      }
+      else
+      {
+         return TRUE;
+      }
    }
 }

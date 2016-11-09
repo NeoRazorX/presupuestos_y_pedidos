@@ -150,6 +150,11 @@
       <tipo>character varying(3)</tipo>
       <nulo>NO</nulo>
    </columna>
+   <columna>
+      <nombre>numdocs</nombre>
+      <tipo>integer</tipo>
+      <defecto>0</defecto>
+   </columna>
    <restriccion>
       <nombre>pedidosprov_pkey</nombre>
       <consulta>PRIMARY KEY (idpedido)</consulta>

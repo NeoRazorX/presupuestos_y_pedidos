@@ -259,6 +259,11 @@
       <tipo>character varying(20)</tipo>
       <nulo>YES</nulo>
    </columna>
+   <columna>
+      <nombre>numdocs</nombre>
+      <tipo>integer</tipo>
+      <defecto>0</defecto>
+   </columna>
    <restriccion>
       <nombre>presupuestoscli_pkey</nombre>
       <consulta>PRIMARY KEY (idpresupuesto)</consulta>

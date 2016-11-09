@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of FacturaSctipts
+ * This file is part of FacturaScripts
  * Copyright (C) 2014-2016    Carlos Garcia Gomez        neorazorx@gmail.com
  * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
  *
@@ -221,6 +221,12 @@ class pedido_cliente extends \fs_model
    public $envio_provincia;
    public $envio_codpais;
    
+   /**
+    * Número de documentos asjuntos
+    * @var integer 
+    */
+   public $numdocs;
+   
    public function __construct($p = FALSE)
    {
       parent::__construct('pedidoscli');
@@ -308,6 +314,8 @@ class pedido_cliente extends \fs_model
          $this->envio_ciudad = $p['ciudadenv'];
          $this->envio_provincia = $p['provinciaenv'];
          $this->envio_codpais = $p['codpaisenv'];
+         
+         $this->numdocs = intval($p['numdocs']);
       }
       else
       {
@@ -359,6 +367,8 @@ class pedido_cliente extends \fs_model
          $this->envio_ciudad = NULL;
          $this->envio_provincia = NULL;
          $this->envio_codpais = NULL;
+         
+         $this->numdocs = 0;
       }
    }
 
@@ -677,6 +687,7 @@ class pedido_cliente extends \fs_model
                     . ", ciudadenv = ".$this->var2str($this->envio_ciudad)
                     . ", provinciaenv = ".$this->var2str($this->envio_provincia)
                     . ", codpaisenv = ".$this->var2str($this->envio_codpais)
+                    . ", numdocs = ".$this->var2str($this->numdocs)
                     . "  WHERE idpedido = ".$this->var2str($this->idpedido).";";
             
             return $this->db->exec($sql);
@@ -686,10 +697,10 @@ class pedido_cliente extends \fs_model
             $this->new_codigo();
             $sql = "INSERT INTO ".$this->table_name." (apartado,cifnif,ciudad,codagente,codalmacen,
                codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,codpostal,codserie,
-               direccion,editable,fecha,hora,idalbaran,irpf,neto,nombrecliente,
-               numero,observaciones,status,porcomision,provincia,tasaconv,total,
-               totaleuros,totalirpf,totaliva,totalrecargo,numero2,femail,fechasalida,codtrans,codigoenv,nombreenv,
-               apellidosenv,apartadoenv,direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv) VALUES ("
+               direccion,editable,fecha,hora,idalbaran,irpf,neto,nombrecliente,numero,observaciones,
+               status,porcomision,provincia,tasaconv,total,totaleuros,totalirpf,totaliva,totalrecargo,
+               numero2,femail,fechasalida,codtrans,codigoenv,nombreenv,apellidosenv,apartadoenv,direccionenv,
+               codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs) VALUES ("
                     . $this->var2str($this->apartado).","
                     . $this->var2str($this->cifnif).","
                     . $this->var2str($this->ciudad).","
@@ -735,7 +746,8 @@ class pedido_cliente extends \fs_model
                     . $this->var2str($this->envio_codpostal).","
                     . $this->var2str($this->envio_ciudad).","
                     . $this->var2str($this->envio_provincia).","
-                    . $this->var2str($this->envio_codpais).");";
+                    . $this->var2str($this->envio_codpais).","
+                    . $this->var2str($this->numdocs).");";
             
             if( $this->db->exec($sql) )
             {
