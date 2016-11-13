@@ -23,7 +23,7 @@ require_model('presupuesto_cliente.php');
 
 class presupuestos_pedidos_cron
 {
-   public function __construct(&$db)
+   public function __construct()
    {
       $pre = new presupuesto_cliente();
       $pre->cron_job();
@@ -36,4 +36,4 @@ class presupuestos_pedidos_cron
    }
 }
 
-new presupuestos_pedidos_cron($db);
+new presupuestos_pedidos_cron();
