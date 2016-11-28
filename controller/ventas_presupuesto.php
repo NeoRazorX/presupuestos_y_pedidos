@@ -53,6 +53,10 @@ class ventas_presupuesto extends fs_controller {
    public $serie;
    public $setup_validez;
    public $agencia;
+   
+   public $new_version;
+   public $confirm_version;
+   public $getversions;
 
 
    public function __construct()
@@ -99,8 +103,8 @@ class ventas_presupuesto extends fs_controller {
             $this->nuevo_presupuesto_url = $nuevoprep->url();
          }
       }
-
-      if( isset($_POST['idpresupuesto']) )
+      
+      if( isset($_POST['idpresupuesto']) && isset($_POST['version']) && $_POST['version'] == '' )
       {
          $this->presupuesto = $presupuesto->get($_POST['idpresupuesto']);
          $this->modificar();
@@ -108,6 +112,43 @@ class ventas_presupuesto extends fs_controller {
       else if( isset($_GET['id']) )
       {
          $this->presupuesto = $presupuesto->get($_GET['id']);
+         $versions = $this->presupuesto->getVersions($this->presupuesto->variacion);
+         foreach ($versions as $v) 
+         {
+             $this->getversions[] = $v['version'];
+         }
+      }
+      
+      if( isset($_POST['version']) && !empty($_POST['version']) )
+      {
+         $exist_version = $this->presupuesto->checkVersion($_POST['version'], $_POST['variacion']);
+         
+         $this->presupuesto = $presupuesto->get($_POST['idpresupuesto']);
+         if ($exist_version)
+         {
+             if ($_POST['version'] == $_POST['last_version'])
+             {
+                 $this->presupuesto->idpresupuesto = $_POST['idpresupuesto'];
+             } else
+             {
+                 foreach ($versions as $v) 
+                 {
+                     if ($_POST['version'] == $v['version'])
+                     {
+                         $idpres = $v['idpresupuesto'];
+                         $this->presupuesto = $presupuesto->get($idpres);
+                         $this->new_version = true;
+                     }
+                 }
+                 $this->presupuesto->idpresupuesto = $idpres;
+             }
+         } else
+         {
+             $this->presupuesto->idpresupuesto = '';
+             $this->new_version = true;
+             $this->presupuesto->save();
+         }
+         $this->modificar();
       }
 
       if($this->presupuesto)
@@ -388,6 +429,11 @@ class ventas_presupuesto extends fs_controller {
                $encontrada = FALSE;
                if( isset($_POST['idlinea_' . $num]) )
                {
+                  if ($this->new_version)
+                  {
+                     $_POST['idlinea_' . $num] = -1;
+                     $this->presupuesto->idpresupuesto = $this->presupuesto->getLastId();
+                  }
                   foreach ($lineas as $k => $value)
                   {
                      /// modificamos la línea
@@ -435,7 +481,7 @@ class ventas_presupuesto extends fs_controller {
                         break;
                      }
                   }
-
+                  
                   /// añadimos la línea
                   if (!$encontrada AND intval($_POST['idlinea_' . $num]) == -1 AND isset($_POST['referencia_' . $num]))
                   {
@@ -492,7 +538,11 @@ class ventas_presupuesto extends fs_controller {
             $this->presupuesto->totalirpf = round($this->presupuesto->totalirpf, FS_NF0);
             $this->presupuesto->totalrecargo = round($this->presupuesto->totalrecargo, FS_NF0);
             $this->presupuesto->total = $this->presupuesto->neto + $this->presupuesto->totaliva - $this->presupuesto->totalirpf + $this->presupuesto->totalrecargo;
-
+            
+            $this->presupuesto->version = $_POST['version'];
+            $this->presupuesto->fechamod = date('Y-m-d H:i:s');
+            $this->presupuesto->variacion = $_POST['variacion'];
+            
             if( abs(floatval($_POST['atotal']) - $this->presupuesto->total) >= .02 )
             {
                $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->presupuesto->total .
@@ -501,6 +551,11 @@ class ventas_presupuesto extends fs_controller {
          }
       }
 
+      if ($this->new_version)
+      {
+         $this->presupuesto->codigo = $this->presupuesto->variacion . '-' . $this->presupuesto->version;
+      }
+      
       if ($this->presupuesto->save())
       {
          $this->new_message(ucfirst(FS_PRESUPUESTO) . " modificado correctamente.");

@@ -264,6 +264,20 @@
       <tipo>integer</tipo>
       <defecto>0</defecto>
    </columna>
+   <columna>
+      <nombre>version</nombre>
+      <tipo>character varying(20)</tipo>
+      <nulo>YES</nulo>
+   </columna>
+   <columna>
+      <nombre>fechamod</nombre>
+      <tipo>datetime</tipo>
+   </columna>
+   <columna>
+      <nombre>variacion</nombre>
+      <tipo>character varying(20)</tipo>
+      <nulo>YES</nulo>
+   </columna>
    <restriccion>
       <nombre>presupuestoscli_pkey</nombre>
       <consulta>PRIMARY KEY (idpresupuesto)</consulta>

@@ -228,6 +228,24 @@ class presupuesto_cliente extends \fs_model
     */
    public $numdocs;
    
+   /**
+    * Versión del presupuesto
+    * @var type 
+    */
+   public $version;
+   
+   /**
+    * Fecha de la versión del presupuesto
+    * @var date 
+    */
+   public $fechamod;
+   
+   /**
+    * Variación del presupuesto
+    * @var type 
+    */
+   public $variacion;
+   
    public function __construct($p = FALSE)
    {
       parent::__construct('presupuestoscli');
@@ -318,6 +336,10 @@ class presupuesto_cliente extends \fs_model
          $this->envio_codpais = $p['codpaisenv'];
          
          $this->numdocs = intval($p['numdocs']);
+         
+         $this->version = $p['version'];
+         $this->fechamod = $p['fechamod'];
+         $this->variacion = $p['variacion'];
       }
       else
       {
@@ -371,6 +393,10 @@ class presupuesto_cliente extends \fs_model
          $this->envio_codpais = NULL;
          
          $this->numdocs = 0;
+         
+         $this->version = NULL;
+         $this->fechamod = NULL;
+         $this->variacion = NULL;
       }
    }
 
@@ -685,6 +711,9 @@ class presupuesto_cliente extends \fs_model
                     . ", provinciaenv = ".$this->var2str($this->envio_provincia)
                     . ", codpaisenv = ".$this->var2str($this->envio_codpais)
                     . ", numdocs = ".$this->var2str($this->numdocs)
+                    . ", version = ".$this->var2str($this->version)
+                    . ", fechamod = ".$this->var2str($this->fechamod)
+                    . ", variacion = ".$this->var2str($this->variacion)
                     . "  WHERE idpresupuesto = ".$this->var2str($this->idpresupuesto).";";
             
             return $this->db->exec($sql);
@@ -697,7 +726,8 @@ class presupuesto_cliente extends \fs_model
                direccion,editable,fecha,finoferta,hora,idpedido,irpf,neto,nombrecliente,numero,
                observaciones,status,porcomision,provincia,tasaconv,total,totaleuros,totalirpf,
                totaliva,totalrecargo,numero2,femail,codtrans,codigoenv,nombreenv,apellidosenv,apartadoenv,
-               direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs) VALUES ("
+               direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs,version,
+               fechamod,variacion) VALUES ("
                     . $this->var2str($this->apartado).","
                     . $this->var2str($this->cifnif).","
                     . $this->var2str($this->ciudad).","
@@ -744,7 +774,10 @@ class presupuesto_cliente extends \fs_model
                     . $this->var2str($this->envio_ciudad).","
                     . $this->var2str($this->envio_provincia).","
                     . $this->var2str($this->envio_codpais).","
-                    . $this->var2str($this->numdocs).");";
+                    . $this->var2str($this->numdocs).","
+                    . $this->var2str($this->version).","
+                    . $this->var2str($this->fechamod).","
+                    . $this->var2str($this->variacion).");";
 
             if( $this->db->exec($sql) )
             {
@@ -1025,4 +1058,32 @@ class presupuesto_cliente extends \fs_model
       $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE idpedido IS NULL AND"
               . " editable = false;");
    }
+   
+    public function getVersions($code)
+    {
+        $data = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE variacion=" . $this->var2str($code) . ";");
+
+        return $data;
+    }
+
+    public function getLastId()
+    {
+        $data = $this->db->select("SELECT max(idpresupuesto) as idpresupuesto FROM " . $this->table_name . ";");
+
+        return $data[0]['idpresupuesto'];
+    }
+
+    public function checkVersion($version, $variacion)
+    {
+        $data = $this->db->select("SELECT version FROM " . $this->table_name . " WHERE version=" . $this->var2str($version) . " AND variacion=".$this->var2str($variacion).";");
+
+        if ($data)
+        {
+            return true;
+        } else
+        {
+            return false;
+        }
+    }
+
 }
