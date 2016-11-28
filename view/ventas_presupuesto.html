@@ -69,6 +69,44 @@
       {if="$fsc->presupuesto->totalirpf==0"}
       $('.irpf').hide();
       {/if}
+          
+      $('#versiones').on('change', function () {
+          window.location.href = 'index.php?page=ventas_presupuesto&id=' + this.value;
+      });
+      $.urlParam = function(name){
+          var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+          return results[1] || 0;
+      }
+      if ($.urlParam('id') != "{$fsc->presupuesto->idpresupuesto}") {
+          window.location.href = 'index.php?page=ventas_presupuesto&id=' + {$fsc->presupuesto->idpresupuesto};
+      }
+      
+      $('#saveForm').click(function () {
+          var last_version = $('#last_version').val();
+          var version = $('#version').val();
+          var exist = false;
+          
+          {if="$fsc->getversions"}
+              {loop="$fsc->getversions"}
+                  if ('{$value}' == version) 
+                  {
+                      var exist = true;
+                  }
+              {/loop}
+          {/if}
+          
+          if (last_version == version || exist == false)
+          {
+              $('form[name="f_presupuesto"]').submit();
+          } else if (last_version != version && exist == true)
+          {
+              $('#modal_version').modal('show');
+              
+              $('button[name="confirm"]').click(function () {
+                  $('form[name="f_presupuesto"]').submit();
+              });
+          }
+      });
    });
 </script>
 
@@ -167,7 +205,7 @@
                   <span class="hidden-xs">&nbsp; Eliminar</span>
                </a>
                {/if}
-               <button class="btn btn-sm btn-primary" type="button" onclick="this.disabled = true;this.form.submit();">
+               <button class="btn btn-sm btn-primary" type="button" onclick="this.disabled = true;" id="saveForm">
                   <span class="glyphicon glyphicon-floppy-disk"></span>
                   <span class="hidden-xs">&nbsp; Guardar</span>
                </button>
@@ -299,6 +337,51 @@
                {else}
                <div class="form-control">{$fsc->presupuesto->finoferta}</div>
                {/if}
+            </div>
+         </div>
+         <div class="col-md-2 col-sm-3">
+            <div class="form-group">
+               Versión:
+               {if="$fsc->presupuesto->editable"}
+               <input class="form-control" type="text" name="version" id="version" value='{if="$fsc->presupuesto->version"}{$fsc->presupuesto->version}{else}v1{/if}' autocomplete="off"/>
+               <input class="form-control" type="hidden" name="last_version" id="last_version" value='{$fsc->presupuesto->version}' autocomplete="off"/>
+               <input class="form-control" type="hidden" name="variacion" id="variacion" value='{if="$fsc->presupuesto->variacion"}{$fsc->presupuesto->variacion}{else}{$fsc->presupuesto->codigo}{/if}' autocomplete="off"/>
+               {else}
+               <div class="form-control">{$fsc->presupuesto->hora}</div>
+               {/if}
+            </div>
+         </div>
+         <div class="col-md-2 col-sm-2">
+            <div class="form-group">
+               Versiones:
+               {if="$fsc->presupuesto->editable"}
+               <select class="form-control" name="versiones" id="versiones">
+               {loop="$fsc->presupuesto->getVersions($fsc->presupuesto->variacion)"}
+                  {if="$value['version']==$fsc->presupuesto->version"}
+                  <option value="{$value['idpresupuesto']}" selected="">{$value['version']}</option>
+                  {else}
+                  <option value="{$value['idpresupuesto']}">{$value['version']}</option>
+                  {/if}
+               {/loop}
+               </select>
+               {else}
+               <select class="form-control" name="versiones" disabled="">
+               {loop="$fsc->presupuesto->getVersions($fsc->presupuesto->variacion)"}
+                  {if="$value['version']==$fsc->presupuesto->version"}
+                  <option value="{$value['idpresupuesto']}" selected="">{$value['version']}</option>
+                  {else}
+                  <option value="{$value['idpresupuesto']}">{$value['version']}</option>
+                  {/if}
+               {/loop}
+               </select>
+               {/if}
+            </div>
+         </div>
+         <div class="col-md-2 col-sm-3">
+            <div class="form-group">
+                <a href="#" onclick="alert('Fecha de la versión: {$fsc->presupuesto->fechamod}')">
+                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                </a>
             </div>
          </div>
       </div>
@@ -844,6 +927,31 @@
             </div>
             {/if}
          {/loop}
+      </div>
+   </div>
+   <div class="modal fade" id="modal_version" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-sm" role="document">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+               </button>
+               <h4 class="modal-title">Versión existente</h4>
+            </div>
+            <div class="modal-body">
+               <p class="help-block">
+                  Esta versión ya existe. ¿Desea actualizar esta versión?
+               </p>
+            </div>
+            <div class="modal-footer">
+               <button type="submit" class="btn btn-sm btn-success" name="confirm">
+                  <span class="glyphicon glyphicon-ok"></span>&nbsp; Sí
+               </button>
+               <button type="button" class="btn btn-sm btn-danger" onclick="javascript:location.reload();">
+                  <span class="glyphicon glyphicon-remove"></span>&nbsp; No
+               </button>
+            </div>
+         </div>
       </div>
    </div>
 </form>
