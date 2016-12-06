@@ -8,7 +8,6 @@
    <columna>
       <nombre>apartado</nombre>
       <tipo>character varying(10)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>cifnif</nombre>
@@ -18,27 +17,22 @@
    <columna>
       <nombre>ciudad</nombre>
       <tipo>character varying(100)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>codagente</nombre>
       <tipo>character varying(10)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>codalmacen</nombre>
       <tipo>character varying(4)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>codcliente</nombre>
       <tipo>character varying(6)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>coddir</nombre>
       <tipo>integer</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>coddivisa</nombre>
@@ -58,7 +52,6 @@
    <columna>
       <nombre>codoportunidad</nombre>
       <tipo>character varying(8)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>codpago</nombre>
@@ -68,12 +61,10 @@
    <columna>
       <nombre>codpais</nombre>
       <tipo>character varying(20)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>codpostal</nombre>
       <tipo>character varying(10)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>codserie</nombre>
@@ -93,7 +84,6 @@
    <columna>
       <nombre>estado</nombre>
       <tipo>character varying(25)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>fecha</nombre>
@@ -103,18 +93,15 @@
    <columna>
       <nombre>hora</nombre>
       <tipo>time without time zone</tipo>
-      <nulo>YES</nulo>
       <defecto>now()</defecto>
    </columna>
    <columna>
       <nombre>finoferta</nombre>
       <tipo>date</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>fechasalida</nombre>
       <tipo>date</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>femail</nombre>
@@ -129,12 +116,10 @@
    <columna>
       <nombre>idpedido</nombre>
       <tipo>integer</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>idprovincia</nombre>
       <tipo>integer</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>irpf</nombre>
@@ -149,7 +134,6 @@
    <columna>
       <nombre>nombrecliente</nombre>
       <tipo>character varying(100)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>numero</nombre>
@@ -159,22 +143,18 @@
    <columna>
       <nombre>numero2</nombre>
       <tipo>character varying(50)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>observaciones</nombre>
       <tipo>text</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>porcomision</nombre>
       <tipo>double precision</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>provincia</nombre>
       <tipo>character varying(100)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>recfinanciero</nombre>
@@ -208,7 +188,6 @@
    <columna>
       <nombre>totalrecargo</nombre>
       <tipo>double precision</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>status</nombre>
@@ -235,7 +214,6 @@
    <columna>
       <nombre>direccionenv</nombre>
       <tipo>character varying(100)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>codpostalenv</nombre>
@@ -252,12 +230,10 @@
    <columna>
       <nombre>apartadoenv</nombre>
       <tipo>character varying(10)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>codpaisenv</nombre>
       <tipo>character varying(20)</tipo>
-      <nulo>YES</nulo>
    </columna>
    <columna>
       <nombre>numdocs</nombre>
@@ -265,18 +241,8 @@
       <defecto>0</defecto>
    </columna>
    <columna>
-      <nombre>version</nombre>
-      <tipo>character varying(20)</tipo>
-      <nulo>YES</nulo>
-   </columna>
-   <columna>
-      <nombre>fechamod</nombre>
-      <tipo>datetime</tipo>
-   </columna>
-   <columna>
-      <nombre>variacion</nombre>
-      <tipo>character varying(20)</tipo>
-      <nulo>YES</nulo>
+      <nombre>idoriginal</nombre>
+      <tipo>integer</tipo>
    </columna>
    <restriccion>
       <nombre>presupuestoscli_pkey</nombre>

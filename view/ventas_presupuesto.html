@@ -69,45 +69,7 @@
       {if="$fsc->presupuesto->totalirpf==0"}
       $('.irpf').hide();
       {/if}
-          
-      $('#versiones').on('change', function () {
-          window.location.href = 'index.php?page=ventas_presupuesto&id=' + this.value;
       });
-      $.urlParam = function(name){
-          var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-          return results[1] || 0;
-      }
-      if ($.urlParam('id') != "{$fsc->presupuesto->idpresupuesto}") {
-          window.location.href = 'index.php?page=ventas_presupuesto&id=' + {$fsc->presupuesto->idpresupuesto};
-      }
-      
-      $('#saveForm').click(function () {
-          var last_version = $('#last_version').val();
-          var version = $('#version').val();
-          var exist = false;
-          
-          {if="$fsc->getversions"}
-              {loop="$fsc->getversions"}
-                  if ('{$value}' == version) 
-                  {
-                      var exist = true;
-                  }
-              {/loop}
-          {/if}
-          
-          if (last_version == version || exist == false)
-          {
-              $('form[name="f_presupuesto"]').submit();
-          } else if (last_version != version && exist == true)
-          {
-              $('#modal_version').modal('show');
-              
-              $('button[name="confirm"]').click(function () {
-                  $('form[name="f_presupuesto"]').submit();
-              });
-          }
-      });
-   });
 </script>
 
 <form name="f_presupuesto" action="{$fsc->presupuesto->url()}" method="post" class="form">
@@ -195,17 +157,28 @@
             {/if}
          </div>
          <div class="col-xs-4 text-right">
-            <a class="btn btn-sm btn-success" href="index.php?page=nueva_venta&tipo=presupuesto" title="Nuevo {#FS_PRESUPUESTO#}">
-               <span class="glyphicon glyphicon-plus"></span>
-            </a>
+            <div class="btn-group">
+               <a class="btn btn-sm btn-success" href="index.php?page=nueva_venta&tipo=presupuesto" title="Nuevo {#FS_PRESUPUESTO#}">
+                  <span class="glyphicon glyphicon-plus"></span>
+               </a>
+               {if="$fsc->versiones"}
+               <a class="btn btn-sm btn-default" href="#" title="Versiones del {#FS_PRESUPUESTO#}" data-toggle="modal" data-target="#modal_versionesp">
+                  <i class="fa fa-retweet" aria-hidden="true"></i>
+                  <span class="hidden-xs">{function="count($fsc->versiones)"}</span>
+               </a>
+               {else}
+               <a class="btn btn-sm btn-default" href="{$fsc->url()}&nversion=TRUE" title="Nueva versión del {#FS_PRESUPUESTO#}">
+                  <i class="fa fa-retweet" aria-hidden="true"></i>
+               </a>
+               {/if}
+            </div>
             <div class="btn-group">
                {if="$fsc->allow_delete"}
                <a id="b_eliminar" class="btn btn-sm btn-danger" href="#">
                   <span class="glyphicon glyphicon-trash"></span>
-                  <span class="hidden-xs">&nbsp; Eliminar</span>
                </a>
                {/if}
-               <button class="btn btn-sm btn-primary" type="button" onclick="this.disabled = true;" id="saveForm">
+               <button class="btn btn-sm btn-primary" type="button" onclick="this.disabled = true;this.form.submit();">
                   <span class="glyphicon glyphicon-floppy-disk"></span>
                   <span class="hidden-xs">&nbsp; Guardar</span>
                </button>
@@ -339,54 +312,9 @@
                {/if}
             </div>
          </div>
-         <div class="col-md-2 col-sm-3">
-            <div class="form-group">
-               Versión:
-               {if="$fsc->presupuesto->editable"}
-               <input class="form-control" type="text" name="version" id="version" value='{if="$fsc->presupuesto->version"}{$fsc->presupuesto->version}{else}v1{/if}' autocomplete="off"/>
-               <input class="form-control" type="hidden" name="last_version" id="last_version" value='{$fsc->presupuesto->version}' autocomplete="off"/>
-               <input class="form-control" type="hidden" name="variacion" id="variacion" value='{if="$fsc->presupuesto->variacion"}{$fsc->presupuesto->variacion}{else}{$fsc->presupuesto->codigo}{/if}' autocomplete="off"/>
-               {else}
-               <div class="form-control">{$fsc->presupuesto->hora}</div>
-               {/if}
-            </div>
-         </div>
-         <div class="col-md-2 col-sm-2">
-            <div class="form-group">
-               Versiones:
-               {if="$fsc->presupuesto->editable"}
-               <select class="form-control" name="versiones" id="versiones">
-               {loop="$fsc->presupuesto->getVersions($fsc->presupuesto->variacion)"}
-                  {if="$value['version']==$fsc->presupuesto->version"}
-                  <option value="{$value['idpresupuesto']}" selected="">{$value['version']}</option>
-                  {else}
-                  <option value="{$value['idpresupuesto']}">{$value['version']}</option>
-                  {/if}
-               {/loop}
-               </select>
-               {else}
-               <select class="form-control" name="versiones" disabled="">
-               {loop="$fsc->presupuesto->getVersions($fsc->presupuesto->variacion)"}
-                  {if="$value['version']==$fsc->presupuesto->version"}
-                  <option value="{$value['idpresupuesto']}" selected="">{$value['version']}</option>
-                  {else}
-                  <option value="{$value['idpresupuesto']}">{$value['version']}</option>
-                  {/if}
-               {/loop}
-               </select>
-               {/if}
-            </div>
-         </div>
-         <div class="col-md-2 col-sm-3">
-            <div class="form-group">
-                <a href="#" onclick="alert('Fecha de la versión: {$fsc->presupuesto->fechamod}')">
-                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                </a>
-            </div>
-         </div>
       </div>
    </div>
-
+   
    <div role="tabpanel">
       <ul class="nav nav-tabs" role="tablist">
          <li role="presentation" class="active">
@@ -940,31 +868,6 @@
          {/loop}
       </div>
    </div>
-   <div class="modal fade" id="modal_version" tabindex="-1" role="dialog">
-      <div class="modal-dialog modal-sm" role="document">
-         <div class="modal-content">
-            <div class="modal-header">
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-               </button>
-               <h4 class="modal-title">Versión existente</h4>
-            </div>
-            <div class="modal-body">
-               <p class="help-block">
-                  Esta versión ya existe. ¿Desea actualizar esta versión?
-               </p>
-            </div>
-            <div class="modal-footer">
-               <button type="submit" class="btn btn-sm btn-success" name="confirm">
-                  <span class="glyphicon glyphicon-ok"></span>&nbsp; Sí
-               </button>
-               <button type="button" class="btn btn-sm btn-danger" onclick="javascript:location.reload();">
-                  <span class="glyphicon glyphicon-remove"></span>&nbsp; No
-               </button>
-            </div>
-         </div>
-      </div>
-   </div>
 </form>
 
 <div class="modal" id="modal_articulos">
@@ -1329,6 +1232,90 @@
       </div>
    </div>
 </form>
+
+<div class="modal fade" id="modal_versionesp" tabindex="-1" role="dialog">
+   <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">
+               <i class="fa fa-retweet" aria-hidden="true"></i> Versiones del {#FS_PRESUPUESTO#}
+            </h4>
+            <p class="help-block">Estas son todas las versiones de {#FS_PRESUPUESTO#} actual.</p>
+         </div>
+         <div class="table-responsive">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th></th>
+                     <th class="text-left">Código + {#FS_NUMERO2#}</th>
+                     <th class="text-left">Cliente</th>
+                     <th class="hidden-sm"></th>
+                     <th class="text-left">Observaciones</th>
+                     <th class="text-right">Total</th>
+                     <th class="text-right">Fecha</th>
+                  </tr>
+               </thead>
+               {loop="$fsc->versiones"}
+               <tr class="clickableRow{if="$value->status==1"} success{elseif="$value->status==2"} danger{elseif="$value->total<=0"} warning{/if}" href="{$value->url()}">
+                  <td class="text-center">
+                     {if="$value->idpedido"}
+                     <span class="glyphicon glyphicon-paperclip" title="El {#FS_PRESUPUESTO#} tiene vinculado un {#FS_PEDIDO#}"></span>
+                     {/if}
+                     {if="$value->status==2"}
+                     <span class="glyphicon glyphicon-remove" title="El {#FS_PRESUPUESTO#} ha sido rechazado"></span>
+                     {/if}
+                     {if="$value->femail"}
+                     <span class="glyphicon glyphicon-send" title="El {#FS_PRESUPUESTO#} fue enviado por email el {$value->femail}"></span>
+                     {/if}
+                  </td>
+                  <td>
+                     {if="$value->idpresupuesto==$fsc->presupuesto->idpresupuesto"}
+                     <b class="text-capitalize">{#FS_PRESUPUESTO#} actual</b>
+                     {else}
+                     <a href="{$value->url()}">{$value->codigo}</a> {$value->numero2}
+                     {/if}
+                     {if="$value->totaliva==0"}<span class="label label-warning">Sin {#FS_IVA#}</span>{/if}
+                     {if="$value->totalrecargo!=0"}<span class="label label-default">RE</span>{/if}
+                     {if="$value->totalirpf!=0"}<span class="label label-default">{#FS_IRPF#}</span>{/if}
+                  </td>
+                  <td>{$value->nombrecliente}</td>
+                  <td class="text-right hidden-sm">
+                     <span title="{$value->numdocs} documentos adjuntos">
+                        {if="$value->numdocs==1"}
+                        <i class="fa fa-file" aria-hidden="true"></i>
+                        {elseif="$value->numdocs>1"}
+                        {$value->numdocs} <i class="fa fa-file" aria-hidden="true"></i>
+                        {/if}
+                     </span>
+                  </td>
+                  <td>{$value->observaciones_resume()}</td>
+                  <td class="text-right" title="{$fsc->show_precio($fsc->euro_convert($value->totaleuros, $value->coddivisa, $value->tasaconv))}">
+                     {$fsc->show_precio($value->total, $value->coddivisa)}
+                  </td>
+                  <td class="text-right" title="Hora {$value->hora}">
+                     {if="$value->fecha==$fsc->today()"}<b>{$value->fecha}</b>{else}{$value->fecha}{/if}
+                  </td>
+               </tr>
+               {else}
+               <tr class="warning">
+                  <td></td>
+                  <td colspan="7">Ningún {#FS_PRESUPUESTO#} encontrado.</td>
+               </tr>
+               {/loop}
+            </table>
+         </div>
+         <div class="modal-footer">
+            <a class="btn btn-sm btn-success" href="{$fsc->url()}&nversion=TRUE" title="Nueva versión del {#FS_PRESUPUESTO#}">
+               <i class="fa fa-retweet" aria-hidden="true"></i>
+               <span class="hidden-xs">&nbsp; Nueva versión</span>
+            </a>
+         </div>
+      </div>
+   </div>
+</div>
 {else}
 <div class="text-center">
    <img src="{#FS_PATH#}view/img/fuuu_face.png" alt="fuuuuu"/>

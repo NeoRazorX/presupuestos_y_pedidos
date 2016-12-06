@@ -229,22 +229,10 @@ class presupuesto_cliente extends \fs_model
    public $numdocs;
    
    /**
-    * Versión del presupuesto
+    * Si este presupuesto es la versión de otro, aquí se almacena el idpresupuesto del original.
     * @var type 
     */
-   public $version;
-   
-   /**
-    * Fecha de la versión del presupuesto
-    * @var date 
-    */
-   public $fechamod;
-   
-   /**
-    * Variación del presupuesto
-    * @var type 
-    */
-   public $variacion;
+   public $idoriginal;
    
    public function __construct($p = FALSE)
    {
@@ -336,10 +324,7 @@ class presupuesto_cliente extends \fs_model
          $this->envio_codpais = $p['codpaisenv'];
          
          $this->numdocs = intval($p['numdocs']);
-         
-         $this->version = $p['version'];
-         $this->fechamod = $p['fechamod'];
-         $this->variacion = $p['variacion'];
+         $this->idoriginal = $this->intval($p['idoriginal']);
       }
       else
       {
@@ -393,10 +378,7 @@ class presupuesto_cliente extends \fs_model
          $this->envio_codpais = NULL;
          
          $this->numdocs = 0;
-         
-         $this->version = NULL;
-         $this->fechamod = NULL;
-         $this->variacion = NULL;
+         $this->idoriginal = NULL;
       }
    }
 
@@ -417,11 +399,11 @@ class presupuesto_cliente extends \fs_model
 
    public function observaciones_resume()
    {
-      if ($this->observaciones == '')
+      if($this->observaciones == '')
       {
          return '-';
       }
-      else if (strlen($this->observaciones) < 60)
+      else if( strlen($this->observaciones) < 60 )
       {
          return $this->observaciones;
       }
@@ -436,7 +418,7 @@ class presupuesto_cliente extends \fs_model
 
    public function url()
    {
-      if (is_null($this->idpresupuesto))
+      if( is_null($this->idpresupuesto) )
       {
          return 'index.php?page=ventas_presupuestos';
       }
@@ -446,7 +428,7 @@ class presupuesto_cliente extends \fs_model
 
    public function pedido_url()
    {
-      if (is_null($this->idpedido))
+      if( is_null($this->idpedido) )
       {
          return 'index.php?page=ventas_pedido';
       }
@@ -456,7 +438,7 @@ class presupuesto_cliente extends \fs_model
 
    public function agente_url()
    {
-      if (is_null($this->codagente))
+      if( is_null($this->codagente) )
       {
          return "index.php?page=admin_agentes";
       }
@@ -466,7 +448,7 @@ class presupuesto_cliente extends \fs_model
 
    public function cliente_url()
    {
-      if (is_null($this->codcliente))
+      if( is_null($this->codcliente) )
       {
          return "index.php?page=ventas_clientes";
       }
@@ -479,7 +461,31 @@ class presupuesto_cliente extends \fs_model
       $linea = new \linea_presupuesto_cliente();
       return $linea->all_from_presupuesto($this->idpresupuesto);
    }
-
+   
+   public function get_versiones()
+   {
+      $versiones = array();
+      
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE idoriginal = " . $this->var2str($this->idpresupuesto);
+      if($this->idoriginal)
+      {
+         $sql .= " OR idoriginal = " . $this->var2str($this->idoriginal);
+         $sql .= " OR idpresupuesto = " . $this->var2str($this->idoriginal);
+      }
+      $sql .= "ORDER BY fecha DESC, hora DESC;";
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $versiones[] = new \presupuesto_cliente($d);
+         }
+      }
+      
+      return $versiones;
+   }
+   
    public function get($id)
    {
       $presupuesto = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idpresupuesto = " . $this->var2str($id) . ";");
@@ -493,7 +499,7 @@ class presupuesto_cliente extends \fs_model
 
    public function exists()
    {
-      if (is_null($this->idpresupuesto))
+      if( is_null($this->idpresupuesto) )
       {
          return FALSE;
       }
@@ -711,9 +717,7 @@ class presupuesto_cliente extends \fs_model
                     . ", provinciaenv = ".$this->var2str($this->envio_provincia)
                     . ", codpaisenv = ".$this->var2str($this->envio_codpais)
                     . ", numdocs = ".$this->var2str($this->numdocs)
-                    . ", version = ".$this->var2str($this->version)
-                    . ", fechamod = ".$this->var2str($this->fechamod)
-                    . ", variacion = ".$this->var2str($this->variacion)
+                    . ", idoriginal = ".$this->var2str($this->idoriginal)
                     . "  WHERE idpresupuesto = ".$this->var2str($this->idpresupuesto).";";
             
             return $this->db->exec($sql);
@@ -726,8 +730,7 @@ class presupuesto_cliente extends \fs_model
                direccion,editable,fecha,finoferta,hora,idpedido,irpf,neto,nombrecliente,numero,
                observaciones,status,porcomision,provincia,tasaconv,total,totaleuros,totalirpf,
                totaliva,totalrecargo,numero2,femail,codtrans,codigoenv,nombreenv,apellidosenv,apartadoenv,
-               direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs,version,
-               fechamod,variacion) VALUES ("
+               direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs,idoriginal) VALUES ("
                     . $this->var2str($this->apartado).","
                     . $this->var2str($this->cifnif).","
                     . $this->var2str($this->ciudad).","
@@ -775,10 +778,8 @@ class presupuesto_cliente extends \fs_model
                     . $this->var2str($this->envio_provincia).","
                     . $this->var2str($this->envio_codpais).","
                     . $this->var2str($this->numdocs).","
-                    . $this->var2str($this->version).","
-                    . $this->var2str($this->fechamod).","
-                    . $this->var2str($this->variacion).");";
-
+                    . $this->var2str($this->idoriginal).");";
+            
             if( $this->db->exec($sql) )
             {
                $this->idpresupuesto = $this->db->lastval();
@@ -1058,32 +1059,4 @@ class presupuesto_cliente extends \fs_model
       $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE idpedido IS NULL AND"
               . " editable = false;");
    }
-   
-    public function getVersions($code)
-    {
-        $data = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE variacion=" . $this->var2str($code) . ";");
-
-        return $data;
-    }
-
-    public function getLastId()
-    {
-        $data = $this->db->select("SELECT max(idpresupuesto) as idpresupuesto FROM " . $this->table_name . ";");
-
-        return $data[0]['idpresupuesto'];
-    }
-
-    public function checkVersion($version, $variacion)
-    {
-        $data = $this->db->select("SELECT version FROM " . $this->table_name . " WHERE version=" . $this->var2str($version) . " AND variacion=".$this->var2str($variacion).";");
-
-        if ($data)
-        {
-            return true;
-        } else
-        {
-            return false;
-        }
-    }
-
 }

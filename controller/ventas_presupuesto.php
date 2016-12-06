@@ -34,8 +34,9 @@ require_model('serie.php');
 require_model('agencia_transporte.php');
 
 
-class ventas_presupuesto extends fs_controller {
-
+class ventas_presupuesto extends fs_controller
+{
+   public $agencia;
    public $agente;
    public $allow_delete;
    public $almacen;
@@ -52,13 +53,8 @@ class ventas_presupuesto extends fs_controller {
    public $presupuesto;
    public $serie;
    public $setup_validez;
-   public $agencia;
+   public $versiones;
    
-   public $new_version;
-   public $confirm_version;
-   public $getversions;
-
-
    public function __construct()
    {
       parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTO), 'ventas', FALSE, FALSE);
@@ -70,6 +66,7 @@ class ventas_presupuesto extends fs_controller {
       $this->allow_delete = $this->user->allow_delete_on(__CLASS__);
       
       $this->ppage = $this->page->get('ventas_presupuestos');
+      $this->agencia = new agencia_transporte();
       $this->agente = FALSE;
 
       $presupuesto = new presupuesto_cliente();
@@ -88,8 +85,6 @@ class ventas_presupuesto extends fs_controller {
       $this->serie = new serie();
       $this->setup_validez = 30;
       $this->configurar_validez();
-      $this->agencia = new agencia_transporte();
-
       
       /**
        * Comprobamos si el usuario tiene acceso a nueva_venta,
@@ -104,7 +99,7 @@ class ventas_presupuesto extends fs_controller {
          }
       }
       
-      if( isset($_POST['idpresupuesto']) && isset($_POST['version']) && $_POST['version'] == '' )
+      if( isset($_POST['idpresupuesto']) )
       {
          $this->presupuesto = $presupuesto->get($_POST['idpresupuesto']);
          $this->modificar();
@@ -112,59 +107,22 @@ class ventas_presupuesto extends fs_controller {
       else if( isset($_GET['id']) )
       {
          $this->presupuesto = $presupuesto->get($_GET['id']);
-         $versions = $this->presupuesto->getVersions($this->presupuesto->variacion);
-         foreach ($versions as $v) 
-         {
-             $this->getversions[] = $v['version'];
-         }
       }
       
-      if( isset($_POST['version']) && !empty($_POST['version']) )
-      {
-         $exist_version = $this->presupuesto->checkVersion($_POST['version'], $_POST['variacion']);
-         
-         $this->presupuesto = $presupuesto->get($_POST['idpresupuesto']);
-         if ($exist_version)
-         {
-             if ($_POST['version'] == $_POST['last_version'])
-             {
-                 $this->presupuesto->idpresupuesto = $_POST['idpresupuesto'];
-             } else
-             {
-                 foreach ($versions as $v) 
-                 {
-                     if ($_POST['version'] == $v['version'])
-                     {
-                         $idpres = $v['idpresupuesto'];
-                         $this->presupuesto = $presupuesto->get($idpres);
-                         $this->new_version = true;
-                     }
-                 }
-                 $this->presupuesto->idpresupuesto = $idpres;
-             }
-         } else
-         {
-             $this->presupuesto->idpresupuesto = '';
-             $this->new_version = true;
-             $this->presupuesto->save();
-         }
-         $this->modificar();
-      }
-
       if($this->presupuesto)
       {
          $this->page->title = $this->presupuesto->codigo;
-
+         
          /// cargamos el agente
          if( !is_null($this->presupuesto->codagente) )
          {
             $agente = new agente();
             $this->agente = $agente->get($this->presupuesto->codagente);
          }
-
+         
          /// cargamos el cliente
          $this->cliente_s = $this->cliente->get($this->presupuesto->codcliente);
-
+         
          /// comprobamos el presupuesto
          if( $this->presupuesto->full_test() )
          {
@@ -191,16 +149,57 @@ class ventas_presupuesto extends fs_controller {
                   $this->new_error_msg("¡Imposible modificar el ".FS_PRESUPUESTO."!");
                }
             }
+            else if( isset($_GET['nversion']) )
+            {
+               $this->nueva_version();
+            }
             else
             {
                /// Comprobamos las líneas
                $this->check_lineas();
             }
          }
+         
+         $this->versiones = $this->presupuesto->get_versiones();
       }
       else
       {
          $this->new_error_msg("¡" . ucfirst(FS_PRESUPUESTO) . " de cliente no encontrado!", 'error', FALSE, FALSE);
+      }
+   }
+   
+   private function nueva_version()
+   {
+      $presu = clone $this->presupuesto;
+      $presu->idpresupuesto = NULL;
+      $presu->idpedido = NULL;
+      $presu->fecha = $this->today();
+      $presu->hora = $this->hour();
+      $presu->status = 0;
+      
+      $presu->idoriginal = $this->presupuesto->idpresupuesto;
+      if($this->presupuesto->idoriginal)
+      {
+         $presu->idoriginal = $this->presupuesto->idoriginal;
+      }
+      
+      if( $presu->save() )
+      {
+         /// también copiamos las líneas del presupuesto
+         foreach($this->presupuesto->get_lineas() as $linea)
+         {
+            $newl = clone $linea;
+            $newl->idlinea = NULL;
+            $newl->idpresupuesto = $presu->idpresupuesto;
+            $newl->save();
+         }
+         
+         $this->new_message('<a href="' . $presu->url() . '">Documento</a> de ' . FS_PRESUPUESTO . ' copiado correctamente.');
+         header('Location: '.$presu->url());
+      }
+      else
+      {
+         $this->new_error_msg('Error al copiar el documento.');
       }
    }
 
@@ -429,11 +428,6 @@ class ventas_presupuesto extends fs_controller {
                $encontrada = FALSE;
                if( isset($_POST['idlinea_' . $num]) )
                {
-                  if ($this->new_version)
-                  {
-                     $_POST['idlinea_' . $num] = -1;
-                     $this->presupuesto->idpresupuesto = $this->presupuesto->getLastId();
-                  }
                   foreach ($lineas as $k => $value)
                   {
                      /// modificamos la línea
@@ -539,10 +533,6 @@ class ventas_presupuesto extends fs_controller {
             $this->presupuesto->totalrecargo = round($this->presupuesto->totalrecargo, FS_NF0);
             $this->presupuesto->total = $this->presupuesto->neto + $this->presupuesto->totaliva - $this->presupuesto->totalirpf + $this->presupuesto->totalrecargo;
             
-            $this->presupuesto->version = $_POST['version'];
-            $this->presupuesto->fechamod = date('Y-m-d H:i:s');
-            $this->presupuesto->variacion = $_POST['variacion'];
-            
             if( abs(floatval($_POST['atotal']) - $this->presupuesto->total) >= .02 )
             {
                $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->presupuesto->total .
@@ -551,11 +541,6 @@ class ventas_presupuesto extends fs_controller {
          }
       }
 
-      if ($this->new_version)
-      {
-         $this->presupuesto->codigo = $this->presupuesto->variacion . '-' . $this->presupuesto->version;
-      }
-      
       if ($this->presupuesto->save())
       {
          $this->new_message(ucfirst(FS_PRESUPUESTO) . " modificado correctamente.");
