@@ -48,6 +48,7 @@ class compras_pedido extends fs_controller
    public $proveedor;
    public $proveedor_s;
    public $serie;
+   public $versiones;
    
    public function __construct()
    {
@@ -136,10 +137,55 @@ class compras_pedido extends fs_controller
             $this->pedido->editable = TRUE;
             $this->pedido->save();
          }
+         else if( isset($_GET['nversion']) )
+         {
+            $this->nueva_version();
+         }
+         else if( isset($_GET['nversionok']) )
+         {
+            $this->new_message('Esta es la nueva versión del '.FS_PEDIDO.'.');
+         }
+         
+         $this->versiones = $this->pedido->get_versiones();
       }
       else
       {
          $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " de proveedor no encontrado!", 'error', FALSE, FALSE);
+      }
+   }
+   
+   private function nueva_version()
+   {
+      $pedi = clone $this->pedido;
+      $pedi->idpedido = NULL;
+      $pedi->idalbaran = NULL;
+      $pedi->fecha = $this->today();
+      $pedi->hora = $this->hour();
+      $pedi->editable = TRUE;
+      
+      $pedi->idoriginal = $this->pedido->idpedido;
+      if($this->pedido->idoriginal)
+      {
+         $pedi->idoriginal = $this->pedido->idoriginal;
+      }
+      
+      if( $pedi->save() )
+      {
+         /// también copiamos las líneas del presupuesto
+         foreach($this->pedido->get_lineas() as $linea)
+         {
+            $newl = clone $linea;
+            $newl->idlinea = NULL;
+            $newl->idpedido = $pedi->idpedido;
+            $newl->save();
+         }
+         
+         $this->new_message('<a href="' . $pedi->url() . '">Documento</a> de ' . FS_PEDIDO . ' copiado correctamente.');
+         header('Location: '.$pedi->url().'&nversionok=TRUE');
+      }
+      else
+      {
+         $this->new_error_msg('Error al copiar el documento.');
       }
    }
 

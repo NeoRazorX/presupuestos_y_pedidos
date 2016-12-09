@@ -36,6 +36,7 @@ require_model('agencia_transporte.php');
 
 class ventas_pedido extends fs_controller
 {
+   public $agencia;
    public $agente;
    public $allow_delete;
    public $almacen;
@@ -51,9 +52,8 @@ class ventas_pedido extends fs_controller
    public $pais;
    public $pedido;
    public $serie;
-   public $agencia;
-
-
+   public $versiones;
+   
    public function __construct()
    {
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDO), 'ventas', FALSE, FALSE);
@@ -82,7 +82,6 @@ class ventas_pedido extends fs_controller
       $this->pais = new pais();
       $this->serie = new serie();
       $this->agencia = new agencia_transporte();
-
       
       /**
        * Comprobamos si el usuario tiene acceso a nueva_venta,
@@ -141,11 +140,56 @@ class ventas_pedido extends fs_controller
                   $this->new_error_msg("¡Imposible modificar el ".FS_PEDIDO."!");
                }
             }
+            else if( isset($_GET['nversion']) )
+            {
+               $this->nueva_version();
+            }
+            else if( isset($_GET['nversionok']) )
+            {
+               $this->new_message('Esta es la nueva versión del '.FS_PEDIDO.'.');
+            }
          }
+         
+         $this->versiones = $this->pedido->get_versiones();
       }
       else
       {
          $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " de cliente no encontrado!", 'error', FALSE, FALSE);
+      }
+   }
+   
+   private function nueva_version()
+   {
+      $pedi = clone $this->pedido;
+      $pedi->idpedido = NULL;
+      $pedi->idalbaran = NULL;
+      $pedi->fecha = $this->today();
+      $pedi->hora = $this->hour();
+      $pedi->status = 0;
+      
+      $pedi->idoriginal = $this->pedido->idpedido;
+      if($this->pedido->idoriginal)
+      {
+         $pedi->idoriginal = $this->pedido->idoriginal;
+      }
+      
+      if( $pedi->save() )
+      {
+         /// también copiamos las líneas del presupuesto
+         foreach($this->pedido->get_lineas() as $linea)
+         {
+            $newl = clone $linea;
+            $newl->idlinea = NULL;
+            $newl->idpedido = $pedi->idpedido;
+            $newl->save();
+         }
+         
+         $this->new_message('<a href="' . $pedi->url() . '">Documento</a> de ' . FS_PEDIDO . ' copiado correctamente.');
+         header('Location: '.$pedi->url().'&nversionok=TRUE');
+      }
+      else
+      {
+         $this->new_error_msg('Error al copiar el documento.');
       }
    }
 

@@ -179,6 +179,12 @@ class pedido_proveedor extends \fs_model
     */
    public $numdocs;
    
+   /**
+    * Si este presupuesto es la versión de otro, aquí se almacena el idpresupuesto del original.
+    * @var type 
+    */
+   public $idoriginal;
+   
    public function __construct($p = FALSE)
    {
       parent::__construct('pedidosprov');
@@ -223,6 +229,7 @@ class pedido_proveedor extends \fs_model
          }
          
          $this->numdocs = intval($p['numdocs']);
+         $this->idoriginal = $this->intval($p['idoriginal']);
       }
       else
       {
@@ -254,6 +261,7 @@ class pedido_proveedor extends \fs_model
          $this->editable = TRUE;
          
          $this->numdocs = 0;
+         $this->idoriginal = NULL;
       }
    }
 
@@ -330,6 +338,30 @@ class pedido_proveedor extends \fs_model
    {
       $linea = new \linea_pedido_proveedor();
       return $linea->all_from_pedido($this->idpedido);
+   }
+   
+   public function get_versiones()
+   {
+      $versiones = array();
+      
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE idoriginal = " . $this->var2str($this->idpedido);
+      if($this->idoriginal)
+      {
+         $sql .= " OR idoriginal = " . $this->var2str($this->idoriginal);
+         $sql .= " OR idpedido = " . $this->var2str($this->idoriginal);
+      }
+      $sql .= "ORDER BY fecha DESC, hora DESC;";
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $versiones[] = new \pedido_proveedor($d);
+         }
+      }
+      
+      return $versiones;
    }
 
    public function get($id)
@@ -525,6 +557,7 @@ class pedido_proveedor extends \fs_model
                     .", totaliva = ".$this->var2str($this->totaliva)
                     .", totalrecargo = ".$this->var2str($this->totalrecargo)
                     .", numdocs = ".$this->var2str($this->numdocs)
+                    . ", idoriginal = ".$this->var2str($this->idoriginal)
                     ."  WHERE idpedido = ".$this->var2str($this->idpedido).";";
             
             return $this->db->exec($sql);
@@ -535,7 +568,8 @@ class pedido_proveedor extends \fs_model
             $sql = "INSERT INTO ".$this->table_name." (cifnif,codagente,codalmacen,codproveedor,
                coddivisa,codejercicio,codigo,codpago,codserie,editable,fecha,hora,idalbaran,irpf,
                neto,nombre,numero,observaciones,tasaconv,total,totaleuros,totalirpf,
-               totaliva,totalrecargo,numproveedor,numdocs) VALUES (".$this->var2str($this->cifnif)
+               totaliva,totalrecargo,numproveedor,numdocs,idoriginal) VALUES 
+                     (".$this->var2str($this->cifnif)
                    .",".$this->var2str($this->codagente)
                    .",".$this->var2str($this->codalmacen)
                    .",".$this->var2str($this->codproveedor)
@@ -560,7 +594,8 @@ class pedido_proveedor extends \fs_model
                    .",".$this->var2str($this->totaliva)
                    .",".$this->var2str($this->totalrecargo)
                    .",".$this->var2str($this->numproveedor)
-                   .",".$this->var2str($this->numdocs).");";
+                   .",".$this->var2str($this->numdocs).","
+                    . $this->var2str($this->idoriginal).");";
             
             if( $this->db->exec($sql) )
             {

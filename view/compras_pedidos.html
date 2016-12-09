@@ -129,9 +129,9 @@
          </tr>
       </thead>
       {loop="$fsc->resultados"}
-      <tr class="clickableRow{if="$value->idalbaran"} success{elseif="$value->total<=0"} warning{/if}" href="{$value->url()}">
+      <tr class='clickableRow{if="$value->idalbaran"} success{elseif="$value->total<=0"} warning{/if}' href="{$value->url()}">
          <td class="text-center">
-            {if condition="$value->idalbaran"}
+            {if="$value->idalbaran"}
             <span class="glyphicon glyphicon-paperclip" title="El {#FS_PEDIDO#} tiene vinculado un {#FS_ALBARAN#}"></span>
             {/if}
          </td>
@@ -140,6 +140,7 @@
             {if="$value->totaliva==0"}<span class="label label-warning">Sin {#FS_IVA#}</span>{/if}
             {if="$value->totalrecargo!=0"}<span class="label label-default">RE</span>{/if}
             {if="$value->totalirpf!=0"}<span class="label label-default">{#FS_IRPF#}</span>{/if}
+            {if="$value->idoriginal"}<i class="fa fa-retweet" aria-hidden="true" title="Este {#FS_PEDIDO#} es una versión de otro"></i>{/if}
          </td>
          <td>
             {$value->nombre}

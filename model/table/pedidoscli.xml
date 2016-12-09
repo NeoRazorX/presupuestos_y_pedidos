@@ -253,6 +253,10 @@
       <tipo>integer</tipo>
       <defecto>0</defecto>
    </columna>
+   <columna>
+      <nombre>idoriginal</nombre>
+      <tipo>integer</tipo>
+   </columna>
    <restriccion>
       <nombre>pedidoscli_pkey</nombre>
       <consulta>PRIMARY KEY (idpedido)</consulta>

@@ -34,7 +34,7 @@
       {loop="$fsc->resultados"}
       <tr class="clickableRow{if="$value->total<=0"} warning{/if}" href="{$value->url()}">
          <td class="text-center">
-            {if condition="$value->idalbaran"}
+            {if="$value->idalbaran"}
             <span class="glyphicon glyphicon-paperclip" title="El {#FS_PEDIDO#} tiene vinculado un {#FS_ALBARAN#}"></span>
             {/if}
          </td>

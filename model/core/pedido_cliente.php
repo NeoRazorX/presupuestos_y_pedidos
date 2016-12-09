@@ -227,6 +227,12 @@ class pedido_cliente extends \fs_model
     */
    public $numdocs;
    
+   /**
+    * Si este presupuesto es la versión de otro, aquí se almacena el idpresupuesto del original.
+    * @var type 
+    */
+   public $idoriginal;
+   
    public function __construct($p = FALSE)
    {
       parent::__construct('pedidoscli');
@@ -316,6 +322,7 @@ class pedido_cliente extends \fs_model
          $this->envio_codpais = $p['codpaisenv'];
          
          $this->numdocs = intval($p['numdocs']);
+         $this->idoriginal = $this->intval($p['idoriginal']);
       }
       else
       {
@@ -369,6 +376,7 @@ class pedido_cliente extends \fs_model
          $this->envio_codpais = NULL;
          
          $this->numdocs = 0;
+         $this->idoriginal = NULL;
       }
    }
 
@@ -449,6 +457,30 @@ class pedido_cliente extends \fs_model
    {
       $linea = new \linea_pedido_cliente();
       return $linea->all_from_pedido($this->idpedido);
+   }
+   
+   public function get_versiones()
+   {
+      $versiones = array();
+      
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE idoriginal = " . $this->var2str($this->idpedido);
+      if($this->idoriginal)
+      {
+         $sql .= " OR idoriginal = " . $this->var2str($this->idoriginal);
+         $sql .= " OR idpedido = " . $this->var2str($this->idoriginal);
+      }
+      $sql .= "ORDER BY fecha DESC, hora DESC;";
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $versiones[] = new \pedido_cliente($d);
+         }
+      }
+      
+      return $versiones;
    }
 
    public function get($id)
@@ -688,6 +720,7 @@ class pedido_cliente extends \fs_model
                     . ", provinciaenv = ".$this->var2str($this->envio_provincia)
                     . ", codpaisenv = ".$this->var2str($this->envio_codpais)
                     . ", numdocs = ".$this->var2str($this->numdocs)
+                    . ", idoriginal = ".$this->var2str($this->idoriginal)
                     . "  WHERE idpedido = ".$this->var2str($this->idpedido).";";
             
             return $this->db->exec($sql);
@@ -700,7 +733,7 @@ class pedido_cliente extends \fs_model
                direccion,editable,fecha,hora,idalbaran,irpf,neto,nombrecliente,numero,observaciones,
                status,porcomision,provincia,tasaconv,total,totaleuros,totalirpf,totaliva,totalrecargo,
                numero2,femail,fechasalida,codtrans,codigoenv,nombreenv,apellidosenv,apartadoenv,direccionenv,
-               codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs) VALUES ("
+               codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs,idoriginal) VALUES ("
                     . $this->var2str($this->apartado).","
                     . $this->var2str($this->cifnif).","
                     . $this->var2str($this->ciudad).","
@@ -747,7 +780,8 @@ class pedido_cliente extends \fs_model
                     . $this->var2str($this->envio_ciudad).","
                     . $this->var2str($this->envio_provincia).","
                     . $this->var2str($this->envio_codpais).","
-                    . $this->var2str($this->numdocs).");";
+                    . $this->var2str($this->numdocs).","
+                    . $this->var2str($this->idoriginal).");";
             
             if( $this->db->exec($sql) )
             {

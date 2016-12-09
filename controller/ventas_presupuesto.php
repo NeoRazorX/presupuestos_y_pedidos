@@ -155,6 +155,11 @@ class ventas_presupuesto extends fs_controller
             }
             else
             {
+               if( isset($_GET['nversionok']) )
+               {
+                  $this->new_message('Esta es la nueva versión del '.FS_PRESUPUESTO.'.');
+               }
+               
                /// Comprobamos las líneas
                $this->check_lineas();
             }
@@ -195,7 +200,7 @@ class ventas_presupuesto extends fs_controller
          }
          
          $this->new_message('<a href="' . $presu->url() . '">Documento</a> de ' . FS_PRESUPUESTO . ' copiado correctamente.');
-         header('Location: '.$presu->url());
+         header('Location: '.$presu->url().'&nversionok=TRUE');
       }
       else
       {

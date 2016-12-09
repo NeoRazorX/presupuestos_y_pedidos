@@ -161,16 +161,12 @@
                <a class="btn btn-sm btn-success" href="index.php?page=nueva_venta&tipo=presupuesto" title="Nuevo {#FS_PRESUPUESTO#}">
                   <span class="glyphicon glyphicon-plus"></span>
                </a>
-               {if="$fsc->versiones"}
                <a class="btn btn-sm btn-default" href="#" title="Versiones del {#FS_PRESUPUESTO#}" data-toggle="modal" data-target="#modal_versionesp">
                   <i class="fa fa-retweet" aria-hidden="true"></i>
+                  {if="$fsc->versiones"}
                   <span class="hidden-xs">{function="count($fsc->versiones)"}</span>
+                  {/if}
                </a>
-               {else}
-               <a class="btn btn-sm btn-default" href="{$fsc->url()}&nversion=TRUE" title="Nueva versión del {#FS_PRESUPUESTO#}">
-                  <i class="fa fa-retweet" aria-hidden="true"></i>
-               </a>
-               {/if}
             </div>
             <div class="btn-group">
                {if="$fsc->allow_delete"}
@@ -1259,7 +1255,7 @@
                   </tr>
                </thead>
                {loop="$fsc->versiones"}
-               <tr class="clickableRow{if="$value->status==1"} success{elseif="$value->status==2"} danger{elseif="$value->total<=0"} warning{/if}" href="{$value->url()}">
+               <tr class='clickableRow{if="$value->status==1"} success{elseif="$value->status==2"} danger{elseif="$value->total<=0"} warning{/if}' href="{$value->url()}">
                   <td class="text-center">
                      {if="$value->idpedido"}
                      <span class="glyphicon glyphicon-paperclip" title="El {#FS_PRESUPUESTO#} tiene vinculado un {#FS_PEDIDO#}"></span>
@@ -1302,7 +1298,7 @@
                {else}
                <tr class="warning">
                   <td></td>
-                  <td colspan="7">Ningún {#FS_PRESUPUESTO#} encontrado.</td>
+                  <td colspan="7">Ninguna versión encontrada.</td>
                </tr>
                {/loop}
             </table>
