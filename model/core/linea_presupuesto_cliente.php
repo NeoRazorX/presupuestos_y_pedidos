@@ -83,7 +83,6 @@ class linea_presupuesto_cliente extends \fs_model
          $this->pvpunitario = floatval($l['pvpunitario']);
          $this->recargo = floatval($l['recargo']);
          $this->referencia = $l['referencia'];
-         
          $this->orden = intval($l['orden']);
          $this->mostrar_cantidad = $this->str2bool($l['mostrar_cantidad']);
          $this->mostrar_precio = $this->str2bool($l['mostrar_precio']);
@@ -103,7 +102,6 @@ class linea_presupuesto_cliente extends \fs_model
          $this->pvpunitario = 0;
          $this->recargo = 0;
          $this->referencia = NULL;
-         
          $this->orden = 0;
          $this->mostrar_cantidad = TRUE;
          $this->mostrar_precio = TRUE;
@@ -279,7 +277,8 @@ class linea_presupuesto_cliente extends \fs_model
          {
             $sql = "INSERT INTO ".$this->table_name." (cantidad,codimpuesto,descripcion,dtopor,
                idpresupuesto,irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,orden,
-               mostrar_cantidad,mostrar_precio) VALUES (".$this->var2str($this->cantidad)
+               mostrar_cantidad,mostrar_precio) VALUES 
+                      (".$this->var2str($this->cantidad)
                     .",".$this->var2str($this->codimpuesto)
                     .",".$this->var2str($this->descripcion)
                     .",".$this->var2str($this->dtopor)

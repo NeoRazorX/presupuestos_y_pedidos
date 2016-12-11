@@ -144,7 +144,6 @@ class linea_pedido_cliente extends \fs_model
          $this->pvpunitario = floatval($l['pvpunitario']);
          $this->recargo = floatval($l['recargo']);
          $this->referencia = $l['referencia'];
-         
          $this->orden = intval($l['orden']);
          $this->mostrar_cantidad = $this->str2bool($l['mostrar_cantidad']);
          $this->mostrar_precio = $this->str2bool($l['mostrar_precio']);
@@ -166,7 +165,6 @@ class linea_pedido_cliente extends \fs_model
          $this->pvpunitario = 0;
          $this->recargo = 0;
          $this->referencia = NULL;
-         
          $this->orden = 0;
          $this->mostrar_cantidad = TRUE;
          $this->mostrar_precio = TRUE;
