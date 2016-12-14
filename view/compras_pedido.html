@@ -969,7 +969,11 @@
                      {/if}
                   </td>
                   <td>
+                     {if="$value->idpedido==$fsc->pedido->idpedido"}
+                     <b class="text-capitalize">{#FS_PEDIDO#} actual</b>
+                     {else}
                      <a href="{$value->url()}">{$value->codigo}</a> {$value->numproveedor}
+                     {/if}
                      {if="$value->totaliva==0"}<span class="label label-warning">Sin {#FS_IVA#}</span>{/if}
                      {if="$value->totalrecargo!=0"}<span class="label label-default">RE</span>{/if}
                      {if="$value->totalirpf!=0"}<span class="label label-default">{#FS_IRPF#}</span>{/if}
