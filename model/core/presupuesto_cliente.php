@@ -572,6 +572,12 @@ class presupuesto_cliente extends \fs_model
       $this->direccion = $this->no_html($this->direccion);
       $this->ciudad = $this->no_html($this->ciudad);
       $this->provincia = $this->no_html($this->provincia);
+      $this->envio_nombre = $this->no_html($this->envio_nombre);
+      $this->envio_apellidos = $this->no_html($this->envio_apellidos);
+      $this->envio_direccion = $this->no_html($this->envio_direccion);
+      $this->envio_ciudad = $this->no_html($this->envio_ciudad);
+      $this->envio_provincia = $this->no_html($this->envio_provincia);
+      $this->numero2 = $this->no_html($this->numero2);
       $this->observaciones = $this->no_html($this->observaciones);
       
       /**

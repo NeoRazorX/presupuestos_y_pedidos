@@ -437,6 +437,7 @@ class pedido_proveedor extends \fs_model
          $this->nombre = '-';
       }
       
+      $this->numproveedor = $this->no_html($this->numproveedor);
       $this->observaciones = $this->no_html($this->observaciones);
       
       /**
