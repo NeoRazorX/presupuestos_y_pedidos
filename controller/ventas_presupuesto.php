@@ -180,6 +180,7 @@ class ventas_presupuesto extends fs_controller
       $presu->idpedido = NULL;
       $presu->fecha = $this->today();
       $presu->hora = $this->hour();
+      $presu->femail = NULL;
       $presu->status = 0;
       
       $presu->idoriginal = $this->presupuesto->idpresupuesto;

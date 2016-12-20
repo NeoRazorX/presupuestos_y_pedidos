@@ -165,6 +165,7 @@ class ventas_pedido extends fs_controller
       $pedi->idalbaran = NULL;
       $pedi->fecha = $this->today();
       $pedi->hora = $this->hour();
+      $pedi->femail = NULL;
       $pedi->status = 0;
       
       $pedi->idoriginal = $this->pedido->idpedido;
