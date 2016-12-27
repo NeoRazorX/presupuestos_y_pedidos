@@ -216,9 +216,9 @@ class imprimir_presu_pedi extends fs_controller
                {
                   $linea_size = 1;
                   $len = mb_strlen($lin->referencia.' '.$lin->descripcion);
-                  while($len > 85)
+                  while($len > 90)
                   {
-                     $len -= 85;
+                     $len -= 90;
                      $linea_size += 0.5;
                   }
                   
@@ -307,9 +307,9 @@ class imprimir_presu_pedi extends fs_controller
          {
             $linea_size = 1;
             $len = mb_strlen($lin->referencia.' '.$lin->descripcion);
-            while($len > 85)
+            while($len > 90)
             {
-               $len -= 85;
+               $len -= 90;
                $linea_size += 0.5;
             }
             
@@ -444,7 +444,12 @@ class imprimir_presu_pedi extends fs_controller
          $pdf_doc->add_table_row($fila);
          $linea_actual++;
       }
-      
+
+      // Relleno azulito para cabecera de la tabla
+      $pdf_doc->pdf->setColor(0.898, 0.976, 1);
+      $pdf_doc->pdf->filledrectangle(30,650,530,15);
+      $pdf_doc->pdf->setColor(0, 0, 0);
+
       $pdf_doc->save_table(
               array(
                   'fontSize' => 8,
@@ -458,13 +463,13 @@ class imprimir_presu_pedi extends fs_controller
                       'irpf' => array('justification' => 'right'),
                       'importe' => array('justification' => 'right')
                   ),
-                  'width' => 520,
+                  'width' => 530,
                   'shaded' => 1,
                   'shadeCol' => array(0.95, 0.95, 0.95),
                   'lineCol' => array(0.3, 0.3, 0.3),
               )
       );
-      
+
       if( $linea_actual == count($lineas) )
       {
          if($documento->observaciones != '')
@@ -507,34 +512,39 @@ class imprimir_presu_pedi extends fs_controller
             
             $pdf_doc->generar_pdf_cabecera($this->empresa, $lppag);
             
+            // Rectangulo correspondiente al Numero de albaran
+            $pdf_doc->pdf->setColor(0.898, 0.976, 1);
+            $pdf_doc->pdf->filledrectangle(290,800,270,25);
+            $pdf_doc->pdf->setColor(0, 0, 0);
+            $pdf_doc->pdf->rectangle(290,800,270,25);
+
+            // Rectangulo correspondiente al Cliete
+            $pdf_doc->pdf->rectangle(290,725,270,70);
             /*
              * Esta es la tabla con los datos del cliente:
              * Presupuesto:             Fecha:
              * Cliente:               CIF/NIF:
              * Dirección:           Teléfonos:
              */
-            $pdf_doc->new_table();
-            $pdf_doc->add_table_row(
-               array(
-                   'campo1' => "<b>".ucfirst(FS_PRESUPUESTO).":</b> ",
-                   'dato1' => $this->presupuesto->codigo,
-                   'campo2' => "<b>Fecha:</b> ".$this->presupuesto->fecha
-               )
-            );
-            
+            $pdf_doc->pdf->ez['leftMargin'] = 295;
+            $pdf_doc->set_y(820);
+            $pdf_doc->pdf->ezText("<b>". strtoupper(FS_PRESUPUESTO).": " . $this->presupuesto->codigo .
+                                  "</b> ... " , 12, array('justification' => 'left'));
+            $pdf_doc->set_y(820);
+            $pdf_doc->pdf->ezText($this->presupuesto->fecha, 10, array('justification' => 'right'));
+            $pdf_doc->set_y(794);
+
             $tipoidfiscal = FS_CIFNIF;
             if($this->cliente)
             {
                $tipoidfiscal = $this->cliente->tipoidfiscal;
             }
-            $pdf_doc->add_table_row(
-               array(
-                   'campo1' => "<b>Cliente:</b> ",
-                   'dato1' => $pdf_doc->fix_html($this->presupuesto->nombrecliente),
-                   'campo2' => "<b>".$tipoidfiscal.":</b> ".$this->presupuesto->cifnif
-               )
-            );
-            
+            $pdf_doc->pdf->ezText("<b>" . $pdf_doc->fix_html($this->presupuesto->nombrecliente) . "</b>",
+                                  10, array('justification' => 'left'));
+            $pdf_doc->pdf->ez['leftMargin'] = 300;
+            $pdf_doc->pdf->ezText("CIF/NIF: " . $this->presupuesto->cifnif,
+                                  8, array('justification' => 'left'));
+
             $direccion = $this->presupuesto->direccion;
             if($this->presupuesto->apartado)
             {
@@ -545,56 +555,73 @@ class imprimir_presu_pedi extends fs_controller
                $direccion .= ' - CP: '.$this->presupuesto->codpostal;
             }
             $direccion .= ' - '.$this->presupuesto->ciudad.' ('.$this->presupuesto->provincia.')';
-            $row = array(
-                'campo1' => "<b>Dirección:</b>",
-                'dato1' => $pdf_doc->fix_html($direccion),
-                'campo2' => ''
-            );
-            
+
+            $pdf_doc->pdf->ezText($pdf_doc->fix_html($direccion),
+                                  8, array('justification' => 'left'));
+
+            if($this->presupuesto->apartado)
+            {
+               $pdf_doc->pdf->ezText("<b>".ucfirst(FS_APARTADO).": </b> ".$this->presupuesto->apartado,
+                                     8, array('justification' => 'left'));
+            }
+
             if(!$this->cliente)
             {
                /// nada
             }
             else if($this->cliente->telefono1)
             {
-               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1;
                if($this->cliente->telefono2)
                {
-                  $row['campo2'] .= "\n".$this->cliente->telefono2;
-                  $lppag -= 2;
+                  $pdf_doc->pdf->ezText("<b>Teléfonos:</b> ".$this->cliente->telefono1 . " - " .
+                                        $this->cliente->telefono2,
+                                        8, array('justification' => 'left'));
+               } else
+               {
+                  $pdf_doc->pdf->ezText("<b>Teléfono:</b> ".$this->cliente->telefono1,
+                                        8, array('justification' => 'left'));                  
                }
             }
             else if($this->cliente->telefono2)
             {
-               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono2;
+               $pdf_doc->pdf->ezText("<b>Teléfono:</b> ".$this->cliente->telefono2,
+                                     8, array('justification' => 'left'));
             }
-            $pdf_doc->add_table_row($row);
-            
+
             if($this->empresa->codpais != 'ESP')
             {
-               $pdf_doc->add_table_row(
-                  array(
-                      'campo1' => "<b>Régimen ".FS_IVA.":</b> ",
-                      'dato1' => $this->cliente->regimeniva,
-                      'campo2' => ''
-                  )
-               );
+               $pdf_doc->pdf->ezText("<b>Régimen ".FS_IVA.":</b> ".$this->cliente->regimeniva,
+                                     8, array('justification' => 'left'));
+            }            
+
+            if($this->cliente->numeroproveedor)
+            {
+               $pdf_doc->pdf->ez['leftMargin'] = 295;
+               $pdf_doc->set_y(740);
+               $pdf_doc->pdf->ezText("<b>N. Proveedor:</b> ".$this->cliente->numeroproveedor,
+                                     8, array('justification' => 'left'));
             }
-            
-            $pdf_doc->save_table(
-               array(
-                   'cols' => array(
-                       'campo1' => array('width' => 90, 'justification' => 'right'),
-                       'dato1' => array('justification' => 'left'),
-                       'campo2' => array('justification' => 'right')
-                   ),
-                   'showLines' => 0,
-                   'width' => 520,
-                   'shaded' => 0
-               )
-            );
+
+            // Rectangulo correspondiente al Cliete
+            $pdf_doc->pdf->rectangle(190,670,370,50);
+            $pdf_doc->pdf->ez['leftMargin'] = 195;
+            $pdf_doc->set_y(718);
+
+            if($this->presupuesto->numero2)
+            {
+               $pdf_doc->pdf->ezText("<b>" . ucfirst(FS_NUMERO2) . ":</b> ".$this->presupuesto->numero2,
+                                     8, array('justification' => 'left'));
+            } else {
+               $pdf_doc->pdf->ezText("<b>" . ucfirst(FS_NUMERO2) . ":</b> N/A",
+                                     8, array('justification' => 'left'));
+            }
+
             $pdf_doc->pdf->ezText("\n", 10);
-            
+
+            $pdf_doc->pdf->ez['leftMargin'] = 35;
+            $pdf_doc->pdf->ez['rightMargin'] = 30;
+            $pdf_doc->set_y(665);
+
             /// lineas + observaciones
             $this->generar_pdf_lineas($pdf_doc, $lineas, $linea_actual, $lppag, $this->presupuesto);
             
@@ -718,47 +745,53 @@ class imprimir_presu_pedi extends fs_controller
             
             $pdf_doc->generar_pdf_cabecera($this->empresa, $lppag);
             
+            // Rectangulo correspondiente al Numero de albaran
+            $pdf_doc->pdf->setColor(0.898, 0.976, 1);
+            $pdf_doc->pdf->filledrectangle(290,800,270,25);
+            $pdf_doc->pdf->setColor(0, 0, 0);
+            $pdf_doc->pdf->rectangle(290,800,270,25);
+
+            // Rectangulo correspondiente al Cliete
+            $pdf_doc->pdf->rectangle(290,725,270,70);
+
             /*
              * Esta es la tabla con los datos del proveedor:
              * Pedido:                  Fecha:
              * Cliente:               CIF/NIF:
              */
-            $pdf_doc->new_table();
-            $pdf_doc->add_table_row(
-               array(
-                   'campo1' => "<b>".ucfirst(FS_PEDIDO).":</b>",
-                   'dato1' => $this->pedido->codigo,
-                   'campo2' => "<b>Fecha:</b> ".$this->pedido->fecha
-               )
-            );
+            $pdf_doc->pdf->ez['leftMargin'] = 295;
+            $pdf_doc->set_y(820);
+            $pdf_doc->pdf->ezText("<b>". strtoupper(FS_PEDIDO).": " . $this->pedido->codigo .
+                                  "</b> ... " , 12, array('justification' => 'left'));
+            $pdf_doc->set_y(820);
+            $pdf_doc->pdf->ezText($this->pedido->fecha, 10, array('justification' => 'right'));
+            $pdf_doc->set_y(794);
             
             $tipoidfiscal = FS_CIFNIF;
             if($this->proveedor)
             {
                $tipoidfiscal = $this->proveedor->tipoidfiscal;
             }
-            $pdf_doc->add_table_row(
-               array(
-                   'campo1' => "<b>Proveedor:</b>",
-                   'dato1' => $pdf_doc->fix_html($this->pedido->nombre),
-                   'campo2' => "<b>".$tipoidfiscal.":</b> ".$this->pedido->cifnif
-               )
-            );
+            $pdf_doc->pdf->ezText("<b>" . $pdf_doc->fix_html($this->pedido->nombre) . "</b>",
+                                  10, array('justification' => 'left'));
+            $pdf_doc->pdf->ez['leftMargin'] = 300;
+            $pdf_doc->pdf->ezText("CIF/NIF: " . $this->pedido->cifnif,
+                                  8, array('justification' => 'left'));
             
-            $pdf_doc->save_table(
-               array(
-                   'cols' => array(
-                       'campo1' => array('width' => 90, 'justification' => 'right'),
-                       'dato1' => array('justification' => 'left'),
-                       'campo2' => array('justification' => 'right')
-                   ),
-                   'showLines' => 0,
-                   'width' => 520,
-                   'shaded' => 0
-               )
-            );
+            /*if($this->proveedor->numeroproveedor)
+            {
+               $pdf_doc->pdf->ez['leftMargin'] = 295;
+               $pdf_doc->set_y(740);
+               $pdf_doc->pdf->ezText("<b>N. Proveedor:</b> ".$this->proveedor->numeroproveedor,
+                                     8, array('justification' => 'left'));
+            }*/
+
             $pdf_doc->pdf->ezText("\n", 10);
-            
+
+            $pdf_doc->pdf->ez['leftMargin'] = 35;
+            $pdf_doc->pdf->ez['rightMargin'] = 30;
+            $pdf_doc->set_y(665);
+
             /// lineas + observaciones
             $this->generar_pdf_lineas($pdf_doc, $lineas, $linea_actual, $lppag, $this->pedido);
             
@@ -884,34 +917,39 @@ class imprimir_presu_pedi extends fs_controller
             
             $pdf_doc->generar_pdf_cabecera($this->empresa, $lppag);
             
+            // Rectangulo correspondiente al Numero de albaran
+            $pdf_doc->pdf->setColor(0.898, 0.976, 1);
+            $pdf_doc->pdf->filledrectangle(290,800,270,25);
+            $pdf_doc->pdf->setColor(0, 0, 0);
+            $pdf_doc->pdf->rectangle(290,800,270,25);
+
+            // Rectangulo correspondiente al Cliete
+            $pdf_doc->pdf->rectangle(290,725,270,70);
             /*
              * Esta es la tabla con los datos del cliente:
-             * Pedido:                  Fecha:
+             * Presupuesto:             Fecha:
              * Cliente:               CIF/NIF:
              * Dirección:           Teléfonos:
              */
-            $pdf_doc->new_table();
-            $pdf_doc->add_table_row(
-               array(
-                   'campo1' => "<b>".ucfirst(FS_PEDIDO).":</b> ",
-                   'dato1' => $this->pedido->codigo,
-                   'campo2' => "<b>Fecha:</b> ".$this->pedido->fecha
-               )
-            );
-            
+            $pdf_doc->pdf->ez['leftMargin'] = 295;
+            $pdf_doc->set_y(820);
+            $pdf_doc->pdf->ezText("<b>". strtoupper(FS_PEDIDO).": " . $this->pedido->codigo .
+                                  "</b> ... " , 12, array('justification' => 'left'));
+            $pdf_doc->set_y(820);
+            $pdf_doc->pdf->ezText($this->pedido->fecha, 10, array('justification' => 'right'));
+            $pdf_doc->set_y(794);
+
             $tipoidfiscal = FS_CIFNIF;
             if($this->cliente)
             {
                $tipoidfiscal = $this->cliente->tipoidfiscal;
             }
-            $pdf_doc->add_table_row(
-               array(
-                   'campo1' => "<b>Cliente:</b> ",
-                   'dato1' => $pdf_doc->fix_html($this->pedido->nombrecliente),
-                   'campo2' => "<b>".$tipoidfiscal.":</b> ".$this->pedido->cifnif
-               )
-            );
-            
+            $pdf_doc->pdf->ezText("<b>" . $pdf_doc->fix_html($this->pedido->nombrecliente) . "</b>",
+                                  10, array('justification' => 'left'));
+            $pdf_doc->pdf->ez['leftMargin'] = 300;
+            $pdf_doc->pdf->ezText("CIF/NIF: " . $this->pedido->cifnif,
+                                  8, array('justification' => 'left'));
+
             $direccion = $this->pedido->direccion;
             if($this->pedido->apartado)
             {
@@ -922,55 +960,72 @@ class imprimir_presu_pedi extends fs_controller
                $direccion .= ' - CP: '.$this->pedido->codpostal;
             }
             $direccion .= ' - '.$this->pedido->ciudad.' ('.$this->pedido->provincia.')';
-            $row = array(
-                'campo1' => "<b>Dirección:</b>",
-                'dato1' => $pdf_doc->fix_html($direccion),
-                'campo2' => ''
-            );
-            
+
+            $pdf_doc->pdf->ezText($pdf_doc->fix_html($direccion),
+                                  8, array('justification' => 'left'));
+
+            if($this->pedido->apartado)
+            {
+               $pdf_doc->pdf->ezText("<b>".ucfirst(FS_APARTADO).": </b> ".$this->pedido->apartado,
+                                     8, array('justification' => 'left'));
+            }
+
             if(!$this->cliente)
             {
                /// nada
             }
             else if($this->cliente->telefono1)
             {
-               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono1;
                if($this->cliente->telefono2)
                {
-                  $row['campo2'] .= "\n".$this->cliente->telefono2;
-                  $lppag -= 2;
+                  $pdf_doc->pdf->ezText("<b>Teléfonos:</b> ".$this->cliente->telefono1 . " - " .
+                                        $this->cliente->telefono2,
+                                        8, array('justification' => 'left'));
+               } else
+               {
+                  $pdf_doc->pdf->ezText("<b>Teléfono:</b> ".$this->cliente->telefono1,
+                                        8, array('justification' => 'left'));                  
                }
             }
             else if($this->cliente->telefono2)
             {
-               $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono2;
+               $pdf_doc->pdf->ezText("<b>Teléfono:</b> ".$this->cliente->telefono2,
+                                     8, array('justification' => 'left'));
             }
-            $pdf_doc->add_table_row($row);
-            
+
             if($this->empresa->codpais != 'ESP')
             {
-               $pdf_doc->add_table_row(
-                  array(
-                      'campo1' => "<b>Régimen ".FS_IVA.":</b> ",
-                      'dato1' => $this->cliente->regimeniva,
-                      'campo2' => ''
-                  )
-               );
+               $pdf_doc->pdf->ezText("<b>Régimen ".FS_IVA.":</b> ".$this->cliente->regimeniva,
+                                     8, array('justification' => 'left'));
+            }            
+
+            if($this->cliente->numeroproveedor)
+            {
+               $pdf_doc->pdf->ez['leftMargin'] = 295;
+               $pdf_doc->set_y(740);
+               $pdf_doc->pdf->ezText("<b>N. Proveedor:</b> ".$this->cliente->numeroproveedor,
+                                     8, array('justification' => 'left'));
             }
-            
-            $pdf_doc->save_table(
-               array(
-                   'cols' => array(
-                       'campo1' => array('width' => 90, 'justification' => 'right'),
-                       'dato1' => array('justification' => 'left'),
-                       'campo2' => array('justification' => 'right')
-                   ),
-                   'showLines' => 0,
-                   'width' => 520,
-                   'shaded' => 0
-               )
-            );
+
+            // Rectangulo correspondiente al Cliete
+            $pdf_doc->pdf->rectangle(190,670,370,50);
+            $pdf_doc->pdf->ez['leftMargin'] = 195;
+            $pdf_doc->set_y(718);
+
+            if($this->pedido->numero2)
+            {
+               $pdf_doc->pdf->ezText("<b>" . ucfirst(FS_NUMERO2) . ":</b> ".$this->pedido->numero2,
+                                     8, array('justification' => 'left'));
+            } else {
+               $pdf_doc->pdf->ezText("<b>" . ucfirst(FS_NUMERO2) . ":</b> N/A",
+                                     8, array('justification' => 'left'));
+            }
+
             $pdf_doc->pdf->ezText("\n", 10);
+
+            $pdf_doc->pdf->ez['leftMargin'] = 35;
+            $pdf_doc->pdf->ez['rightMargin'] = 30;
+            $pdf_doc->set_y(665);
             
             /// lineas + observaciones
             $this->generar_pdf_lineas($pdf_doc, $lineas, $linea_actual, $lppag, $this->pedido);
