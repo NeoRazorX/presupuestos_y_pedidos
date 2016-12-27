@@ -778,13 +778,13 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->pdf->ezText("CIF/NIF: " . $this->pedido->cifnif,
                                   8, array('justification' => 'left'));
             
-            /*if($this->proveedor->numeroproveedor)
+            if($this->pedido->numproveedor)
             {
                $pdf_doc->pdf->ez['leftMargin'] = 295;
                $pdf_doc->set_y(740);
-               $pdf_doc->pdf->ezText("<b>N. Proveedor:</b> ".$this->proveedor->numeroproveedor,
+               $pdf_doc->pdf->ezText("<b>N. Proveedor:</b> ".$this->pedido->numproveedor,
                                      8, array('justification' => 'left'));
-            }*/
+            }
 
             $pdf_doc->pdf->ezText("\n", 10);
 
