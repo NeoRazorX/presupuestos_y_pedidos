@@ -86,15 +86,15 @@
             <div class="btn-group">
                <a id="b_imprimir" class="btn btn-sm btn-default" href="#">
                   <span class="glyphicon glyphicon-print"></span>
-                  <span class="hidden-xs">&nbsp; Imprimir</span>
+                  <span class="hidden-xs">&nbsp;Imprimir</span>
                </a>
                {if="$fsc->empresa->can_send_mail()"}
                <a id="b_enviar" class="btn btn-sm btn-default" href="#">
                   <span class="glyphicon glyphicon-envelope"></span>
                   {if="$fsc->presupuesto->femail"}
-                  <span class="hidden-xs">&nbsp; Reenviar</span>
+                  <span class="hidden-xs">&nbsp;Reenviar</span>
                   {else}
-                  <span class="hidden-xs">&nbsp; Enviar</span>
+                  <span class="hidden-xs">&nbsp;Enviar</span>
                   {/if}
                </a>
                {/if}
@@ -112,7 +112,7 @@
             <div class="btn-group">
                <a class="btn btn-sm btn-info text-capitalize" href="{$fsc->presupuesto->pedido_url()}">
                   <span class="glyphicon glyphicon-eye-open"></span>
-                  <span class="hidden-xs">&nbsp; Ver {#FS_PEDIDO#}</span>
+                  <span class="hidden-xs">&nbsp;Ver {#FS_PEDIDO#}</span>
                </a>
             </div>
             {else}
@@ -177,7 +177,7 @@
                {/if}
                <button class="btn btn-sm btn-primary" type="button" onclick="this.disabled = true;this.form.submit();">
                   <span class="glyphicon glyphicon-floppy-disk"></span>
-                  <span class="hidden-xs">&nbsp; Guardar</span>
+                  <span class="hidden-xs">&nbsp;Guardar</span>
                </button>
             </div>
          </div>
@@ -317,21 +317,21 @@
          <li role="presentation" class="active">
             <a href="#lineas_p" aria-controls="lineas_p" role="tab" data-toggle="tab">
                <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-               <span class="hidden-xs">&nbsp; Líneas</span>
+               <span class="hidden-xs">&nbsp;Líneas</span>
                <span class='badge'>{function="count($lineas)"}</span>
             </a>
          </li>
          <li role="presentation">
             <a href="#detalles" aria-controls="detalles" role="tab" data-toggle="tab">
                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-               <span class="hidden-xs">&nbsp; Detalles</span>
+               <span class="hidden-xs">&nbsp;Detalles</span>
             </a>
          </li>
          {if="$fsc->presupuesto->editable"}
          <li role="presentation">
             <a href="#envio" aria-controls="envio" role="tab" data-toggle="tab">
                <span class="glyphicon glyphicon-road" aria-hidden="true"></span>
-               <span class="hidden-xs">&nbsp; Envío</span>
+               <span class="hidden-xs">&nbsp;Envío</span>
             </a>
          </li>
          <li role="presentation">
@@ -565,7 +565,7 @@
                   <div class="col-sm-2">
                      <div class="form-group">
                         {#FS_CIFNIF#}:
-                        <input class="form-control" type="text" name="cifnif" value="{$fsc->presupuesto->cifnif}" autocomplete="off"/>
+                        <input class="form-control" type="text" name="cifnif" value="{$fsc->presupuesto->cifnif}" maxlength="20" autocomplete="off"/>
                      </div>
                   </div>
                   <div class="col-sm-2">
@@ -678,7 +678,7 @@
                   <div class="col-sm-3">
                      <div class="form-group">
                         Código Postal:
-                        <input class="form-control" type="text" name="codpostal" value="{$fsc->presupuesto->codpostal}"/>
+                        <input class="form-control" type="text" name="codpostal" value="{$fsc->presupuesto->codpostal}" maxlength="10" autocomplete="off"/>
                      </div>
                   </div>
                   <div class="col-sm-6">
@@ -690,7 +690,7 @@
                   <div class="col-sm-3">
                      <div class="form-group">
                         <span class="text-capitalize">{#FS_APARTADO#}</span>:
-                        <input class="form-control" type="text" name="apartado" value="{$fsc->presupuesto->apartado}"/>
+                        <input class="form-control" type="text" name="apartado" value="{$fsc->presupuesto->apartado}" maxlength="10" autocomplete="off"/>
                      </div>
                   </div>
                </div>
@@ -1100,7 +1100,7 @@
                {elseif="!in_array('CRM',$GLOBALS['plugins'])"}
                <p class="help-block">
                   Gestiona los contactos del cliente y comunícate con ellos con el
-                  <a href="https://www.facturascripts.com/store/producto/plugin-crm/" target="_blank">plugin CRM</a>.
+                  <a href="https://www.facturascripts.com/plugin/CRM" target="_blank">plugin CRM</a>.
                </p>
                {/if}
             </div>
