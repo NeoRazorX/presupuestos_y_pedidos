@@ -430,7 +430,7 @@
                   {loop="$lineas"}
                   <tr>
                      <td>
-                        <a target="_blank" href="{$value->articulo_url()}">{$value->referencia}</a> {$value->descripcion}
+                        <a target="_blank" href="{$value->articulo_url()}">{$value->referencia}</a> {$value->descripcion()}
                      </td>
                      <td class="text-right">{$value->cantidad}</td>
                      <td class="text-right">{$fsc->show_precio($value->pvpunitario, $fsc->pedido->coddivisa, TRUE, FS_NF0_ART)}</td>

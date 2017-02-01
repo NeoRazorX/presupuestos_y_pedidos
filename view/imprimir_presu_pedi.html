@@ -3,13 +3,9 @@
 <div class="container-fluid">
    <div class="row">
       <div class="col-sm-12">
-         {if="$fsc->pedido"}
+         {if="$fsc->documento"}
          <a href="{$fsc->pedido->url()}" class="btn btn-default">
-            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> &nbsp; Volver
-         </a>
-         {elseif="$fsc->presupuesto"}
-         <a href="{$fsc->presupuesto->url()}" class="btn btn-default">
-            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> &nbsp; Volver
+            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>&nbsp; Volver
          </a>
          {/if}
          <div class="page-header">

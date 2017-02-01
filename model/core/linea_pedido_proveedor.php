@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of FacturaScripts
- * Copyright (C) 2014-2016  Carlos Garcia Gomez       neorazorx@gmail.com
+ * Copyright (C) 2014-2017  Carlos Garcia Gomez       neorazorx@gmail.com
  * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -111,6 +111,11 @@ class linea_pedido_proveedor extends \fs_model
    public function total_iva()
    {
       return $this->pvptotal*(100+$this->iva-$this->irpf+$this->recargo)/100;
+   }
+   
+   public function descripcion()
+   {
+      return nl2br($this->descripcion);
    }
    
    public function show_codigo()
