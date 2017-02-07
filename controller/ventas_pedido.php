@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of FacturaScripts
- * Copyright (C) 2014-2016  Carlos Garcia Gomez       neorazorx@gmail.com
+ * Copyright (C) 2014-2017  Carlos Garcia Gomez       neorazorx@gmail.com
  * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -172,6 +172,13 @@ class ventas_pedido extends fs_controller
       if($this->pedido->idoriginal)
       {
          $pedi->idoriginal = $this->pedido->idoriginal;
+      }
+      
+      /// enlazamos con el ejercicio correcto
+      $ejercicio = $this->ejercicio->get_by_fecha($pedi->fecha);
+      if($ejercicio)
+      {
+         $pedi->codejercicio = $ejercicio->codejercicio;
       }
       
       if( $pedi->save() )
