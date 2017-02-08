@@ -182,6 +182,7 @@ class ventas_presupuesto extends fs_controller
       $presu->hora = $this->hour();
       $presu->femail = NULL;
       $presu->status = 0;
+      $presu->numdocs = 0;
       
       $presu->idoriginal = $this->presupuesto->idpresupuesto;
       if($this->presupuesto->idoriginal)

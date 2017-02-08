@@ -162,6 +162,7 @@ class compras_pedido extends fs_controller
       $pedi->fecha = $this->today();
       $pedi->hora = $this->hour();
       $pedi->editable = TRUE;
+      $pedi->numdocs = 0;
       
       $pedi->idoriginal = $this->pedido->idpedido;
       if($this->pedido->idoriginal)

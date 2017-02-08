@@ -167,6 +167,7 @@ class ventas_pedido extends fs_controller
       $pedi->hora = $this->hour();
       $pedi->femail = NULL;
       $pedi->status = 0;
+      $pedi->numdocs = 0;
       
       $pedi->idoriginal = $this->pedido->idpedido;
       if($this->pedido->idoriginal)
