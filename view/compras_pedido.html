@@ -21,7 +21,13 @@
    tiene_recargo = true;
    {/if}
    
-   $(document).ready(function () {
+   function cambiar_proveedor() {
+      $("#p_cambiar_proveedor").removeClass('hidden');
+      document.f_pedido.ac_proveedor.readOnly = false;
+      document.f_pedido.ac_proveedor.value = '';
+      document.f_pedido.ac_proveedor.focus();
+   }
+   $(document).ready(function() {
       $('#numlineas').val(numlineas);
       usar_serie();
       usar_almacen();
@@ -30,8 +36,8 @@
       $('#ac_proveedor').autocomplete({
          serviceUrl: nueva_compra_url,
          paramName: 'buscar_proveedor',
-         onSelect: function (suggestion) {
-            if (suggestion)
+         onSelect: function(suggestion) {
+            if(suggestion)
             {
                if(document.f_pedido.proveedor.value != suggestion.data && suggestion.data != '')
                {
@@ -209,13 +215,16 @@
             <div class='form-group{if="!$fsc->proveedor_s"} has-warning{/if}'>
                Proveedor actual:
                <div class="input-group">
-                  <input class="form-control" type="text" name="ac_proveedor" id="ac_proveedor" value="{$fsc->pedido->nombre}" placeholder="Buscar" autocomplete="off"/>
-                  <span class="input-group-btn">
-                     <button class="btn btn-default" type="button" onclick="document.f_pedido.ac_proveedor.value = '';document.f_pedido.ac_proveedor.focus();">
+                  <input class="form-control" type="text" name="ac_proveedor" id="ac_proveedor" value="{$fsc->pedido->nombre}" placeholder="Buscar" readonly="" autocomplete="off"/>
+                  <span class="input-group-btn" title="Cambiar proveedor">
+                     <button class="btn btn-default" type="button" onclick="cambiar_proveedor()">
                         <span class="glyphicon glyphicon-edit"></span>
                      </button>
                   </span>
                </div>
+               <p id="p_cambiar_proveedor" class="help-block hidden">
+                  Para cambiar el nombre o el {#FS_CIFNIF#}, pero no el proveedor, ve a la pestaña detalles.
+               </p>
             </div>
          </div>
          {/if}
@@ -477,6 +486,17 @@
             <div class="container-fluid">
                <div class="row">
                   <div class="col-sm-12">
+                     {if="$fsc->pedido->editable"}
+                     <div class="text-right">
+                        <a href="#" class="label label-default" onclick="tiene_recargo=true;recalcular();" title="Mostrar Recargo de Equivalencia">
+                           <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp; RE
+                        </a>
+                        &nbsp;
+                        <a href="#" class="label label-default" onclick="irpf=21;recalcular();" title="Mostrar {#FS_IRPF#}">
+                           <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp; {#FS_IRPF#}
+                        </a>
+                     </div>
+                     {/if}
                      <div class="form-group">
                         Observaciones:
                         <textarea class="form-control" name="observaciones" rows="6">{$fsc->pedido->observaciones}</textarea>
