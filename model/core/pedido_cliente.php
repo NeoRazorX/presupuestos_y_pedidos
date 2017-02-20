@@ -812,6 +812,8 @@ class pedido_cliente extends \fs_model
          $this->db->exec("UPDATE presupuestoscli SET idpedido = NULL, editable = TRUE,"
                  . " status = 0 WHERE idpedido = " . $this->var2str($this->idpedido) . ";");
          
+         $this->new_message(ucfirst(FS_PEDIDO) . ' de venta ' . $this->codigo . " eliminado correctamente.", TRUE);
+         
          return TRUE;
       }
       else
