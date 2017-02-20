@@ -318,7 +318,6 @@ class ventas_pedidos extends fs_controller
       {
          if( $pedido->delete() )
          {
-            $this->new_message(ucfirst(FS_PEDIDO) . ' de venta ' . $pedido->codigo . " eliminado correctamente.", TRUE);
             $this->clean_last_changes();
          }
          else

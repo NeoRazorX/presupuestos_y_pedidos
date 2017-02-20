@@ -801,6 +801,8 @@ class presupuesto_cliente extends \fs_model
 
    public function delete()
    {
+      $this->new_message(ucfirst(FS_PRESUPUESTO) . " de venta " . $this->codigo . " eliminado correctamente.", TRUE);
+
       return $this->db->exec("DELETE FROM " . $this->table_name . " WHERE idpresupuesto = "
               . $this->var2str($this->idpresupuesto) . ";");
    }
