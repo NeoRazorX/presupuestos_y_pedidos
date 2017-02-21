@@ -798,13 +798,16 @@ class presupuesto_cliente extends \fs_model
       else
          return FALSE;
    }
-
+   
+   /**
+    * Elimina el presupuesto de la base de datos.
+    * Devuelve FALSE en caso de fallo, TRUE en caso de éxito.
+    * @return type
+    */
    public function delete()
    {
-      $this->new_message(ucfirst(FS_PRESUPUESTO) . " de venta " . $this->codigo . " eliminado correctamente.", TRUE);
-
-      return $this->db->exec("DELETE FROM " . $this->table_name . " WHERE idpresupuesto = "
-              . $this->var2str($this->idpresupuesto) . ";");
+      $this->new_message(ucfirst(FS_PRESUPUESTO)." de venta ".$this->codigo." eliminado correctamente.");
+      return $this->db->exec("DELETE FROM ".$this->table_name." WHERE idpresupuesto = ".$this->var2str($this->idpresupuesto).";");
    }
    
    /**

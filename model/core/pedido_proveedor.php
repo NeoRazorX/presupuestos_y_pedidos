@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of FacturaScripts
- * Copyright (C) 2014-2016  Carlos Garcia Gomez       neorazorx@gmail.com
+ * Copyright (C) 2014-2017  Carlos Garcia Gomez       neorazorx@gmail.com
  * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -610,12 +610,16 @@ class pedido_proveedor extends \fs_model
       else
          return FALSE;
    }
-
+   
+   /**
+    * Elimina el pedido de la base de datos.
+    * Devuelve FALSE en caso de fallo.
+    * @return type
+    */
    public function delete()
    {
+      $this->new_message(ucfirst(FS_PEDIDO).' de compra '.$this->codigo." eliminado correctamente.");
       return $this->db->exec("DELETE FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($this->idpedido).";");
-      $this->new_message(ucfirst(FS_PEDIDO) . ' de compra ' . $this->codigo . " eliminado correctamente.", TRUE);
-
    }
    
    /**

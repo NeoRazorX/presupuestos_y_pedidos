@@ -803,7 +803,12 @@ class pedido_cliente extends \fs_model
       else
          return FALSE;
    }
-
+   
+   /**
+    * Elimina el pedido de la base de datos.
+    * Devuelve FALSE en caso de fallo.
+    * @return boolean
+    */
    public function delete()
    {
       if( $this->db->exec("DELETE FROM ".$this->table_name." WHERE idpedido = ".$this->var2str($this->idpedido).";") )
@@ -812,8 +817,7 @@ class pedido_cliente extends \fs_model
          $this->db->exec("UPDATE presupuestoscli SET idpedido = NULL, editable = TRUE,"
                  . " status = 0 WHERE idpedido = " . $this->var2str($this->idpedido) . ";");
          
-         $this->new_message(ucfirst(FS_PEDIDO) . ' de venta ' . $this->codigo . " eliminado correctamente.", TRUE);
-         
+         $this->new_message(ucfirst(FS_PEDIDO).' de venta '.$this->codigo." eliminado correctamente.");
          return TRUE;
       }
       else
