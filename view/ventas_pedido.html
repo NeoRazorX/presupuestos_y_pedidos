@@ -115,14 +115,14 @@
                   {/if}
                {/loop}
             </div>
-            {if="$fsc->pedido->idalbaran"}
+            
             <div class="btn-group">
+               {if="$fsc->pedido->idalbaran"}
                <a class="btn btn-sm btn-info text-capitalize" href="{$fsc->pedido->albaran_url()}">
                   <span class="glyphicon glyphicon-eye-open"></span>
-                  <span class="hidden-xs">&nbsp;Ver {#FS_ALBARAN#} {$fsc->albarancod}</span>
+                  <span class="hidden-xs">&nbsp;Ver {#FS_ALBARAN#}</span>
                </a>
-            </div>
-            {else}
+               {else}
                <div class="btn-group">
                   {if="$fsc->pedido->status==0"}
                   <button type="button" class="btn btn-sm btn-warning dropdown-toggle" data-toggle="dropdown">
@@ -167,13 +167,13 @@
                      {/if}
                   </ul>
                </div>
-            {/if}
-            {if="$fsc->historico"}
-            <a href="#" class="btn btn-sm btn-default" data-toggle="modal" data-target="#modal_historico">
-               <span class="fa fa-history"></span>
-               <span class="hidden-xs hidden-sm">&nbsp;Histórico</span>
-            </a>
-            {/if}
+               {/if}
+               {if="$fsc->historico"}
+               <a href="#" class="btn btn-sm btn-default" data-toggle="modal" data-target="#modal_historico" title="Historial del {#FS_PEDIDO#}">
+                  <i class="fa fa-book" aria-hidden="true"></i>
+               </a>
+               {/if}
+            </div>
          </div>
          <div class="col-xs-4 text-right">
             <div class="btn-group">
@@ -1343,64 +1343,38 @@
    <div class="modal-dialog">
       <div class="modal-content">
          <div class="modal-header">
-            <h4 class="modal-title">Histórico del {#FS_PEDIDO#} {$fsc->pedido->codigo}</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">
+               <i class="fa fa-book" aria-hidden="true"></i>
+               Histórico del {#FS_PEDIDO#} {$fsc->pedido->codigo}
+            </h4>
          </div>
-         <div class="modal-body">
-            <div class="panel panel-info">
-               <div class="panel-heading">
-                  Facturación
-               </div>
-               <div class="table-responsive">
-                  <table class="table table-hover">
-                     <thead>
-                        <tr>
-                           <td width="200px">Documento</td>
-                           <td>Fecha</td>
-                           <td>Importe</td>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        {loop="$fsc->historico"}
-                        {if="$value['documento'] != 'contabilidad_asiento'"}
-                        <tr>
-                           <td width="200px"><a href="index.php?page={$value['documento']}&id={$value['id']}" target="_blank">{$value['codigo']}</td>
-                           <td>{$value['fecha']}</td>
-                           <td>{$fsc->show_precio($value['importe'], $value['divisa'])}</a></td>
-                        </tr>
-                        {/if}
-                        {/loop}
-                     </tbody>
-                  </table>
-               </div>
-            </div>
-            <br>
-            <div class="panel panel-warning">
-               <div class="panel-heading">
-                  Contabilidad
-               </div>
-               <div class="table-responsive">
-                  <table class="table table-hover">
-                     <thead>
-                        <tr>
-                           <td width="200px">Documento</td>
-                           <td>Fecha</td>
-                           <td>Importe</td>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        {loop="$fsc->historico"}
-                        {if="$value['documento'] == 'contabilidad_asiento'"}
-                        <tr>
-                           <td width="200px"><a href="index.php?page={$value['documento']}&id={$value['id']}" target="_blank">Asiento {$value['codigo']}</td>
-                           <td>{$value['fecha']}</td>
-                           <td>{$fsc->show_precio($value['importe'], $value['divisa'])}</a></td>
-                        </tr>
-                        {/if}
-                        {/loop}
-                     </tbody>
-                  </table>
-               </div>
-            </div>
+         <div class="table-responsive">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>Tipo</th>
+                     <th>Documento</th>
+                     <th class="text-right">Importe</th>
+                     <th class="text-right">Fecha</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  {loop="$fsc->historico"}
+                  <tr>
+                     <td>{$value['documento']}</td>
+                     <td>
+                        <a href="{$value['modelo']->url()}" target="_blank">{$value['modelo']->codigo}</a>
+                        {if="$value['modelo']->numero2"}{$value['modelo']->numero2}{/if}
+                     </td>
+                     <td class="text-right">{$fsc->show_precio($value['modelo']->total, $value['modelo']->coddivisa)}</td>
+                     <td class="text-right">{$value['modelo']->fecha}</td>
+                  </tr>
+                  {/loop}
+               </tbody>
+            </table>
          </div>
       </div>
    </div>

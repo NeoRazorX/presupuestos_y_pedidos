@@ -18,11 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+require_model('agencia_transporte.php');
+require_model('albaran_cliente.php');
 require_model('articulo.php');
 require_model('cliente.php');
 require_model('divisa.php');
 require_model('ejercicio.php');
 require_model('fabricante.php');
+require_model('factura_cliente.php');
 require_model('familia.php');
 require_model('forma_pago.php');
 require_model('impuesto.php');
@@ -31,8 +34,6 @@ require_model('pais.php');
 require_model('pedido_cliente.php');
 require_model('presupuesto_cliente.php');
 require_model('serie.php');
-require_model('agencia_transporte.php');
-
 
 class ventas_presupuesto extends fs_controller
 {
@@ -48,20 +49,19 @@ class ventas_presupuesto extends fs_controller
    public $familia;
    public $forma_pago;
    public $impuesto;
+   public $historico;
    public $nuevo_presupuesto_url;
    public $pais;
    public $presupuesto;
    public $serie;
    public $setup_validez;
    public $versiones;
-   public $historico;
-   public $pedidocod;
    
    public function __construct()
    {
       parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTO), 'ventas', FALSE, FALSE);
    }
-
+   
    protected function private_core()
    {
       /// ¿El usuario tiene permiso para eliminar en esta página?
@@ -70,7 +70,7 @@ class ventas_presupuesto extends fs_controller
       $this->ppage = $this->page->get('ventas_presupuestos');
       $this->agencia = new agencia_transporte();
       $this->agente = FALSE;
-
+      
       $presupuesto = new presupuesto_cliente();
       $this->presupuesto = FALSE;
       $this->almacen = new almacen();
@@ -87,9 +87,6 @@ class ventas_presupuesto extends fs_controller
       $this->serie = new serie();
       $this->setup_validez = 30;
       $this->configurar_validez();
-      
-      $this->historico = FALSE;
-      $this->pedidocod = FALSE;
       
       /**
        * Comprobamos si el usuario tiene acceso a nueva_venta,
@@ -117,7 +114,6 @@ class ventas_presupuesto extends fs_controller
       if($this->presupuesto)
       {
          $this->page->title = $this->presupuesto->codigo;
-         $this->get_historico();
          
          /// cargamos el agente
          if( !is_null($this->presupuesto->codagente) )
@@ -172,6 +168,7 @@ class ventas_presupuesto extends fs_controller
          }
          
          $this->versiones = $this->presupuesto->get_versiones();
+         $this->get_historico();
       }
       else
       {
@@ -750,90 +747,67 @@ class ventas_presupuesto extends fs_controller
       return $lineas;
    }
    
-   
-   /*
-    * Devuelve un array con el histórico de documentos.
-    */
    private function get_historico()
    {
       $this->historico = array();
-      if ($this->presupuesto->idpedido)
+      $orden = 0;
+      
+      if($this->presupuesto->idpedido)
       {
-      //pedido
-      $sql = "SELECT idpedido,fecha,codigo,total,coddivisa,idalbaran FROM pedidoscli WHERE idpedido =".$this->presupuesto->idpedido.";";
-      $data = $this->db->select($sql);
-      if($data)
-      {
-         foreach($data as $d)
+         /// pedido
+         $sql = "SELECT * FROM pedidoscli WHERE idpedido = ".$this->presupuesto->var2str($this->presupuesto->idpedido)
+                 ." ORDER BY idpedido ASC;";
+         
+         $data = $this->db->select($sql);
+         if($data)
          {
-            $this->historico[] = array(
-                'orden' => '1',
-                'documento' => 'ventas_pedido',
-                'id' => $d['idpedido'],
-                'codigo' => $d['codigo'],
-                'fecha' => Date('d-m-Y', strtotime($d['fecha'])),
-                'importe' => $d['total'],
-                'divisa' => $d['coddivisa']
-            );
-            $this->pedidocod = $d['codigo'];
-
-               if($d['idalbaran'])
+            foreach($data as $d)
+            {
+               $pedido = new pedido_cliente($d);
+               $this->historico[] = array(
+                   'orden' => $orden,
+                   'documento' => 'ventas_pedido',
+                   'modelo' => $pedido
+               );
+               $orden++;
+               
+               if($pedido->idalbaran)
                {
-                  $sql1 = "SELECT idalbaran,fecha,codigo,total,coddivisa,idfactura FROM albaranescli WHERE idalbaran =" . $d['idalbaran'] . ";";
+                  /// albarán
+                  $sql1 = "SELECT * FROM albaranescli WHERE idalbaran = ".$pedido->var2str($pedido->idalbaran)
+                          ." ORDER BY idalbaran ASC;";
+                  
                   $data1 = $this->db->select($sql1);
                   if($data1)
                   {
                      foreach($data1 as $d1)
                      {
+                        $albaran = new albaran_cliente($d1);
                         $this->historico[] = array(
-                            'orden' => '2',
+                            'orden' => $orden,
                             'documento' => 'ventas_albaran',
-                            'id' => $d1['idalbaran'],
-                            'codigo' => $d1['codigo'],
-                            'fecha' => Date('d-m-Y', strtotime($d1['fecha'])),
-                            'importe' => $d1['total'],
-                            'divisa' => $d1['coddivisa']
+                            'modelo' => $albaran
                         );
-
-                        if($d1['idfactura'])
+                        $orden++;
+                        
+                        if($albaran->idfactura)
                         {
-                           $sql2 = "SELECT idfactura,fecha,codigo,total,coddivisa FROM facturascli WHERE idfactura =" . $d1['idfactura'] . ";";
+                           /// factura
+                           $sql2 = "SELECT * FROM facturascli WHERE idfactura = ".$albaran->var2str($albaran->idfactura)
+                                   ." ORDER BY idfactura ASC;";
+                           
                            $data2 = $this->db->select($sql2);
                            if($data2)
                            {
                               foreach($data2 as $d2)
                               {
-                                 $this->historico[''] = array(
-                                     'orden' => '3',
+                                 $factura = new factura_cliente($d2);
+                                 $this->historico[] = array(
+                                     'orden' => $orden,
                                      'documento' => 'ventas_factura',
-                                     'id' => $d2['idfactura'],
-                                     'codigo' => $d2['codigo'],
-                                     'fecha' => Date('d-m-Y', strtotime($d2['fecha'])),
-                                     'importe' => $d2['total'],
-                                     'divisa' => $d2['coddivisa']
+                                     'modelo' => $factura
                                  );
-                                 
-
-                                 if($d2['codigo'])
-                                 {
-                                    $sql3 = "SELECT idasiento,fecha,importe FROM co_asientos WHERE documento = " . $this->empresa->var2str($d2['codigo']) . ";";
-                                    $data3 = $this->db->select($sql3);
-                                    if($data3)
-                                    {
-                                       foreach($data3 as $d3)
-                                       {
-                                          $this->historico[] = array(
-                                              'orden' => '10',
-                                              'documento' => 'contabilidad_asiento',
-                                              'id' => $d3['idasiento'],
-                                              'codigo' => $d3['idasiento'],
-                                              'fecha' => Date('d-m-Y', strtotime($d3['fecha'])),
-                                              'importe' => $d3['importe'],
-                                              'divisa' => $d2['coddivisa']
-                                          );
-                                       }
-                                    }
-                                 }
+                                 $orden++;
                               }
                            }
                         }
@@ -843,13 +817,5 @@ class ventas_presupuesto extends fs_controller
             }
          }
       }
-
-
-      foreach($this->historico as $key => $row)
-      {
-         $aux[$key] = $row['orden'];
-      }
-
-      return array_multisort($aux, SORT_ASC, $this->historico);
    }
 }
