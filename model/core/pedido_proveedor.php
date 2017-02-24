@@ -174,7 +174,7 @@ class pedido_proveedor extends \fs_model
    public $editable;
    
    /**
-    * Número de documentos asjuntos
+    * Número de documentos adjuntos.
     * @var integer 
     */
    public $numdocs;

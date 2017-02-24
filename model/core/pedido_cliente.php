@@ -223,7 +223,7 @@ class pedido_cliente extends \fs_model
    public $envio_codpais;
    
    /**
-    * Número de documentos asjuntos
+    * Número de documentos adjuntos.
     * @var integer 
     */
    public $numdocs;
