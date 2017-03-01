@@ -1331,7 +1331,7 @@
 </div>
 
 <div class="modal" id="modal_historico">
-   <div class="modal-dialog">
+   <div class="modal-dialog modal-lg">
       <div class="modal-content">
          <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -1353,9 +1353,15 @@
                   </tr>
                </thead>
                <tbody>
+                  <tr class="warning">
+                     <td class="text-capitalize">{#FS_PRESUPUESTO#}</td>
+                     <td><b>Este {#FS_PRESUPUESTO#}</b></td>
+                     <td class="text-right">{$fsc->show_precio($fsc->presupuesto->total, $fsc->presupuesto->coddivisa)}</td>
+                     <td class="text-right">{$fsc->presupuesto->fecha}</td>
+                  </tr>
                   {loop="$fsc->historico"}
                   <tr>
-                     <td>{$value['documento']}</td>
+                     <td class="text-capitalize">{$value['documento']}</td>
                      <td>
                         <a href="{$value['modelo']->url()}" target="_blank">{$value['modelo']->codigo}</a>
                         {if="$value['modelo']->numero2"}{$value['modelo']->numero2}{/if}

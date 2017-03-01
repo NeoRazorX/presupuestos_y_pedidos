@@ -766,7 +766,7 @@ class ventas_presupuesto extends fs_controller
                $pedido = new pedido_cliente($d);
                $this->historico[] = array(
                    'orden' => $orden,
-                   'documento' => 'ventas_pedido',
+                   'documento' => FS_PEDIDO,
                    'modelo' => $pedido
                );
                $orden++;
@@ -785,7 +785,7 @@ class ventas_presupuesto extends fs_controller
                         $albaran = new albaran_cliente($d1);
                         $this->historico[] = array(
                             'orden' => $orden,
-                            'documento' => 'ventas_albaran',
+                            'documento' => FS_ALBARAN,
                             'modelo' => $albaran
                         );
                         $orden++;
@@ -804,7 +804,7 @@ class ventas_presupuesto extends fs_controller
                                  $factura = new factura_cliente($d2);
                                  $this->historico[] = array(
                                      'orden' => $orden,
-                                     'documento' => 'ventas_factura',
+                                     'documento' => 'factura',
                                      'modelo' => $factura
                                  );
                                  $orden++;
