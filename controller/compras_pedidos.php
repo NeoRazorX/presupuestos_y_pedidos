@@ -1,7 +1,7 @@
 <?php
 /*
- * This file is part of FacturaScripts
- * Copyright (C) 2014-2016  Carlos Garcia Gomez  neorazorx@gmail.com
+ * This file is part of presupuestos_y_pedidos
+ * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
  * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
