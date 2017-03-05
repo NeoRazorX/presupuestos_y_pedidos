@@ -473,7 +473,7 @@
                                   value="0" onchange="recalcular()" autocomplete="off"/>
                         </td>
                      </tr>
-                     {if="$fsc->user->admin"}
+                     {if="$fsc->user->admin AND FS_DB_HISTORY"}
                      <tr>
                         <td colspan="6"></td>
                         <td class="text-right">{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</td>
