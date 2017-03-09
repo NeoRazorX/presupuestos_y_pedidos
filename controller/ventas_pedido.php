@@ -588,8 +588,9 @@ class ventas_pedido extends fs_controller
       }
       else if( $albaran->save() )
       {
-         $continuar = TRUE;
          $art0 = new articulo();
+         $continuar = TRUE;
+         $trazabilidad = FALSE;
 
          foreach($this->pedido->get_lineas() as $l)
          {
@@ -615,20 +616,23 @@ class ventas_pedido extends fs_controller
             if( $n->save() )
             {
                /// descontamos del stock
-               if( !is_null($n->referencia) )
+               if($n->referencia)
                {
                   $articulo = $art0->get($n->referencia);
                   if($articulo)
                   {
                      $articulo->sum_stock($albaran->codalmacen, 0 - $l->cantidad);
+                     if($articulo->trazabilidad)
+                     {
+                        $trazabilidad = TRUE;
+                     }
                   }
                }
             }
             else
             {
-               $continuar = FALSE;
                $this->new_error_msg("¡Imposible guardar la línea el artículo " . $n->referencia . "! ");
-               break;
+               $continuar = FALSE;
             }
          }
 
@@ -641,7 +645,11 @@ class ventas_pedido extends fs_controller
             {
                $this->new_message("<a href='" . $albaran->url() . "'>" . ucfirst(FS_ALBARAN) . '</a> generado correctamente.');
                
-               if( isset($_POST['facturar']) )
+               if($trazabilidad)
+               {
+                  header('Location: index.php?page=ventas_trazabilidad&doc=albaran&id='.$albaran->idalbaran);
+               }
+               else if( isset($_POST['facturar']) )
                {
                   header('Location: '.$albaran->url().'&facturar='.$_POST['facturar'].'&petid='.$this->random_string());
                }

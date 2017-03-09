@@ -504,9 +504,10 @@ class compras_pedido extends fs_controller
       }
       else if( $albaran->save() )
       {
-         $continuar = TRUE;
          $art0 = new articulo();
-
+         $continuar = TRUE;
+         $trazabilidad = FALSE;
+         
          foreach($this->pedido->get_lineas() as $l)
          {
             $n = new linea_albaran_proveedor();
@@ -534,14 +535,17 @@ class compras_pedido extends fs_controller
                   if($articulo)
                   {
                      $articulo->sum_stock($albaran->codalmacen, $l->cantidad, isset($_POST['costemedio']) );
+                     if($articulo->trazabilidad)
+                     {
+                        $trazabilidad = TRUE;
+                     }
                   }
                }
             }
             else
             {
-               $continuar = FALSE;
                $this->new_error_msg("¡Imposible guardar la línea el artículo " . $n->referencia . "! ");
-               break;
+               $continuar = FALSE;
             }
          }
 
@@ -553,6 +557,10 @@ class compras_pedido extends fs_controller
             if( $this->pedido->save() )
             {
                $this->new_message("<a href='" . $albaran->url() . "'>" . ucfirst(FS_ALBARAN) . '</a> generado correctamente.');
+               if($trazabilidad)
+               {
+                  header('Location: index.php?page=compras_trazabilidad&doc=albaran&id='.$albaran->idalbaran);
+               }
             }
             else
             {
