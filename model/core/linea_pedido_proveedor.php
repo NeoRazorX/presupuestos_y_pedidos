@@ -42,16 +42,67 @@ class linea_pedido_proveedor extends \fs_model
    public $idpedido;
    
    public $cantidad;
+   
+   /**
+    * Código del impuesto relacionado.
+    * @var type 
+    */
    public $codimpuesto;
    public $descripcion;
+   
+   /**
+    * % de descuento.
+    * @var type 
+    */
    public $dtopor;
+   
+   /**
+    * % de retención IRPF
+    * @var type 
+    */
    public $irpf;
+   
+   /**
+    * % del impuesto relacionado.
+    * @var type 
+    */
    public $iva;
+   
+   /**
+    * Importe neto sin descuento, es decir, pvpunitario * cantidad.
+    * @var type 
+    */
    public $pvpsindto;
+   
+   /**
+    * Importe neto de la linea, sin impuestos.
+    * @var type 
+    */
    public $pvptotal;
+   
+   /**
+    * Precio de un unidad.
+    * @var type 
+    */
    public $pvpunitario;
+   
+   /**
+    * % de recargo de equivalencia RE.
+    * @var type 
+    */
    public $recargo;
+   
+   /**
+    * Referencia del artículo.
+    * @var type 
+    */
    public $referencia;
+   
+   /**
+    * Código de la combinación seleccionada, en el caso de los artículos con atributos.
+    * @var type 
+    */
+   public $codcombinacion;
    
    private static $pedidos;
    
@@ -79,6 +130,7 @@ class linea_pedido_proveedor extends \fs_model
          $this->pvpunitario = floatval($l['pvpunitario']);
          $this->recargo = floatval($l['recargo']);
          $this->referencia = $l['referencia'];
+         $this->codcombinacion = $l['codcombinacion'];
       }
       else
       {
@@ -95,6 +147,7 @@ class linea_pedido_proveedor extends \fs_model
          $this->pvpunitario = 0;
          $this->recargo = 0;
          $this->referencia = NULL;
+         $this->codcombinacion = NULL;
       }
    }
    
@@ -256,6 +309,7 @@ class linea_pedido_proveedor extends \fs_model
                     .", pvpunitario = ".$this->var2str($this->pvpunitario)
                     .", recargo = ".$this->var2str($this->recargo)
                     .", referencia = ".$this->var2str($this->referencia)
+                    .", codcombinacion = ".$this->var2str($this->codcombinacion)
                     ."  WHERE idlinea = ".$this->var2str($this->idlinea).";";
             
             return $this->db->exec($sql);
@@ -263,7 +317,7 @@ class linea_pedido_proveedor extends \fs_model
          else
          {
             $sql = "INSERT INTO ".$this->table_name." (cantidad,codimpuesto,descripcion,dtopor,
-               idpedido,irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia)
+               idpedido,irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,codcombinacion)
                VALUES (".$this->var2str($this->cantidad)
                     .",".$this->var2str($this->codimpuesto)
                     .",".$this->var2str($this->descripcion)
@@ -275,7 +329,8 @@ class linea_pedido_proveedor extends \fs_model
                     .",".$this->var2str($this->pvptotal)
                     .",".$this->var2str($this->pvpunitario)
                     .",".$this->var2str($this->recargo)
-                    .",".$this->var2str($this->referencia).");";
+                    .",".$this->var2str($this->referencia)
+                    .",".$this->var2str($this->codcombinacion).");";
             
             if( $this->db->exec($sql) )
             {

@@ -523,6 +523,10 @@ class ventas_presupuesto extends fs_controller
                      if($art0)
                      {
                         $linea->referencia = $art0->referencia;
+                        if($_POST['codcombinacion_' . $num])
+                        {
+                           $linea->codcombinacion = $_POST['codcombinacion_' . $num];
+                        }
                      }
                      
                      if( $linea->save() )
@@ -650,6 +654,7 @@ class ventas_presupuesto extends fs_controller
             $n->pvpunitario = $l->pvpunitario;
             $n->recargo = $l->recargo;
             $n->referencia = $l->referencia;
+            $n->codcombinacion = $l->codcombinacion;
             $n->orden = $l->orden;
             $n->mostrar_cantidad = $l->mostrar_cantidad;
             $n->mostrar_precio = $l->mostrar_precio;

@@ -403,7 +403,7 @@ class compras_pedido extends fs_controller
                         $linea->recargo = floatval($_POST['recargo_' . $num]);
                      }
                      
-                     $linea->irpf = floatval($_POST['irpf_'.$num]);
+                     $linea->irpf = floatval($_POST['irpf_' . $num]);
                      $linea->cantidad = floatval($_POST['cantidad_' . $num]);
                      $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
                      $linea->dtopor = floatval($_POST['dto_' . $num]);
@@ -414,6 +414,10 @@ class compras_pedido extends fs_controller
                      if($art0)
                      {
                         $linea->referencia = $art0->referencia;
+                        if($_POST['codcombinacion_' . $num])
+                        {
+                           $linea->codcombinacion = $_POST['codcombinacion_' . $num];
+                        }
                      }
                      
                      if( $linea->save() )
@@ -525,6 +529,7 @@ class compras_pedido extends fs_controller
             $n->pvpunitario = $l->pvpunitario;
             $n->recargo = $l->recargo;
             $n->referencia = $l->referencia;
+            $n->codcombinacion = $l->codcombinacion;
 
             if( $n->save() )
             {
@@ -534,7 +539,7 @@ class compras_pedido extends fs_controller
                   $articulo = $art0->get($n->referencia);
                   if($articulo)
                   {
-                     $articulo->sum_stock($albaran->codalmacen, $l->cantidad, isset($_POST['costemedio']) );
+                     $articulo->sum_stock($albaran->codalmacen, $l->cantidad, isset($_POST['costemedio']), $l->codcombinacion);
                      if($articulo->trazabilidad)
                      {
                         $trazabilidad = TRUE;

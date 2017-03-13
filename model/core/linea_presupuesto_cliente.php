@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of presupuestos_y_pedidos
- * Copyright (C) 2014-2016    Carlos Garcia Gomez        neorazorx@gmail.com
+ * Copyright (C) 2014-2017    Carlos Garcia Gomez        neorazorx@gmail.com
  * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -42,19 +42,84 @@ class linea_presupuesto_cliente extends \fs_model
    public $idpresupuesto;
    
    public $cantidad;
+   
+   /**
+    * Código del impuesto relacionado.
+    * @var type 
+    */
    public $codimpuesto;
    public $descripcion;
+   
+   /**
+    * % de descuento.
+    * @var type 
+    */
    public $dtopor;
+   
+   /**
+    * % de retención IRPF.
+    * @var type 
+    */
    public $irpf;
+   
+   /**
+    * % del impuesto relacionado.
+    * @var type 
+    */
    public $iva;
+   
+   /**
+    * Importe neto sin descuento, es decir, pvpunitario * cantidad.
+    * @var type 
+    */
    public $pvpsindto;
+   
+   /**
+    * Importe neto de la linea, sin impuestos.
+    * @var type 
+    */
    public $pvptotal;
+   
+   /**
+    * Precio de una unidad.
+    * @var type 
+    */
    public $pvpunitario;
+   
+   /**
+    * % de recargo de equivalencia.
+    * @var type 
+    */
    public $recargo;
+   
+   /**
+    * Referencia del artículo.
+    * @var type 
+    */
    public $referencia;
    
+   /**
+    * Código de la combinación seleccionada, en el caso de los artículos con atributos.
+    * @var type 
+    */
+   public $codcombinacion;
+   
+   /**
+    * Posición de la linea en el documento. Cuanto más alto más abajo.
+    * @var type 
+    */
    public $orden;
+   
+   /**
+    * False -> no se muestra la columna cantidad al imprimir.
+    * @var type 
+    */
    public $mostrar_cantidad;
+   
+   /**
+    * False -> no se muestran las columnas precio, descuento, impuestos y total al imprimir.
+    * @var type 
+    */
    public $mostrar_precio;
    
    private static $presupuestos;
@@ -83,6 +148,7 @@ class linea_presupuesto_cliente extends \fs_model
          $this->pvpunitario = floatval($l['pvpunitario']);
          $this->recargo = floatval($l['recargo']);
          $this->referencia = $l['referencia'];
+         $this->codcombinacion = $l['codcombinacion'];
          $this->orden = intval($l['orden']);
          $this->mostrar_cantidad = $this->str2bool($l['mostrar_cantidad']);
          $this->mostrar_precio = $this->str2bool($l['mostrar_precio']);
@@ -102,6 +168,7 @@ class linea_presupuesto_cliente extends \fs_model
          $this->pvpunitario = 0;
          $this->recargo = 0;
          $this->referencia = NULL;
+         $this->codcombinacion = NULL;
          $this->orden = 0;
          $this->mostrar_cantidad = TRUE;
          $this->mostrar_precio = TRUE;
@@ -266,6 +333,7 @@ class linea_presupuesto_cliente extends \fs_model
                     .", pvpunitario = ".$this->var2str($this->pvpunitario)
                     .", recargo = ".$this->var2str($this->recargo)
                     .", referencia = ".$this->var2str($this->referencia)
+                    .", codcombinacion = ".$this->var2str($this->codcombinacion)
                     .", orden = ".$this->var2str($this->orden)
                     .", mostrar_cantidad = ".$this->var2str($this->mostrar_cantidad)
                     .", mostrar_precio = ".$this->var2str($this->mostrar_precio)
@@ -276,8 +344,8 @@ class linea_presupuesto_cliente extends \fs_model
          else
          {
             $sql = "INSERT INTO ".$this->table_name." (cantidad,codimpuesto,descripcion,dtopor,
-               idpresupuesto,irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,orden,
-               mostrar_cantidad,mostrar_precio) VALUES 
+               idpresupuesto,irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,codcombinacion,
+               orden,mostrar_cantidad,mostrar_precio) VALUES 
                       (".$this->var2str($this->cantidad)
                     .",".$this->var2str($this->codimpuesto)
                     .",".$this->var2str($this->descripcion)
@@ -290,6 +358,7 @@ class linea_presupuesto_cliente extends \fs_model
                     .",".$this->var2str($this->pvpunitario)
                     .",".$this->var2str($this->recargo)
                     .",".$this->var2str($this->referencia)
+                    .",".$this->var2str($this->codcombinacion)
                     .",".$this->var2str($this->orden)
                     .",".$this->var2str($this->mostrar_cantidad)
                     .",".$this->var2str($this->mostrar_precio).");";

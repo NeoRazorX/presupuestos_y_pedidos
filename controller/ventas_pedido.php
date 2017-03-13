@@ -473,6 +473,10 @@ class ventas_pedido extends fs_controller
                      if($art0)
                      {
                         $linea->referencia = $art0->referencia;
+                        if($_POST['codcombinacion_' . $num])
+                        {
+                           $linea->codcombinacion = $_POST['codcombinacion_' . $num];
+                        }
                      }
                      
                      if( $linea->save() )
@@ -609,6 +613,7 @@ class ventas_pedido extends fs_controller
             $n->pvpunitario = $l->pvpunitario;
             $n->recargo = $l->recargo;
             $n->referencia = $l->referencia;
+            $n->codcombinacion = $l->codcombinacion;
             $n->orden = $l->orden;
             $n->mostrar_cantidad = $l->mostrar_cantidad;
             $n->mostrar_precio = $l->mostrar_precio;
@@ -621,7 +626,7 @@ class ventas_pedido extends fs_controller
                   $articulo = $art0->get($n->referencia);
                   if($articulo)
                   {
-                     $articulo->sum_stock($albaran->codalmacen, 0 - $l->cantidad);
+                     $articulo->sum_stock($albaran->codalmacen, 0 - $l->cantidad, FALSE, $l->codcombinacion);
                      if($articulo->trazabilidad)
                      {
                         $trazabilidad = TRUE;
