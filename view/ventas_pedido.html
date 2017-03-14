@@ -15,7 +15,6 @@
    all_series = {function="json_encode($fsc->serie->all())"};
    cliente = {function="json_encode($fsc->cliente_s)"};
    nueva_venta_url = '{$fsc->nuevo_pedido_url}';
-   kiwimaru_url = '{#FS_COMMUNITY_URL#}/index.php?page=kiwimaru';
    
    {if="$fsc->cliente_s"}
    all_direcciones = {function="json_encode($fsc->cliente_s->get_direcciones())"};
@@ -388,6 +387,7 @@
                         <td>
                            <input type="hidden" name="idlinea_{$counter}" value="{$value->idlinea}"/>
                            <input type="hidden" name="referencia_{$counter}" value="{$value->referencia}"/>
+                           <input type="hidden" name="codcombinacion_{$counter}" value="{$value->codcombinacion}"/>
                            {if="$value->idlineapresupuesto"}
                            <div class="input-group">
                               <a target="_blank" href="index.php?page=ventas_presupuesto&id={$value->idpresupuesto}" class="input-group-addon" title="ver {#FS_PRESUPUESTO#}">P</a>
@@ -474,7 +474,7 @@
                                   value="0" onchange="recalcular()" autocomplete="off"/>
                         </td>
                      </tr>
-                     {if="$fsc->user->admin"}
+                     {if="$fsc->user->admin AND FS_DB_HISTORY"}
                      <tr>
                         <td colspan="6"></td>
                         <td class="text-right">{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</td>
@@ -959,11 +959,6 @@
             <li id="li_mis_articulos">
                <a href="#" id="b_mis_articulos">Mi catálogo</a>
             </li>
-            <li id="li_kiwimaru">
-               <a href="#" id="b_kiwimaru">
-                  <span class="glyphicon glyphicon-globe"></span>
-               </a>
-            </li>
             <li id="li_nuevo_articulo">
                <a href="#" id="b_nuevo_articulo">
                   <span class="glyphicon glyphicon-plus"></span>&nbsp; Nuevo
@@ -971,7 +966,6 @@
             </li>
          </ul>
          <div id="search_results"></div>
-         <div id="kiwimaru_results"></div>
          <div id="nuevo_articulo" class="modal-body" style="display: none;">
             <form name="f_nuevo_articulo" action="{$fsc->url()}" method="post" class="form">
                <div class="container-fluid">
@@ -1340,7 +1334,7 @@
 </div>
 
 <div class="modal" id="modal_historico">
-   <div class="modal-dialog">
+   <div class="modal-dialog modal-lg">
       <div class="modal-content">
          <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -1362,9 +1356,15 @@
                   </tr>
                </thead>
                <tbody>
+                  <tr class="warning">
+                     <td class="text-capitalize">{#FS_PEDIDO#}</td>
+                     <td><b>Este {#FS_PEDIDO#}</b></td>
+                     <td class="text-right">{$fsc->show_precio($fsc->pedido->total, $fsc->pedido->coddivisa)}</td>
+                     <td class="text-right">{$fsc->pedido->fecha}</td>
+                  </tr>
                   {loop="$fsc->historico"}
                   <tr>
-                     <td>{$value['documento']}</td>
+                     <td class="text-capitalize">{$value['documento']}</td>
                      <td>
                         <a href="{$value['modelo']->url()}" target="_blank">{$value['modelo']->codigo}</a>
                         {if="$value['modelo']->numero2"}{$value['modelo']->numero2}{/if}

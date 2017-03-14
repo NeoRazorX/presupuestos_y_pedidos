@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of FacturaScripts
+ * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017  Carlos Garcia Gomez       neorazorx@gmail.com
  * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
@@ -473,6 +473,10 @@ class ventas_pedido extends fs_controller
                      if($art0)
                      {
                         $linea->referencia = $art0->referencia;
+                        if($_POST['codcombinacion_' . $num])
+                        {
+                           $linea->codcombinacion = $_POST['codcombinacion_' . $num];
+                        }
                      }
                      
                      if( $linea->save() )
@@ -588,8 +592,9 @@ class ventas_pedido extends fs_controller
       }
       else if( $albaran->save() )
       {
-         $continuar = TRUE;
          $art0 = new articulo();
+         $continuar = TRUE;
+         $trazabilidad = FALSE;
 
          foreach($this->pedido->get_lineas() as $l)
          {
@@ -608,6 +613,7 @@ class ventas_pedido extends fs_controller
             $n->pvpunitario = $l->pvpunitario;
             $n->recargo = $l->recargo;
             $n->referencia = $l->referencia;
+            $n->codcombinacion = $l->codcombinacion;
             $n->orden = $l->orden;
             $n->mostrar_cantidad = $l->mostrar_cantidad;
             $n->mostrar_precio = $l->mostrar_precio;
@@ -615,20 +621,23 @@ class ventas_pedido extends fs_controller
             if( $n->save() )
             {
                /// descontamos del stock
-               if( !is_null($n->referencia) )
+               if($n->referencia)
                {
                   $articulo = $art0->get($n->referencia);
                   if($articulo)
                   {
-                     $articulo->sum_stock($albaran->codalmacen, 0 - $l->cantidad);
+                     $articulo->sum_stock($albaran->codalmacen, 0 - $l->cantidad, FALSE, $l->codcombinacion);
+                     if($articulo->trazabilidad)
+                     {
+                        $trazabilidad = TRUE;
+                     }
                   }
                }
             }
             else
             {
-               $continuar = FALSE;
                $this->new_error_msg("¡Imposible guardar la línea el artículo " . $n->referencia . "! ");
-               break;
+               $continuar = FALSE;
             }
          }
 
@@ -641,7 +650,11 @@ class ventas_pedido extends fs_controller
             {
                $this->new_message("<a href='" . $albaran->url() . "'>" . ucfirst(FS_ALBARAN) . '</a> generado correctamente.');
                
-               if( isset($_POST['facturar']) )
+               if($trazabilidad)
+               {
+                  header('Location: index.php?page=ventas_trazabilidad&doc=albaran&id='.$albaran->idalbaran);
+               }
+               else if( isset($_POST['facturar']) )
                {
                   header('Location: '.$albaran->url().'&facturar='.$_POST['facturar'].'&petid='.$this->random_string());
                }
@@ -721,7 +734,7 @@ class ventas_pedido extends fs_controller
             $presupuesto = new presupuesto_cliente($d);
             $this->historico[] = array(
                 'orden' => $orden,
-                'documento' => 'ventas_presupuesto',
+                'documento' => FS_PRESUPUESTO,
                 'modelo' => $presupuesto
             );
             $orden++;
@@ -741,7 +754,7 @@ class ventas_pedido extends fs_controller
                $albaran = new albaran_cliente($d1);
                $this->historico[] = array(
                    'orden' => $orden,
-                   'documento' => 'ventas_albaran',
+                   'documento' => FS_ALBARAN,
                    'modelo' => $albaran
                );
                $orden++;
@@ -759,7 +772,7 @@ class ventas_pedido extends fs_controller
                         $factura = new factura_cliente($d2);
                         $this->historico[] = array(
                             'orden' => $orden,
-                            'documento' => 'ventas_factura',
+                            'documento' => 'factura',
                             'modelo' => $factura
                         );
                         $orden++;
