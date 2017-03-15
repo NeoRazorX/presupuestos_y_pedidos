@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of FacturaScripts
+ * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -521,7 +521,11 @@ class imprimir_presu_pedi extends fs_controller
       {
          $direccion .= ' - CP: '.$this->documento->codpostal;
       }
-      $direccion .= ' - '.$this->documento->ciudad.' ('.$this->documento->provincia.')';
+      $direccion .= ' - '.$this->documento->ciudad;
+      if($this->documento->provincia)
+      {
+         $direccion .= ' ('.$this->documento->provincia.')';
+      }
       $row = array(
           'campo1' => "<b>Dirección:</b>",
           'dato1' => $pdf_doc->fix_html($direccion),

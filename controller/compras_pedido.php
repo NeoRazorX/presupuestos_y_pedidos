@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of FacturaScripts
+ * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017  Carlos Garcia Gomez       neorazorx@gmail.com
  * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
@@ -403,7 +403,7 @@ class compras_pedido extends fs_controller
                         $linea->recargo = floatval($_POST['recargo_' . $num]);
                      }
                      
-                     $linea->irpf = floatval($_POST['irpf_'.$num]);
+                     $linea->irpf = floatval($_POST['irpf_' . $num]);
                      $linea->cantidad = floatval($_POST['cantidad_' . $num]);
                      $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
                      $linea->dtopor = floatval($_POST['dto_' . $num]);
@@ -414,6 +414,10 @@ class compras_pedido extends fs_controller
                      if($art0)
                      {
                         $linea->referencia = $art0->referencia;
+                        if($_POST['codcombinacion_' . $num])
+                        {
+                           $linea->codcombinacion = $_POST['codcombinacion_' . $num];
+                        }
                      }
                      
                      if( $linea->save() )
@@ -504,9 +508,10 @@ class compras_pedido extends fs_controller
       }
       else if( $albaran->save() )
       {
-         $continuar = TRUE;
          $art0 = new articulo();
-
+         $continuar = TRUE;
+         $trazabilidad = FALSE;
+         
          foreach($this->pedido->get_lineas() as $l)
          {
             $n = new linea_albaran_proveedor();
@@ -524,6 +529,7 @@ class compras_pedido extends fs_controller
             $n->pvpunitario = $l->pvpunitario;
             $n->recargo = $l->recargo;
             $n->referencia = $l->referencia;
+            $n->codcombinacion = $l->codcombinacion;
 
             if( $n->save() )
             {
@@ -533,15 +539,18 @@ class compras_pedido extends fs_controller
                   $articulo = $art0->get($n->referencia);
                   if($articulo)
                   {
-                     $articulo->sum_stock($albaran->codalmacen, $l->cantidad, isset($_POST['costemedio']) );
+                     $articulo->sum_stock($albaran->codalmacen, $l->cantidad, isset($_POST['costemedio']), $l->codcombinacion);
+                     if($articulo->trazabilidad)
+                     {
+                        $trazabilidad = TRUE;
+                     }
                   }
                }
             }
             else
             {
-               $continuar = FALSE;
                $this->new_error_msg("¡Imposible guardar la línea el artículo " . $n->referencia . "! ");
-               break;
+               $continuar = FALSE;
             }
          }
 
@@ -553,6 +562,10 @@ class compras_pedido extends fs_controller
             if( $this->pedido->save() )
             {
                $this->new_message("<a href='" . $albaran->url() . "'>" . ucfirst(FS_ALBARAN) . '</a> generado correctamente.');
+               if($trazabilidad)
+               {
+                  header('Location: index.php?page=compras_trazabilidad&doc=albaran&id='.$albaran->idalbaran);
+               }
             }
             else
             {
