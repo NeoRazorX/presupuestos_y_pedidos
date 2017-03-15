@@ -2,6 +2,7 @@
 /*
  * This file is part of FacturaScripts
  * Copyright (C) 2015-2016  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2017 Luis Miguel Pérez Romero (PCREDNET) luismipr@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -19,9 +20,27 @@
 
 require_model('presupuesto_cliente.php');
 require_model('pedido_cliente.php');
+require_model('cliente.php');
+require_model('proveedor.php');
+require_model('forma_pago.php');
+
 
 class informe_presupuestos extends fs_controller
 {
+   public $resultados;
+   
+   public $desde;
+   public $hasta;
+   public $estado;
+   public $forma_pago;
+   public $cliente;
+   public $proveedor;
+   public $agente;
+   public $almacen;
+   public $serie;
+   public $divisa;
+   
+
    public function __construct()
    {
       parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTOS), 'informes', FALSE, TRUE);
@@ -29,262 +48,81 @@ class informe_presupuestos extends fs_controller
    
    protected function private_core()
    {
-      /// declaramos los objetos sólo para asegurarnos de que existen las tablas
-      $presupuesto = new presupuesto_cliente();
-      $pedido = new pedido_cliente();
-   }
-   
-   public function stats_last_days()
-   {
-      $stats = array();
+      $this->desde = '';
+      $this->hasta = '';
+      $this->estado = '';
+      $this->cliente = new cliente();
+      $this->proveedor = new proveedor();
+      $this->almacen = new almacen();
+      $this->serie = new serie();
+      $this->divisa = new divisa();
+      $this->forma_pago = new forma_pago();
+      $this->agente = new agente();
       
-      $stats_pre = $this->stats_last_days_aux('presupuestoscli');
-      foreach($stats_pre as $i => $value)
+      
+      //recogemos valores
+      if (isset($_REQUEST['desde']))
       {
-         $stats[$i] = array(
-             'day' => $value['day'],
-             'total_pre' => round($value['total'], FS_NF0),
-             'total_ped' => 0
-         );
+         $this->desde = $_REQUEST['desde'];
+      }
+      if (isset($_REQUEST['hasta']))
+      {
+         $this->hasta = $_REQUEST['hasta'];
+      }
+      if (isset($_REQUEST['estado']))
+      {
+         $this->estado = $_REQUEST['estado'];
+      }
+      if (isset($_REQUEST['codcliente']) && $_REQUEST['codcliente'] != '')
+      {
+         $cli0 = new cliente();
+         $this->cliente = $cli0->get($_REQUEST['codcliente']);
+      }
+      if (isset($_REQUEST['codproveedor']) && $_REQUEST['codproveedor'] != '')
+      {
+         $prov0 = new proveedor();
+         $this->proveedor = $prov0->get($_REQUEST['codproveedor']);
+      }
+      if (isset($_REQUEST['codalmacen']) && $_REQUEST['codalmacen'] != '')
+      {
+         $alm0 = new almacen();
+         $this->almacen = $alm0->get($_REQUEST['codalmacen']);
       }
       
-      $stats_ped = $this->stats_last_days_aux('pedidoscli');
-      foreach($stats_ped as $i => $value)
+      $codserie = FALSE;
+      if(isset($_REQUEST['codserie']) && $_REQUEST['codserie'] != '')
       {
-         $stats[$i]['total_ped'] = round($value['total'], FS_NF0);
-      }
-      
-      return $stats;
-   }
-   
-   private function stats_last_days_aux($table_name = 'presupuestoscli', $numdays = 25)
-   {
-      $stats = array();
-      $desde = Date('d-m-Y', strtotime( Date('d-m-Y').'-'.$numdays.' day'));
-      
-      /// inicializamos los resultados
-      foreach($this->date_range($desde, Date('d-m-Y'), '+1 day', 'd') as $date)
-      {
-         $i = intval($date);
-         $stats[$i] = array('day' => $i, 'total' => 0);
-      }
-      
-      if( strtolower(FS_DB_TYPE) == 'postgresql')
-      {
-         $sql_aux = "to_char(fecha,'FMDD')";
-      }
-      else
-         $sql_aux = "DATE_FORMAT(fecha, '%d')";
-      
-      /// primero consultamos la divisa de la empresa
-      $data = $this->db->select("SELECT ".$sql_aux." as dia, sum(neto) as total FROM ".$table_name
-              ." WHERE fecha >= ".$this->empresa->var2str($desde)
-              ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-              ." AND coddivisa = ".$this->empresa->var2str($this->empresa->coddivisa)
-              ." GROUP BY ".$sql_aux." ORDER BY dia ASC;");
-      if($data)
-      {
-         foreach($data as $d)
+         $ser0 = new serie();
+         $this->serie = $ser0->get($_REQUEST['codserie']);
+         $codserie = FALSE;
+         if ($this->serie)
          {
-            $i = intval($d['dia']);
-            $stats[$i]['total'] = floatval($d['total']);
+            $codserie = $this->serie->codserie;
          }
       }
-      
-      /// ahora consultamos las demás divisas
-      $data = $this->db->select("SELECT ".$sql_aux." as dia, sum(neto/tasaconv) as total FROM ".$table_name
-              ." WHERE fecha >= ".$this->empresa->var2str($desde)
-              ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-              ." AND coddivisa != ".$this->empresa->var2str($this->empresa->coddivisa)
-              ." GROUP BY ".$sql_aux." ORDER BY dia ASC;");
-      if($data)
+      if (isset($_REQUEST['coddivisa']) && $_REQUEST['coddivisa'] != '')
       {
-         foreach($data as $d)
-         {
-            $i = intval($d['dia']);
-            $stats[$i]['total'] += $this->euro_convert( floatval($d['total']) );
-         }
+         $div0 = new divisa;
+         $this->divisa = $div0->get($_REQUEST['coddivisa']);
       }
+      if (isset($_REQUEST['codpago']) && $_REQUEST['codpago'] != '')
+      {
+         $fp0 = new forma_pago();
+         $this->forma_pago = $fp0->get($_REQUEST['codpago']);
+      }
+      if (isset($_REQUEST['codagente']) && $_REQUEST['codagente'] != '')
+      {
+         $age0 = new agente();
+         $this->agente = $age0->get($_REQUEST['codagente']);
+      }
+         
       
-      return $stats;
+      
+      //resultados
+      $pre0 = new presupuesto_cliente();
+      $this->resultados = $pre0->all_desde($this->desde, $this->hasta, $codserie);
+      //print_r($this->resultados);
    }
    
-   public function stats_last_months()
-   {
-      $stats = array();
-      $stats_pre = $this->stats_last_months_aux('presupuestoscli');
-      $meses = array(
-          1 => 'ene',
-          2 => 'feb',
-          3 => 'mar',
-          4 => 'abr',
-          5 => 'may',
-          6 => 'jun',
-          7 => 'jul',
-          8 => 'ago',
-          9 => 'sep',
-          10 => 'oct',
-          11 => 'nov',
-          12 => 'dic'
-      );
-      
-      foreach($stats_pre as $i => $value)
-      {
-         $stats[$i] = array(
-             'month' => $meses[ $value['month'] ],
-             'total_pre' => round($value['total'], FS_NF0),
-             'total_ped' => 0
-         );
-      }
-      
-      $stats_ped = $this->stats_last_months_aux('pedidoscli');
-      foreach($stats_ped as $i => $value)
-      {
-         $stats[$i]['total_ped'] = round($value['total'], FS_NF0);
-      }
-      
-      return $stats;
-   }
    
-   private function stats_last_months_aux($table_name = 'presupuestoscli', $num = 11)
-   {
-      $stats = array();
-      $desde = Date('d-m-Y', strtotime( Date('1-m-Y').'-'.$num.' month'));
-      
-      /// inicializamos los resultados
-      foreach($this->date_range($desde, Date('d-m-Y'), '+1 month', 'm') as $date)
-      {
-         $i = intval($date);
-         $stats[$i] = array('month' => $i, 'total' => 0);
-      }
-      
-      if( strtolower(FS_DB_TYPE) == 'postgresql')
-      {
-         $sql_aux = "to_char(fecha,'FMMM')";
-      }
-      else
-         $sql_aux = "DATE_FORMAT(fecha, '%m')";
-      
-      /// primero consultamos con la divisa de la empresa
-      $data = $this->db->select("SELECT ".$sql_aux." as mes, sum(neto) as total FROM ".$table_name
-              ." WHERE fecha >= ".$this->empresa->var2str($desde)
-              ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-              ." AND coddivisa = ".$this->empresa->var2str($this->empresa->coddivisa)
-              ." GROUP BY ".$sql_aux." ORDER BY mes ASC;");
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $i = intval($d['mes']);
-            $stats[$i]['total'] = floatval($d['total']);
-         }
-      }
-      
-      /// ahora consultamos el resto de divisas
-      $data = $this->db->select("SELECT ".$sql_aux." as mes, sum(neto/tasaconv) as total FROM ".$table_name
-              ." WHERE fecha >= ".$this->empresa->var2str($desde)
-              ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-              ." AND coddivisa != ".$this->empresa->var2str($this->empresa->coddivisa)
-              ." GROUP BY ".$sql_aux." ORDER BY mes ASC;");
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $i = intval($d['mes']);
-            $stats[$i]['total'] += $this->euro_convert( floatval($d['total']) );
-         }
-      }
-      
-      return $stats;
-   }
-   
-   public function stats_last_years()
-   {
-      $stats = array();
-      
-      $stats_pre = $this->stats_last_years_aux('presupuestoscli');
-      foreach($stats_pre as $i => $value)
-      {
-         $stats[$i] = array(
-             'year' => $value['year'],
-             'total_pre' => round($value['total'], FS_NF0),
-             'total_ped' => 0
-         );
-      }
-      
-      $stats_ped = $this->stats_last_years_aux('pedidoscli');
-      foreach($stats_ped as $i => $value)
-      {
-         $stats[$i]['total_ped'] = round($value['total'], FS_NF0);
-      }
-      
-      return $stats;
-   }
-   
-   private function stats_last_years_aux($table_name = 'presupuestoscli', $num = 4)
-   {
-      $stats = array();
-      $desde = Date('d-m-Y', strtotime( Date('d-m-Y').'-'.$num.' year'));
-      
-      /// inicializamos los resultados
-      foreach($this->date_range($desde, Date('d-m-Y'), '+1 year', 'Y') as $date)
-      {
-         $i = intval($date);
-         $stats[$i] = array('year' => $i, 'total' => 0);
-      }
-      
-      if( strtolower(FS_DB_TYPE) == 'postgresql')
-      {
-         $sql_aux = "to_char(fecha,'FMYYYY')";
-      }
-      else
-         $sql_aux = "DATE_FORMAT(fecha, '%Y')";
-      
-      /// primero consultamos con la divisa de la empresa
-      $data = $this->db->select("SELECT ".$sql_aux." as ano, sum(neto) as total FROM ".$table_name
-              ." WHERE fecha >= ".$this->empresa->var2str($desde)
-              ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-              ." AND coddivisa = ".$this->empresa->var2str($this->empresa->coddivisa)
-              ." GROUP BY ".$sql_aux." ORDER BY ano ASC;");
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $i = intval($d['ano']);
-            $stats[$i]['total'] = floatval($d['total']);
-         }
-      }
-      
-      /// ahora consultamos el resto de divisas
-      $data = $this->db->select("SELECT ".$sql_aux." as ano, sum(neto/tasaconv) as total FROM ".$table_name
-              ." WHERE fecha >= ".$this->empresa->var2str($desde)
-              ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-              ." AND coddivisa != ".$this->empresa->var2str($this->empresa->coddivisa)
-              ." GROUP BY ".$sql_aux." ORDER BY ano ASC;");
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $i = intval($d['ano']);
-            $stats[$i]['total'] += $this->euro_convert( floatval($d['total']) );
-         }
-      }
-      
-      return $stats;
-   }
-   
-   private function date_range($first, $last, $step = '+1 day', $format = 'd-m-Y' )
-   {
-      $dates = array();
-      $current = strtotime($first);
-      $last = strtotime($last);
-      
-      while( $current <= $last )
-      {
-         $dates[] = date($format, $current);
-         $current = strtotime($step, $current);
-      }
-      
-      return $dates;
-   }
 }

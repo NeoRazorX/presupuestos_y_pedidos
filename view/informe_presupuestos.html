@@ -1,121 +1,155 @@
 {include="header"}
 
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
-   // Load the Visualization API and the piechart package.
-   google.load('visualization', '1.0', {'packages':['corechart']});
-   
-   // Set a callback to run when the Google Visualization API is loaded.
-   google.setOnLoadCallback(drawChart);
-   
-   // Callback that creates and populates a data table,
-   // instantiates the pie chart, passes in the data and
-   // draws it.
-   function drawChart()
-   {
-      // Create the data table.
-      var data = new google.visualization.DataTable();
-      data.addColumn('string', 'día');
-      data.addColumn('number', '{#FS_PRESUPUESTOS#} {$fsc->simbolo_divisa()}');
-      data.addColumn('number', '{#FS_PEDIDOS#} {$fsc->simbolo_divisa()}');
-      data.addRows([
-      {loop="$fsc->stats_last_days()"}
-         ['{$value['day']}', {$value['total_pre']}, {$value['total_ped']}],
-      {/loop}
-      ]);
-      
-      // Instantiate and draw our chart, passing in some options.
-      var chart = new google.visualization.ColumnChart(document.getElementById('chart_presupuestos_day'));
-      chart.draw(data);
-      
-      // Create the data table.
-      var data2 = new google.visualization.DataTable();
-      data2.addColumn('string', 'mes');
-      data2.addColumn('number', '{#FS_PRESUPUESTOS#} {$fsc->simbolo_divisa()}');
-      data2.addColumn('number', '{#FS_PEDIDOS#} {$fsc->simbolo_divisa()}');
-      data2.addRows([
-      {loop="$fsc->stats_last_months()"}
-         ['{$value['month']}', {$value['total_pre']}, {$value['total_ped']}],
-      {/loop}
-      ]);
-      
-      // Instantiate and draw our chart, passing in some options.
-      var chart2 = new google.visualization.AreaChart(document.getElementById('chart_presupuestos_month'));
-      chart2.draw(data2);
-      
-      // Create the data table.
-      var data3 = new google.visualization.DataTable();
-      data3.addColumn('string', 'año');
-      data3.addColumn('number', '{#FS_PRESUPUESTOS#} {$fsc->simbolo_divisa()}');
-      data3.addColumn('number', '{#FS_PEDIDOS#} {$fsc->simbolo_divisa()}');
-      data3.addRows([
-      {loop="$fsc->stats_last_years()"}
-         ['{$value['year']}', {$value['total_pre']}, {$value['total_ped']}],
-      {/loop}
-      ]);
-      
-      // Instantiate and draw our chart, passing in some options.
-      var chart3 = new google.visualization.AreaChart(document.getElementById('chart_presupuestos_year'));
-      chart3.draw(data3);
-   }
-</script>
+<script type="text/javascript" src="{#FS_PATH#}view/js/charts.js" charset="UTF-8"></script>
 
 <div class="container-fluid">
    <div class="row">
       <div class="col-sm-12">
          <div class="page-header">
             <h1>
-               <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
-               Informe de {#FS_PRESUPUESTOS#}
-               <a class="btn btn-xs btn-default" href="{$fsc->url()}" title="Recargar la página">
-                  <span class="glyphicon glyphicon-refresh"></span>
-               </a>
+               <i class="fa fa-pie-chart" aria-hidden="true"></i> Informe de presupuestos
                <span class="btn-group">
-               {loop="$fsc->extensions"}
-                  {if="$value->type=='button'"}
-                  <a href="index.php?page={$value->from}{$value->params}" class="btn btn-xs btn-default">{$value->text}</a>
+                  <a class="btn btn-xs btn-default" href="{$fsc->url()}" title="Recargar la página">
+                     <span class="glyphicon glyphicon-refresh"></span>
+                  </a>
+                  {if="$fsc->page->is_default()"}
+                  <a class="btn btn-xs btn-default active" href="{$fsc->url()}&amp;default_page=FALSE" title="desmarcar como página de inicio">
+                     <span class="glyphicon glyphicon-home"></span>
+                  </a>
+                  {else}
+                  <a class="btn btn-xs btn-default" href="{$fsc->url()}&amp;default_page=TRUE" title="marcar como página de inicio">
+                     <span class="glyphicon glyphicon-home"></span>
+                  </a>
                   {/if}
-               {/loop}
                </span>
             </h1>
          </div>
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title"><span class="text-capitalize">{#FS_PRESUPUESTOS#}</span> de los últimos días</h3>
+      </div>
+   </div>
+   <form action="{$fsc->url()}" method="post" class="form">
+      <div class="row">
+         <div class="col-sm-2">
+            <label>Estado</label>
+            <div class="form-group">
+               <div class="input-group">
+                  <span class="input-group-addon">
+                     <i class="fa fa-pie-chart" aria-hidden="true"></i>
+                  </span>
+                  <select name="estado" class="form-control" onchange="this.form.submit()">
+                     <option value="" {if="!$fsc->estado"} selected=""{/if}> Todos </option>
+                     <option value="0" {if="$fsc->estado=='0'"} selected=""{/if}> Pendientes </option>
+                     <option value="1" {if="$fsc->estado=='1'"} selected=""{/if}> Aprobados </option>
+                     <option value="2" {if="$fsc->estado=='2'"} selected=""{/if}> Rechazados </option>
+                  </select>
+               </div>
             </div>
-            <div class="panel-body">
-               <div id="chart_presupuestos_day" style="height: 250px;"></div>
-               <p class="help-block">Se muestran valores <b>netos</b>, es decir, sin impuestos.</p>
+         </div>
+         <div class="col-sm-2">
+             <label>Empleado</label>
+            <div class="form-group">
+               <select name="codagente" class="form-control" onchange="this.form.submit()">
+                  <option value="">Cualquier empleado</option>
+                  <option value="">------</option>
+                  {loop="$fsc->agente->all()"}
+                     {if="$value->codagente==$fsc->agente->codagente"}
+                     <option value="{$value->codagente}" selected="">{$value->get_fullname()}</option>
+                     {else}
+                     <option value="{$value->codagente}">{$value->get_fullname()}</option>
+                     {/if}
+                  {/loop}
+               </select>
+            </div>
+         </div>
+         <div class="col-sm-2">
+             <label>Desde</label>
+            <div class="form-group">
+               <div class="input-group">
+                  <span class="input-group-addon">
+                     <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+                  <input type="text" name="desde" value="{$fsc->desde}" class="form-control datepicker" placeholder="desde" autocomplete="off" onchange="this.form.submit()"/>
+               </div>
+            </div>
+         </div>
+         <div class="col-sm-2">
+             <label>Hasta</label>
+            <div class="form-group">
+               <div class="input-group">
+                  <span class="input-group-addon">
+                     <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+                  <input type="text" name="hasta" value="{$fsc->hasta}" class="form-control datepicker" placeholder="hasta" autocomplete="off" onchange="this.form.submit()"/>
+               </div>
             </div>
          </div>
       </div>
-   </div>
-   <div class="row">
-      <div class="col-sm-12">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title"><span class="text-capitalize">{#FS_PRESUPUESTOS#}</span> de los últimos meses</h3>
+      <div class="row">
+         <div class="col-sm-2">
+             <label>Forma de pago</label>
+            <div class="form-group">
+               <select name="codpago" class="form-control" onchange="this.form.submit()">
+                  <option value="">Todas</option>
+                  <option value="">------</option>
+                  {loop="$fsc->forma_pago->all()"}
+                     {if="$value->codpago==$fsc->forma_pago->codpago"}
+                     <option value="{$value->codpago}" selected="">{$value->descripcion}</option>
+                     {else}
+                     <option value="{$value->codpago}">{$value->descripcion}</option>
+                     {/if}
+                  {/loop}
+               </select>
             </div>
-            <div class="panel-body">
-               <div id="chart_presupuestos_month" style="height: 350px;"></div>
-               <p class="help-block">Se muestran valores <b>netos</b>, es decir, sin impuestos.</p>
+         </div>
+         <div class="col-sm-2">
+             <label>Divisa</label>
+            <div class="form-group">
+               <select name="coddivisa" class="form-control" onchange="this.form.submit()">
+                  <option value="">Todas</option>
+                  <option value="">------</option>
+                  {loop="$fsc->divisa->all()"}
+                     {if="$value->coddivisa==$fsc->divisa->coddivisa"}
+                     <option value="{$value->coddivisa}" selected="">{$value->descripcion}</option>
+                     {else}
+                     <option value="{$value->coddivisa}">{$value->descripcion}</option>
+                     {/if}
+                  {/loop}
+               </select>
+            </div>
+         </div>
+         <div class="col-sm-2">
+             <label>Serie</label>
+            <div class="form-group">
+               <select name="codserie" class="form-control" onchange="this.form.submit()">
+                  <option value="">Todas</option>
+                  <option value="">------</option>
+                  {loop="$fsc->serie->all()"}
+                     {if="$value->codserie==$fsc->serie->codserie"}
+                     <option value="{$value->codserie}" selected="">{$value->descripcion}</option>
+                     {else}
+                     <option value="{$value->codserie}">{$value->descripcion}</option>
+                     {/if}
+                  {/loop}
+               </select>
+            </div>
+         </div>
+         <div class="col-sm-2">
+             <label>Almacén</label>
+            <div class="form-group">
+               <select name="codalmacen" class="form-control" onchange="this.form.submit()">
+                  <option value="">Todos</option>
+                  <option value="">------</option>
+                  {loop="$fsc->almacen->all()"}
+                     {if="$value->codalmacen==$fsc->almacen->codalmacen"}
+                     <option value="{$value->codalmacen}" selected="">{$value->nombre}</option>
+                     {else}
+                     <option value="{$value->codalmacen}">{$value->nombre}</option>
+                     {/if}
+                  {/loop}
+               </select>
             </div>
          </div>
       </div>
-   </div>
-   <div class="row">
-      <div class="col-sm-12">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title"><span class="text-capitalize">{#FS_PRESUPUESTOS#}</span> de los últimos años</h3>
-            </div>
-            <div class="panel-body">
-               <div id="chart_presupuestos_year" style="height: 350px;"></div>
-               <p class="help-block">Se muestran valores <b>netos</b>, es decir, sin impuestos.</p>
-            </div>
-         </div>
-      </div>
-   </div>
+   </form>      
 </div>
 
 {include="footer"}
