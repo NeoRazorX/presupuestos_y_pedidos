@@ -653,7 +653,7 @@ class imprimir_presu_pedi extends fs_controller
       }
    }
    
-   private function generar_pdf_presupuesto($archivo = FALSE)
+   public function generar_pdf_presupuesto($archivo = FALSE)
    {
       if( !$archivo )
       {
@@ -782,7 +782,7 @@ class imprimir_presu_pedi extends fs_controller
       }
    }
    
-   private function generar_pdf_pedido_proveedor($archivo = FALSE)
+   public function generar_pdf_pedido_proveedor($archivo = FALSE)
    {
       if( !$archivo )
       {
@@ -893,7 +893,7 @@ class imprimir_presu_pedi extends fs_controller
          return $ref;
    }
    
-   private function generar_pdf_pedido($archivo = FALSE)
+   public function generar_pdf_pedido($archivo = FALSE)
    {
       if( !$archivo )
       {
