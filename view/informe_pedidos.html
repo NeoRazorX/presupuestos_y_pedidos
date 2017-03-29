@@ -213,8 +213,13 @@
                   </thead>
                   {loop="$fsc->stats_agentes()"}
                   <tr>
-                     <td>{$value['txt']}</td>
-                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                     {if="$value['txt']=='Ninguno'"}
+                        <td class="warning">Ninguno</td>
+                        <td class="warning text-right">{$fsc->show_precio($value['total'])}</td>
+                     {else}
+                        <td>{$value['txt']}</td>
+                        <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                     {/if}
                   </tr>
                   {else}
                   <tr class="warning">
@@ -243,8 +248,13 @@
                   </thead>
                   {loop="$fsc->stats_agentes('pedidoscli')"}
                   <tr>
-                     <td>{$value['txt']}</td>
-                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                     {if="$value['txt']=='Ninguno'"}
+                        <td class="warning">Ninguno</td>
+                        <td class="warning text-right">{$fsc->show_precio($value['total'])}</td>
+                     {else}
+                        <td>{$value['txt']}</td>
+                        <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                     {/if}
                   </tr>
                   {else}
                   <tr class="warning">

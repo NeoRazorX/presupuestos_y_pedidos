@@ -288,20 +288,30 @@ class informe_pedidos extends fs_controller
       {
          foreach($data as $d)
          {
-            $agente = $this->agente->get($d['codagente']);
-            if($agente)
+            if( is_null($d['codagente']) )
             {
                $stats[] = array(
-                   'txt' => $agente->get_fullname(),
+                   'txt' => 'Ninguno',
                    'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
                );
             }
             else
             {
-               $stats[] = array(
-                   'txt' => $d['codagente'],
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
-               );
+               $agente = $this->agente->get($d['codagente']);
+               if($agente)
+               {
+                  $stats[] = array(
+                      'txt' => $agente->get_fullname(),
+                      'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                  );
+               }
+               else
+               {
+                  $stats[] = array(
+                      'txt' => $d['codagente'],
+                      'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                  );
+               }
             }
          }
       }
