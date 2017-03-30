@@ -26,6 +26,7 @@ require_model('cuenta_banco.php');
 require_model('cuenta_banco_cliente.php');
 require_model('forma_pago.php');
 require_model('impuesto.php');
+require_model('pais.php');
 require_model('pedido_cliente.php');
 require_model('pedido_proveedor.php');
 require_model('presupuesto_cliente.php');
@@ -526,6 +527,15 @@ class imprimir_presu_pedi extends fs_controller
       {
          $direccion .= ' ('.$this->documento->provincia.')';
       }
+      if($this->documento->codpais != $this->empresa->codpais)
+      {
+         $pais0 = new pais();
+         $pais = $pais0->get($this->documento->codpais);
+         if($pais)
+         {
+            $direccion .= ' '.$pais->nombre;
+         }
+      }
       $row = array(
           'campo1' => "<b>Dirección:</b>",
           'dato1' => $pdf_doc->fix_html($direccion),
@@ -643,7 +653,7 @@ class imprimir_presu_pedi extends fs_controller
       }
    }
    
-   private function generar_pdf_presupuesto($archivo = FALSE)
+   public function generar_pdf_presupuesto($archivo = FALSE)
    {
       if( !$archivo )
       {
@@ -772,7 +782,7 @@ class imprimir_presu_pedi extends fs_controller
       }
    }
    
-   private function generar_pdf_pedido_proveedor($archivo = FALSE)
+   public function generar_pdf_pedido_proveedor($archivo = FALSE)
    {
       if( !$archivo )
       {
@@ -883,7 +893,7 @@ class imprimir_presu_pedi extends fs_controller
          return $ref;
    }
    
-   private function generar_pdf_pedido($archivo = FALSE)
+   public function generar_pdf_pedido($archivo = FALSE)
    {
       if( !$archivo )
       {

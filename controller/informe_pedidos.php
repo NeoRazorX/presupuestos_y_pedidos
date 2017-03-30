@@ -1,7 +1,9 @@
 <?php
+
 /*
  * This file is part of presupuestos_y_pedidos
- * Copyright (C) 2015-2017  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2015-2017    Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2017         Itaca Software Libre  contacta@itacaswl.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -17,12 +19,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+require_model('almacen.php');
+require_model('cliente.php');
+require_model('divisa.php');
+require_model('forma_pago.php');
 require_model('pedido_cliente.php');
 require_model('pedido_proveedor.php');
+require_model('proveedor.php');
+require_model('serie.php');
 
 class informe_pedidos extends fs_controller
 {
-   public $prestashop;
+   public $agente;
+   public $almacen;
+   public $codagente;
+   public $codalmacen;
+   public $coddivisa;
+   public $codpago;
+   public $codserie;
+   public $divisa;
+   public $desde;
+	public $forma_pago;
+   public $hasta;
+   public $mostrar;
+   public $pedidos_cli;
+   public $pedidos_pro;
+   public $serie;
+   
+	private $where;
    
    public function __construct()
    {
@@ -32,122 +56,97 @@ class informe_pedidos extends fs_controller
    protected function private_core()
    {
       /// declaramos los objetos sólo para asegurarnos de que existen las tablas
-      $pedido_cli = new pedido_cliente();
-      $pedido_pro = new pedido_proveedor();
+      $this->pedido_cli = new pedido_cliente();
+      $this->pedido_pro = new pedido_proveedor();
       
-      $this->prestashop = $this->db->table_exists('ps_orders');
+      $this->agente = new agente();
+      $this->almacen = new almacen();
+		$this->divisa = new divisa();
+		$this->forma_pago = new forma_pago();
+      $this->serie = new serie();
+      
+      $this->mostrar = 'general';
+      if( isset($_REQUEST['mostrar']) )
+      {
+         $this->mostrar = $_REQUEST['mostrar'];
+      }
+      
+      $this->desde = Date('01-01-Y');
+      if( isset($_REQUEST['desde']) )
+      {
+         $this->desde = $_REQUEST['desde'];
+      }
+      
+      $this->hasta = Date('t-m-Y');
+      if( isset($_REQUEST['hasta']) )
+      {
+         $this->hasta = $_REQUEST['hasta'];
+      }  
+      
+      $this->codserie = FALSE;
+      if( isset($_REQUEST['codserie']) )
+      {
+         $this->codserie = $_REQUEST['codserie'];
+      }
+      
+      $this->codpago = FALSE;
+      if( isset($_REQUEST['codpago']) )
+      {
+         $this->codpago = $_REQUEST['codpago'];
+      }
+      
+      $this->codagente = FALSE;
+      if( isset($_REQUEST['codagente']) )
+      {
+         $this->codagente = $_REQUEST['codagente'];
+      }
+      
+      $this->codalmacen = FALSE; 
+      if( isset($_REQUEST['codalmacen']) )
+      {
+         $this->codalmacen = $_REQUEST['codalmacen'];
+      }
+
+      $this->coddivisa = $this->empresa->coddivisa;
+      if( isset($_REQUEST['coddivisa']) )
+      {
+         $this->coddivisa = $_REQUEST['coddivisa'];
+      }
+      
+      $this->set_where();
    }
    
-   public function stats_last_days()
+   private function set_where()
    {
-      $stats = array();
-      $stats_cli = $this->stats_last_days_aux('pedidoscli');
-      $stats_pro = $this->stats_last_days_aux('pedidosprov');
+      $this->where = " WHERE fecha >= ".$this->empresa->var2str($this->desde)
+              ." AND fecha <= ".$this->empresa->var2str($this->hasta);
       
-      foreach($stats_cli as $i => $value)
+		if($this->codserie)
       {
-         $stats[$i] = array(
-             'day' => $value['day'],
-             'total_cli' => round($value['total'], FS_NF0),
-             'total_pro' => 0
-         );
+			$this->where .= " AND codserie = ".$this->empresa->var2str($this->codserie);
+      }
+
+		if($this->codagente)
+      {
+			$this->where .= " AND codagente = ".$this->empresa->var2str($this->codagente);
+      }
+
+		if($this->codalmacen)
+      {
+			$this->where .= " AND coddivisa = ".$this->empresa->var2str($this->coddivisa);
       }
       
-      foreach($stats_pro as $i => $value)
+		if($this->coddivisa)
       {
-         $stats[$i]['total_pro'] = round($value['total'], FS_NF0);
-      }
-      
-      if($this->prestashop)
-      {
-         $stats_ps = $this->stats_last_days_aux('ps_orders');
-         foreach($stats_ps as $i => $value)
-         {
-            $stats[$i]['total_ps'] = round($value['total'], FS_NF0);
-         }
-      }
-      
-      return $stats;
+         $this->where .= " AND coddivisa = ".$this->empresa->var2str($this->coddivisa);
+		}
    }
-   
-   private function stats_last_days_aux($table_name = 'pedidoscli', $numdays = 25)
+
+   public function stats_months()
    {
       $stats = array();
-      $desde = Date('d-m-Y', strtotime( Date('d-m-Y').'-'.$numdays.' day'));
-      
-      /// inicializamos los resultados
-      foreach($this->date_range($desde, Date('d-m-Y'), '+1 day', 'd') as $date)
-      {
-         $i = intval($date);
-         $stats[$i] = array('day' => $i, 'total' => 0);
-      }
-      
-      if( strtolower(FS_DB_TYPE) == 'postgresql')
-      {
-         $sql_aux = "to_char(fecha,'FMDD')";
-      }
-      else
-         $sql_aux = "DATE_FORMAT(fecha, '%d')";
-      
-      if($table_name == 'ps_orders')
-      {
-         $sql = "SELECT ".$sql_aux." as dia, SUM(totaliva) as total FROM ".$table_name
-                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
-                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-                 ." GROUP BY ".$sql_aux." ORDER BY dia ASC;";
-         $data = $this->db->select($sql);
-         if($data)
-         {
-            foreach($data as $d)
-            {
-               $i = intval($d['dia']);
-               $stats[$i]['total'] = floatval($d['total']);
-            }
-         }
-      }
-      else
-      {
-         /// primero consultamos con la divisa de la empresa
-         $sql = "SELECT ".$sql_aux." as dia, SUM(neto) as total FROM ".$table_name
-                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
-                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-                 ." AND coddivisa = ".$this->empresa->var2str($this->empresa->coddivisa)
-                 ." GROUP BY ".$sql_aux." ORDER BY dia ASC;";
-         $data = $this->db->select($sql);
-         if($data)
-         {
-            foreach($data as $d)
-            {
-               $i = intval($d['dia']);
-               $stats[$i]['total'] = floatval($d['total']);
-            }
-         }
-         
-         /// primero consultamos con la divisa de la empresa
-         $sql = "SELECT ".$sql_aux." as dia, SUM(neto/tasaconv) as total FROM ".$table_name
-                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
-                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-                 ." AND coddivisa != ".$this->empresa->var2str($this->empresa->coddivisa)
-                 ." GROUP BY ".$sql_aux." ORDER BY dia ASC;";
-         $data = $this->db->select($sql);
-         if($data)
-         {
-            foreach($data as $d)
-            {
-               $i = intval($d['dia']);
-               $stats[$i]['total'] += $this->euro_convert( floatval($d['total']) );
-            }
-         }
-      }
-      
-      return $stats;
-   }
-   
-   public function stats_last_months()
-   {
-      $stats = array();
-      $stats_cli = $this->stats_last_months_aux('pedidoscli');
-      $stats_pro = $this->stats_last_months_aux('pedidosprov');
+      $stats_cli = $this->stats_months_aux('pedidoscli');
+      $stats_pro = $this->stats_months_aux('pedidosprov');
       $meses = array(
           1 => 'ene',
           2 => 'feb',
@@ -165,8 +164,17 @@ class informe_pedidos extends fs_controller
       
       foreach($stats_cli as $i => $value)
       {
+      	$mesletra = "";
+      	$ano = "";
+      	
+      	if( !empty($value['month']) )
+      	{
+	      	$mesletra = $meses[intval(substr((string)$value['month'], 0, strlen((string)$value['month'])-2))];
+	      	$ano = substr((string)$value['month'], -2);
+      	}
+	
          $stats[$i] = array(
-             'month' => $meses[ $value['month'] ],
+             'month' => $mesletra.$ano , 
              'total_cli' => round($value['total'], FS_NF0),
              'total_pro' => 0
          );
@@ -177,25 +185,15 @@ class informe_pedidos extends fs_controller
          $stats[$i]['total_pro'] = round($value['total'], FS_NF0);
       }
       
-      if($this->prestashop)
-      {
-         $stats_ps = $this->stats_last_months_aux('ps_orders');
-         foreach($stats_ps as $i => $value)
-         {
-            $stats[$i]['total_ps'] = round($value['total'], FS_NF0);
-         }
-      }
-      
       return $stats;
    }
    
-   private function stats_last_months_aux($table_name = 'pedidoscli', $num = 11)
+   private function stats_months_aux($table_name = 'pedidoscli')
    {
       $stats = array();
-      $desde = Date('d-m-Y', strtotime( Date('1-m-Y').'-'.$num.' month'));
       
       /// inicializamos los resultados
-      foreach($this->date_range($desde, Date('d-m-Y'), '+1 month', 'm') as $date)
+      foreach($this->date_range($this->desde, $this->hasta, '+1 month', 'my') as $date)
       {
          $i = intval($date);
          $stats[$i] = array('month' => $i, 'total' => 0);
@@ -203,164 +201,25 @@ class informe_pedidos extends fs_controller
       
       if( strtolower(FS_DB_TYPE) == 'postgresql')
       {
-         $sql_aux = "to_char(fecha,'FMMM')";
-      }
-      else
-         $sql_aux = "DATE_FORMAT(fecha, '%m')";
-      
-      if($table_name == 'ps_orders')
-      {
-         $sql = "SELECT ".$sql_aux." as mes, SUM(totaliva) as total FROM ".$table_name
-                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
-                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-                 ." GROUP BY ".$sql_aux." ORDER BY mes ASC;";
-         $data = $this->db->select($sql);
-         if($data)
-         {
-            foreach($data as $d)
-            {
-               $i = intval($d['mes']);
-               $stats[$i]['total'] = floatval($d['total']);
-            }
-         }
+         $sql_aux = "to_char(fecha,'FMMMYY')";
+
       }
       else
       {
-         /// primero consultamos la divisa de la empresa
-         $sql = "SELECT ".$sql_aux." as mes, SUM(neto) as total FROM ".$table_name
-                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
-                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-                 ." AND coddivisa = ".$this->empresa->var2str($this->empresa->coddivisa)
-                 ." GROUP BY ".$sql_aux." ORDER BY mes ASC;";
-         $data = $this->db->select($sql);
-         if($data)
+         $sql_aux = "DATE_FORMAT(fecha, '%m%y')";
+      }
+
+      /// primero consultamos la divisa de la empresa
+      $sql = "SELECT ".$sql_aux." as mes, SUM(neto) as total FROM ".$table_name
+              .$this->where." GROUP BY ".$sql_aux." ORDER BY mes ASC;";
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $d)
          {
-            foreach($data as $d)
-            {
-               $i = intval($d['mes']);
-               $stats[$i]['total'] = floatval($d['total']);
-            }
-         }
-         
-         /// ahora consultamos el resto de divisas
-         $sql = "SELECT ".$sql_aux." as mes, SUM(neto/tasaconv) as total FROM ".$table_name
-                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
-                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-                 ." AND coddivisa != ".$this->empresa->var2str($this->empresa->coddivisa)
-                 ." GROUP BY ".$sql_aux." ORDER BY mes ASC;";
-         $data = $this->db->select($sql);
-         if($data)
-         {
-            foreach($data as $d)
-            {
-               $i = intval($d['mes']);
-               $stats[$i]['total'] += $this->euro_convert( floatval($d['total']) );
-            }
-         }
-      }
-      
-      return $stats;
-   }
-   
-   public function stats_last_years()
-   {
-      $stats = array();
-      $stats_cli = $this->stats_last_years_aux('pedidoscli');
-      $stats_pro = $this->stats_last_years_aux('pedidosprov');
-      
-      foreach($stats_cli as $i => $value)
-      {
-         $stats[$i] = array(
-             'year' => $value['year'],
-             'total_cli' => round($value['total'], FS_NF0),
-             'total_pro' => 0
-         );
-      }
-      
-      foreach($stats_pro as $i => $value)
-      {
-         $stats[$i]['total_pro'] = round($value['total'], FS_NF0);
-      }
-      
-      if($this->prestashop)
-      {
-         $stats_ps = $this->stats_last_years_aux('ps_orders');
-         foreach($stats_ps as $i => $value)
-         {
-            $stats[$i]['total_ps'] = round($value['total'], FS_NF0);
-         }
-      }
-      
-      return $stats;
-   }
-   
-   private function stats_last_years_aux($table_name = 'pedidoscli', $num = 4)
-   {
-      $stats = array();
-      $desde = Date('d-m-Y', strtotime( Date('d-m-Y').'-'.$num.' year'));
-      
-      /// inicializamos los resultados
-      foreach($this->date_range($desde, Date('d-m-Y'), '+1 year', 'Y') as $date)
-      {
-         $i = intval($date);
-         $stats[$i] = array('year' => $i, 'total' => 0);
-      }
-      
-      if( strtolower(FS_DB_TYPE) == 'postgresql')
-      {
-         $sql_aux = "to_char(fecha,'FMYYYY')";
-      }
-      else
-         $sql_aux = "DATE_FORMAT(fecha, '%Y')";
-      
-      if($table_name == 'ps_orders')
-      {
-         $sql = "SELECT ".$sql_aux." as ano, SUM(totaliva) as total FROM ".$table_name
-                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
-                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-                 ." GROUP BY ".$sql_aux." ORDER BY ano ASC;";
-         $data = $this->db->select($sql);
-         if($data)
-         {
-            foreach($data as $d)
-            {
-               $i = intval($d['ano']);
-               $stats[$i]['total'] = floatval($d['total']);
-            }
-         }
-      }
-      else
-      {
-         /// primero consultamos en la divisa de la empresa
-         $sql = "SELECT ".$sql_aux." as ano, SUM(neto) as total FROM ".$table_name
-                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
-                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-                 ." AND coddivisa = ".$this->empresa->var2str($this->empresa->coddivisa)
-                 ." GROUP BY ".$sql_aux." ORDER BY ano ASC;";
-         $data = $this->db->select($sql);
-         if($data)
-         {
-            foreach($data as $d)
-            {
-               $i = intval($d['ano']);
-               $stats[$i]['total'] = floatval($d['total']);
-            }
-         }
-         
-         /// ahora consultamos en el resto de divisas
-         $sql = "SELECT ".$sql_aux." as ano, SUM(neto/tasaconv) as total FROM ".$table_name
-                 ." WHERE fecha >= ".$this->empresa->var2str($desde)
-                 ." AND fecha <= ".$this->empresa->var2str(Date('d-m-Y'))
-                 ." AND coddivisa != ".$this->empresa->var2str($this->empresa->coddivisa)
-                 ." GROUP BY ".$sql_aux." ORDER BY ano ASC;";
-         $data = $this->db->select($sql);
-         if($data)
-         {
-            foreach($data as $d)
-            {
-               $i = intval($d['ano']);
-               $stats[$i]['total'] += $this->euro_convert( floatval($d['total']) );
-            }
+            $i = intval($d['mes']);
+            $stats[$i]['total'] = floatval($d['total']);
          }
       }
       
@@ -380,5 +239,151 @@ class informe_pedidos extends fs_controller
       }
       
       return $dates;
+   } 
+
+   public function stats_series($tabla = 'pedidosprov')
+   {
+      $stats = array();
+      
+      $sql  = "select codserie,sum(neto) as total from ".$tabla;
+		$sql .= $this->where;
+      $sql .= " group by codserie order by total desc;";
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $serie = $this->serie->get($d['codserie']);
+            if($serie)
+            {
+               $stats[] = array(
+                   'txt' => $serie->descripcion,
+                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+               );
+            }
+            else
+            {
+               $stats[] = array(
+                   'txt' => $d['codserie'],
+                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+               );
+            }
+         }
+      }
+      
+      return $stats;
+   }
+
+   public function stats_agentes($tabla = 'pedidosprov')
+   {
+      $stats = array();
+      
+      $sql  = "select codagente,sum(neto) as total from ".$tabla;
+		$sql .= $this->where;
+      $sql .= " group by codagente order by total desc;";
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            if( is_null($d['codagente']) )
+            {
+               $stats[] = array(
+                   'txt' => 'Ninguno',
+                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+               );
+            }
+            else
+            {
+               $agente = $this->agente->get($d['codagente']);
+               if($agente)
+               {
+                  $stats[] = array(
+                      'txt' => $agente->get_fullname(),
+                      'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                  );
+               }
+               else
+               {
+                  $stats[] = array(
+                      'txt' => $d['codagente'],
+                      'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                  );
+               }
+            }
+         }
+      }
+      
+      return $stats;
+   }
+   
+   public function stats_almacenes($tabla = 'pedidosprov')
+   {
+      $stats = array();
+      
+      $sql  = "select codalmacen,sum(neto) as total from ".$tabla;
+		$sql .= $this->where;
+		$sql .= " group by codalmacen order by total desc;"; 
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $alma = $this->almacen->get($d['codalmacen']);
+            if($alma)
+            {
+               $stats[] = array(
+                   'txt' => $alma->nombre,
+                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+               );
+            }
+            else
+            {
+               $stats[] = array(
+                   'txt' => $d['codalmacen'],
+                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+               );
+            }
+         }
+      }
+      
+      return $stats;
+   }
+
+   public function stats_formas_pago($tabla = 'pedidosprov')
+   {
+      $stats = array();
+      
+      $sql  = "select codpago,sum(neto) as total from ".$tabla;
+		$sql .= $this->where;
+      $sql .=" group by codpago order by total desc;";
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $formap = $this->forma_pago->get($d['codpago']);
+            if($formap)
+            {
+               $stats[] = array(
+                   'txt' => $formap->descripcion,
+                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+               );
+            }
+            else
+            {
+               $stats[] = array(
+                   'txt' => $d['codpago'],
+                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+               );
+            }
+         }
+      }
+      
+      return $stats;
    }
 }
