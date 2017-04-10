@@ -392,72 +392,86 @@ class informe_pedidos extends fs_controller
       
 		if($tabla == 'pedidoscli')
 		{
-	      $sql  = "select status,sum(neto) as total from ".$tabla;
-			$sql .= $this->where;					
-      	$sql .=" group by status order by total desc;";
+	      $stats = $this->stats_estado_pedidoscli();
       }
       else
       {
-	      $sql  = "select idalbaran,sum(neto) as total from ".$tabla;
+         /// aprobados
+	      $sql  = "select sum(neto) as total from ".$tabla;
 			$sql .= $this->where;
-      	$sql .=" group by idalbaran order by total desc;"; 
+      	$sql .=" and idalbaran is not null order by total desc;";
+         
+         $data = $this->db->select($sql);
+         if($data)
+         {
+            $stats[] = array(
+                'txt' => 'aprobado',
+		          'total' => round( floatval($data[0]['total']), FS_NF0)
+            );
+         }
+         
+         /// pendientes
+	      $sql  = "select sum(neto) as total from ".$tabla;
+			$sql .= $this->where;
+      	$sql .=" and idalbaran is null order by total desc;";
+         
+         $data = $this->db->select($sql);
+         if($data)
+         {
+            $stats[] = array(
+                'txt' => 'pendiente',
+		          'total' => round( floatval($data[0]['total']), FS_NF0)
+            );
+         }
       }
+      
+      return $stats;
+   }
+   
+   private function stats_estado_pedidoscli()
+   {
+      $stats = array();
+      $tabla = 'pedidoscli';
+      
+		$sql  = "select status,sum(neto) as total from ".$tabla;
+		$sql .= $this->where;
+      $sql .=" group by status order by total desc;";
       
       $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $d)
          {
-				if($tabla == 'pedidoscli')
-				{
-					switch($d['status'])
-               {
-               	case 1:
-		               $stats[] = array(
-		                   'txt' => 'aprobado',
-		                   'total' => round( floatval($d['total']), FS_NF0)
-		               );
-               		break;
-                  
-               	case 2:
-		               $stats[] = array(
-		                   'txt' => 'rechazado',
-		                   'total' => round( floatval($d['total']), FS_NF0)
-		               );
-               		break;
-                  
-               	case 3:
-		               $stats[] = array(
-		                   'txt' => 'validado',
-		                   'total' => round( floatval($d['total']), FS_NF0)
-		               );
-               		break;
-                  
-               	case 0:
-               	default:
-		               $stats[] = array(
-		                   'txt' => 'pendiente',
-		                   'total' => round( floatval($d['total']), FS_NF0)
-		               );
-               		break;
-					}
-				}
-				else
-				{				
-				   if( is_null($d['idalbaran']) )
-				   {
-	               $stats[] = array(
-	                   'txt' => 'no aprobado',
-	                   'total' => round( floatval($d['total']), FS_NF0)
-	               );
-               }
-				   else
-               {
-	               $stats[] = array(
-	                   'txt' => 'aprobado',
-	                   'total' => round( floatval($d['total']), FS_NF0)
-	               );
-               }
+				switch($d['status'])
+            {
+               case 1:
+                  $stats[] = array(
+                      'txt' => 'aprobado',
+		                'total' => round( floatval($d['total']), FS_NF0)
+		            );
+               	break;
+               
+               case 2:
+                  $stats[] = array(
+                      'txt' => 'rechazado',
+		                'total' => round( floatval($d['total']), FS_NF0)
+                  );
+                  break;
+               
+               case 3:
+                  $stats[] = array(
+                      'txt' => 'validado',
+		                'total' => round( floatval($d['total']), FS_NF0)
+		            );
+               	break;
+               
+               case 0:
+               default:
+                  $stats[] = array(
+                      'txt' => 'pendiente',
+		                'total' => round( floatval($d['total']), FS_NF0)
+		            );
+               	break;
 				}
          }
       }
