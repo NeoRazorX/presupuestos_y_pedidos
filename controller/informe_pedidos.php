@@ -386,4 +386,87 @@ class informe_pedidos extends fs_controller
       
       return $stats;
    }
+   
+   
+   public function stats_estado($tabla = 'pedidosprov')
+   {
+      $stats = array();
+      
+
+		
+		if ($tabla=='pedidoscli') 
+		{			
+	      $sql  = "select status,sum(neto) as total from ".$tabla;
+			$sql .= $this->where;					
+      	$sql .=" group by status order by total desc;";
+      }
+      else 
+      {
+	      $sql  = "select idalbaran,sum(neto) as total from ".$tabla;
+			$sql .= $this->where;      	
+      	$sql .=" group by idalbaran order by total desc;"; 
+      }	
+      	
+      	    
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $d)
+         {
+
+
+				if ($tabla=='pedidoscli') 
+				{
+					
+					switch($d['status'])
+               {
+               	case 1:
+		               $stats[] = array(
+		                   'txt' => 'aprobado',
+		                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+		               );       
+               		break;
+               	case 2:
+		               $stats[] = array(
+		                   'txt' => 'rechazado',
+		                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+		               );       
+               		break;
+               	case 3:
+		               $stats[] = array(
+		                   'txt' => 'validado',
+		                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+		               );       
+               		break;
+               	case 0:
+               	default:
+		               $stats[] = array(
+		                   'txt' => 'pendiente',
+		                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+		               );       
+               		break;
+
+					}
+				}
+				else 
+				{				
+				   if (is_null($d['idalbaran']))
+				   
+	               $stats[0] = array(
+	                   'txt' => 'no aprobado',
+	                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+	               ); 
+				   else 
+	               $stats[1] = array(
+	                   'txt' => 'aprobado',
+	                   'total' => $stats[1]['total']+round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+	               ); 
+				}
+
+         }
+      }
+      
+      return $stats;
+   }   
+   
 }
