@@ -124,7 +124,7 @@
 		               <h3 class="panel-title"><span class="text-capitalize">{#FS_PEDIDOS#}</span> por mes</h3>
 		            </div>
 		            <div class="panel-body">
-		               <canvas id="chart_pedidos_month" style="height:350px !important"</canvas>
+		               <canvas id="chart_pedidos_month" style="height:350px !important"></canvas>
 		               <p class="help-block">Se muestran valores <b>netos</b>, es decir, sin impuestos.</p>
 		            </div>
 		         </div>
@@ -132,68 +132,6 @@
 		   </div>
       </div>
    </div>
-   <div class="row">
-      <div class="col-sm-6">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title">Pedidos de compras por {#FS_SERIE#}</h3>
-            </div>
-            <div class="panel-body">
-               <canvas id="chart_compras_series"></canvas>
-            </div>
-            <div class="table-responsive">
-               <table class="table table-hover">
-                  <thead>
-                     <tr>
-                        <th>Campo</th>
-                        <th class="text-right">Total</th>
-                     </tr>
-                  </thead>
-                  {loop="$fsc->stats_series()"}
-                  <tr>
-                     <td>{$value['txt']}</td>
-                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
-                  </tr>
-                  {else}
-                  <tr class="warning">
-                     <td colspan="2">Sin resultados.</td>
-                  </tr>
-                  {/loop}
-               </table>
-            </div>
-         </div>
-      </div>
-      <div class="col-sm-6">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title">Pedidos de ventas por {#FS_SERIE#}</h3>
-            </div>
-            <div class="panel-body">
-               <canvas id="chart_ventas_series"></canvas>
-            </div>
-            <div class="table-responsive">
-               <table class="table table-hover">
-                  <thead>
-                     <tr>
-                        <th>Campo</th>
-                        <th class="text-right">Total</th>
-                     </tr>
-                  </thead>
-                  {loop="$fsc->stats_series('pedidoscli')"}
-                  <tr>
-                     <td>{$value['txt']}</td>
-                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
-                  </tr>
-                  {else}
-                  <tr class="warning">
-                     <td colspan="2">Sin resultados.</td>
-                  </tr>
-                  {/loop}
-               </table>
-            </div>
-         </div>
-      </div>
-   </div>   
    <div class="row">
       <div class="col-sm-6">
          <div class="panel panel-default">
@@ -255,6 +193,68 @@
                         <td>{$value['txt']}</td>
                         <td class="text-right">{$fsc->show_precio($value['total'])}</td>
                      {/if}
+                  </tr>
+                  {else}
+                  <tr class="warning">
+                     <td colspan="2">Sin resultados.</td>
+                  </tr>
+                  {/loop}
+               </table>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-6">
+         <div class="panel panel-default">
+            <div class="panel-heading">
+               <h3 class="panel-title">Pedidos de compras por {#FS_SERIE#}</h3>
+            </div>
+            <div class="panel-body">
+               <canvas id="chart_compras_series"></canvas>
+            </div>
+            <div class="table-responsive">
+               <table class="table table-hover">
+                  <thead>
+                     <tr>
+                        <th>Campo</th>
+                        <th class="text-right">Total</th>
+                     </tr>
+                  </thead>
+                  {loop="$fsc->stats_series()"}
+                  <tr>
+                     <td>{$value['txt']}</td>
+                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                  </tr>
+                  {else}
+                  <tr class="warning">
+                     <td colspan="2">Sin resultados.</td>
+                  </tr>
+                  {/loop}
+               </table>
+            </div>
+         </div>
+      </div>
+      <div class="col-sm-6">
+         <div class="panel panel-default">
+            <div class="panel-heading">
+               <h3 class="panel-title">Pedidos de ventas por {#FS_SERIE#}</h3>
+            </div>
+            <div class="panel-body">
+               <canvas id="chart_ventas_series"></canvas>
+            </div>
+            <div class="table-responsive">
+               <table class="table table-hover">
+                  <thead>
+                     <tr>
+                        <th>Campo</th>
+                        <th class="text-right">Total</th>
+                     </tr>
+                  </thead>
+                  {loop="$fsc->stats_series('pedidoscli')"}
+                  <tr>
+                     <td>{$value['txt']}</td>
+                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
                   </tr>
                   {else}
                   <tr class="warning">
@@ -407,7 +407,7 @@
                         <th class="text-right">Total</th>
                      </tr>
                   </thead>
-                  {loop="$fsc->stats_formas_pago()"}
+                  {loop="$fsc->stats_estado('pedidosprov')"}
                   <tr>
                      <td>{$value['txt']}</td>
                      <td class="text-right">{$fsc->show_precio($value['total'])}</td>
@@ -451,31 +451,23 @@
             </div>
          </div>
       </div>
-   </div>   
-   
-   
-   
+   </div>
 </div>
 {/if}
 
-
-<script src="plugins/presupuestos_y_pedidos/extras/Chart.bundle.min.js"></script>
-
+<script src="view/js/Chart.bundle.min.js"></script>
 <script type="text/javascript">
-
-   window.onload=drawChart();
-
+   window.onload = drawChart();
    function drawChart()
    {
-
       var data2 = {
       	labels: [],
       	datasets: [
-      	 {label: 'ventas {$fsc->simbolo_divisa()}',
+      	 {label: 'ventas',
 			  backgroundColor:"rgba(54, 162, 235,0.8)" ,
 			  data: []      	 
       	 },
-      	 {label:'compras {$fsc->simbolo_divisa()}',
+      	 {label:'compras',
 			  backgroundColor:"rgba(255, 99, 132,0.8)" ,
 			  data: []        	 
       	 }  	
@@ -483,11 +475,9 @@
       };      
 
       {loop="$fsc->stats_months()"}
-
-			data2.labels.push('{$value['month']}');       
+			data2.labels.push('{$value['month']}');
          data2.datasets[0].data.push({$value['total_cli']});
-         data2.datasets[1].data.push({$value['total_pro']});         
-         
+         data2.datasets[1].data.push({$value['total_pro']});
       {/loop}
 
 		var ctx2 = document.getElementById('chart_pedidos_month').getContext('2d');
@@ -496,7 +486,6 @@
 		  type: 'line',
 		  data: data2
 		});
-
 
       var data3 = {
       	labels: [],
@@ -517,11 +506,8 @@
       };      
 
       {loop="$fsc->stats_series()"}
-
-			data3.labels.push('{$value['txt']}');       
+			data3.labels.push('{$value['txt']}');
          data3.datasets[0].data.push({$value['total']});
-
-         
       {/loop}
 
 		var ctx3 = document.getElementById('chart_compras_series').getContext('2d');
@@ -530,7 +516,6 @@
 		  type: 'polarArea',  
 		  data: data3
 		});
-
 
       var data4 = {
       	labels: [],
@@ -551,11 +536,8 @@
       };      
 
       {loop="$fsc->stats_series('pedidoscli')"}
-
 			data4.labels.push('{$value['txt']}');       
          data4.datasets[0].data.push({$value['total']});
-
-         
       {/loop}
 
 		var ctx4 = document.getElementById('chart_ventas_series').getContext('2d');
@@ -564,7 +546,6 @@
 		  type: 'polarArea',  
 		  data: data4
 		});
-
 
       var data5 = {
       	labels: [],
@@ -582,14 +563,11 @@
 			  data: []      	 
       	 }
       	]     
-      };      
+      };
 
       {loop="$fsc->stats_agentes()"}
-
-			data5.labels.push('{$value['txt']}');       
+			data5.labels.push('{$value['txt']}');
          data5.datasets[0].data.push({$value['total']});
-
-         
       {/loop}
 
 		var ctx5 = document.getElementById('chart_compras_agentes').getContext('2d');
@@ -598,7 +576,6 @@
 		  type: 'polarArea',  
 		  data: data5
 		});
-
 
       var data6 = {
       	labels: [],
@@ -619,11 +596,8 @@
       };      
 
       {loop="$fsc->stats_agentes('pedidoscli')"}
-
-			data6.labels.push('{$value['txt']}');       
+			data6.labels.push('{$value['txt']}');
          data6.datasets[0].data.push({$value['total']});
-
-         
       {/loop}
 
 		var ctx6 = document.getElementById('chart_ventas_agentes').getContext('2d');
@@ -632,9 +606,6 @@
 		  type: 'polarArea',  
 		  data: data6
 		});
-
-
-
 
       var data7 = {
       	labels: [],
@@ -655,11 +626,8 @@
       };      
 
       {loop="$fsc->stats_almacenes()"}
-
-			data7.labels.push('{$value['txt']}');       
+			data7.labels.push('{$value['txt']}');
          data7.datasets[0].data.push({$value['total']});
-
-         
       {/loop}
 
 		var ctx7 = document.getElementById('chart_compras_almacenes').getContext('2d');
@@ -668,7 +636,6 @@
 		  type: 'polarArea',  
 		  data: data7
 		});
-
 
       var data8 = {
       	labels: [],
@@ -689,11 +656,8 @@
       };      
 
       {loop="$fsc->stats_almacenes('pedidoscli')"}
-
-			data8.labels.push('{$value['txt']}');       
-         data8.datasets[0].data.push({$value['total']});
-
-         
+			data8.labels.push('{$value['txt']}');
+         data8.datasets[0].data.push({$value['total']});         
       {/loop}
 
 		var ctx8 = document.getElementById('chart_ventas_almacenes').getContext('2d');
@@ -702,8 +666,6 @@
 		  type: 'polarArea',  
 		  data: data8
 		});
-
-
 
       var data9 = {
       	labels: [],
@@ -724,11 +686,8 @@
       };      
 
       {loop="$fsc->stats_formas_pago()"}
-
-			data9.labels.push('{$value['txt']}');       
+			data9.labels.push('{$value['txt']}');
          data9.datasets[0].data.push({$value['total']});
-
-         
       {/loop}
 
 		var ctx9 = document.getElementById('chart_compras_formas_pago').getContext('2d');
@@ -737,7 +696,6 @@
 		  type: 'polarArea',  
 		  data: data9
 		});
-
 
       var data10 = {
       	labels: [],
@@ -758,11 +716,8 @@
       };      
 
       {loop="$fsc->stats_formas_pago('pedidoscli')"}
-
-			data10.labels.push('{$value['txt']}');       
+			data10.labels.push('{$value['txt']}');
          data10.datasets[0].data.push({$value['total']});
-
-         
       {/loop}
 
 		var ctx10 = document.getElementById('chart_ventas_formas_pago').getContext('2d');
@@ -771,8 +726,6 @@
 		  type: 'polarArea',  
 		  data: data10
 		});
-
-
 
       var data11 = {
       	labels: [],
@@ -793,11 +746,8 @@
       };      
 
       {loop="$fsc->stats_estado()"}
-
-			data11.labels.push('{$value['txt']}');       
+			data11.labels.push('{$value['txt']}');
          data11.datasets[0].data.push({$value['total']});
-
-         
       {/loop}
 
 		var ctx11 = document.getElementById('chart_compras_estado').getContext('2d');
@@ -806,7 +756,6 @@
 		  type: 'polarArea',  
 		  data: data11
 		});
-
 
       var data12 = {
       	labels: [],
@@ -827,11 +776,8 @@
       };      
 
       {loop="$fsc->stats_estado('pedidoscli')"}
-
-			data12.labels.push('{$value['txt']}');       
+			data12.labels.push('{$value['txt']}');
          data12.datasets[0].data.push({$value['total']});
-
-         
       {/loop}
 
 		var ctx12 = document.getElementById('chart_ventas_estado').getContext('2d');
@@ -840,8 +786,6 @@
 		  type: 'polarArea',  
 		  data: data12
 		});
-
-
    }   
 </script>
 

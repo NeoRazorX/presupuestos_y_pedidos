@@ -3,7 +3,7 @@
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2015-2017    Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2017         Itaca Software Libre  contacta@itacaswl.com
+ * Copyright (C) 2017         Itaca Software Libre contacta@itacaswl.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -208,8 +208,7 @@ class informe_pedidos extends fs_controller
       {
          $sql_aux = "DATE_FORMAT(fecha, '%m%y')";
       }
-
-      /// primero consultamos la divisa de la empresa
+      
       $sql = "SELECT ".$sql_aux." as mes, SUM(neto) as total FROM ".$table_name
               .$this->where." GROUP BY ".$sql_aux." ORDER BY mes ASC;";
       
@@ -259,14 +258,14 @@ class informe_pedidos extends fs_controller
             {
                $stats[] = array(
                    'txt' => $serie->descripcion,
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
             else
             {
                $stats[] = array(
                    'txt' => $d['codserie'],
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
          }
@@ -292,7 +291,7 @@ class informe_pedidos extends fs_controller
             {
                $stats[] = array(
                    'txt' => 'Ninguno',
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
             else
@@ -302,14 +301,14 @@ class informe_pedidos extends fs_controller
                {
                   $stats[] = array(
                       'txt' => $agente->get_fullname(),
-                      'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                      'total' => round( floatval($d['total']), FS_NF0)
                   );
                }
                else
                {
                   $stats[] = array(
                       'txt' => $d['codagente'],
-                      'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                      'total' => round( floatval($d['total']), FS_NF0)
                   );
                }
             }
@@ -337,14 +336,14 @@ class informe_pedidos extends fs_controller
             {
                $stats[] = array(
                    'txt' => $alma->nombre,
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
             else
             {
                $stats[] = array(
                    'txt' => $d['codalmacen'],
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
          }
@@ -371,14 +370,14 @@ class informe_pedidos extends fs_controller
             {
                $stats[] = array(
                    'txt' => $formap->descripcion,
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
             else
             {
                $stats[] = array(
                    'txt' => $d['codpago'],
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
          }
@@ -387,86 +386,82 @@ class informe_pedidos extends fs_controller
       return $stats;
    }
    
-   
    public function stats_estado($tabla = 'pedidosprov')
    {
       $stats = array();
       
-
-		
-		if ($tabla=='pedidoscli') 
-		{			
+		if($tabla == 'pedidoscli')
+		{
 	      $sql  = "select status,sum(neto) as total from ".$tabla;
 			$sql .= $this->where;					
       	$sql .=" group by status order by total desc;";
       }
-      else 
+      else
       {
 	      $sql  = "select idalbaran,sum(neto) as total from ".$tabla;
-			$sql .= $this->where;      	
+			$sql .= $this->where;
       	$sql .=" group by idalbaran order by total desc;"; 
-      }	
-      	
-      	    
+      }
+      
       $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $d)
          {
-
-
-				if ($tabla=='pedidoscli') 
+				if($tabla == 'pedidoscli')
 				{
-					
 					switch($d['status'])
                {
                	case 1:
 		               $stats[] = array(
 		                   'txt' => 'aprobado',
-		                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
-		               );       
+		                   'total' => round( floatval($d['total']), FS_NF0)
+		               );
                		break;
+                  
                	case 2:
 		               $stats[] = array(
 		                   'txt' => 'rechazado',
-		                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
-		               );       
+		                   'total' => round( floatval($d['total']), FS_NF0)
+		               );
                		break;
+                  
                	case 3:
 		               $stats[] = array(
 		                   'txt' => 'validado',
-		                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
-		               );       
+		                   'total' => round( floatval($d['total']), FS_NF0)
+		               );
                		break;
+                  
                	case 0:
                	default:
 		               $stats[] = array(
 		                   'txt' => 'pendiente',
-		                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
-		               );       
+		                   'total' => round( floatval($d['total']), FS_NF0)
+		               );
                		break;
-
 					}
 				}
-				else 
+				else
 				{				
-				   if (is_null($d['idalbaran']))
-				   
-	               $stats[0] = array(
+				   if( is_null($d['idalbaran']) )
+				   {
+	               $stats[] = array(
 	                   'txt' => 'no aprobado',
-	                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
-	               ); 
-				   else 
-	               $stats[1] = array(
+	                   'total' => round( floatval($d['total']), FS_NF0)
+	               );
+               }
+				   else
+               {
+	               $stats[] = array(
 	                   'txt' => 'aprobado',
-	                   'total' => $stats[1]['total']+round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
-	               ); 
+	                   'total' => round( floatval($d['total']), FS_NF0)
+	               );
+               }
 				}
-
          }
       }
       
       return $stats;
-   }   
-   
+   }
 }
