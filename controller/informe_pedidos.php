@@ -37,11 +37,11 @@ class informe_pedidos extends fs_controller
    public $coddivisa;
    public $codpago;
    public $codserie;
-   public $divisa;
    public $desde;
+   public $divisa;
 	public $forma_pago;
    public $hasta;
-   public $mostrar;
+   public $multi_almacen;
    public $pedidos_cli;
    public $pedidos_pro;
    public $serie;
@@ -65,13 +65,10 @@ class informe_pedidos extends fs_controller
 		$this->forma_pago = new forma_pago();
       $this->serie = new serie();
       
-      $this->mostrar = 'general';
-      if( isset($_REQUEST['mostrar']) )
-      {
-         $this->mostrar = $_REQUEST['mostrar'];
-      }
+      $fsvar = new fs_var();
+      $this->multi_almacen = $fsvar->simple_get('multi_almacen');
       
-      $this->desde = Date('01-01-Y');
+      $this->desde = Date('01-m-Y', strtotime('-14 months'));
       if( isset($_REQUEST['desde']) )
       {
          $this->desde = $_REQUEST['desde'];
@@ -218,6 +215,62 @@ class informe_pedidos extends fs_controller
          foreach($data as $d)
          {
             $i = intval($d['mes']);
+            $stats[$i]['total'] = floatval($d['total']);
+         }
+      }
+      
+      return $stats;
+   }
+   
+   public function stats_years()
+   {
+      $stats = array();
+      $stats_cli = $this->stats_years_aux('pedidoscli');
+      $stats_pro = $this->stats_years_aux('pedidosprov');
+      
+      foreach($stats_cli as $i => $value)
+      {
+         $stats[$i] = array(
+             'year' => $value['year'],
+             'total_cli' => round($value['total'], FS_NF0),
+             'total_pro' => 0
+         );
+      }
+      
+      foreach($stats_pro as $i => $value)
+      {
+         $stats[$i]['total_pro'] = round($value['total'], FS_NF0);
+      }
+      
+      return $stats;
+   }
+   
+   private function stats_years_aux($table_name = 'pedidoscli', $num = 4)
+   {
+      $stats = array();
+      
+      /// inicializamos los resultados
+      foreach($this->date_range($this->desde, $this->hasta, '+1 year', 'Y') as $date)
+      {
+         $i = intval($date);
+         $stats[$i] = array('year' => $i, 'total' => 0);
+      }
+      
+      if( strtolower(FS_DB_TYPE) == 'postgresql')
+      {
+         $sql_aux = "to_char(fecha,'FMYYYY')";
+      }
+      else
+         $sql_aux = "DATE_FORMAT(fecha, '%Y')";
+      
+      $data = $this->db->select("SELECT ".$sql_aux." as ano, sum(neto) as total FROM ".$table_name
+              .$this->where." GROUP BY ".$sql_aux." ORDER BY ano ASC;");
+      
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $i = intval($d['ano']);
             $stats[$i]['total'] = floatval($d['total']);
          }
       }
@@ -386,13 +439,13 @@ class informe_pedidos extends fs_controller
       return $stats;
    }
    
-   public function stats_estado($tabla = 'pedidosprov')
+   public function stats_estados($tabla = 'pedidosprov')
    {
       $stats = array();
       
 		if($tabla == 'pedidoscli')
 		{
-	      $stats = $this->stats_estado_pedidoscli();
+	      $stats = $this->stats_estados_pedidoscli();
       }
       else
       {
@@ -404,10 +457,13 @@ class informe_pedidos extends fs_controller
          $data = $this->db->select($sql);
          if($data)
          {
-            $stats[] = array(
-                'txt' => 'aprobado',
-		          'total' => round( floatval($data[0]['total']), FS_NF0)
-            );
+            if( floatval($data[0]['total']) )
+            {
+               $stats[] = array(
+                   'txt' => 'aprobado',
+                   'total' => round( floatval($data[0]['total']), FS_NF0)
+               );
+            }
          }
          
          /// pendientes
@@ -418,17 +474,20 @@ class informe_pedidos extends fs_controller
          $data = $this->db->select($sql);
          if($data)
          {
-            $stats[] = array(
-                'txt' => 'pendiente',
-		          'total' => round( floatval($data[0]['total']), FS_NF0)
-            );
+            if( floatval($data[0]['total']) )
+            {
+               $stats[] = array(
+                   'txt' => 'pendiente',
+                   'total' => round( floatval($data[0]['total']), FS_NF0)
+               );
+            }
          }
       }
       
       return $stats;
    }
    
-   private function stats_estado_pedidoscli()
+   private function stats_estados_pedidoscli()
    {
       $stats = array();
       $tabla = 'pedidoscli';
@@ -440,42 +499,65 @@ class informe_pedidos extends fs_controller
       $data = $this->db->select($sql);
       if($data)
       {
+         $estados = array(
+             0 => 'pendiente',
+             1 => 'aprobado',
+             2 => 'rechazado',
+             3 => 'validado parcialmente'
+         );
+         
          foreach($data as $d)
          {
-				switch($d['status'])
-            {
-               case 1:
-                  $stats[] = array(
-                      'txt' => 'aprobado',
-		                'total' => round( floatval($d['total']), FS_NF0)
-		            );
-               	break;
-               
-               case 2:
-                  $stats[] = array(
-                      'txt' => 'rechazado',
-		                'total' => round( floatval($d['total']), FS_NF0)
-                  );
-                  break;
-               
-               case 3:
-                  $stats[] = array(
-                      'txt' => 'validado',
-		                'total' => round( floatval($d['total']), FS_NF0)
-		            );
-               	break;
-               
-               case 0:
-               default:
-                  $stats[] = array(
-                      'txt' => 'pendiente',
-		                'total' => round( floatval($d['total']), FS_NF0)
-		            );
-               	break;
-				}
+            $stats[] = array(
+                'txt' => $estados[$d['status']],
+		          'total' => round( floatval($d['total']), FS_NF0)
+            );
          }
       }
       
       return $stats;
+   }
+   
+   /**
+    * Esta función sirve para generar el javascript necesario para que la vista genere
+    * las gráficas, ahorrando mucho código.
+    * @param type $data
+    * @param type $chart_id
+    * @return string
+    */
+   public function generar_chart_pie_js(&$data, $chart_id)
+   {
+      $js_txt = '';
+      
+      if($data)
+      {
+         echo "var ".$chart_id."_labels = [];\n";
+         echo "var ".$chart_id."_data = [];\n";
+         
+         foreach($data as $d)
+         {
+            echo $chart_id.'_labels.push("'.$d['txt'].'"); ';
+            echo $chart_id.'_data.push("'.$d['total'].'");'."\n";
+         }
+         
+         /// hacemos el apaño para evitar el problema de charts.js con tabs en boostrap
+         echo "var ".$chart_id."_ctx = document.getElementById('".$chart_id."').getContext('2d');\n";
+         echo $chart_id."_ctx.canvas.height = 100;\n";
+         
+         echo "var ".$chart_id."_chart = new Chart(".$chart_id."_ctx, {
+            type: 'pie',
+            data: {
+               labels: ".$chart_id."_labels,
+               datasets: [
+                  {
+                     backgroundColor: default_colors,
+                     data: ".$chart_id."_data
+                  }
+               ]
+            }
+         });";
+      }
+      
+      return $js_txt;
    }
 }
