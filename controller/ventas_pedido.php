@@ -228,11 +228,7 @@ class ventas_pedido extends fs_controller
       if($this->pedido->editable)
       {
          $eje0 = $this->ejercicio->get_by_fecha($_POST['fecha'], FALSE);
-         if(!$eje0)
-         {
-            $this->new_error_msg('Ningún ejercicio encontrado.');
-         }
-         else
+         if($eje0)
          {
             $this->pedido->fecha = $_POST['fecha'];
             $this->pedido->hora = $_POST['hora'];
@@ -242,6 +238,16 @@ class ventas_pedido extends fs_controller
             {
                $this->pedido->fechasalida = $_POST['fechasalida'];
             }
+            
+            if($this->pedido->codejercicio != $eje0->codejercicio)
+            {
+               $this->pedido->codejercicio = $eje0->codejercicio;
+               $this->pedido->new_codigo();
+            }
+         }
+         else
+         {
+            $this->new_error_msg('Ningún ejercicio encontrado.');
          }
          
          /// ¿cambiamos el cliente?
