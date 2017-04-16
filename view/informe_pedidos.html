@@ -521,8 +521,8 @@
       ];
       {loop="$fsc->stats_months()"}
       pedidos_mes_labels.push("{$value['month']}");
-      pedidos_mes_data[0].push("{$value['total_cli']}");
-      pedidos_mes_data[1].push("{$value['total_pro']}");
+      pedidos_mes_data[0].push("{$value['total_pro']}");
+      pedidos_mes_data[1].push("{$value['total_cli']}");
       {/loop}
       
       /// esto es un apaño para evitar los problemas de charts.js con tabs en bootstrap
@@ -556,8 +556,8 @@
       ];
       {loop="$fsc->stats_years()"}
       pedidos_anyo_labels.push("{$value['year']}");
-      pedidos_anyo_data[0].push("{$value['total_cli']}");
-      pedidos_anyo_data[1].push("{$value['total_pro']}");
+      pedidos_anyo_data[0].push("{$value['total_pro']}");
+      pedidos_anyo_data[1].push("{$value['total_cli']}");
       {/loop}
       
       /// esto es un apaño para evitar los problemas de charts.js con tabs en bootstrap
