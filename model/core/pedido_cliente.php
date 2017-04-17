@@ -287,7 +287,7 @@ class pedido_cliente extends \fs_model
             $this->status = 1;
             $this->editable = FALSE;
          }
-         else if($this->status >= 2)
+         else if($this->status == 2)
          {
             /// cancelado o validado parcialmente
             $this->editable = FALSE;
@@ -589,7 +589,7 @@ class pedido_cliente extends \fs_model
       {
          $this->editable = TRUE;
       }
-      else if($this->status >= 2)
+      else if($this->status == 2)
       {
          $this->editable = FALSE;
       }

@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of presupuestos_y_pedidos
- * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2014-2015  Francesc Pineda Segarra  shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2017  Carlos Garcia Gomez       neorazorx@gmail.com
+ * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -75,25 +75,10 @@ class ventas_pedidos extends fs_controller
       $this->order = 'fecha DESC';
       if( isset($_GET['order']) )
       {
-         if($_GET['order'] == 'fecha_desc')
+         $orden_l = $this->orden();
+         if( isset($orden_l[$_GET['order']]) )
          {
-            $this->order = 'fecha DESC';
-         }
-         else if($_GET['order'] == 'fecha_asc')
-         {
-            $this->order = 'fecha ASC';
-         }
-         else if($_GET['order'] == 'fechasalida_desc')
-         {
-            $this->order = 'fechasalida DESC';
-         }
-         else if($_GET['order'] == 'fechasalida_asc')
-         {
-            $this->order = 'fechasalida ASC';
-         }
-         else if($_GET['order'] == 'total_desc')
-         {
-            $this->order = 'total DESC';
+            $this->order = $orden_l[$_GET['order']]['orden'];
          }
          
          setcookie('ventas_ped_order', $this->order, time()+FS_COOKIES_EXPIRE);
@@ -548,5 +533,46 @@ class ventas_pedidos extends fs_controller
             }
          }
       }
+   }
+   
+   public function orden()
+   {
+      return array(
+          'fecha_desc' => array(
+              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>',
+              'texto' => 'Fecha',
+              'orden' => 'fecha DESC'
+          ),
+          'fecha_asc' => array(
+              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>',
+              'texto' => 'Fecha',
+              'orden' => 'fecha ASC'
+          ),
+          'fechasalida_desc' => array(
+              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>',
+              'texto' => 'Salida',
+              'orden' => 'fechasalida DESC'
+          ),
+          'fechasalida_asc' => array(
+              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>',
+              'texto' => 'Salida',
+              'orden' => 'fechasalida ASC'
+          ),
+          'codigo_desc' => array(
+              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>',
+              'texto' => 'Código',
+              'orden' => 'codigo DESC'
+          ),
+          'codigo_asc' => array(
+              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>',
+              'texto' => 'Código',
+              'orden' => 'codigo ASC'
+          ),
+          'total_desc' => array(
+              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>',
+              'texto' => 'Total',
+              'orden' => 'total DESC'
+          )
+      );
    }
 }

@@ -3,7 +3,7 @@
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2015-2017    Carlos Garcia Gomez  neorazorx@gmail.com
- * Copyright (C) 2017         Itaca Software Libre  contacta@itacaswl.com
+ * Copyright (C) 2017         Itaca Software Libre contacta@itacaswl.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -37,11 +37,11 @@ class informe_pedidos extends fs_controller
    public $coddivisa;
    public $codpago;
    public $codserie;
-   public $divisa;
    public $desde;
+   public $divisa;
 	public $forma_pago;
    public $hasta;
-   public $mostrar;
+   public $multi_almacen;
    public $pedidos_cli;
    public $pedidos_pro;
    public $serie;
@@ -65,13 +65,10 @@ class informe_pedidos extends fs_controller
 		$this->forma_pago = new forma_pago();
       $this->serie = new serie();
       
-      $this->mostrar = 'general';
-      if( isset($_REQUEST['mostrar']) )
-      {
-         $this->mostrar = $_REQUEST['mostrar'];
-      }
+      $fsvar = new fs_var();
+      $this->multi_almacen = $fsvar->simple_get('multi_almacen');
       
-      $this->desde = Date('01-01-Y');
+      $this->desde = Date('01-m-Y', strtotime('-14 months'));
       if( isset($_REQUEST['desde']) )
       {
          $this->desde = $_REQUEST['desde'];
@@ -208,8 +205,7 @@ class informe_pedidos extends fs_controller
       {
          $sql_aux = "DATE_FORMAT(fecha, '%m%y')";
       }
-
-      /// primero consultamos la divisa de la empresa
+      
       $sql = "SELECT ".$sql_aux." as mes, SUM(neto) as total FROM ".$table_name
               .$this->where." GROUP BY ".$sql_aux." ORDER BY mes ASC;";
       
@@ -219,6 +215,62 @@ class informe_pedidos extends fs_controller
          foreach($data as $d)
          {
             $i = intval($d['mes']);
+            $stats[$i]['total'] = floatval($d['total']);
+         }
+      }
+      
+      return $stats;
+   }
+   
+   public function stats_years()
+   {
+      $stats = array();
+      $stats_cli = $this->stats_years_aux('pedidoscli');
+      $stats_pro = $this->stats_years_aux('pedidosprov');
+      
+      foreach($stats_cli as $i => $value)
+      {
+         $stats[$i] = array(
+             'year' => $value['year'],
+             'total_cli' => round($value['total'], FS_NF0),
+             'total_pro' => 0
+         );
+      }
+      
+      foreach($stats_pro as $i => $value)
+      {
+         $stats[$i]['total_pro'] = round($value['total'], FS_NF0);
+      }
+      
+      return $stats;
+   }
+   
+   private function stats_years_aux($table_name = 'pedidoscli', $num = 4)
+   {
+      $stats = array();
+      
+      /// inicializamos los resultados
+      foreach($this->date_range($this->desde, $this->hasta, '+1 year', 'Y') as $date)
+      {
+         $i = intval($date);
+         $stats[$i] = array('year' => $i, 'total' => 0);
+      }
+      
+      if( strtolower(FS_DB_TYPE) == 'postgresql')
+      {
+         $sql_aux = "to_char(fecha,'FMYYYY')";
+      }
+      else
+         $sql_aux = "DATE_FORMAT(fecha, '%Y')";
+      
+      $data = $this->db->select("SELECT ".$sql_aux." as ano, sum(neto) as total FROM ".$table_name
+              .$this->where." GROUP BY ".$sql_aux." ORDER BY ano ASC;");
+      
+      if($data)
+      {
+         foreach($data as $d)
+         {
+            $i = intval($d['ano']);
             $stats[$i]['total'] = floatval($d['total']);
          }
       }
@@ -259,14 +311,14 @@ class informe_pedidos extends fs_controller
             {
                $stats[] = array(
                    'txt' => $serie->descripcion,
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
             else
             {
                $stats[] = array(
                    'txt' => $d['codserie'],
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
          }
@@ -292,7 +344,7 @@ class informe_pedidos extends fs_controller
             {
                $stats[] = array(
                    'txt' => 'Ninguno',
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
             else
@@ -302,14 +354,14 @@ class informe_pedidos extends fs_controller
                {
                   $stats[] = array(
                       'txt' => $agente->get_fullname(),
-                      'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                      'total' => round( floatval($d['total']), FS_NF0)
                   );
                }
                else
                {
                   $stats[] = array(
                       'txt' => $d['codagente'],
-                      'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                      'total' => round( floatval($d['total']), FS_NF0)
                   );
                }
             }
@@ -337,14 +389,14 @@ class informe_pedidos extends fs_controller
             {
                $stats[] = array(
                    'txt' => $alma->nombre,
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
             else
             {
                $stats[] = array(
                    'txt' => $d['codalmacen'],
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
          }
@@ -371,19 +423,141 @@ class informe_pedidos extends fs_controller
             {
                $stats[] = array(
                    'txt' => $formap->descripcion,
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
             else
             {
                $stats[] = array(
                    'txt' => $d['codpago'],
-                   'total' => round( abs( $this->euro_convert( floatval($d['total']) ) ), FS_NF0)
+                   'total' => round( floatval($d['total']), FS_NF0)
                );
             }
          }
       }
       
       return $stats;
+   }
+   
+   public function stats_estados($tabla = 'pedidosprov')
+   {
+      $stats = array();
+      
+		if($tabla == 'pedidoscli')
+		{
+	      $stats = $this->stats_estados_pedidoscli();
+      }
+      else
+      {
+         /// aprobados
+	      $sql  = "select sum(neto) as total from ".$tabla;
+			$sql .= $this->where;
+      	$sql .=" and idalbaran is not null order by total desc;";
+         
+         $data = $this->db->select($sql);
+         if($data)
+         {
+            if( floatval($data[0]['total']) )
+            {
+               $stats[] = array(
+                   'txt' => 'aprobado',
+                   'total' => round( floatval($data[0]['total']), FS_NF0)
+               );
+            }
+         }
+         
+         /// pendientes
+	      $sql  = "select sum(neto) as total from ".$tabla;
+			$sql .= $this->where;
+      	$sql .=" and idalbaran is null order by total desc;";
+         
+         $data = $this->db->select($sql);
+         if($data)
+         {
+            if( floatval($data[0]['total']) )
+            {
+               $stats[] = array(
+                   'txt' => 'pendiente',
+                   'total' => round( floatval($data[0]['total']), FS_NF0)
+               );
+            }
+         }
+      }
+      
+      return $stats;
+   }
+   
+   private function stats_estados_pedidoscli()
+   {
+      $stats = array();
+      $tabla = 'pedidoscli';
+      
+		$sql  = "select status,sum(neto) as total from ".$tabla;
+		$sql .= $this->where;
+      $sql .=" group by status order by total desc;";
+      
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         $estados = array(
+             0 => 'pendiente',
+             1 => 'aprobado',
+             2 => 'rechazado',
+             3 => 'validado parcialmente'
+         );
+         
+         foreach($data as $d)
+         {
+            $stats[] = array(
+                'txt' => $estados[$d['status']],
+		          'total' => round( floatval($d['total']), FS_NF0)
+            );
+         }
+      }
+      
+      return $stats;
+   }
+   
+   /**
+    * Esta función sirve para generar el javascript necesario para que la vista genere
+    * las gráficas, ahorrando mucho código.
+    * @param type $data
+    * @param type $chart_id
+    * @return string
+    */
+   public function generar_chart_pie_js(&$data, $chart_id)
+   {
+      $js_txt = '';
+      
+      if($data)
+      {
+         echo "var ".$chart_id."_labels = [];\n";
+         echo "var ".$chart_id."_data = [];\n";
+         
+         foreach($data as $d)
+         {
+            echo $chart_id.'_labels.push("'.$d['txt'].'"); ';
+            echo $chart_id.'_data.push("'.$d['total'].'");'."\n";
+         }
+         
+         /// hacemos el apaño para evitar el problema de charts.js con tabs en boostrap
+         echo "var ".$chart_id."_ctx = document.getElementById('".$chart_id."').getContext('2d');\n";
+         echo $chart_id."_ctx.canvas.height = 100;\n";
+         
+         echo "var ".$chart_id."_chart = new Chart(".$chart_id."_ctx, {
+            type: 'pie',
+            data: {
+               labels: ".$chart_id."_labels,
+               datasets: [
+                  {
+                     backgroundColor: default_colors,
+                     data: ".$chart_id."_data
+                  }
+               ]
+            }
+         });";
+      }
+      
+      return $js_txt;
    }
 }

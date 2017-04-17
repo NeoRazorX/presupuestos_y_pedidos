@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of presupuestos_y_pedidos
- * Copyright (C) 2016  Carlos Garcia Gomez       neorazorx@gmail.com
+ * Copyright (C) 2016-2017 Carlos Garcia Gomez  neorazorx@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once __DIR__.'/core/pedido_proveedor.php';
+require_once 'plugins/presupuestos_y_pedidos/model/core/pedido_proveedor.php';
 
 /**
  * Pedido de proveedor

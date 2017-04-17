@@ -277,11 +277,7 @@ class ventas_presupuesto extends fs_controller
       if($this->presupuesto->editable)
       {
          $eje0 = $this->ejercicio->get_by_fecha($_POST['fecha'], FALSE);
-         if(!$eje0)
-         {
-            $this->new_error_msg('Ningún ejercicio encontrado.');
-         }
-         else
+         if($eje0)
          {
             $this->presupuesto->fecha = $_POST['fecha'];
             $this->presupuesto->hora = $_POST['hora'];
@@ -291,6 +287,16 @@ class ventas_presupuesto extends fs_controller
             {
                $this->presupuesto->finoferta = $_POST['finoferta'];
             }
+            
+            if($this->presupuesto->codejercicio != $eje0->codejercicio)
+            {
+               $this->presupuesto->codejercicio = $eje0->codejercicio;
+               $this->presupuesto->new_codigo();
+            }
+         }
+         else
+         {
+            $this->new_error_msg('Ningún ejercicio encontrado.');
          }
          
          /// ¿cambiamos el cliente?

@@ -1,7 +1,7 @@
 {include="header"}
 
 <div class="container-fluid">
-   <form name="listado_general" action="{$fsc->url()}&mostrar=general" method="post" class="form">
+   <form name="listado_general" action="{$fsc->url()}" method="post" class="form">
       <div class="row">
          <div class="col-sm-12">
 	         <div class="page-header">
@@ -12,9 +12,6 @@
 	                  <span class="glyphicon glyphicon-refresh"></span>
 	               </a>
 	            </h1>
-               <p class="help-block">
-                  Selecciona las opciones de filtrado que desees.
-               </p>
 	         </div>
          </div>
       </div>
@@ -65,22 +62,6 @@
          </div>
          <div class="col-sm-2">
             <div class="form-group">
-               <a href="{$fsc->almacen->url()}">Almacén</a>:
-               <select name="codalmacen" class="form-control" onchange="this.form.submit()">
-                  <option value="">Todos</option>
-						<option value="">------</option>
-						{loop="$fsc->almacen->all()"}
-                     {if="$fsc->codalmacen==$value->codalmacen"}
-		               <option value="{$value->codalmacen}" selected="">{$value->nombre}</option>
-		               {else}
-		               <option value="{$value->codalmacen}">{$value->nombre}</option>
-		               {/if}
-						{/loop}
-               </select>
-            </div>
-         </div>
-         <div class="col-sm-2">
-            <div class="form-group">
                <a href="{$fsc->divisa->url()}">Divisa</a>:
 					<select name="coddivisa" class="form-control" onchange="this.form.submit()">
                   {loop="$fsc->divisa->all()"}
@@ -109,404 +90,542 @@
                </select>
             </div>
          </div>
+         {if="$fsc->multi_almacen"}
+         <div class="col-sm-2">
+            <div class="form-group">
+               <a href="{$fsc->almacen->url()}">Almacén</a>:
+               <select name="codalmacen" class="form-control" onchange="this.form.submit()">
+                  <option value="">Todos</option>
+						<option value="">------</option>
+						{loop="$fsc->almacen->all()"}
+                     {if="$fsc->codalmacen==$value->codalmacen"}
+		               <option value="{$value->codalmacen}" selected="">{$value->nombre}</option>
+		               {else}
+		               <option value="{$value->codalmacen}">{$value->nombre}</option>
+		               {/if}
+						{/loop}
+               </select>
+            </div>
+         </div>
+         {else}
+         <input type="hidden" name="codalmacen" value=""/>
+         {/if}
       </div>
    </form>
-</div>
-
-{if="$fsc->mostrar=='general'"}
-<div class="container-fluid">
    <div class="row">
       <div class="col-sm-12">
-		   <div class="row">
-		      <div class="col-sm-12">
-		         <div class="panel panel-default">
-		            <div class="panel-heading">
-		               <h3 class="panel-title"><span class="text-capitalize">{#FS_PEDIDOS#}</span> por mes</h3>
-		            </div>
-		            <div class="panel-body">
-		               <div id="chart_pedidos_month" style="height: 350px;"></div>
-		               <p class="help-block">Se muestran valores <b>netos</b>, es decir, sin impuestos.</p>
-		            </div>
-		         </div>
-		      </div>
-		   </div>
+         <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active">
+               <a href="#mensual" aria-controls="mensual" role="tab" data-toggle="tab">Mensual</a>
+            </li>
+            <li role="presentation">
+               <a href="#desgloses" aria-controls="desgloses" role="tab" data-toggle="tab">Desgloses</a>
+            </li>
+            <li role="presentation">
+               <a href="#empleados" aria-controls="empleados" role="tab" data-toggle="tab">Empleados</a>
+            </li>
+         </ul>
+         <br/>
       </div>
    </div>
-   <div class="row">
-      <div class="col-sm-6">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title">Pedidos de compras por {#FS_SERIE#}</h3>
-            </div>
-            <div class="panel-body">
-               <div id="chart_compras_series"></div>
-            </div>
-            <div class="table-responsive">
-               <table class="table table-hover">
-                  <thead>
-                     <tr>
-                        <th>Campo</th>
-                        <th class="text-right">Total</th>
-                     </tr>
-                  </thead>
-                  {loop="$fsc->stats_series()"}
-                  <tr>
-                     <td>{$value['txt']}</td>
-                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
-                  </tr>
-                  {else}
-                  <tr class="warning">
-                     <td colspan="2">Sin resultados.</td>
-                  </tr>
-                  {/loop}
-               </table>
+   <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="mensual">
+         <div class="row">
+            <div class="col-sm-12">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title"><span class="text-capitalize">{#FS_PEDIDOS#}</span> por mes</h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_pedidos_mes" style="height: 350px;"></canvas>
+                     <p class="help-block">Se muestran valores <b>netos</b>, es decir, sin impuestos.</p>
+                  </div>
+               </div>
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title"><span class="text-capitalize">{#FS_PEDIDOS#}</span> por año</h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_pedidos_anyo" style="height: 350px;"></canvas>
+                     <p class="help-block">Se muestran valores <b>netos</b>, es decir, sin impuestos.</p>
+                  </div>
+               </div>
             </div>
          </div>
       </div>
-      <div class="col-sm-6">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title">Pedidos de ventas por {#FS_SERIE#}</h3>
+      <div role="tabpanel" class="tab-pane" id="desgloses">
+         <div class="row">
+            <div class="col-sm-6">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title">
+                        <span class="text-capitalize">{#FS_PEDIDOS#}</span> de compras por {#FS_SERIE#}
+                     </h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_compras_series"></canvas>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>Campo</th>
+                              <th class="text-right">Total</th>
+                           </tr>
+                        </thead>
+                        {loop="$fsc->stats_series()"}
+                        <tr>
+                           <td>{$value['txt']}</td>
+                           <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="2">Sin resultados.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
+               </div>
             </div>
-            <div class="panel-body">
-               <div id="chart_ventas_series"></div>
+            <div class="col-sm-6">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title">
+                        <span class="text-capitalize">{#FS_PEDIDOS#}</span> de ventas por {#FS_SERIE#}
+                     </h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_ventas_series"></canvas>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>Campo</th>
+                              <th class="text-right">Total</th>
+                           </tr>
+                        </thead>
+                        {loop="$fsc->stats_series('pedidoscli')"}
+                        <tr>
+                           <td>{$value['txt']}</td>
+                           <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="2">Sin resultados.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
+               </div>
             </div>
-            <div class="table-responsive">
-               <table class="table table-hover">
-                  <thead>
-                     <tr>
-                        <th>Campo</th>
-                        <th class="text-right">Total</th>
-                     </tr>
-                  </thead>
-                  {loop="$fsc->stats_series('pedidoscli')"}
-                  <tr>
-                     <td>{$value['txt']}</td>
-                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
-                  </tr>
-                  {else}
-                  <tr class="warning">
-                     <td colspan="2">Sin resultados.</td>
-                  </tr>
-                  {/loop}
-               </table>
+         </div>
+         {if="$fsc->multi_almacen"}
+         <div class="row">
+            <div class="col-sm-6">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title">
+                        <span class="text-capitalize">{#FS_PEDIDOS#}</span> de compras por almacén
+                     </h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_compras_almacenes"></canvas>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>Campo</th>
+                              <th class="text-right">Total</th>
+                           </tr>
+                        </thead>
+                        {loop="$fsc->stats_almacenes()"}
+                        <tr>
+                           <td>{$value['txt']}</td>
+                           <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="2">Sin resultados.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm-6">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title">
+                        <span class="text-capitalize">{#FS_PEDIDOS#}</span> de ventas por almacén
+                     </h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_ventas_almacenes"></canvas>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>Campo</th>
+                              <th class="text-right">Total</th>
+                           </tr>
+                        </thead>
+                        {loop="$fsc->stats_almacenes('pedidoscli')"}
+                        <tr>
+                           <td>{$value['txt']}</td>
+                           <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="2">Sin resultados.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
+               </div>
+            </div>
+         </div>
+         {/if}
+         <div class="row">
+            <div class="col-sm-6">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title">
+                        <span class="text-capitalize">{#FS_PEDIDOS#}</span> de compras por formas de pago
+                     </h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_compras_formas_pago"></canvas>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>Campo</th>
+                              <th class="text-right">Total</th>
+                           </tr>
+                        </thead>
+                        {loop="$fsc->stats_formas_pago()"}
+                        <tr>
+                           <td>{$value['txt']}</td>
+                           <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="2">Sin resultados.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm-6">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title">
+                        <span class="text-capitalize">{#FS_PEDIDOS#}</span> de ventas por formas de pago
+                     </h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_ventas_formas_pago"></canvas>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>Campo</th>
+                              <th class="text-right">Total</th>
+                           </tr>
+                        </thead>
+                        {loop="$fsc->stats_formas_pago('pedidoscli')"}
+                        <tr>
+                           <td>{$value['txt']}</td>
+                           <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="2">Sin resultados.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-6">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title">
+                        <span class="text-capitalize">{#FS_PEDIDOS#}</span> de compras por estado
+                     </h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_compras_estados"></canvas>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>Campo</th>
+                              <th class="text-right">Total</th>
+                           </tr>
+                        </thead>
+                        {loop="$fsc->stats_estados()"}
+                        <tr>
+                           <td>{$value['txt']}</td>
+                           <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="2">Sin resultados.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
+               </div>
+            </div>
+            <div class="col-sm-6">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title">
+                        <span class="text-capitalize">{#FS_PEDIDOS#}</span> de ventas por estado
+                     </h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_ventas_estados"></canvas>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>Campo</th>
+                              <th class="text-right">Total</th>
+                           </tr>
+                        </thead>
+                        {loop="$fsc->stats_estados('pedidoscli')"}
+                        <tr>
+                           <td>{$value['txt']}</td>
+                           <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="2">Sin resultados.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
+               </div>
             </div>
          </div>
       </div>
-   </div>   
-   <div class="row">
-      <div class="col-sm-6">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title">Pedidos de compras por Empleado</h3>
+      <div role="tabpanel" class="tab-pane" id="empleados">
+         <div class="row">
+            <div class="col-sm-6">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title">
+                        <span class="text-capitalize">{#FS_PEDIDOS#}</span> de compras por Empleado
+                     </h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_compras_agentes"></canvas>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>Campo</th>
+                              <th class="text-right">Total</th>
+                           </tr>
+                        </thead>
+                        {loop="$fsc->stats_agentes()"}
+                        <tr>
+                           {if="$value['txt']=='Ninguno'"}
+                              <td class="warning">Ninguno</td>
+                              <td class="warning text-right">{$fsc->show_precio($value['total'])}</td>
+                           {else}
+                              <td>{$value['txt']}</td>
+                              <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                           {/if}
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="2">Sin resultados.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
+               </div>
             </div>
-            <div class="panel-body">
-               <div id="chart_compras_agentes"></div>
-            </div>
-            <div class="table-responsive">
-               <table class="table table-hover">
-                  <thead>
-                     <tr>
-                        <th>Campo</th>
-                        <th class="text-right">Total</th>
-                     </tr>
-                  </thead>
-                  {loop="$fsc->stats_agentes()"}
-                  <tr>
-                     {if="$value['txt']=='Ninguno'"}
-                        <td class="warning">Ninguno</td>
-                        <td class="warning text-right">{$fsc->show_precio($value['total'])}</td>
-                     {else}
-                        <td>{$value['txt']}</td>
-                        <td class="text-right">{$fsc->show_precio($value['total'])}</td>
-                     {/if}
-                  </tr>
-                  {else}
-                  <tr class="warning">
-                     <td colspan="2">Sin resultados.</td>
-                  </tr>
-                  {/loop}
-               </table>
-            </div>
-         </div>
-      </div>
-      <div class="col-sm-6">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title">Pedidos de ventas por Empleado</h3>
-            </div>
-            <div class="panel-body">
-               <div id="chart_ventas_agentes"></div>
-            </div>
-            <div class="table-responsive">
-               <table class="table table-hover">
-                  <thead>
-                     <tr>
-                        <th>Campo</th>
-                        <th class="text-right">Total</th>
-                     </tr>
-                  </thead>
-                  {loop="$fsc->stats_agentes('pedidoscli')"}
-                  <tr>
-                     {if="$value['txt']=='Ninguno'"}
-                        <td class="warning">Ninguno</td>
-                        <td class="warning text-right">{$fsc->show_precio($value['total'])}</td>
-                     {else}
-                        <td>{$value['txt']}</td>
-                        <td class="text-right">{$fsc->show_precio($value['total'])}</td>
-                     {/if}
-                  </tr>
-                  {else}
-                  <tr class="warning">
-                     <td colspan="2">Sin resultados.</td>
-                  </tr>
-                  {/loop}
-               </table>
-            </div>
-         </div>
-      </div>
-   </div>
-   <div class="row">
-      <div class="col-sm-6">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title">Pedidos de compras por almacén</h3>
-            </div>
-            <div class="panel-body">
-               <div id="chart_compras_almacenes"></div>
-            </div>
-            <div class="table-responsive">
-               <table class="table table-hover">
-                  <thead>
-                     <tr>
-                        <th>Campo</th>
-                        <th class="text-right">Total</th>
-                     </tr>
-                  </thead>
-                  {loop="$fsc->stats_almacenes()"}
-                  <tr>
-                     <td>{$value['txt']}</td>
-                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
-                  </tr>
-                  {else}
-                  <tr class="warning">
-                     <td colspan="2">Sin resultados.</td>
-                  </tr>
-                  {/loop}
-               </table>
-            </div>
-         </div>
-      </div>
-      <div class="col-sm-6">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title">Pedidos de ventas por almacén</h3>
-            </div>
-            <div class="panel-body">
-               <div id="chart_ventas_almacenes"></div>
-            </div>
-            <div class="table-responsive">
-               <table class="table table-hover">
-                  <thead>
-                     <tr>
-                        <th>Campo</th>
-                        <th class="text-right">Total</th>
-                     </tr>
-                  </thead>
-                  {loop="$fsc->stats_almacenes('pedidoscli')"}
-                  <tr>
-                     <td>{$value['txt']}</td>
-                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
-                  </tr>
-                  {else}
-                  <tr class="warning">
-                     <td colspan="2">Sin resultados.</td>
-                  </tr>
-                  {/loop}
-               </table>
-            </div>
-         </div>
-      </div>
-   </div>
-   <div class="row">
-      <div class="col-sm-6">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title">Pedidos de compras por formas de pago</h3>
-            </div>
-            <div class="panel-body">
-               <div id="chart_compras_formas_pago"></div>
-            </div>
-            <div class="table-responsive">
-               <table class="table table-hover">
-                  <thead>
-                     <tr>
-                        <th>Campo</th>
-                        <th class="text-right">Total</th>
-                     </tr>
-                  </thead>
-                  {loop="$fsc->stats_formas_pago()"}
-                  <tr>
-                     <td>{$value['txt']}</td>
-                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
-                  </tr>
-                  {else}
-                  <tr class="warning">
-                     <td colspan="2">Sin resultados.</td>
-                  </tr>
-                  {/loop}
-               </table>
-            </div>
-         </div>
-      </div>
-      <div class="col-sm-6">
-         <div class="panel panel-default">
-            <div class="panel-heading">
-               <h3 class="panel-title">Pedidos de ventas por formas de pago</h3>
-            </div>
-            <div class="panel-body">
-               <div id="chart_ventas_formas_pago"></div>
-            </div>
-            <div class="table-responsive">
-               <table class="table table-hover">
-                  <thead>
-                     <tr>
-                        <th>Campo</th>
-                        <th class="text-right">Total</th>
-                     </tr>
-                  </thead>
-                  {loop="$fsc->stats_formas_pago('pedidoscli')"}
-                  <tr>
-                     <td>{$value['txt']}</td>
-                     <td class="text-right">{$fsc->show_precio($value['total'])}</td>
-                  </tr>
-                  {else}
-                  <tr class="warning">
-                     <td colspan="2">Sin resultados.</td>
-                  </tr>
-                  {/loop}
-               </table>
+            <div class="col-sm-6">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title">
+                        <span class="text-capitalize">{#FS_PEDIDOS#}</span> de ventas por Empleado
+                     </h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_ventas_agentes"></canvas>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>Campo</th>
+                              <th class="text-right">Total</th>
+                           </tr>
+                        </thead>
+                        {loop="$fsc->stats_agentes('pedidoscli')"}
+                        <tr>
+                           {if="$value['txt']=='Ninguno'"}
+                              <td class="warning">Ninguno</td>
+                              <td class="warning text-right">{$fsc->show_precio($value['total'])}</td>
+                           {else}
+                              <td>{$value['txt']}</td>
+                              <td class="text-right">{$fsc->show_precio($value['total'])}</td>
+                           {/if}
+                        </tr>
+                        {else}
+                        <tr class="warning">
+                           <td colspan="2">Sin resultados.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
+               </div>
             </div>
          </div>
       </div>
    </div>
 </div>
-{/if}
 
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script src="{#FS_PATH#}view/js/chart.bundle.min.js"></script>
 <script type="text/javascript">
-   // Load the Visualization API and the piechart package.
-   google.load('visualization', '1.0', {'packages':['corechart']});
-   
-   // Set a callback to run when the Google Visualization API is loaded.
-   google.setOnLoadCallback(drawChart);
-
-   // Callback that creates and populates a data table,
-   // instantiates the pie chart, passes in the data and
-   // draws it.
-   function drawChart()
-   {
-      // Create the data table.
-      var data2 = new google.visualization.DataTable();
-      data2.addColumn('string', 'mes');
-      data2.addColumn('number', 'ventas {$fsc->simbolo_divisa()}');
-      data2.addColumn('number', 'compras {$fsc->simbolo_divisa()}');
+   $(document).ready(function () {
       
-      data2.addRows([
-         {loop="$fsc->stats_months()"}
-         ['{$value['month']}', {$value['total_cli']}, {$value['total_pro']}],
-         {/loop}
-      ]);
-     
-      // Instantiate and draw our chart, passing in some options.
-      var chart2 = new google.visualization.AreaChart(document.getElementById('chart_pedidos_month'));
-      chart2.draw(data2);
-
-      var options = {
-         is3D: true,
-      };
-
-      var data3 = google.visualization.arrayToDataTable([
-         ['TXT', 'Total'],
-         {loop="$fsc->stats_series()"}
-         ['{$value['txt']}', {$value['total']}],
-         {/loop}
-        ]);
+      /// definimos unos colores para usar
+      var default_colors = [
+         "rgba(255, 99, 132,0.8)","rgba(54, 162, 235,0.8)",'#3366CC','#DC3912','#FF9900',
+         '#109618','#990099','#3B3EAC','#0099C6','#DD4477','#66AA00','#B82E2E','#316395',
+         '#994499','#22AA99','#AAAA11','#6633CC','#E67300','#8B0707','#329262','#5574A6',
+         '#3B3EAC'
+      ];
       
-      var chart3 = new google.visualization.PieChart(document.getElementById('chart_compras_series'));
-      chart3.draw(data3, options);
+      /// cargamos los datos de los pedios por mes
+      var pedidos_mes_labels = [];
+      var pedidos_mes_data = [
+         [],[]
+      ];
+      {loop="$fsc->stats_months()"}
+      pedidos_mes_labels.push("{$value['month']}");
+      pedidos_mes_data[0].push("{$value['total_pro']}");
+      pedidos_mes_data[1].push("{$value['total_cli']}");
+      {/loop}
       
-      var data4 = google.visualization.arrayToDataTable([
-         ['TXT', 'Total'],
-         {loop="$fsc->stats_series('pedidoscli')"}
-         ['{$value['txt']}', {$value['total']}],
-         {/loop}
-        ]);
+      /// esto es un apaño para evitar los problemas de charts.js con tabs en bootstrap
+      var ctx2 = document.getElementById('chart_pedidos_mes').getContext('2d');
+      ctx2.canvas.height = 150;
       
-      var chart4 = new google.visualization.PieChart(document.getElementById('chart_ventas_series'));
-      chart4.draw(data4, options);
-
-      var data5 = google.visualization.arrayToDataTable([
-         ['TXT', 'Total'],
-         {loop="$fsc->stats_agentes()"}
-         ['{$value['txt']}', {$value['total']}],
-         {/loop}
-        ]);
+      var chart2 = new Chart(ctx2, {
+            type: 'line',
+            data: {
+               labels: pedidos_mes_labels,
+               datasets: [
+                  {
+                     label: 'compras',
+                     backgroundColor: "rgba(255, 99, 132,0.8)",
+                     data: pedidos_mes_data[0]
+                  },
+                  {
+                     label: 'ventas',
+                     backgroundColor: "rgba(54, 162, 235,0.8)",
+                     data: pedidos_mes_data[1]
+                  }
+               ]
+            }
+         }
+      );
       
-      var chart5 = new google.visualization.PieChart(document.getElementById('chart_compras_agentes'));
-      chart5.draw(data5, options);
+      /// cargamos los datos de los pedios por mes
+      var pedidos_anyo_labels = [];
+      var pedidos_anyo_data = [
+         [],[]
+      ];
+      {loop="$fsc->stats_years()"}
+      pedidos_anyo_labels.push("{$value['year']}");
+      pedidos_anyo_data[0].push("{$value['total_pro']}");
+      pedidos_anyo_data[1].push("{$value['total_cli']}");
+      {/loop}
       
-      var data6 = google.visualization.arrayToDataTable([
-         ['TXT', 'Total'],
-         {loop="$fsc->stats_agentes('pedidoscli')"}
-         ['{$value['txt']}', {$value['total']}],
-         {/loop}
-        ]);
+      /// esto es un apaño para evitar los problemas de charts.js con tabs en bootstrap
+      var ctx3 = document.getElementById('chart_pedidos_anyo').getContext('2d');
+      ctx3.canvas.height = 150;
       
-      var chart6 = new google.visualization.PieChart(document.getElementById('chart_ventas_agentes'));
-      chart6.draw(data6, options);  
+      var chart3 = new Chart(ctx3, {
+            type: 'line',
+            data: {
+               labels: pedidos_anyo_labels,
+               datasets: [
+                  {
+                     label: 'compras',
+                     backgroundColor: "rgba(255, 99, 132,0.8)",
+                     data: pedidos_anyo_data[0]
+                  },
+                  {
+                     label: 'ventas',
+                     backgroundColor: "rgba(54, 162, 235,0.8)",
+                     data: pedidos_anyo_data[1]
+                  }
+               ]
+            }
+         }
+      );
       
+      /// cargamos el queso del desglose por serie de las compras
+      <!--{$data=$fsc->stats_series()}-->
+      {$fsc->generar_chart_pie_js($data, 'chart_compras_series')}
       
-      var data7 = google.visualization.arrayToDataTable([
-         ['TXT', 'Total'],
-         {loop="$fsc->stats_almacenes()"}
-         ['{$value['txt']}', {$value['total']}],
-         {/loop}
-        ]);
+      /// cargamos el queso del desglose por serie de las ventas
+      <!--{$data=$fsc->stats_series('pedidoscli')}-->
+      {$fsc->generar_chart_pie_js($data, 'chart_ventas_series')}
       
-      var chart7 = new google.visualization.PieChart(document.getElementById('chart_compras_almacenes'));
-      chart7.draw(data7, options);
+      {if="$fsc->multi_almacen"}
+      /// cargamos el queso del desglose por almacén de las compras
+      <!--{$data=$fsc->stats_almacenes()}-->
+      {$fsc->generar_chart_pie_js($data, 'chart_compras_almacenes')}
       
-      var data8 = google.visualization.arrayToDataTable([
-         ['TXT', 'Total'],
-         {loop="$fsc->stats_almacenes('pedidoscli')"}
-         ['{$value['txt']}', {$value['total']}],
-         {/loop}
-        ]);
+      /// cargamos el queso del desglose por almacén de las ventas
+      <!--{$data=$fsc->stats_almacenes('pedidoscli')}-->
+      {$fsc->generar_chart_pie_js($data, 'chart_ventas_almacenes')}
+      {/if}
       
-      var chart8 = new google.visualization.PieChart(document.getElementById('chart_ventas_almacenes'));
-      chart8.draw(data8, options);
+      /// cargamos el queso del desglose por forma de pago de las compras
+      <!--{$data=$fsc->stats_formas_pago()}-->
+      {$fsc->generar_chart_pie_js($data, 'chart_compras_formas_pago')}
       
-      var data9 = google.visualization.arrayToDataTable([
-         ['TXT', 'Total'],
-         {loop="$fsc->stats_formas_pago()"}
-         ['{$value['txt']}', {$value['total']}],
-         {/loop}
-        ]);
+      /// cargamos el queso del desglose por forma de pago de las ventas
+      <!--{$data=$fsc->stats_formas_pago('pedidoscli')}-->
+      {$fsc->generar_chart_pie_js($data, 'chart_ventas_formas_pago')}
       
-      var chart9 = new google.visualization.PieChart(document.getElementById('chart_compras_formas_pago'));
-      chart9.draw(data9, options);
+      /// cargamos el queso del desglose por estado de las compras
+      <!--{$data=$fsc->stats_estados()}-->
+      {$fsc->generar_chart_pie_js($data, 'chart_compras_estados')}
       
-      var data10 = google.visualization.arrayToDataTable([
-         ['TXT', 'Total'],
-         {loop="$fsc->stats_formas_pago('pedidoscli')"}
-         ['{$value['txt']}', {$value['total']}],
-         {/loop}
-        ]);
+      /// cargamos el queso del desglose por estado de las ventas
+      <!--{$data=$fsc->stats_estados('pedidoscli')}-->
+      {$fsc->generar_chart_pie_js($data, 'chart_ventas_estados')}
       
-      var chart10 = new google.visualization.PieChart(document.getElementById('chart_ventas_formas_pago'));
-      chart10.draw(data10, options);
-   }   
+      /// cargamos el queso del desglose por empleado de las compras
+      <!--{$data=$fsc->stats_agentes()}-->
+      {$fsc->generar_chart_pie_js($data, 'chart_compras_agentes')}
+      
+      /// cargamos el queso del desglose por empleado de las ventas
+      <!--{$data=$fsc->stats_agentes('pedidoscli')}-->
+      {$fsc->generar_chart_pie_js($data, 'chart_ventas_agentes')}
+   });
 </script>
 
 {include="footer"}

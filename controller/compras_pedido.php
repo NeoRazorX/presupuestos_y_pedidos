@@ -220,14 +220,20 @@ class compras_pedido extends fs_controller
       if( is_null($this->pedido->idalbaran) )
       {
          $eje0 = $this->ejercicio->get_by_fecha($_POST['fecha'], FALSE);
-         if(!$eje0)
-         {
-            $this->new_error_msg('Ningún ejercicio encontrado.');
-         }
-         else
+         if($eje0)
          {
             $this->pedido->fecha = $_POST['fecha'];
             $this->pedido->hora = $_POST['hora'];
+            
+            if($this->pedido->codejercicio != $eje0->codejercicio)
+            {
+               $this->pedido->codejercicio = $eje0->codejercicio;
+               $this->pedido->new_codigo();
+            }
+         }
+         else
+         {
+            $this->new_error_msg('Ningún ejercicio encontrado.');
          }
          
          /// ¿cambiamos el proveedor?
