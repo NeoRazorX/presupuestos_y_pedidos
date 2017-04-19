@@ -131,9 +131,16 @@ class ventas_pedido extends fs_controller
                
                if($this->pedido->status == 1 AND is_null($this->pedido->idalbaran))
                {
-                  $this->generar_albaran();
+                  if( $this->comprobar_stock() )
+                  {
+                     $this->generar_albaran();
+                  }
+                  else
+                  {
+                     $this->pedido->status = 0;
+                  }
                }
-               elseif ($this->pedido->save())
+               else if( $this->pedido->save() )
                {
                   $this->new_message(ucfirst(FS_PEDIDO)." modificado correctamente.");
                }
@@ -788,5 +795,59 @@ class ventas_pedido extends fs_controller
             }
          }
       }
+   }
+   
+   /**
+    * Comprueba el stock de cada uno de los artículos del pedido.
+    * Devuelve TRUE si hay suficiente stock.
+    * @return boolean
+    */
+   private function comprobar_stock()
+   {
+      $ok = TRUE;
+      
+      $art0 = new articulo();
+      foreach($this->pedido->get_lineas() as $linea)
+      {
+         if($linea->referencia)
+         {
+            $articulo = $art0->get($linea->referencia);
+            if($articulo)
+            {
+               if(!$articulo->controlstock)
+               {
+                  if($linea->cantidad > $articulo->stockfis)
+                  {
+                     /// si se pide más cantidad de la disponible, es que no hay suficiente
+                     $ok = FALSE;
+                  }
+                  else
+                  {
+                     /// comprobamos el stock en el almacén del pedido
+                     $ok = FALSE;
+                     foreach($articulo->get_stock() as $stock)
+                     {
+                        if($stock->codalmacen == $this->pedido->codalmacen)
+                        {
+                           if($stock->cantidad >= $linea->cantidad)
+                           {
+                              $ok = TRUE;
+                           }
+                           break;
+                        }
+                     }
+                  }
+                  
+                  if(!$ok)
+                  {
+                     $this->new_error_msg('No hay suficiente stock del artículo '.$linea->referencia);
+                     break;
+                  }
+               }
+            }
+         }
+      }
+      
+      return $ok;
    }
 }

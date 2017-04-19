@@ -191,7 +191,6 @@ class pedido_cliente extends \fs_model
     * 0 -> pendiente. (editable)
     * 1 -> aprobado. (hay un idalbaran y no es editable)
     * 2 -> rechazado. (no hay idalbaran y no es editable)
-    * 3 -> validado parcialmente.
     * @var type 
     */
    public $status;
@@ -289,7 +288,7 @@ class pedido_cliente extends \fs_model
          }
          else if($this->status == 2)
          {
-            /// cancelado o validado parcialmente
+            /// cancelado
             $this->editable = FALSE;
          }
          else if($this->editable)
