@@ -983,11 +983,30 @@ class presupuesto_cliente extends \fs_model
       }
       if($estado)
       {
-         $sql .= " AND status = ".$this->var2str($estado);
+         if($estado =='0')
+         {
+            $sql .= " AND idpedido is NULL AND status = 0";
+         }
+         else if ($estado=='1')
+         {
+            $sql .= " AND status = '1'";
+         }
+         else if ($this->estado=='2')
+         {
+            $sql .= " AND status = '2'";
+         }
       }
       if($forma_pago)
       {
          $sql .= " AND codpago = ".$this->var2str($forma_pago);
+      }
+      if($divisa)
+      {
+         $sql .= "AND coddivisa = ".$this->var2str($divisa);
+      }
+      if($almacen)
+      {
+         $sql .= "AND codalmacen = ".$this->var2str($almacen);
       }
       $sql .= " ORDER BY fecha ASC, codigo ASC;";
       
