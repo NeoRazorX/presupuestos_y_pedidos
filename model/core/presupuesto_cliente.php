@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of presupuestos_y_pedidos
- * Copyright (C) 2014-2016    Carlos Garcia Gomez        neorazorx@gmail.com
+ * Copyright (C) 2014-2017    Carlos Garcia Gomez        neorazorx@gmail.com
  * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1031,7 +1031,7 @@ class presupuesto_cliente extends \fs_model
    public function search($query, $offset = 0)
    {
       $preslist = array();
-      $query = strtolower($this->no_html($query));
+      $query = mb_strtolower( $this->no_html($query), 'UTF8' );
       
       $consulta = "SELECT * FROM " . $this->table_name . " WHERE ";
       if( is_numeric($query) )

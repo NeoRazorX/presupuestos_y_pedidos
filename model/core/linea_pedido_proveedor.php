@@ -380,7 +380,7 @@ class linea_pedido_proveedor extends \fs_model
     * @param type $limit
     * @return \linea_pedido_proveedor
     */
-   public function all_from_articulo($ref, $offset=0, $limit=FS_ITEM_LIMIT)
+   public function all_from_articulo($ref, $offset = 0, $limit = FS_ITEM_LIMIT)
    {
       $linealist = array();
       $sql = "SELECT * FROM ".$this->table_name." WHERE referencia = ".$this->var2str($ref)
@@ -404,10 +404,10 @@ class linea_pedido_proveedor extends \fs_model
     * @param type $offset
     * @return \linea_pedido_proveedor
     */
-   public function search($query='', $offset=0)
+   public function search($query = '', $offset = 0)
    {
       $linealist = array();
-      $query = strtolower( $this->no_html($query) );
+      $query = mb_strtolower( $this->no_html($query), 'UTF8' );
       
       $sql = "SELECT * FROM ".$this->table_name." WHERE ";
       if( is_numeric($query) )

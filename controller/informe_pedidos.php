@@ -39,6 +39,7 @@ class informe_pedidos extends fs_controller
    public $codserie;
    public $desde;
    public $divisa;
+   public $estado;
 	public $forma_pago;
    public $hasta;
    public $multi_almacen;
@@ -46,7 +47,8 @@ class informe_pedidos extends fs_controller
    public $pedidos_pro;
    public $serie;
    
-	private $where;
+	private $where_compras;
+   private $where_ventas;
    
    public function __construct()
    {
@@ -110,37 +112,65 @@ class informe_pedidos extends fs_controller
          $this->coddivisa = $_REQUEST['coddivisa'];
       }
       
+      $this->estado = '';
+      if( isset($_REQUEST['estado']) )
+      {
+         $this->estado = $_REQUEST['estado'];
+      }
+      
       $this->set_where();
    }
    
    private function set_where()
    {
-      $this->where = " WHERE fecha >= ".$this->empresa->var2str($this->desde)
+      $this->where_compras = " WHERE fecha >= ".$this->empresa->var2str($this->desde)
               ." AND fecha <= ".$this->empresa->var2str($this->hasta);
       
 		if($this->codserie)
       {
-			$this->where .= " AND codserie = ".$this->empresa->var2str($this->codserie);
+			$this->where_compras .= " AND codserie = ".$this->empresa->var2str($this->codserie);
       }
 
 		if($this->codagente)
       {
-			$this->where .= " AND codagente = ".$this->empresa->var2str($this->codagente);
+			$this->where_compras .= " AND codagente = ".$this->empresa->var2str($this->codagente);
       }
 
 		if($this->codalmacen)
       {
-			$this->where .= " AND codalmacen = ".$this->empresa->var2str($this->codalmacen);
+			$this->where_compras .= " AND codalmacen = ".$this->empresa->var2str($this->codalmacen);
       }
       
 		if($this->coddivisa)
       {
-         $this->where .= " AND coddivisa = ".$this->empresa->var2str($this->coddivisa);
+         $this->where_compras .= " AND coddivisa = ".$this->empresa->var2str($this->coddivisa);
 		}
       
       if($this->codpago)
       {
-			$this->where .= " AND codpago = ".$this->empresa->var2str($this->codpago);
+			$this->where_compras .= " AND codpago = ".$this->empresa->var2str($this->codpago);
+      }
+      
+      $this->where_ventas = $this->where_compras;
+      if($this->estado != '')
+      {
+         switch($this->estado)
+         {
+            case '0':
+               $this->where_compras .= " AND idalbaran IS NULL";
+               $this->where_ventas .= " AND idalbaran IS NULL AND status = '0'";
+               break;
+            
+            case '1':
+               $this->where_compras .= " AND idalbaran IS NOT NULL";
+               $this->where_ventas .= " AND status = '1'";
+               break;
+            
+            case '2':
+               $this->where_compras .= " AND 1 = 2";
+               $this->where_ventas .= " AND status = '2'";
+               break;
+         }
       }
    }
 
@@ -211,8 +241,16 @@ class informe_pedidos extends fs_controller
          $sql_aux = "DATE_FORMAT(fecha, '%m%y')";
       }
       
-      $sql = "SELECT ".$sql_aux." as mes, SUM(neto) as total FROM ".$table_name
-              .$this->where." GROUP BY ".$sql_aux." ORDER BY mes ASC;";
+      $sql = "SELECT ".$sql_aux." as mes, SUM(neto) as total FROM ".$table_name;
+      if($table_name == 'pedidoscli')
+      {
+         $sql .= $this->where_ventas;
+      }
+      else
+      {
+         $sql .= $this->where_compras;
+      }
+      $sql .= " GROUP BY ".$sql_aux." ORDER BY mes ASC;";
       
       $data = $this->db->select($sql);
       if($data)
@@ -268,9 +306,18 @@ class informe_pedidos extends fs_controller
       else
          $sql_aux = "DATE_FORMAT(fecha, '%Y')";
       
-      $data = $this->db->select("SELECT ".$sql_aux." as ano, sum(neto) as total FROM ".$table_name
-              .$this->where." GROUP BY ".$sql_aux." ORDER BY ano ASC;");
+      $sql = "SELECT ".$sql_aux." as ano, sum(neto) as total FROM ".$table_name;
+      if($table_name == 'pedidoscli')
+      {
+         $sql .= $this->where_ventas;
+      }
+      else
+      {
+         $sql .= $this->where_compras;
+      }
+      $sql .= " GROUP BY ".$sql_aux." ORDER BY ano ASC;";
       
+      $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $d)
@@ -303,7 +350,14 @@ class informe_pedidos extends fs_controller
       $stats = array();
       
       $sql  = "select codserie,sum(neto) as total from ".$tabla;
-		$sql .= $this->where;
+		if($tabla == 'pedidoscli')
+      {
+         $sql .= $this->where_ventas;
+      }
+      else
+      {
+         $sql .= $this->where_compras;
+      }
       $sql .= " group by codserie order by total desc;";
       
       $data = $this->db->select($sql);
@@ -337,7 +391,14 @@ class informe_pedidos extends fs_controller
       $stats = array();
       
       $sql  = "select codagente,sum(neto) as total from ".$tabla;
-		$sql .= $this->where;
+		if($tabla == 'pedidoscli')
+      {
+         $sql .= $this->where_ventas;
+      }
+      else
+      {
+         $sql .= $this->where_compras;
+      }
       $sql .= " group by codagente order by total desc;";
       
       $data = $this->db->select($sql);
@@ -381,7 +442,14 @@ class informe_pedidos extends fs_controller
       $stats = array();
       
       $sql  = "select codalmacen,sum(neto) as total from ".$tabla;
-		$sql .= $this->where;
+		if($tabla == 'pedidoscli')
+      {
+         $sql .= $this->where_ventas;
+      }
+      else
+      {
+         $sql .= $this->where_compras;
+      }
 		$sql .= " group by codalmacen order by total desc;"; 
       
       $data = $this->db->select($sql);
@@ -415,7 +483,14 @@ class informe_pedidos extends fs_controller
       $stats = array();
       
       $sql  = "select codpago,sum(neto) as total from ".$tabla;
-		$sql .= $this->where;
+		if($tabla == 'pedidoscli')
+      {
+         $sql .= $this->where_ventas;
+      }
+      else
+      {
+         $sql .= $this->where_compras;
+      }
       $sql .=" group by codpago order by total desc;";
       
       $data = $this->db->select($sql);
@@ -456,7 +531,7 @@ class informe_pedidos extends fs_controller
       {
          /// aprobados
 	      $sql  = "select sum(neto) as total from ".$tabla;
-			$sql .= $this->where;
+			$sql .= $this->where_compras;
       	$sql .=" and idalbaran is not null order by total desc;";
          
          $data = $this->db->select($sql);
@@ -473,7 +548,7 @@ class informe_pedidos extends fs_controller
          
          /// pendientes
 	      $sql  = "select sum(neto) as total from ".$tabla;
-			$sql .= $this->where;
+			$sql .= $this->where_compras;
       	$sql .=" and idalbaran is null order by total desc;";
          
          $data = $this->db->select($sql);
@@ -498,7 +573,7 @@ class informe_pedidos extends fs_controller
       $tabla = 'pedidoscli';
       
 		$sql  = "select status,sum(neto) as total from ".$tabla;
-		$sql .= $this->where;
+		$sql .= $this->where_ventas;
       $sql .=" group by status order by total desc;";
       
       $data = $this->db->select($sql);
@@ -541,7 +616,7 @@ class informe_pedidos extends fs_controller
          
          foreach($data as $d)
          {
-            echo $chart_id.'_labels.push("'.$d['txt'].'"); ';
+            echo $chart_id.'_labels.push("'.$d['txt'].'");'."\n";
             echo $chart_id.'_data.push("'.$d['total'].'");'."\n";
          }
          

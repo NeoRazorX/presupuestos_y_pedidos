@@ -435,10 +435,10 @@ class linea_presupuesto_cliente extends \fs_model
     * @param type $offset
     * @return \linea_presupuesto_cliente
     */
-   public function search($query='', $offset=0)
+   public function search($query = '', $offset = 0)
    {
       $linealist = array();
-      $query = strtolower( $this->no_html($query) );
+      $query = mb_strtolower( $this->no_html($query), 'UTF8' );
       
       $sql = "SELECT * FROM ".$this->table_name." WHERE ";
       if( is_numeric($query) )

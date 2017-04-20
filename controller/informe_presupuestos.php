@@ -20,11 +20,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 require_once 'plugins/facturacion_base/extras/fs_pdf.php';
 require_once 'plugins/facturacion_base/extras/xlsxwriter.class.php';
-
-
 require_model('almacen.php');
 require_model('cliente.php');
 require_model('divisa.php');
@@ -34,9 +31,9 @@ require_model('serie.php');
 
 class informe_presupuestos extends fs_controller
 {
-
    public $agente;
    public $almacen;
+   public $cliente;
    public $codagente;
    public $codalmacen;
    public $coddivisa;
@@ -44,14 +41,14 @@ class informe_presupuestos extends fs_controller
    public $codserie;
    public $desde;
    public $divisa;
+   public $estado;
    public $forma_pago;
    public $hasta;
    public $multi_almacen;
    public $presupuestos_cli;
    public $serie;
+   
    private $where;
-   public $estado;
-   public $cliente;
 
    public function __construct()
    {
@@ -74,59 +71,58 @@ class informe_presupuestos extends fs_controller
       $this->multi_almacen = $fsvar->simple_get('multi_almacen');
 
       $this->desde = Date('01-m-Y', strtotime('-14 months'));
-      if(isset($_REQUEST['desde']))
+      if( isset($_REQUEST['desde']) )
       {
          $this->desde = $_REQUEST['desde'];
       }
 
       $this->hasta = Date('t-m-Y');
-      if(isset($_REQUEST['hasta']))
+      if( isset($_REQUEST['hasta']) )
       {
          $this->hasta = $_REQUEST['hasta'];
       }
 
-      $this->codserie = FALSE;
-      if(isset($_REQUEST['codserie']))
-      {
-         $this->codserie = $_REQUEST['codserie'];
-      }
-
-      $this->codpago = FALSE;
-      if(isset($_REQUEST['codpago']))
-      {
-         $this->codpago = $_REQUEST['codpago'];
-      }
-
       $this->codagente = FALSE;
-      if(isset($_REQUEST['codagente']))
+      if( isset($_REQUEST['codagente']) )
       {
          $this->codagente = $_REQUEST['codagente'];
       }
 
-      $this->codalmacen = FALSE;
-      if(isset($_REQUEST['codalmacen']))
+      $this->codserie = FALSE;
+      if( isset($_REQUEST['codserie']) )
       {
-         $this->codalmacen = $_REQUEST['codalmacen'];
+         $this->codserie = $_REQUEST['codserie'];
       }
 
       $this->coddivisa = $this->empresa->coddivisa;
-      if(isset($_REQUEST['coddivisa']))
+      if( isset($_REQUEST['coddivisa']) )
       {
          $this->coddivisa = $_REQUEST['coddivisa'];
       }
 
-      $this->estado = "";
-      if(isset($_REQUEST['estado']))
+      $this->codpago = FALSE;
+      if( isset($_REQUEST['codpago']) )
+      {
+         $this->codpago = $_REQUEST['codpago'];
+      }
+
+      $this->codalmacen = FALSE;
+      if( isset($_REQUEST['codalmacen']) )
+      {
+         $this->codalmacen = $_REQUEST['codalmacen'];
+      }
+      
+      $this->estado = '';
+      if( isset($_REQUEST['estado']) )
       {
          $this->estado = $_REQUEST['estado'];
       }
 
-      if(isset($_REQUEST['buscar_cliente']))
+      if( isset($_REQUEST['buscar_cliente']) )
       {
          $this->buscar_cliente();
       }
-
-      else if(isset($_REQUEST['codcliente']))
+      else if( isset($_REQUEST['codcliente']) )
       {
          if($_REQUEST['codcliente'] != '')
          {
@@ -134,17 +130,33 @@ class informe_presupuestos extends fs_controller
             $this->cliente = $cli0->get($_REQUEST['codcliente']);
          }
       }
+      
+      $this->set_where();
 
-      //listados???
-      if(isset($_POST['pdf']))
+      /// ¿¿¿listados???
+      if( isset($_POST['pdf']) )
       {
          if($_POST['pdf'] == 'TRUE')
          {
             $this->pdf_presupuestos_cli();
          }
       }
+   }
 
-      $this->set_where();
+   private function buscar_cliente()
+   {
+      /// desactivamos la plantilla HTML
+      $this->template = FALSE;
+      
+      $cli = new cliente();
+      $json = array();
+      foreach($cli->search($_REQUEST['buscar_cliente']) as $cli)
+      {
+         $json[] = array('value' => $cli->nombre, 'data' => $cli->codcliente);
+      }
+      
+      header('Content-Type: application/json');
+      echo json_encode( array('query' => $_REQUEST['buscar_cliente'], 'suggestions' => $json) );
    }
 
    private function set_where()
@@ -171,18 +183,23 @@ class informe_presupuestos extends fs_controller
       {
          $this->where .= " AND coddivisa = " . $this->empresa->var2str($this->coddivisa);
       }
-
-      if($this->estado)
+      
+      if($this->codpago)
       {
-         if($this->estado =='3')
+			$this->where .= " AND codpago = " . $this->empresa->var2str($this->codpago);
+      }
+
+      if($this->estado != '')
+      {
+         if($this->estado == '0')
          {
             $this->where .= " AND idpedido is NULL AND status = 0";
          }
-         else if ($this->estado=='1')
+         else if($this->estado == '1')
          {
             $this->where .= " AND status = '1'";
          }
-         else if ($this->estado=='2')
+         else if($this->estado == '2')
          {
             $this->where .= " AND status = '2'";
          }
@@ -553,65 +570,6 @@ class informe_presupuestos extends fs_controller
    }
 
    /**
-    * Esta función sirve para generar el javascript necesario para que la vista genere
-    * las gráficas, ahorrando mucho código.
-    * @param type $data
-    * @param type $chart_id
-    * @return string
-    */
-   public function generar_chart_pie_js(&$data, $chart_id)
-   {
-      $js_txt = '';
-
-      if($data)
-      {
-         echo "var " . $chart_id . "_labels = [];\n";
-         echo "var " . $chart_id . "_data = [];\n";
-
-         foreach($data as $d)
-         {
-            echo $chart_id . '_labels.push("' . $d['txt'] . '"); ';
-            echo $chart_id . '_data.push("' . $d['total'] . '");' . "\n";
-         }
-
-         /// hacemos el apaño para evitar el problema de charts.js con tabs en boostrap
-         echo "var " . $chart_id . "_ctx = document.getElementById('" . $chart_id . "').getContext('2d');\n";
-         echo $chart_id . "_ctx.canvas.height = 100;\n";
-
-         echo "var " . $chart_id . "_chart = new Chart(" . $chart_id . "_ctx, {
-            type: 'pie',
-            data: {
-               labels: " . $chart_id . "_labels,
-               datasets: [
-                  {
-                     backgroundColor: default_colors,
-                     data: " . $chart_id . "_data
-                  }
-               ]
-            }
-         });";
-      }
-
-      return $js_txt;
-   }
-
-   private function buscar_cliente()
-   {
-      /// desactivamos la plantilla HTML
-      $this->template = FALSE;
-      
-      $cli = new cliente();
-      $json = array();
-      foreach($cli->search($_REQUEST['buscar_cliente']) as $cli)
-      {
-         $json[] = array('value' => $cli->nombre, 'data' => $cli->codcliente);
-      }
-      
-      header('Content-Type: application/json');
-      echo json_encode( array('query' => $_REQUEST['buscar_cliente'], 'suggestions' => $json) );
-   }
-
-   /**
     * 
     * @return type array datos
     */
@@ -660,66 +618,84 @@ class informe_presupuestos extends fs_controller
       return $stats;
    }
 
+   /**
+    * Esta función sirve para generar el javascript necesario para que la vista genere
+    * las gráficas, ahorrando mucho código.
+    * @param type $data
+    * @param type $chart_id
+    * @return string
+    */
+   public function generar_chart_pie_js(&$data, $chart_id, $type = 'pie')
+   {
+      $js_txt = '';
+
+      if($data)
+      {
+         echo "var " . $chart_id . "_labels = [];\n";
+         echo "var " . $chart_id . "_data = [];\n";
+
+         foreach($data as $d)
+         {
+            echo $chart_id . '_labels.push("' . $d['txt'] . '"); ';
+            echo $chart_id . '_data.push("' . $d['total'] . '");' . "\n";
+         }
+
+         /// hacemos el apaño para evitar el problema de charts.js con tabs en boostrap
+         echo "var " . $chart_id . "_ctx = document.getElementById('" . $chart_id . "').getContext('2d');\n";
+         echo $chart_id . "_ctx.canvas.height = 100;\n";
+
+         echo "var " . $chart_id . "_chart = new Chart(" . $chart_id . "_ctx, {
+            type: '".$type."',
+            data: {
+               labels: " . $chart_id . "_labels,
+               datasets: [
+                  {
+                     backgroundColor: default_colors,
+                     data: " . $chart_id . "_data
+                  }
+               ]
+            }
+         });";
+      }
+
+      return $js_txt;
+   }
+
    private function pdf_presupuestos_cli()
    {
       /// desactivamos el motor de plantillas
+      $this->template = FALSE;
       
-
       $pdf_doc = new fs_pdf('a4', 'landscape', 'Courier');
       $pdf_doc->pdf->addInfo('Title', FS_PRESUPUESTOS . ' del ' . $this->desde . ' al ' . $this->hasta);
       $pdf_doc->pdf->addInfo('Subject', FS_PRESUPUESTOS . ' del ' . $this->desde . ' al ' . $this->hasta);
       $pdf_doc->pdf->addInfo('Author', $this->empresa->nombre);
-
-      $codserie = FALSE;
-      if($this->codserie)
-      {
-         $codserie = $this->codserie;
-      }
-
-      $codagente = FALSE;
-      if($this->codagente)
-      {
-         $codagente = $this->codagente;
-      }
-
+      
       $codcliente = FALSE;
       if($this->cliente)
       {
          $codcliente = $this->cliente->codcliente;
       }
-
-      $estado = FALSE;
-      if($this->estado)
-      {
-         $estado = $this->estado;
-      }
-
-      $forma_pago = FALSE;
-      if($this->codpago)
-      {
-         $forma_pago = $this->codpago;
-      }
-
-      $divisa = FALSE;
-      if($this->coddivisa)
-      {
-         $divisa = $this->coddivisa;
-      }
-
-      $almacen = FALSE;
-      if($this->codalmacen)
-      {
-         $almacen = $this->codalmacen;
-      }
-
+      
       $pre0 = new presupuesto_cliente();
-      $presupuestos = $pre0->all_desde($this->desde, $this->hasta, $codserie, $codagente, $codcliente, $estado, $forma_pago, $almacen, $divisa);
+      $presupuestos = $pre0->all_desde(
+              $this->desde,
+              $this->hasta,
+              $this->codserie,
+              $this->codagente,
+              $codcliente,
+              $this->estado,
+              $this->codpago,
+              $this->codalmacen,
+              $this->coddivisa
+      );
       if($presupuestos)
       {
          $total_lineas = count($presupuestos);
          $linea_actual = 0;
          $lppag = 61;
          $pagina = 1;
+         $totalbase = $total = 0;
 
          while($linea_actual < $total_lineas)
          {
@@ -732,69 +708,75 @@ class informe_presupuestos extends fs_controller
             /// encabezado
             $pdf_doc->pdf->ezText( $this->fix_html($this->empresa->nombre). " - ".FS_PRESUPUESTOS." - de venta del ".$this->desde." al ".$this->hasta );
             
-            if($codserie)
+            if($this->codserie)
             {
-               $pdf_doc->pdf->ezText("Serie: " . $codserie);
+               $pdf_doc->pdf->ezText( strtoupper(FS_SERIE).': ' . $this->codserie );
                $lppag--;
             }
 
-            if($codagente)
+            if($this->codagente)
             {
                $age0 = new agente();
                $agente = $age0->get($this->codagente);
-               $pdf_doc->pdf->ezText("Agente: " . $this->fix_html($agente->nombre));
+               if($agente)
+               {
+                  $pdf_doc->pdf->ezText("Empleado: " . $this->fix_html($agente->nombre));
+                  $lppag--;
+               }
+            }
+
+            if($this->cliente)
+            {
+               $pdf_doc->pdf->ezText("Cliente: " . $this->fix_html($this->cliente->nombre));
                $lppag--;
             }
 
-            if($codcliente)
-            {
-               $cli0 = new cliente();
-               $cliente = $cli0->get($this->cliente->codcliente);
-               $pdf_doc->pdf->ezText("Cliente: " . $this->fix_html($cliente->nombre));
-               $lppag--;
-            }
-
-            if($estado)
+            if($this->estado)
             {
                $lppag--;
-               if($estado == '3')
+               if($this->estado == '3')
                {
                   $pdf_doc->pdf->ezText("Estado: Pendientes");
                }
-               else if ($estado == '1')
+               else if($this->estado == '1')
                {
                   $pdf_doc->pdf->ezText("Estado: Aprobados");
                }
-               else if ($estado == '2')
+               else if($this->estado == '2')
                {
                   $pdf_doc->pdf->ezText("Estado: Rechazados");
                }
             }
-
-            if($forma_pago)
+            
+            if($this->codpago)
             {
                $fp0 = new forma_pago();
                $forma_pago = $fp0->get($this->codpago);
-               $pdf_doc->pdf->ezText("Forma de pago: " . $this->fix_html($forma_pago->descripcion));
-               $lppag--;
+               if($forma_pago)
+               {
+                  $pdf_doc->pdf->ezText("Forma de pago: " . $this->fix_html($forma_pago->descripcion));
+                  $lppag--;
+               }
             }
             
-            if($almacen)
+            if($this->almacen)
             {
                $alm0 = new almacen();
                $almacen = $alm0->get($this->codalmacen);
-               $pdf_doc->pdf->ezText("Almacén: " . $this->fix_html($almacen->nombre));
-               $lppag--;
+               if($almacen)
+               {
+                  $pdf_doc->pdf->ezText("Almacén: " . $this->fix_html($almacen->nombre));
+                  $lppag--;
+               }
             }
 
             $pdf_doc->pdf->ezText("\n", 8);
-
 
             /// tabla principal
             $pdf_doc->new_table();
             $pdf_doc->add_table_header(
                     array(
-                        'serie' => '<b>Serie</b>',
+                        'serie' => '<b>' . strtoupper(FS_SERIE) . '</b>',
                         'presupuesto' => '<b>Pres.</b>',
                         'fecha' => '<b>Fecha</b>',
                         'descripcion' => '<b>Descripción</b>',
@@ -816,7 +798,6 @@ class informe_presupuestos extends fs_controller
                );
 
                $pdf_doc->add_table_row($linea);
-
 
                $i++;
                $totalbase += $presupuestos[$linea_actual]->neto;
@@ -877,5 +858,4 @@ class informe_presupuestos extends fs_controller
       $newt = str_replace('&#39;', "'", $newt);
       return $newt;
    }
-
 }
