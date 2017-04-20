@@ -952,16 +952,63 @@ class presupuesto_cliente extends \fs_model
    }
    
    /**
-    * Devuelve un array con los presupuestos comprendidos entre $desde y $hasta
+    * Devuelve un array con los presupuestos según los filtros:
+    * 
     * @param type $desde
     * @param type $hasta
+    * @param type $codserie
+    * @param type $codagente
+    * @param type $codcliente
+    * @param type $estado
+    * @param type $forma_pago
+    * @param type $almacen
+    * @param type $divisa
     * @return \presupuesto_cliente
     */
-   public function all_desde($desde, $hasta)
+   public function all_desde($desde, $hasta, $codserie = FALSE, $codagente = FALSE, $codcliente = FALSE, $estado = FALSE, $forma_pago = FALSE, $almacen = FALSE, $divisa = FALSE)
    {
       $preslist = array();
-      $sql = "SELECT * FROM " . $this->table_name . " WHERE fecha >= " . $this->var2str($desde)
-              . " AND fecha <= " . $this->var2str($hasta) ." ORDER BY codigo ASC;";
+      $sql = "SELECT * FROM ".$this->table_name." WHERE fecha >= ".$this->var2str($desde)." AND fecha <= ".$this->var2str($hasta);
+      if($codserie)
+      {
+         $sql .= " AND codserie = ".$this->var2str($codserie);
+      }
+      if($codagente)
+      {
+         $sql .= " AND codagente = ".$this->var2str($codagente);
+      }
+      if($codcliente)
+      {
+         $sql .= " AND codcliente = ".$this->var2str($codcliente);
+      }
+      if($estado)
+      {
+         if($estado =='0')
+         {
+            $sql .= " AND idpedido is NULL AND status = 0";
+         }
+         else if ($estado=='1')
+         {
+            $sql .= " AND status = '1'";
+         }
+         else if ($this->estado=='2')
+         {
+            $sql .= " AND status = '2'";
+         }
+      }
+      if($forma_pago)
+      {
+         $sql .= " AND codpago = ".$this->var2str($forma_pago);
+      }
+      if($divisa)
+      {
+         $sql .= "AND coddivisa = ".$this->var2str($divisa);
+      }
+      if($almacen)
+      {
+         $sql .= "AND codalmacen = ".$this->var2str($almacen);
+      }
+      $sql .= " ORDER BY fecha ASC, codigo ASC;";
       
       $data = $this->db->select($sql);
       if($data)
