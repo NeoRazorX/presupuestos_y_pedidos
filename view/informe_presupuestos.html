@@ -31,7 +31,6 @@
       {else}
       <input type="hidden" name="codcliente"/>
       {/if}
-      <input type="hidden" name="pdf"/>
       <div class="row">
          <div class="col-sm-12">
             <div class="page-header">
@@ -169,11 +168,15 @@
             </div>
          </div>
          <div class="col-sm-2">
-            Descargar:
-            <br/>
-            <button class="btn btn-sm btn-info" type="button" onclick="this.disabled=true;document.listado_general.pdf.value='TRUE';this.form.submit();">
-               <span class="fa fa-file-pdf-o"></span>&nbsp; PDF
-            </button>
+            <div class="form-group">
+               Descarga:
+               <select class="form-control" name="generar" onchange="this.form.submit()">
+                  <option value="">-----</option>
+                  <option value="pdf" {if="$fsc->generar == 'pdf'"}selected=""{/if}><span class="fa fa-file-pdf-o"></span>PDF</option>
+                  <option value="xls" {if="$fsc->generar == 'xls'"}selected=""{/if}><span class="fa fa-file-excel-o"></span>XLS</option>
+                  <option value="csv" {if="$fsc->generar == 'csv'"}selected=""{/if}><span class="fa fa-file-csv-o"></span>CSV</option>  
+               </select>
+            </div>
          </div>
       </div>
    </form>

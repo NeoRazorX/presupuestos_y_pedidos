@@ -134,11 +134,19 @@ class informe_presupuestos extends fs_controller
       $this->set_where();
 
       /// ¿¿¿listados???
-      if( isset($_POST['pdf']) )
+      if( isset($_POST['generar']) )
       {
-         if($_POST['pdf'] == 'TRUE')
+         if($_POST['generar'] == 'pdf')
          {
             $this->pdf_presupuestos_cli();
+         }
+         else if($_POST['generar'] == 'xls')
+         {
+            $this->xls_presupuestoscli();
+         }
+         else if ($_POST['generar'] == 'csv')
+         {
+            $this->csv_presupuestoscli();
          }
       }
    }
@@ -519,7 +527,7 @@ class informe_presupuestos extends fs_controller
       {
          $estados = array(
              0 => 'Pendientes',
-             1 => 'Aprovados',
+             1 => 'Aprobados',
              2 => 'Rechazados',
          );
 
@@ -857,5 +865,127 @@ class informe_presupuestos extends fs_controller
       $newt = str_replace('&quot;', '"', $newt);
       $newt = str_replace('&#39;', "'", $newt);
       return $newt;
+   }
+   
+   private function xls_presupuestoscli()
+   {
+      
+      $this->template = FALSE;
+      header("Content-Disposition: attachment; filename=\"informe_presupuestos_".time().".xlsx\"");
+      header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      header('Content-Transfer-Encoding: binary');
+      header('Cache-Control: must-revalidate');
+      header('Pragma: public');
+      
+       $header = array(
+         'almacen' => 'string',
+         'codigo' => 'string',
+         'serie' => 'string',
+         FS_NUMERO2 => 'string',
+         'fecha' => 'string',
+         'descripcion' => 'string',
+         FS_CIFNIF => 'string',
+         'base' => '#,##0.00',
+         'total' => '#,##0.00;[RED]-#,##0.00',
+      );
+
+      $data = array();
+
+      $codcliente = FALSE;
+      if($this->cliente)
+      {
+         $codcliente = $this->cliente->codcliente;
+      }
+
+      $pre0 = new presupuesto_cliente();
+       $presupuestos = $pre0->all_desde(
+              $this->desde,
+              $this->hasta,
+              $this->codserie,
+              $this->codagente,
+              $codcliente,
+              $this->estado,
+              $this->codpago,
+              $this->codalmacen,
+              $this->coddivisa
+      );
+       
+       if($presupuestos)
+      {
+         foreach($presupuestos as $pres)
+         {
+            $linea = array(
+                'almacen' => $pres->codalmacen,
+                'codigo' => $pres->codigo,
+                'serie' => $pres->codserie,
+                FS_NUMERO2 => $pres->numero2,
+                'fecha' => $pres->fecha,
+                'descripcion' => $pres->nombrecliente,
+                FS_CIFNIF => $pres->cifnif,
+                'base' => $pres->neto,
+                'total' => $pres->total,
+            );
+            
+            $data[] = $linea;
+         }
+      }
+      
+      $writter = new XLSXWriter();
+      $writter->setAuthor('Generador Excel FS');
+      $writter->writeSheetHeader('Pres_clientes', $header);
+      foreach($data as $row)
+      {
+         $writter->writeSheetRow('Pres_clientes', $row);
+      }
+      
+      $writter->writeToStdOut();
+   }
+   
+   private function csv_presupuestoscli()
+   {
+      $this->template = FALSE;
+      header("content-type:application/csv;charset=UTF-8");
+      header("Content-Disposition: attachment; filename=\"presupuestos_cli.csv\"");
+      echo "almacen,serie," . FS_NUMERO2 . ",presupuesto,fecha,descripcion," . FS_CIFNIF
+      . ",base,total\n";
+
+      $codcliente = FALSE;
+      if($this->cliente)
+      {
+         $codcliente = $this->cliente->codcliente;
+      }
+
+      $pre0 = new presupuesto_cliente();
+      $presupuestos = $pre0->all_desde(
+              $this->desde,
+              $this->hasta,
+              $this->codserie,
+              $this->codagente,
+              $codcliente,
+              $this->estado,
+              $this->codpago,
+              $this->codalmacen,
+              $this->coddivisa
+      );
+
+      if($presupuestos)
+      {
+         foreach($presupuestos as $pres)
+         {
+            $linea = array(
+                'almacen' => $pres->codalmacen,
+                'serie' => $pres->codserie,
+                'numero2' => $pres->numero2,
+                'presupuesto' => $pres->numero,
+                'fecha' => $pres->fecha,
+                'descripcion' => $pres->nombrecliente,
+                'cifnif' => $pres->cifnif,
+                'base' => $pres->neto,
+                'total' => $pres->total
+            );
+
+            echo '"' . join('","', $linea) . "\"\n";
+         }
+      }
    }
 }
