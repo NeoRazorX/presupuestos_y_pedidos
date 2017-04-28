@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of presupuestos_y_pedidos
+ * This file is part of pedidos_y_pedidos
  * Copyright (C) 2015-2017    Carlos Garcia Gomez  neorazorx@gmail.com
  * Copyright (C) 2017         Itaca Software Libre contacta@itacaswl.com
  *
@@ -19,6 +19,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+require_once 'plugins/facturacion_base/extras/fs_pdf.php';
+require_once 'plugins/facturacion_base/extras/xlsxwriter.class.php';
+
 require_model('almacen.php');
 require_model('cliente.php');
 require_model('divisa.php');
@@ -30,6 +33,7 @@ require_model('serie.php');
 
 class informe_pedidos extends fs_controller
 {
+
    public $agente;
    public $almacen;
    public $codagente;
@@ -40,132 +44,179 @@ class informe_pedidos extends fs_controller
    public $desde;
    public $divisa;
    public $estado;
-	public $forma_pago;
+   public $forma_pago;
    public $hasta;
    public $multi_almacen;
    public $pedidos_cli;
    public $pedidos_pro;
    public $serie;
-   
-	private $where_compras;
+   private $where_compras;
    private $where_ventas;
-   
+   public $cliente;
+   public $proveedor;
+
    public function __construct()
    {
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS), 'informes', FALSE, TRUE);
    }
-   
+
    protected function private_core()
    {
       /// declaramos los objetos sólo para asegurarnos de que existen las tablas
       $this->pedido_cli = new pedido_cliente();
       $this->pedido_pro = new pedido_proveedor();
-      
+
       $this->agente = new agente();
       $this->almacen = new almacen();
-		$this->divisa = new divisa();
-		$this->forma_pago = new forma_pago();
+      $this->divisa = new divisa();
+      $this->forma_pago = new forma_pago();
       $this->serie = new serie();
-      
+      $this->cliente = FALSE;
+      $this->proveedor = FALSE;
+
       $fsvar = new fs_var();
       $this->multi_almacen = $fsvar->simple_get('multi_almacen');
-      
+
       $this->desde = Date('01-m-Y', strtotime('-14 months'));
-      if( isset($_REQUEST['desde']) )
+      if(isset($_REQUEST['desde']))
       {
          $this->desde = $_REQUEST['desde'];
       }
-      
+
       $this->hasta = Date('t-m-Y');
-      if( isset($_REQUEST['hasta']) )
+      if(isset($_REQUEST['hasta']))
       {
          $this->hasta = $_REQUEST['hasta'];
-      }  
-      
+      }
+
       $this->codserie = FALSE;
-      if( isset($_REQUEST['codserie']) )
+      if(isset($_REQUEST['codserie']))
       {
          $this->codserie = $_REQUEST['codserie'];
       }
-      
+
       $this->codpago = FALSE;
-      if( isset($_REQUEST['codpago']) )
+      if(isset($_REQUEST['codpago']))
       {
          $this->codpago = $_REQUEST['codpago'];
       }
-      
+
       $this->codagente = FALSE;
-      if( isset($_REQUEST['codagente']) )
+      if(isset($_REQUEST['codagente']))
       {
          $this->codagente = $_REQUEST['codagente'];
       }
-      
-      $this->codalmacen = FALSE; 
-      if( isset($_REQUEST['codalmacen']) )
+
+      $this->codalmacen = FALSE;
+      if(isset($_REQUEST['codalmacen']))
       {
          $this->codalmacen = $_REQUEST['codalmacen'];
       }
 
       $this->coddivisa = $this->empresa->coddivisa;
-      if( isset($_REQUEST['coddivisa']) )
+      if(isset($_REQUEST['coddivisa']))
       {
          $this->coddivisa = $_REQUEST['coddivisa'];
       }
-      
+
       $this->estado = '';
-      if( isset($_REQUEST['estado']) )
+      if(isset($_REQUEST['estado']))
       {
          $this->estado = $_REQUEST['estado'];
       }
       
+      if( isset($_REQUEST['buscar_cliente']) )
+      {
+         $this->buscar_cliente();
+      }
+      else if (isset($_REQUEST['buscar_proveedor']))
+      {
+         $this->buscar_proveedor();
+      }
+     
+      if( isset($_REQUEST['codcliente']) )
+      {
+         if($_REQUEST['codcliente'] != '')
+         {
+            $cli0 = new cliente();
+            $this->cliente = $cli0->get($_REQUEST['codcliente']);
+         }
+      }
+      
+      if( isset($_REQUEST['codproveedor']) )
+      {
+         if($_REQUEST['codproveedor'] != '')
+         {
+            $prov0 = new proveedor();
+            $this->proveedor = $prov0->get($_REQUEST['codproveedor']);
+         }
+      }
+
       $this->set_where();
+      
+      /// ¿¿¿listados???
+      if( isset($_POST['generar']) )
+      {
+         if($_POST['generar'] == 'pdfcli')
+         {
+            $this->pdf_pedidos_cli();
+         }
+         else if($_POST['generar'] == 'xlscli')
+         {
+            $this->xls_pedidoscli();
+         }
+         else if ($_POST['generar'] == 'csvcli')
+         {
+            $this->csv_pedidoscli();
+         }
+      }
    }
-   
+
    private function set_where()
    {
-      $this->where_compras = " WHERE fecha >= ".$this->empresa->var2str($this->desde)
-              ." AND fecha <= ".$this->empresa->var2str($this->hasta);
-      
-		if($this->codserie)
+      $this->where_compras = " WHERE fecha >= " . $this->empresa->var2str($this->desde)
+              . " AND fecha <= " . $this->empresa->var2str($this->hasta);
+
+      if($this->codserie)
       {
-			$this->where_compras .= " AND codserie = ".$this->empresa->var2str($this->codserie);
+         $this->where_compras .= " AND codserie = " . $this->empresa->var2str($this->codserie);
       }
 
-		if($this->codagente)
+      if($this->codagente)
       {
-			$this->where_compras .= " AND codagente = ".$this->empresa->var2str($this->codagente);
+         $this->where_compras .= " AND codagente = " . $this->empresa->var2str($this->codagente);
       }
 
-		if($this->codalmacen)
+      if($this->codalmacen)
       {
-			$this->where_compras .= " AND codalmacen = ".$this->empresa->var2str($this->codalmacen);
+         $this->where_compras .= " AND codalmacen = " . $this->empresa->var2str($this->codalmacen);
       }
-      
-		if($this->coddivisa)
+
+      if($this->coddivisa)
       {
-         $this->where_compras .= " AND coddivisa = ".$this->empresa->var2str($this->coddivisa);
-		}
-      
+         $this->where_compras .= " AND coddivisa = " . $this->empresa->var2str($this->coddivisa);
+      }
+
       if($this->codpago)
       {
-			$this->where_compras .= " AND codpago = ".$this->empresa->var2str($this->codpago);
+         $this->where_compras .= " AND codpago = " . $this->empresa->var2str($this->codpago);
       }
-      
+
       $this->where_ventas = $this->where_compras;
       if($this->estado != '')
       {
-         switch($this->estado)
+         switch ($this->estado)
          {
             case '0':
                $this->where_compras .= " AND idalbaran IS NULL";
                $this->where_ventas .= " AND idalbaran IS NULL AND status = '0'";
                break;
-            
+
             case '1':
                $this->where_compras .= " AND idalbaran IS NOT NULL";
                $this->where_ventas .= " AND status = '1'";
                break;
-            
+
             case '2':
                $this->where_compras .= " AND 1 = 2";
                $this->where_ventas .= " AND status = '2'";
@@ -193,55 +244,54 @@ class informe_pedidos extends fs_controller
           11 => 'nov',
           12 => 'dic'
       );
-      
+
       foreach($stats_cli as $i => $value)
       {
-      	$mesletra = "";
-      	$ano = "";
-      	
-      	if( !empty($value['month']) )
-      	{
-	      	$mesletra = $meses[intval(substr((string)$value['month'], 0, strlen((string)$value['month'])-2))];
-	      	$ano = substr((string)$value['month'], -2);
-      	}
-	
+         $mesletra = "";
+         $ano = "";
+
+         if(!empty($value['month']))
+         {
+            $mesletra = $meses[intval(substr((string) $value['month'], 0, strlen((string) $value['month']) - 2))];
+            $ano = substr((string) $value['month'], -2);
+         }
+
          $stats[$i] = array(
-             'month' => $mesletra.$ano , 
+             'month' => $mesletra . $ano,
              'total_cli' => round($value['total'], FS_NF0),
              'total_pro' => 0
          );
       }
-      
+
       foreach($stats_pro as $i => $value)
       {
          $stats[$i]['total_pro'] = round($value['total'], FS_NF0);
       }
-      
+
       return $stats;
    }
-   
+
    private function stats_months_aux($table_name = 'pedidoscli')
    {
       $stats = array();
-      
+
       /// inicializamos los resultados
       foreach($this->date_range($this->desde, $this->hasta, '+1 month', 'my') as $date)
       {
          $i = intval($date);
          $stats[$i] = array('month' => $i, 'total' => 0);
       }
-      
-      if( strtolower(FS_DB_TYPE) == 'postgresql')
+
+      if(strtolower(FS_DB_TYPE) == 'postgresql')
       {
          $sql_aux = "to_char(fecha,'FMMMYY')";
-
       }
       else
       {
          $sql_aux = "DATE_FORMAT(fecha, '%m%y')";
       }
-      
-      $sql = "SELECT ".$sql_aux." as mes, SUM(neto) as total FROM ".$table_name;
+
+      $sql = "SELECT " . $sql_aux . " as mes, SUM(neto) as total FROM " . $table_name;
       if($table_name == 'pedidoscli')
       {
          $sql .= $this->where_ventas;
@@ -250,8 +300,8 @@ class informe_pedidos extends fs_controller
       {
          $sql .= $this->where_compras;
       }
-      $sql .= " GROUP BY ".$sql_aux." ORDER BY mes ASC;";
-      
+      $sql .= " GROUP BY " . $sql_aux . " ORDER BY mes ASC;";
+
       $data = $this->db->select($sql);
       if($data)
       {
@@ -261,16 +311,16 @@ class informe_pedidos extends fs_controller
             $stats[$i]['total'] = floatval($d['total']);
          }
       }
-      
+
       return $stats;
    }
-   
+
    public function stats_years()
    {
       $stats = array();
       $stats_cli = $this->stats_years_aux('pedidoscli');
       $stats_pro = $this->stats_years_aux('pedidosprov');
-      
+
       foreach($stats_cli as $i => $value)
       {
          $stats[$i] = array(
@@ -279,34 +329,34 @@ class informe_pedidos extends fs_controller
              'total_pro' => 0
          );
       }
-      
+
       foreach($stats_pro as $i => $value)
       {
          $stats[$i]['total_pro'] = round($value['total'], FS_NF0);
       }
-      
+
       return $stats;
    }
-   
+
    private function stats_years_aux($table_name = 'pedidoscli', $num = 4)
    {
       $stats = array();
-      
+
       /// inicializamos los resultados
       foreach($this->date_range($this->desde, $this->hasta, '+1 year', 'Y') as $date)
       {
          $i = intval($date);
          $stats[$i] = array('year' => $i, 'total' => 0);
       }
-      
-      if( strtolower(FS_DB_TYPE) == 'postgresql')
+
+      if(strtolower(FS_DB_TYPE) == 'postgresql')
       {
          $sql_aux = "to_char(fecha,'FMYYYY')";
       }
       else
          $sql_aux = "DATE_FORMAT(fecha, '%Y')";
-      
-      $sql = "SELECT ".$sql_aux." as ano, sum(neto) as total FROM ".$table_name;
+
+      $sql = "SELECT " . $sql_aux . " as ano, sum(neto) as total FROM " . $table_name;
       if($table_name == 'pedidoscli')
       {
          $sql .= $this->where_ventas;
@@ -315,8 +365,8 @@ class informe_pedidos extends fs_controller
       {
          $sql .= $this->where_compras;
       }
-      $sql .= " GROUP BY ".$sql_aux." ORDER BY ano ASC;";
-      
+      $sql .= " GROUP BY " . $sql_aux . " ORDER BY ano ASC;";
+
       $data = $this->db->select($sql);
       if($data)
       {
@@ -326,31 +376,31 @@ class informe_pedidos extends fs_controller
             $stats[$i]['total'] = floatval($d['total']);
          }
       }
-      
+
       return $stats;
    }
-   
-   private function date_range($first, $last, $step = '+1 day', $format = 'd-m-Y' )
+
+   private function date_range($first, $last, $step = '+1 day', $format = 'd-m-Y')
    {
       $dates = array();
       $current = strtotime($first);
       $last = strtotime($last);
-      
-      while( $current <= $last )
+
+      while($current <= $last)
       {
          $dates[] = date($format, $current);
          $current = strtotime($step, $current);
       }
-      
+
       return $dates;
-   } 
+   }
 
    public function stats_series($tabla = 'pedidosprov')
    {
       $stats = array();
-      
-      $sql  = "select codserie,sum(neto) as total from ".$tabla;
-		if($tabla == 'pedidoscli')
+
+      $sql = "select codserie,sum(neto) as total from " . $tabla;
+      if($tabla == 'pedidoscli')
       {
          $sql .= $this->where_ventas;
       }
@@ -359,7 +409,7 @@ class informe_pedidos extends fs_controller
          $sql .= $this->where_compras;
       }
       $sql .= " group by codserie order by total desc;";
-      
+
       $data = $this->db->select($sql);
       if($data)
       {
@@ -370,28 +420,28 @@ class informe_pedidos extends fs_controller
             {
                $stats[] = array(
                    'txt' => $serie->descripcion,
-                   'total' => round( floatval($d['total']), FS_NF0)
+                   'total' => round(floatval($d['total']), FS_NF0)
                );
             }
             else
             {
                $stats[] = array(
                    'txt' => $d['codserie'],
-                   'total' => round( floatval($d['total']), FS_NF0)
+                   'total' => round(floatval($d['total']), FS_NF0)
                );
             }
          }
       }
-      
+
       return $stats;
    }
 
    public function stats_agentes($tabla = 'pedidosprov')
    {
       $stats = array();
-      
-      $sql  = "select codagente,sum(neto) as total from ".$tabla;
-		if($tabla == 'pedidoscli')
+
+      $sql = "select codagente,sum(neto) as total from " . $tabla;
+      if($tabla == 'pedidoscli')
       {
          $sql .= $this->where_ventas;
       }
@@ -400,17 +450,17 @@ class informe_pedidos extends fs_controller
          $sql .= $this->where_compras;
       }
       $sql .= " group by codagente order by total desc;";
-      
+
       $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $d)
          {
-            if( is_null($d['codagente']) )
+            if(is_null($d['codagente']))
             {
                $stats[] = array(
                    'txt' => 'Ninguno',
-                   'total' => round( floatval($d['total']), FS_NF0)
+                   'total' => round(floatval($d['total']), FS_NF0)
                );
             }
             else
@@ -420,29 +470,29 @@ class informe_pedidos extends fs_controller
                {
                   $stats[] = array(
                       'txt' => $agente->get_fullname(),
-                      'total' => round( floatval($d['total']), FS_NF0)
+                      'total' => round(floatval($d['total']), FS_NF0)
                   );
                }
                else
                {
                   $stats[] = array(
                       'txt' => $d['codagente'],
-                      'total' => round( floatval($d['total']), FS_NF0)
+                      'total' => round(floatval($d['total']), FS_NF0)
                   );
                }
             }
          }
       }
-      
+
       return $stats;
    }
-   
+
    public function stats_almacenes($tabla = 'pedidosprov')
    {
       $stats = array();
-      
-      $sql  = "select codalmacen,sum(neto) as total from ".$tabla;
-		if($tabla == 'pedidoscli')
+
+      $sql = "select codalmacen,sum(neto) as total from " . $tabla;
+      if($tabla == 'pedidoscli')
       {
          $sql .= $this->where_ventas;
       }
@@ -450,8 +500,8 @@ class informe_pedidos extends fs_controller
       {
          $sql .= $this->where_compras;
       }
-		$sql .= " group by codalmacen order by total desc;"; 
-      
+      $sql .= " group by codalmacen order by total desc;";
+
       $data = $this->db->select($sql);
       if($data)
       {
@@ -462,28 +512,28 @@ class informe_pedidos extends fs_controller
             {
                $stats[] = array(
                    'txt' => $alma->nombre,
-                   'total' => round( floatval($d['total']), FS_NF0)
+                   'total' => round(floatval($d['total']), FS_NF0)
                );
             }
             else
             {
                $stats[] = array(
                    'txt' => $d['codalmacen'],
-                   'total' => round( floatval($d['total']), FS_NF0)
+                   'total' => round(floatval($d['total']), FS_NF0)
                );
             }
          }
       }
-      
+
       return $stats;
    }
 
    public function stats_formas_pago($tabla = 'pedidosprov')
    {
       $stats = array();
-      
-      $sql  = "select codpago,sum(neto) as total from ".$tabla;
-		if($tabla == 'pedidoscli')
+
+      $sql = "select codpago,sum(neto) as total from " . $tabla;
+      if($tabla == 'pedidoscli')
       {
          $sql .= $this->where_ventas;
       }
@@ -491,8 +541,8 @@ class informe_pedidos extends fs_controller
       {
          $sql .= $this->where_compras;
       }
-      $sql .=" group by codpago order by total desc;";
-      
+      $sql .= " group by codpago order by total desc;";
+
       $data = $this->db->select($sql);
       if($data)
       {
@@ -503,79 +553,79 @@ class informe_pedidos extends fs_controller
             {
                $stats[] = array(
                    'txt' => $formap->descripcion,
-                   'total' => round( floatval($d['total']), FS_NF0)
+                   'total' => round(floatval($d['total']), FS_NF0)
                );
             }
             else
             {
                $stats[] = array(
                    'txt' => $d['codpago'],
-                   'total' => round( floatval($d['total']), FS_NF0)
+                   'total' => round(floatval($d['total']), FS_NF0)
                );
             }
          }
       }
-      
+
       return $stats;
    }
-   
+
    public function stats_estados($tabla = 'pedidosprov')
    {
       $stats = array();
-      
-		if($tabla == 'pedidoscli')
-		{
-	      $stats = $this->stats_estados_pedidoscli();
+
+      if($tabla == 'pedidoscli')
+      {
+         $stats = $this->stats_estados_pedidoscli();
       }
       else
       {
          /// aprobados
-	      $sql  = "select sum(neto) as total from ".$tabla;
-			$sql .= $this->where_compras;
-      	$sql .=" and idalbaran is not null order by total desc;";
-         
+         $sql = "select sum(neto) as total from " . $tabla;
+         $sql .= $this->where_compras;
+         $sql .= " and idalbaran is not null order by total desc;";
+
          $data = $this->db->select($sql);
          if($data)
          {
-            if( floatval($data[0]['total']) )
+            if(floatval($data[0]['total']))
             {
                $stats[] = array(
                    'txt' => 'aprobado',
-                   'total' => round( floatval($data[0]['total']), FS_NF0)
+                   'total' => round(floatval($data[0]['total']), FS_NF0)
                );
             }
          }
-         
+
          /// pendientes
-	      $sql  = "select sum(neto) as total from ".$tabla;
-			$sql .= $this->where_compras;
-      	$sql .=" and idalbaran is null order by total desc;";
-         
+         $sql = "select sum(neto) as total from " . $tabla;
+         $sql .= $this->where_compras;
+         $sql .= " and idalbaran is null order by total desc;";
+
          $data = $this->db->select($sql);
          if($data)
          {
-            if( floatval($data[0]['total']) )
+            if(floatval($data[0]['total']))
             {
                $stats[] = array(
                    'txt' => 'pendiente',
-                   'total' => round( floatval($data[0]['total']), FS_NF0)
+                   'total' => round(floatval($data[0]['total']), FS_NF0)
                );
             }
          }
       }
-      
+
       return $stats;
    }
-   
+
    private function stats_estados_pedidoscli()
    {
       $stats = array();
       $tabla = 'pedidoscli';
-      
-		$sql  = "select status,sum(neto) as total from ".$tabla;
-		$sql .= $this->where_ventas;
-      $sql .=" group by status order by total desc;";
-      
+
+      $sql = "select status,sum(neto) as total from " . $tabla;
+      $sql .= $this->where_ventas;
+      $sql .= " group by status order by total desc;";
+
       $data = $this->db->select($sql);
       if($data)
       {
@@ -585,19 +635,19 @@ class informe_pedidos extends fs_controller
              2 => 'rechazado',
              3 => 'validado parcialmente'
          );
-         
+
          foreach($data as $d)
          {
             $stats[] = array(
                 'txt' => $estados[$d['status']],
-		          'total' => round( floatval($d['total']), FS_NF0)
+                'total' => round(floatval($d['total']), FS_NF0)
             );
          }
       }
-      
+
       return $stats;
    }
-   
+
    /**
     * Esta función sirve para generar el javascript necesario para que la vista genere
     * las gráficas, ahorrando mucho código.
@@ -608,36 +658,390 @@ class informe_pedidos extends fs_controller
    public function generar_chart_pie_js(&$data, $chart_id)
    {
       $js_txt = '';
-      
+
       if($data)
       {
-         echo "var ".$chart_id."_labels = [];\n";
-         echo "var ".$chart_id."_data = [];\n";
-         
+         echo "var " . $chart_id . "_labels = [];\n";
+         echo "var " . $chart_id . "_data = [];\n";
+
          foreach($data as $d)
          {
-            echo $chart_id.'_labels.push("'.$d['txt'].'");'."\n";
-            echo $chart_id.'_data.push("'.$d['total'].'");'."\n";
+            echo $chart_id . '_labels.push("' . $d['txt'] . '");' . "\n";
+            echo $chart_id . '_data.push("' . $d['total'] . '");' . "\n";
          }
-         
+
          /// hacemos el apaño para evitar el problema de charts.js con tabs en boostrap
-         echo "var ".$chart_id."_ctx = document.getElementById('".$chart_id."').getContext('2d');\n";
-         echo $chart_id."_ctx.canvas.height = 100;\n";
-         
-         echo "var ".$chart_id."_chart = new Chart(".$chart_id."_ctx, {
+         echo "var " . $chart_id . "_ctx = document.getElementById('" . $chart_id . "').getContext('2d');\n";
+         echo $chart_id . "_ctx.canvas.height = 100;\n";
+
+         echo "var " . $chart_id . "_chart = new Chart(" . $chart_id . "_ctx, {
             type: 'pie',
             data: {
-               labels: ".$chart_id."_labels,
+               labels: " . $chart_id . "_labels,
                datasets: [
                   {
                      backgroundColor: default_colors,
-                     data: ".$chart_id."_data
+                     data: " . $chart_id . "_data
                   }
                ]
             }
          });";
       }
-      
+
       return $js_txt;
    }
+   
+   private function buscar_cliente()
+   {
+      /// desactivamos la plantilla HTML
+      $this->template = FALSE;
+      
+      $cli = new cliente();
+      $json = array();
+      foreach($cli->search($_REQUEST['buscar_cliente']) as $cli)
+      {
+         $json[] = array('value' => $cli->nombre, 'data' => $cli->codcliente);
+      }
+      
+      header('Content-Type: application/json');
+      echo json_encode( array('query' => $_REQUEST['buscar_cliente'], 'suggestions' => $json) );
+   }
+   
+   private function buscar_proveedor()
+   {
+      /// desactivamos la plantilla HTML
+      $this->template = FALSE;
+      
+      $prov = new proveedor();
+      $json = array();
+      foreach($prov->search($_REQUEST['buscar_proveedor']) as $prov)
+      {
+         $json[] = array('value' => $prov->nombre, 'data' => $prov->codproveedor);
+      }
+      
+      header('Content-Type: application/json');
+      echo json_encode( array('query' => $_REQUEST['buscar_proveedor'], 'suggestions' => $json) );
+   }
+   
+   private function pdf_pedidos_cli()
+   {
+      /// desactivamos el motor de plantillas
+      $this->template = FALSE;
+      
+      $pdf_doc = new fs_pdf('a4', 'landscape', 'Courier');
+      $pdf_doc->pdf->addInfo('Title', FS_PEDIDOS . ' del ' . $this->desde . ' al ' . $this->hasta);
+      $pdf_doc->pdf->addInfo('Subject', FS_PEDIDOS . ' del ' . $this->desde . ' al ' . $this->hasta);
+      $pdf_doc->pdf->addInfo('Author', $this->empresa->nombre);
+      
+      $codcliente = FALSE;
+      if($this->cliente)
+      {
+         $codcliente = $this->cliente->codcliente;
+      }
+      
+      $ped0 = new pedido_cliente();
+      $pedidos = $ped0->all_desde(
+              $this->desde,
+              $this->hasta,
+              $this->codserie,
+              $this->codagente,
+              $codcliente,
+              $this->estado,
+              $this->codpago,
+              $this->codalmacen,
+              $this->coddivisa
+      );
+      if($pedidos)
+      {
+         $total_lineas = count($pedidos);
+         $linea_actual = 0;
+         $lppag = 61;
+         $pagina = 1;
+         $totalbase = $total = 0;
+
+         while($linea_actual < $total_lineas)
+         {
+            if($linea_actual > 0)
+            {
+               $pdf_doc->pdf->ezNewPage();
+               $pagina++;
+            }
+
+            /// encabezado
+            $pdf_doc->pdf->ezText( $this->fix_html($this->empresa->nombre). " - ".FS_PEDIDOS." - de venta del ".$this->desde." al ".$this->hasta );
+            
+            if($this->codserie)
+            {
+               $pdf_doc->pdf->ezText( strtoupper(FS_SERIE).': ' . $this->codserie );
+               $lppag--;
+            }
+
+            if($this->codagente)
+            {
+               $age0 = new agente();
+               $agente = $age0->get($this->codagente);
+               if($agente)
+               {
+                  $pdf_doc->pdf->ezText("Empleado: " . $this->fix_html($agente->nombre));
+                  $lppag--;
+               }
+            }
+
+            if($this->cliente)
+            {
+               $pdf_doc->pdf->ezText("Cliente: " . $this->fix_html($this->cliente->nombre));
+               $lppag--;
+            }
+
+            if($this->estado != '')
+            {
+               switch ($this->estado)
+               {
+                  case '0':
+                     $pdf_doc->pdf->ezText("Estado: Pendientes");
+                     break;
+
+                  case '1':
+                     $pdf_doc->pdf->ezText("Estado: Aprobados");
+                     break;
+
+                  case '2':
+                     $pdf_doc->pdf->ezText("Estado: Pendientes");
+                     break;
+               }
+            }
+
+            if($this->codpago)
+            {
+               $fp0 = new forma_pago();
+               $forma_pago = $fp0->get($this->codpago);
+               if($forma_pago)
+               {
+                  $pdf_doc->pdf->ezText("Forma de pago: " . $this->fix_html($forma_pago->descripcion));
+                  $lppag--;
+               }
+            }
+            
+            if($this->almacen)
+            {
+               $alm0 = new almacen();
+               $almacen = $alm0->get($this->codalmacen);
+               if($almacen)
+               {
+                  $pdf_doc->pdf->ezText("Almacén: " . $this->fix_html($almacen->nombre));
+                  $lppag--;
+               }
+            }
+
+            $pdf_doc->pdf->ezText("\n", 8);
+
+            /// tabla principal
+            $pdf_doc->new_table();
+            $pdf_doc->add_table_header(
+                    array(
+                        'serie' => '<b>' . strtoupper(FS_SERIE) . '</b>',
+                        'pedido' => '<b>Ped.</b>',
+                        'fecha' => '<b>Fecha</b>',
+                        'descripcion' => '<b>Descripción</b>',
+                        'cifnif' => '<b>' . FS_CIFNIF . '</b>',
+                        'base' => '<b>Base Im.</b>',
+                        'total' => '<b>Total</b>'
+                    )
+            );
+            for($i = 0; $i < $lppag AND $linea_actual < $total_lineas; $i++)
+            {
+               $linea = array(
+                   'serie' => $pedidos[$linea_actual]->codserie,
+                   'pedido' => $pedidos[$linea_actual]->codigo,
+                   'fecha' => $pedidos[$linea_actual]->fecha,
+                   'descripcion' => $this->fix_html($pedidos[$linea_actual]->nombrecliente),
+                   'cifnif' => $pedidos[$linea_actual]->cifnif,
+                   'base' => $pedidos[$linea_actual]->neto,
+                   'total' => $pedidos[$linea_actual]->total,
+               );
+
+               $pdf_doc->add_table_row($linea);
+
+               $i++;
+               $totalbase += $pedidos[$linea_actual]->neto;
+               $total += $pedidos[$linea_actual]->total;
+               $linea_actual++;
+            }
+
+            $pdf_doc->save_table(
+                    array(
+                        'fontSize' => 8,
+                        'cols' => array(
+                            'base' => array('justification' => 'right'),
+                            'total' => array('justification' => 'right')
+                        ),
+                        'shaded' => 0,
+                        'width' => 780
+                    )
+            );
+
+
+            /// Rellenamos la última tabla
+            $pdf_doc->set_y(70);
+            $pdf_doc->new_table();
+            $titulo = array('pagina' => '<b>Suma y sigue</b>');
+            $fila = array('pagina' => $pagina . '/' . ($pagina + ceil(($total_lineas - $linea_actual) / $lppag)));
+            $opciones = array(
+                'fontSize' => 8,
+                'cols' => array('base' => array('justification' => 'right')),
+                'showLines' => 1,
+                'width' => 780
+            );
+            
+            $titulo['base'] = '<b>Base imponible</b>';
+            $titulo['total'] = '<b>Total</b>';
+            $fila['base'] = $this->show_precio($totalbase);
+            $fila['total'] = $this->show_precio($total);
+            $opciones['cols']['base'] = array('justification' => 'right');
+            $opciones['cols']['total'] = array('justification' => 'right');
+            $pdf_doc->add_table_header($titulo);
+            $pdf_doc->add_table_row($fila);
+            $pdf_doc->save_table($opciones);
+         }
+      }
+      else
+      {
+         $pdf_doc->pdf->ezText($this->empresa->nombre . " - " . FS_PEDIDOS . "  de venta del " . $this->desde . " al " . $this->hasta . ":\n\n", 14);
+         $pdf_doc->pdf->ezText("Ninguna.\n\n", 14);
+      }
+
+      $pdf_doc->show();
+   }
+
+   private function fix_html($txt)
+   {
+      $newt = str_replace('&lt;', '<', $txt);
+      $newt = str_replace('&gt;', '>', $newt);
+      $newt = str_replace('&quot;', '"', $newt);
+      $newt = str_replace('&#39;', "'", $newt);
+      return $newt;
+   }
+   
+   private function xls_pedidoscli()
+   {
+      
+      $this->template = FALSE;
+      header("Content-Disposition: attachment; filename=\"informe_pedidos_".time().".xlsx\"");
+      header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      header('Content-Transfer-Encoding: binary');
+      header('Cache-Control: must-revalidate');
+      header('Pragma: public');
+      
+       $header = array(
+         'almacen' => 'string',
+         'codigo' => 'string',
+         'serie' => 'string',
+         FS_NUMERO2 => 'string',
+         'fecha' => 'string',
+         'descripcion' => 'string',
+         FS_CIFNIF => 'string',
+         'base' => '#,##0.00',
+         'total' => '#,##0.00;[RED]-#,##0.00',
+      );
+
+      $data = array();
+
+      $codcliente = FALSE;
+      if($this->cliente)
+      {
+         $codcliente = $this->cliente->codcliente;
+      }
+
+      $ped0 = new pedido_cliente();
+       $pedidos = $ped0->all_desde(
+              $this->desde,
+              $this->hasta,
+              $this->codserie,
+              $this->codagente,
+              $codcliente,
+              $this->estado,
+              $this->codpago,
+              $this->codalmacen,
+              $this->coddivisa
+      );
+       
+       if($pedidos)
+      {
+         foreach($pedidos as $ped)
+         {
+            $linea = array(
+                'almacen' => $ped->codalmacen,
+                'codigo' => $ped->codigo,
+                'serie' => $ped->codserie,
+                FS_NUMERO2 => $ped->numero2,
+                'fecha' => $ped->fecha,
+                'descripcion' => $ped->nombrecliente,
+                FS_CIFNIF => $ped->cifnif,
+                'base' => $ped->neto,
+                'total' => $ped->total,
+            );
+            
+            $data[] = $linea;
+         }
+      }
+      
+      $writter = new XLSXWriter();
+      $writter->setAuthor('Generador Excel FS');
+      $writter->writeSheetHeader('Pres_clientes', $header);
+      foreach($data as $row)
+      {
+         $writter->writeSheetRow('Pres_clientes', $row);
+      }
+      
+      $writter->writeToStdOut();
+   }
+   
+   private function csv_pedidoscli()
+   {
+      $this->template = FALSE;
+      header("content-type:application/csv;charset=UTF-8");
+      header("Content-Disposition: attachment; filename=\"pedidos_cli.csv\"");
+      echo "almacen,serie," . FS_NUMERO2 . ",pedido,fecha,descripcion," . FS_CIFNIF
+      . ",base,total\n";
+
+      $codcliente = FALSE;
+      if($this->cliente)
+      {
+         $codcliente = $this->cliente->codcliente;
+      }
+
+      $ped0 = new pedido_cliente();
+      $pedidos = $ped0->all_desde(
+              $this->desde,
+              $this->hasta,
+              $this->codserie,
+              $this->codagente,
+              $codcliente,
+              $this->estado,
+              $this->codpago,
+              $this->codalmacen,
+              $this->coddivisa
+      );
+
+      if($pedidos)
+      {
+         foreach($pedidos as $ped)
+         {
+            $linea = array(
+                'almacen' => $ped->codalmacen,
+                'serie' => $ped->codserie,
+                'numero2' => $ped->numero2,
+                'pedido' => $ped->numero,
+                'fecha' => $ped->fecha,
+                'descripcion' => $ped->nombrecliente,
+                'cifnif' => $ped->cifnif,
+                'base' => $ped->neto,
+                'total' => $ped->total
+            );
+
+            echo '"' . join('","', $linea) . "\"\n";
+         }
+      }
+   }
+
 }

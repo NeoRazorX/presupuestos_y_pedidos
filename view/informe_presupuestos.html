@@ -26,11 +26,11 @@
 
 <div class="container-fluid">
    <form id="listado_general" name="listado_general" action="{$fsc->url()}" method="post" class="form">
-      {if="$fsc->cliente"}
-      <input type="hidden" name="codcliente" value="{$fsc->cliente->codcliente}"/>
-      {else}
-      <input type="hidden" name="codcliente"/>
-      {/if}
+   {if="$fsc->cliente"}
+   <input type="hidden" name="codcliente" value="{$fsc->cliente->codcliente}"/>
+   {else}
+   <input type="hidden" name="codcliente"/>
+   {/if}
       <div class="row">
          <div class="col-sm-12">
             <div class="page-header">
