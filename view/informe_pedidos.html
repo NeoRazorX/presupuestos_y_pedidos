@@ -118,6 +118,7 @@
             <div class="form-group">
                <a href="{$fsc->divisa->url()}">Divisa</a>:
                <select name="coddivisa" class="form-control" onchange="this.form.submit()">
+                  <option value="all" {if="$fsc->coddivisa=='all'"}selected=""{/if}>Todas</option>
                   {loop="$fsc->divisa->all()"}
                   {if="$fsc->coddivisa==$value->coddivisa"}
                   <option value="{$value->coddivisa}" selected="">{$value->descripcion}</option>

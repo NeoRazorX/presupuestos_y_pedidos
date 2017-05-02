@@ -741,30 +741,72 @@ class pedido_proveedor extends \fs_model
    }
    
    /**
-    * Devuelve un array con todos los pedidos comprendidos entre $desde y $hasta
+    * 
     * @param type $desde
     * @param type $hasta
+    * @param type $codserie
+    * @param type $codagente
+    * @param type $codproveedor
+    * @param type $estado
+    * @param type $forma_pago
+    * @param type $almacen
+    * @param type $divisa
     * @return \pedido_proveedor
     */
-   public function all_desde($desde, $hasta)
+   public function all_desde($desde, $hasta, $codserie = FALSE, $codagente = FALSE, $codproveedor = FALSE, $estado = FALSE, $forma_pago = FALSE, $almacen = FALSE, $divisa = FALSE)
    {
-      $pedlist = array();
-      $sql = "SELECT * FROM ".$this->table_name." WHERE fecha >= ".$this->var2str($desde)
-              ." AND fecha <= ".$this->var2str($hasta)
-              ." ORDER BY codigo ASC;";
-      
+      $preslist = array();
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE fecha >= " . $this->var2str($desde) . " AND fecha <= " . $this->var2str($hasta);
+      if($codserie)
+      {
+         $sql .= " AND codserie = " . $this->var2str($codserie);
+      }
+      if($codagente)
+      {
+         $sql .= " AND codagente = " . $this->var2str($codagente);
+      }
+      if($codproveedor)
+      {
+         $sql .= " AND codproveedor = " . $this->var2str($codproveedor);
+      }
+      if($estado != '')
+      {
+         switch ($estado)
+         {
+            case '0':
+               $sql .= " AND idalbaran IS NULL ";
+               break;
+            case '1':
+               $sql .= " AND idalbaran IS NOT NULL ";
+               break;
+         }
+      }
+      if($forma_pago)
+      {
+         $sql .= " AND codpago = " . $this->var2str($forma_pago);
+      }
+      if($divisa)
+      {
+         $sql .= "AND coddivisa = " . $this->var2str($divisa);
+      }
+      if($almacen)
+      {
+         $sql .= "AND codalmacen = " . $this->var2str($almacen);
+      }
+      $sql .= " ORDER BY fecha ASC, codigo ASC;";
+
       $data = $this->db->select($sql);
       if($data)
       {
          foreach($data as $p)
          {
-            $pedlist[] = new \pedido_proveedor($p);
+            $preslist[] = new \pedido_proveedor($p);
          }
       }
-      
-      return $pedlist;
+
+      return $preslist;
    }
-   
+
    /**
     * Devuelve un array con los pedidos que coinciden con $query
     * @param type $query

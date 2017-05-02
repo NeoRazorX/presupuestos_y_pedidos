@@ -54,6 +54,8 @@ class informe_pedidos extends fs_controller
    private $where_ventas;
    public $cliente;
    public $proveedor;
+   public $tipo;
+   public $generar;
 
    public function __construct()
    {
@@ -73,6 +75,8 @@ class informe_pedidos extends fs_controller
       $this->serie = new serie();
       $this->cliente = FALSE;
       $this->proveedor = FALSE;
+      $this->tipo = FALSE;
+      $this->generar = FALSE;
 
       $fsvar = new fs_var();
       $this->multi_almacen = $fsvar->simple_get('multi_almacen');
@@ -116,7 +120,12 @@ class informe_pedidos extends fs_controller
       $this->coddivisa = $this->empresa->coddivisa;
       if(isset($_REQUEST['coddivisa']))
       {
-         $this->coddivisa = $_REQUEST['coddivisa'];
+         if($_REQUEST['coddivisa'] == 'all')
+         {
+            $this->coddivisa = FALSE;
+         }
+         else
+            $this->coddivisa = $_REQUEST['coddivisa'];
       }
 
       $this->estado = '';
@@ -159,15 +168,33 @@ class informe_pedidos extends fs_controller
       {
          if($_POST['generar'] == 'pdfcli')
          {
-            $this->pdf_pedidos_cli();
+            $this->tipo = 'ventas';
+            $this->pdf_pedidos();
          }
          else if($_POST['generar'] == 'xlscli')
          {
-            $this->xls_pedidoscli();
+            $this->tipo = 'ventas';
+            $this->xls_pedidos();
          }
          else if ($_POST['generar'] == 'csvcli')
          {
-            $this->csv_pedidoscli();
+            $this->tipo = 'ventas';
+            $this->csv_pedidos();
+         }
+         else if ($_POST['generar'] == 'pdfprov')
+         {
+            $this->tipo = 'compras';
+            $this->pdf_pedidos();
+         }
+         else if ($_POST['generar'] == 'xlsprov')
+         {
+            $this->tipo = 'compras';
+            $this->xls_pedidos();
+         }
+         else if ($_POST['generar'] == 'csvprov')
+         {
+            $this->tipo = 'compras';
+            $this->csv_pedidos();
          }
       }
    }
@@ -723,7 +750,47 @@ class informe_pedidos extends fs_controller
       echo json_encode( array('query' => $_REQUEST['buscar_proveedor'], 'suggestions' => $json) );
    }
    
-   private function pdf_pedidos_cli()
+   public function resultados()
+   {
+      $codigo = false;
+      
+      if($this->tipo)
+      {
+         if($this->tipo == 'ventas')
+         {
+            $ped0 = new pedido_cliente();
+            if($this->cliente)
+            {
+               $codigo = $this->cliente->codcliente;
+            }
+         }
+         else
+         {
+            $ped0 = new pedido_proveedor();
+            if($this->proveedor)
+            {
+               $codigo = $this->proveedor->codproveedor;
+            }
+         }
+      }
+      
+      $pedidos = $ped0->all_desde(
+              $this->desde,
+              $this->hasta,
+              $this->codserie,
+              $this->codagente,
+              $codigo,
+              $this->estado,
+              $this->codpago,
+              $this->codalmacen,
+              $this->coddivisa
+      );
+      
+      return $pedidos;
+   }
+   
+   
+   private function pdf_pedidos()
    {
       /// desactivamos el motor de plantillas
       $this->template = FALSE;
@@ -733,24 +800,7 @@ class informe_pedidos extends fs_controller
       $pdf_doc->pdf->addInfo('Subject', FS_PEDIDOS . ' del ' . $this->desde . ' al ' . $this->hasta);
       $pdf_doc->pdf->addInfo('Author', $this->empresa->nombre);
       
-      $codcliente = FALSE;
-      if($this->cliente)
-      {
-         $codcliente = $this->cliente->codcliente;
-      }
-      
-      $ped0 = new pedido_cliente();
-      $pedidos = $ped0->all_desde(
-              $this->desde,
-              $this->hasta,
-              $this->codserie,
-              $this->codagente,
-              $codcliente,
-              $this->estado,
-              $this->codpago,
-              $this->codalmacen,
-              $this->coddivisa
-      );
+      $pedidos = $this->resultados();
       if($pedidos)
       {
          $total_lineas = count($pedidos);
@@ -768,7 +818,7 @@ class informe_pedidos extends fs_controller
             }
 
             /// encabezado
-            $pdf_doc->pdf->ezText( $this->fix_html($this->empresa->nombre). " - ".FS_PEDIDOS." - de venta del ".$this->desde." al ".$this->hasta );
+            $pdf_doc->pdf->ezText( $this->fix_html($this->empresa->nombre). " - ".FS_PEDIDOS." - de ".$this->tipo." del ".$this->desde." al ".$this->hasta );
             
             if($this->codserie)
             {
@@ -786,11 +836,23 @@ class informe_pedidos extends fs_controller
                   $lppag--;
                }
             }
-
-            if($this->cliente)
+            if($this->tipo)
             {
-               $pdf_doc->pdf->ezText("Cliente: " . $this->fix_html($this->cliente->nombre));
-               $lppag--;
+               if($this->tipo == 'ventas') {
+                  if($this->cliente)
+                  {
+                     $pdf_doc->pdf->ezText("Cliente: " . $this->fix_html($this->cliente->nombre));
+                     $lppag--;
+                  }
+               }
+               else
+               {
+                  if($this->proveedor)
+                  {
+                     $pdf_doc->pdf->ezText("Proveedor: " . $this->fix_html($this->proveedor->nombre));
+                     $lppag--;
+                  }
+               }
             }
 
             if($this->estado != '')
@@ -834,6 +896,12 @@ class informe_pedidos extends fs_controller
             }
 
             $pdf_doc->pdf->ezText("\n", 8);
+            
+            $nombre = 'nombrecliente';
+            if($this->tipo == 'compras')
+            {
+               $nombre = 'nombre';
+            }
 
             /// tabla principal
             $pdf_doc->new_table();
@@ -854,7 +922,7 @@ class informe_pedidos extends fs_controller
                    'serie' => $pedidos[$linea_actual]->codserie,
                    'pedido' => $pedidos[$linea_actual]->codigo,
                    'fecha' => $pedidos[$linea_actual]->fecha,
-                   'descripcion' => $this->fix_html($pedidos[$linea_actual]->nombrecliente),
+                   'descripcion' => $this->fix_html($pedidos[$linea_actual]->$nombre),
                    'cifnif' => $pedidos[$linea_actual]->cifnif,
                    'base' => $pedidos[$linea_actual]->neto,
                    'total' => $pedidos[$linea_actual]->total,
@@ -906,8 +974,8 @@ class informe_pedidos extends fs_controller
       }
       else
       {
-         $pdf_doc->pdf->ezText($this->empresa->nombre . " - " . FS_PEDIDOS . "  de venta del " . $this->desde . " al " . $this->hasta . ":\n\n", 14);
-         $pdf_doc->pdf->ezText("Ninguna.\n\n", 14);
+         $pdf_doc->pdf->ezText($this->empresa->nombre . " - " . FS_PEDIDOS . "  de ".$this->tipo." del " . $this->desde . " al " . $this->hasta . ":\n\n", 14);
+         $pdf_doc->pdf->ezText("Ninguno.\n\n", 14);
       }
 
       $pdf_doc->show();
@@ -922,7 +990,7 @@ class informe_pedidos extends fs_controller
       return $newt;
    }
    
-   private function xls_pedidoscli()
+   private function xls_pedidos()
    {
       
       $this->template = FALSE;
@@ -946,26 +1014,16 @@ class informe_pedidos extends fs_controller
 
       $data = array();
 
-      $codcliente = FALSE;
-      if($this->cliente)
+      
+      $pedidos = $this->resultados();
+
+      $nombre = 'nombrecliente';
+      if($this->tipo == 'compras')
       {
-         $codcliente = $this->cliente->codcliente;
+         $nombre = 'nombre';
       }
 
-      $ped0 = new pedido_cliente();
-       $pedidos = $ped0->all_desde(
-              $this->desde,
-              $this->hasta,
-              $this->codserie,
-              $this->codagente,
-              $codcliente,
-              $this->estado,
-              $this->codpago,
-              $this->codalmacen,
-              $this->coddivisa
-      );
-       
-       if($pedidos)
+      if($pedidos)
       {
          foreach($pedidos as $ped)
          {
@@ -975,53 +1033,42 @@ class informe_pedidos extends fs_controller
                 'serie' => $ped->codserie,
                 FS_NUMERO2 => $ped->numero2,
                 'fecha' => $ped->fecha,
-                'descripcion' => $ped->nombrecliente,
+                'descripcion' => $ped->$nombre,
                 FS_CIFNIF => $ped->cifnif,
                 'base' => $ped->neto,
                 'total' => $ped->total,
             );
-            
+
             $data[] = $linea;
          }
       }
       
       $writter = new XLSXWriter();
       $writter->setAuthor('Generador Excel FS');
-      $writter->writeSheetHeader('Pres_clientes', $header);
+      $writter->writeSheetHeader('Pedidos', $header);
       foreach($data as $row)
       {
-         $writter->writeSheetRow('Pres_clientes', $row);
+         $writter->writeSheetRow('Pedidos', $row);
       }
       
       $writter->writeToStdOut();
    }
    
-   private function csv_pedidoscli()
+   private function csv_pedidos()
    {
       $this->template = FALSE;
       header("content-type:application/csv;charset=UTF-8");
-      header("Content-Disposition: attachment; filename=\"pedidos_cli.csv\"");
+      header("Content-Disposition: attachment; filename=\"informe_pedidos.csv\"");
       echo "almacen,serie," . FS_NUMERO2 . ",pedido,fecha,descripcion," . FS_CIFNIF
       . ",base,total\n";
 
-      $codcliente = FALSE;
-      if($this->cliente)
-      {
-         $codcliente = $this->cliente->codcliente;
-      }
+      $pedidos = $this->resultados();
 
-      $ped0 = new pedido_cliente();
-      $pedidos = $ped0->all_desde(
-              $this->desde,
-              $this->hasta,
-              $this->codserie,
-              $this->codagente,
-              $codcliente,
-              $this->estado,
-              $this->codpago,
-              $this->codalmacen,
-              $this->coddivisa
-      );
+      $nombre = 'nombrecliente';
+      if($this->tipo == 'compras')
+      {
+         $nombre = 'nombre';
+      }
 
       if($pedidos)
       {
@@ -1033,7 +1080,7 @@ class informe_pedidos extends fs_controller
                 'numero2' => $ped->numero2,
                 'pedido' => $ped->numero,
                 'fecha' => $ped->fecha,
-                'descripcion' => $ped->nombrecliente,
+                'descripcion' => $ped->$nombre,
                 'cifnif' => $ped->cifnif,
                 'base' => $ped->neto,
                 'total' => $ped->total
