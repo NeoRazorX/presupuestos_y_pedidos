@@ -43,8 +43,6 @@ class informe_pedidos extends fs_controller
 	public $forma_pago;
    public $hasta;
    public $multi_almacen;
-   public $pedidos_cli;
-   public $pedidos_pro;
    public $serie;
    
 	private $where_compras;
@@ -58,8 +56,8 @@ class informe_pedidos extends fs_controller
    protected function private_core()
    {
       /// declaramos los objetos sólo para asegurarnos de que existen las tablas
-      $this->pedido_cli = new pedido_cliente();
-      $this->pedido_pro = new pedido_proveedor();
+      $pedido_cli = new pedido_cliente();
+      $pedido_pro = new pedido_proveedor();
       
       $this->agente = new agente();
       $this->almacen = new almacen();

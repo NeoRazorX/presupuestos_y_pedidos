@@ -45,7 +45,6 @@ class informe_presupuestos extends fs_controller
    public $forma_pago;
    public $hasta;
    public $multi_almacen;
-   public $presupuestos_cli;
    public $serie;
    
    private $where;
@@ -58,7 +57,7 @@ class informe_presupuestos extends fs_controller
    protected function private_core()
    {
       /// declaramos los objetos sólo para asegurarnos de que existen las tablas
-      $this->presupuesto_cli = new presupuesto_cliente();
+      $presupuesto_cli = new presupuesto_cliente();
 
       $this->agente = new agente();
       $this->almacen = new almacen();
