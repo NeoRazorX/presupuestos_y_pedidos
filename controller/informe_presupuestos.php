@@ -20,35 +20,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once 'plugins/facturacion_base/extras/fs_pdf.php';
-require_once 'plugins/facturacion_base/extras/xlsxwriter.class.php';
-require_model('almacen.php');
-require_model('cliente.php');
-require_model('divisa.php');
-require_model('forma_pago.php');
+require_once 'plugins/facturacion_base/controller/informe_albaranes.php';
 require_model('presupuesto_cliente.php');
-require_model('serie.php');
 
-class informe_presupuestos extends fs_controller
+class informe_presupuestos extends informe_albaranes
 {
-   public $agente;
-   public $almacen;
-   public $cliente;
-   public $codagente;
-   public $codalmacen;
-   public $coddivisa;
-   public $codpago;
-   public $codserie;
-   public $desde;
-   public $divisa;
    public $estado;
-   public $forma_pago;
-   public $hasta;
-   public $multi_almacen;
-   public $serie;
    
-   private $where;
-
    public function __construct()
    {
       parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTOS), 'informes', FALSE, TRUE);
@@ -58,162 +36,50 @@ class informe_presupuestos extends fs_controller
    {
       /// declaramos los objetos sólo para asegurarnos de que existen las tablas
       $presupuesto_cli = new presupuesto_cliente();
-
-      $this->agente = new agente();
-      $this->almacen = new almacen();
-      $this->divisa = new divisa();
-      $this->forma_pago = new forma_pago();
-      $this->serie = new serie();
-      $this->cliente = FALSE;
-
-      $fsvar = new fs_var();
-      $this->multi_almacen = $fsvar->simple_get('multi_almacen');
-
-      $this->desde = Date('01-m-Y', strtotime('-14 months'));
-      if( isset($_REQUEST['desde']) )
-      {
-         $this->desde = $_REQUEST['desde'];
-      }
-
-      $this->hasta = Date('t-m-Y');
-      if( isset($_REQUEST['hasta']) )
-      {
-         $this->hasta = $_REQUEST['hasta'];
-      }
-
-      $this->codagente = FALSE;
-      if( isset($_REQUEST['codagente']) )
-      {
-         $this->codagente = $_REQUEST['codagente'];
-      }
-
-      $this->codserie = FALSE;
-      if( isset($_REQUEST['codserie']) )
-      {
-         $this->codserie = $_REQUEST['codserie'];
-      }
-
-      $this->coddivisa = $this->empresa->coddivisa;
-      if( isset($_REQUEST['coddivisa']) )
-      {
-         $this->coddivisa = $_REQUEST['coddivisa'];
-      }
-
-      $this->codpago = FALSE;
-      if( isset($_REQUEST['codpago']) )
-      {
-         $this->codpago = $_REQUEST['codpago'];
-      }
-
-      $this->codalmacen = FALSE;
-      if( isset($_REQUEST['codalmacen']) )
-      {
-         $this->codalmacen = $_REQUEST['codalmacen'];
-      }
+      
+      $this->nombre_docs = FS_PRESUPUESTOS;
+      $this->table_compras = 'presupuestoscli';
+      $this->table_ventas = 'presupuestoscli';
+      
+      parent::private_core();
+   }
+   
+   protected function ini_filters()
+   {
+      parent::ini_filters();
       
       $this->estado = '';
       if( isset($_REQUEST['estado']) )
       {
          $this->estado = $_REQUEST['estado'];
       }
-
-      if( isset($_REQUEST['buscar_cliente']) )
-      {
-         $this->buscar_cliente();
-      }
-      else if( isset($_REQUEST['codcliente']) )
-      {
-         if($_REQUEST['codcliente'] != '')
-         {
-            $cli0 = new cliente();
-            $this->cliente = $cli0->get($_REQUEST['codcliente']);
-         }
-      }
-      
-      $this->set_where();
-
-      /// ¿¿¿listados???
-      if( isset($_POST['pdf']) )
-      {
-         if($_POST['pdf'] == 'TRUE')
-         {
-            $this->pdf_presupuestos_cli();
-         }
-      }
    }
-
-   private function buscar_cliente()
+   
+   protected function set_where()
    {
-      /// desactivamos la plantilla HTML
-      $this->template = FALSE;
+      parent::set_where();
       
-      $cli = new cliente();
-      $json = array();
-      foreach($cli->search($_REQUEST['buscar_cliente']) as $cli)
-      {
-         $json[] = array('value' => $cli->nombre, 'data' => $cli->codcliente);
-      }
-      
-      header('Content-Type: application/json');
-      echo json_encode( array('query' => $_REQUEST['buscar_cliente'], 'suggestions' => $json) );
-   }
-
-   private function set_where()
-   {
-      $this->where = " WHERE fecha >= " . $this->empresa->var2str($this->desde)
-              . " AND fecha <= " . $this->empresa->var2str($this->hasta);
-
-      if($this->codserie)
-      {
-         $this->where .= " AND codserie = " . $this->empresa->var2str($this->codserie);
-      }
-
-      if($this->codagente)
-      {
-         $this->where .= " AND codagente = " . $this->empresa->var2str($this->codagente);
-      }
-
-      if($this->codalmacen)
-      {
-         $this->where .= " AND codalmacen = " . $this->empresa->var2str($this->codalmacen);
-      }
-
-      if($this->coddivisa)
-      {
-         $this->where .= " AND coddivisa = " . $this->empresa->var2str($this->coddivisa);
-      }
-      
-      if($this->codpago)
-      {
-			$this->where .= " AND codpago = " . $this->empresa->var2str($this->codpago);
-      }
-
       if($this->estado != '')
       {
          if($this->estado == '0')
          {
-            $this->where .= " AND idpedido is NULL AND status = 0";
+            $this->where_ventas .= " AND idpedido is NULL AND status = 0";
          }
          else if($this->estado == '1')
          {
-            $this->where .= " AND status = '1'";
+            $this->where_ventas .= " AND status = '1'";
          }
          else if($this->estado == '2')
          {
-            $this->where .= " AND status = '2'";
+            $this->where_ventas .= " AND status = '2'";
          }
       }
-
-      if($this->cliente)
-      {
-         $this->where .= " AND codcliente = " . $this->empresa->var2str($this->cliente->codcliente);
-      }
    }
-
+   
    public function stats_months()
    {
       $stats = array();
-      $stats_cli = $this->stats_months_aux();
+      $stats_cli = $this->stats_months_aux($this->table_ventas);
       $meses = array(
           1 => 'ene',
           2 => 'feb',
@@ -250,46 +116,10 @@ class informe_presupuestos extends fs_controller
       return $stats;
    }
 
-   private function stats_months_aux()
-   {
-      $stats = array();
-
-      /// inicializamos los resultados
-      foreach($this->date_range($this->desde, $this->hasta, '+1 month', 'my') as $date)
-      {
-         $i = intval($date);
-         $stats[$i] = array('month' => $i, 'total' => 0);
-      }
-
-      if(strtolower(FS_DB_TYPE) == 'postgresql')
-      {
-         $sql_aux = "to_char(fecha,'FMMMYY')";
-      }
-      else
-      {
-         $sql_aux = "DATE_FORMAT(fecha, '%m%y')";
-      }
-
-      $sql = "SELECT " . $sql_aux . " as mes, SUM(neto) as total FROM presupuestoscli"
-              . $this->where . " GROUP BY " . $sql_aux . " ORDER BY mes ASC;";
-
-      $data = $this->db->select($sql);
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $i = intval($d['mes']);
-            $stats[$i]['total'] = floatval($d['total']);
-         }
-      }
-
-      return $stats;
-   }
-
    public function stats_years()
    {
       $stats = array();
-      $stats_cli = $this->stats_years_aux();
+      $stats_cli = $this->stats_years_aux($this->table_ventas);
 
       foreach($stats_cli as $i => $value)
       {
@@ -301,216 +131,33 @@ class informe_presupuestos extends fs_controller
 
       return $stats;
    }
+   
+   public function stats_series($tabla = 'presupuestoscli')
+   {
+      return parent::stats_series($tabla);
+   }
 
-   private function stats_years_aux($num = 4)
+   public function stats_agentes($tabla = 'presupuestoscli')
+   {
+      return parent::stats_agentes($tabla);
+   }
+
+   public function stats_almacenes($tabla = 'presupuestoscli')
+   {
+      return parent::stats_almacenes($tabla);
+   }
+
+   public function stats_formas_pago($tabla = 'presupuestoscli')
+   {
+      return parent::stats_formas_pago($tabla);
+   }
+   
+   public function stats_estados($tabla = 'presupuestoscli')
    {
       $stats = array();
-
-      /// inicializamos los resultados
-      foreach($this->date_range($this->desde, $this->hasta, '+1 year', 'Y') as $date)
-      {
-         $i = intval($date);
-         $stats[$i] = array('year' => $i, 'total' => 0);
-      }
-
-      if(strtolower(FS_DB_TYPE) == 'postgresql')
-      {
-         $sql_aux = "to_char(fecha,'FMYYYY')";
-      }
-      else
-         $sql_aux = "DATE_FORMAT(fecha, '%Y')";
-
-      $data = $this->db->select("SELECT " . $sql_aux . " as ano, sum(neto) as total FROM presupuestoscli"
-              . $this->where . " GROUP BY " . $sql_aux . " ORDER BY ano ASC;");
-
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $i = intval($d['ano']);
-            $stats[$i]['total'] = floatval($d['total']);
-         }
-      }
-
-      return $stats;
-   }
-
-   private function date_range($first, $last, $step = '+1 day', $format = 'd-m-Y')
-   {
-      $dates = array();
-      $current = strtotime($first);
-      $last = strtotime($last);
-
-      while($current <= $last)
-      {
-         $dates[] = date($format, $current);
-         $current = strtotime($step, $current);
-      }
-
-      return $dates;
-   }
-
-   public function stats_series()
-   {
-      $stats = array();
-
-      $sql = "select codserie,sum(neto) as total from presupuestoscli";
-      $sql .= $this->where;
-      $sql .= " group by codserie order by total desc;";
-
-      $data = $this->db->select($sql);
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $serie = $this->serie->get($d['codserie']);
-            if($serie)
-            {
-               $stats[] = array(
-                   'txt' => $serie->descripcion,
-                   'total' => round(floatval($d['total']), FS_NF0)
-               );
-            }
-            else
-            {
-               $stats[] = array(
-                   'txt' => $d['codserie'],
-                   'total' => round(floatval($d['total']), FS_NF0)
-               );
-            }
-         }
-      }
-
-      return $stats;
-   }
-
-   public function stats_agentes()
-   {
-      $stats = array();
-
-      $sql = "select codagente,sum(neto) as total from presupuestoscli";
-      $sql .= $this->where;
-      $sql .= " group by codagente order by total desc;";
-
-      $data = $this->db->select($sql);
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            if(is_null($d['codagente']))
-            {
-               $stats[] = array(
-                   'txt' => 'Ninguno',
-                   'total' => round(floatval($d['total']), FS_NF0)
-               );
-            }
-            else
-            {
-               $agente = $this->agente->get($d['codagente']);
-               if($agente)
-               {
-                  $stats[] = array(
-                      'txt' => $agente->get_fullname(),
-                      'total' => round(floatval($d['total']), FS_NF0)
-                  );
-               }
-               else
-               {
-                  $stats[] = array(
-                      'txt' => $d['codagente'],
-                      'total' => round(floatval($d['total']), FS_NF0)
-                  );
-               }
-            }
-         }
-      }
-
-      return $stats;
-   }
-
-   public function stats_almacenes()
-   {
-      $stats = array();
-
-      $sql = "select codalmacen,sum(neto) as total from presupuestoscli";
-      $sql .= $this->where;
-      $sql .= " group by codalmacen order by total desc;";
-
-      $data = $this->db->select($sql);
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $alma = $this->almacen->get($d['codalmacen']);
-            if($alma)
-            {
-               $stats[] = array(
-                   'txt' => $alma->nombre,
-                   'total' => round(floatval($d['total']), FS_NF0)
-               );
-            }
-            else
-            {
-               $stats[] = array(
-                   'txt' => $d['codalmacen'],
-                   'total' => round(floatval($d['total']), FS_NF0)
-               );
-            }
-         }
-      }
-
-      return $stats;
-   }
-
-   public function stats_formas_pago()
-   {
-      $stats = array();
-
-      $sql = "select codpago,sum(neto) as total from presupuestoscli";
-      $sql .= $this->where;
-      $sql .= " group by codpago order by total desc;";
-
-      $data = $this->db->select($sql);
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $formap = $this->forma_pago->get($d['codpago']);
-            if($formap)
-            {
-               $stats[] = array(
-                   'txt' => $formap->descripcion,
-                   'total' => round(floatval($d['total']), FS_NF0)
-               );
-            }
-            else
-            {
-               $stats[] = array(
-                   'txt' => $d['codpago'],
-                   'total' => round(floatval($d['total']), FS_NF0)
-               );
-            }
-         }
-      }
-
-      return $stats;
-   }
-
-   public function stats_estados()
-   {
-
-      $stats = $this->stats_estados_presupuestoscli();
-
-      return $stats;
-   }
-
-   private function stats_estados_presupuestoscli()
-   {
-      $stats = array();
-
-
+      
       $sql = "select status,sum(neto) as total from presupuestoscli ";
-      $sql .= $this->where;
+      $sql .= $this->where_ventas;
       $sql .= " group by status order by total desc;";
 
       $data = $this->db->select($sql);
@@ -518,7 +165,7 @@ class informe_presupuestos extends fs_controller
       {
          $estados = array(
              0 => 'Pendientes',
-             1 => 'Aprovados',
+             1 => 'Aprobados',
              2 => 'Rechazados',
          );
 
@@ -533,41 +180,7 @@ class informe_presupuestos extends fs_controller
 
       return $stats;
    }
-
-   public function stats_divisas()
-   {
-      $stats = array();
-
-      $sql = "select coddivisa,sum(neto) as total from presupuestoscli";
-      $sql .= $this->where;
-      $sql .= " group by coddivisa order by total desc;";
-
-      $data = $this->db->select($sql);
-      if($data)
-      {
-         foreach($data as $d)
-         {
-            $divisa = $this->divisa->get($d['coddivisa']);
-            if($divisa)
-            {
-               $stats[] = array(
-                   'txt' => $divisa->descripcion,
-                   'total' => round(floatval($d['total']), FS_NF0)
-               );
-            }
-            else
-            {
-               $stats[] = array(
-                   'txt' => $d['coddivisa'],
-                   'total' => round(floatval($d['total']), FS_NF0)
-               );
-            }
-         }
-      }
-
-      return $stats;
-   }
-
+   
    /**
     * 
     * @return type array datos
@@ -577,7 +190,7 @@ class informe_presupuestos extends fs_controller
       $stats = array();
 
       $sql = "select codcliente,sum(neto) as total from presupuestoscli";
-      $sql .= $this->where;
+      $sql .= $this->where_ventas;
       $sql .= " group by codcliente order by total desc;";
 
       $data = $this->db->select($sql);
@@ -616,245 +229,21 @@ class informe_presupuestos extends fs_controller
 
       return $stats;
    }
-
-   /**
-    * Esta función sirve para generar el javascript necesario para que la vista genere
-    * las gráficas, ahorrando mucho código.
-    * @param type $data
-    * @param type $chart_id
-    * @return string
-    */
-   public function generar_chart_pie_js(&$data, $chart_id, $type = 'pie')
+   
+   protected function get_documentos($tabla)
    {
-      $js_txt = '';
-
+      $doclist = array();
+      
+      $sql  = "select * from ".$tabla.$this->where_ventas." order by fecha asc, hora asc;";
+      $data = $this->db->select($sql);
       if($data)
       {
-         echo "var " . $chart_id . "_labels = [];\n";
-         echo "var " . $chart_id . "_data = [];\n";
-
          foreach($data as $d)
          {
-            echo $chart_id . '_labels.push("' . $d['txt'] . '"); ';
-            echo $chart_id . '_data.push("' . $d['total'] . '");' . "\n";
-         }
-
-         /// hacemos el apaño para evitar el problema de charts.js con tabs en boostrap
-         echo "var " . $chart_id . "_ctx = document.getElementById('" . $chart_id . "').getContext('2d');\n";
-         echo $chart_id . "_ctx.canvas.height = 100;\n";
-
-         echo "var " . $chart_id . "_chart = new Chart(" . $chart_id . "_ctx, {
-            type: '".$type."',
-            data: {
-               labels: " . $chart_id . "_labels,
-               datasets: [
-                  {
-                     backgroundColor: default_colors,
-                     data: " . $chart_id . "_data
-                  }
-               ]
-            }
-         });";
-      }
-
-      return $js_txt;
-   }
-
-   private function pdf_presupuestos_cli()
-   {
-      /// desactivamos el motor de plantillas
-      $this->template = FALSE;
-      
-      $pdf_doc = new fs_pdf('a4', 'landscape', 'Courier');
-      $pdf_doc->pdf->addInfo('Title', FS_PRESUPUESTOS . ' del ' . $this->desde . ' al ' . $this->hasta);
-      $pdf_doc->pdf->addInfo('Subject', FS_PRESUPUESTOS . ' del ' . $this->desde . ' al ' . $this->hasta);
-      $pdf_doc->pdf->addInfo('Author', $this->empresa->nombre);
-      
-      $codcliente = FALSE;
-      if($this->cliente)
-      {
-         $codcliente = $this->cliente->codcliente;
-      }
-      
-      $pre0 = new presupuesto_cliente();
-      $presupuestos = $pre0->all_desde(
-              $this->desde,
-              $this->hasta,
-              $this->codserie,
-              $this->codagente,
-              $codcliente,
-              $this->estado,
-              $this->codpago,
-              $this->codalmacen,
-              $this->coddivisa
-      );
-      if($presupuestos)
-      {
-         $total_lineas = count($presupuestos);
-         $linea_actual = 0;
-         $lppag = 61;
-         $pagina = 1;
-         $totalbase = $total = 0;
-
-         while($linea_actual < $total_lineas)
-         {
-            if($linea_actual > 0)
-            {
-               $pdf_doc->pdf->ezNewPage();
-               $pagina++;
-            }
-
-            /// encabezado
-            $pdf_doc->pdf->ezText( $this->fix_html($this->empresa->nombre). " - ".FS_PRESUPUESTOS." - de venta del ".$this->desde." al ".$this->hasta );
-            
-            if($this->codserie)
-            {
-               $pdf_doc->pdf->ezText( strtoupper(FS_SERIE).': ' . $this->codserie );
-               $lppag--;
-            }
-
-            if($this->codagente)
-            {
-               $age0 = new agente();
-               $agente = $age0->get($this->codagente);
-               if($agente)
-               {
-                  $pdf_doc->pdf->ezText("Empleado: " . $this->fix_html($agente->nombre));
-                  $lppag--;
-               }
-            }
-
-            if($this->cliente)
-            {
-               $pdf_doc->pdf->ezText("Cliente: " . $this->fix_html($this->cliente->nombre));
-               $lppag--;
-            }
-
-            if($this->estado)
-            {
-               $lppag--;
-               if($this->estado == '3')
-               {
-                  $pdf_doc->pdf->ezText("Estado: Pendientes");
-               }
-               else if($this->estado == '1')
-               {
-                  $pdf_doc->pdf->ezText("Estado: Aprobados");
-               }
-               else if($this->estado == '2')
-               {
-                  $pdf_doc->pdf->ezText("Estado: Rechazados");
-               }
-            }
-            
-            if($this->codpago)
-            {
-               $fp0 = new forma_pago();
-               $forma_pago = $fp0->get($this->codpago);
-               if($forma_pago)
-               {
-                  $pdf_doc->pdf->ezText("Forma de pago: " . $this->fix_html($forma_pago->descripcion));
-                  $lppag--;
-               }
-            }
-            
-            if($this->almacen)
-            {
-               $alm0 = new almacen();
-               $almacen = $alm0->get($this->codalmacen);
-               if($almacen)
-               {
-                  $pdf_doc->pdf->ezText("Almacén: " . $this->fix_html($almacen->nombre));
-                  $lppag--;
-               }
-            }
-
-            $pdf_doc->pdf->ezText("\n", 8);
-
-            /// tabla principal
-            $pdf_doc->new_table();
-            $pdf_doc->add_table_header(
-                    array(
-                        'serie' => '<b>' . strtoupper(FS_SERIE) . '</b>',
-                        'presupuesto' => '<b>Pres.</b>',
-                        'fecha' => '<b>Fecha</b>',
-                        'descripcion' => '<b>Descripción</b>',
-                        'cifnif' => '<b>' . FS_CIFNIF . '</b>',
-                        'base' => '<b>Base Im.</b>',
-                        'total' => '<b>Total</b>'
-                    )
-            );
-            for($i = 0; $i < $lppag AND $linea_actual < $total_lineas; $i++)
-            {
-               $linea = array(
-                   'serie' => $presupuestos[$linea_actual]->codserie,
-                   'presupuesto' => $presupuestos[$linea_actual]->codigo,
-                   'fecha' => $presupuestos[$linea_actual]->fecha,
-                   'descripcion' => $this->fix_html($presupuestos[$linea_actual]->nombrecliente),
-                   'cifnif' => $presupuestos[$linea_actual]->cifnif,
-                   'base' => $presupuestos[$linea_actual]->neto,
-                   'total' => $presupuestos[$linea_actual]->total,
-               );
-
-               $pdf_doc->add_table_row($linea);
-
-               $i++;
-               $totalbase += $presupuestos[$linea_actual]->neto;
-               $total += $presupuestos[$linea_actual]->total;
-               $linea_actual++;
-            }
-
-            $pdf_doc->save_table(
-                    array(
-                        'fontSize' => 8,
-                        'cols' => array(
-                            'base' => array('justification' => 'right'),
-                            'total' => array('justification' => 'right')
-                        ),
-                        'shaded' => 0,
-                        'width' => 780
-                    )
-            );
-
-
-            /// Rellenamos la última tabla
-            $pdf_doc->set_y(70);
-            $pdf_doc->new_table();
-            $titulo = array('pagina' => '<b>Suma y sigue</b>');
-            $fila = array('pagina' => $pagina . '/' . ($pagina + ceil(($total_lineas - $linea_actual) / $lppag)));
-            $opciones = array(
-                'fontSize' => 8,
-                'cols' => array('base' => array('justification' => 'right')),
-                'showLines' => 1,
-                'width' => 780
-            );
-            
-            $titulo['base'] = '<b>Base imponible</b>';
-            $titulo['total'] = '<b>Total</b>';
-            $fila['base'] = $this->show_precio($totalbase);
-            $fila['total'] = $this->show_precio($total);
-            $opciones['cols']['base'] = array('justification' => 'right');
-            $opciones['cols']['total'] = array('justification' => 'right');
-            $pdf_doc->add_table_header($titulo);
-            $pdf_doc->add_table_row($fila);
-            $pdf_doc->save_table($opciones);
+            $doclist[] = new presupuesto_cliente($d);
          }
       }
-      else
-      {
-         $pdf_doc->pdf->ezText($this->empresa->nombre . " - " . FS_PRESUPUESTOS . "  de venta del " . $this->desde . " al " . $this->hasta . ":\n\n", 14);
-         $pdf_doc->pdf->ezText("Ninguna.\n\n", 14);
-      }
-
-      $pdf_doc->show();
-   }
-
-   private function fix_html($txt)
-   {
-      $newt = str_replace('&lt;', '<', $txt);
-      $newt = str_replace('&gt;', '>', $newt);
-      $newt = str_replace('&quot;', '"', $newt);
-      $newt = str_replace('&#39;', "'", $newt);
-      return $newt;
+      
+      return $doclist;
    }
 }
