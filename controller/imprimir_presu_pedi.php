@@ -1181,13 +1181,6 @@ class imprimir_presu_pedi extends fs_controller
    
    public function is_html($txt)
    {
-      if( stripos($txt, '<html') === FALSE )
-      {
-         return FALSE;
-      }
-      else
-      {
-         return TRUE;
-      }
+      return ( $txt != strip_tags($txt) ) ? TRUE : FALSE;
    }
 }
