@@ -18,28 +18,36 @@
  */
 
 require_model('agente.php');
+require_model('almacen.php');
 require_model('articulo.php');
 require_model('cliente.php');
 require_model('presupuesto_cliente.php');
 require_model('serie.php');
+require_model('forma_pago.php');
+
 
 class ventas_presupuestos extends fs_controller
 {
    public $agente;
+   public $almacenes;
    public $articulo;
    public $buscar_lineas;
    public $cliente;
    public $codagente;
+   public $codalmacen;
    public $codserie;
    public $desde;
    public $hasta;
    public $lineas;
    public $mostrar;
+   public $multi_almacen;
    public $num_resultados;
    public $offset;
    public $order;
    public $resultados;
    public $serie;
+   public $fpago;
+   public $codpago;
    public $total_resultados;
    public $total_resultados_txt;
 
@@ -52,7 +60,9 @@ class ventas_presupuestos extends fs_controller
    {
       $presupuesto = new presupuesto_cliente();
       $this->agente = new agente();
+      $this->almacenes = new almacen();
       $this->serie = new serie();
+      $this->fpago = new forma_pago();
 
       $this->mostrar = 'todo';
       if( isset($_GET['mostrar']) )
@@ -64,6 +74,9 @@ class ventas_presupuestos extends fs_controller
       {
          $this->mostrar = $_COOKIE['ventas_pres_mostrar'];
       }
+      
+      $fsvar = new fs_var();
+      $this->multi_almacen = $fsvar->simple_get('multi_almacen');
       
       $this->offset = 0;
       if( isset($_REQUEST['offset']) )
@@ -110,7 +123,9 @@ class ventas_presupuestos extends fs_controller
          $this->share_extension();
          $this->cliente = FALSE;
          $this->codagente = '';
+         $this->codalmacen = '';
          $this->codserie = '';
+         $this->codpago = '';
          $this->desde = '';
          $this->hasta = '';
          $this->num_resultados = '';
@@ -150,10 +165,17 @@ class ventas_presupuestos extends fs_controller
             {
                $this->codagente = $_REQUEST['codagente'];
             }
-            
+            if( isset($_REQUEST['codalmacen']) )
+            {
+               $this->codalmacen = $_REQUEST['codalmacen'];
+            }
             if( isset($_REQUEST['codserie']) )
             {
                $this->codserie = $_REQUEST['codserie'];
+            }
+            if( isset($_REQUEST['codpago']) )
+            {
+               $this->codpago = $_REQUEST['codpago'];
             }
             
             if( isset($_REQUEST['desde']) )
@@ -253,6 +275,8 @@ class ventas_presupuestos extends fs_controller
               ."&query=".$this->query
               ."&codserie=".$this->codserie
               ."&codagente=".$this->codagente
+              ."&codalmacen=".$this->codalmacen
+              ."&codpago=".$this->codpago   
               ."&codcliente=".$codcliente
               ."&desde=".$this->desde
               ."&hasta=".$this->hasta;
@@ -483,6 +507,11 @@ class ventas_presupuestos extends fs_controller
          $sql .= $where."codagente = ".$this->agente->var2str($this->codagente);
          $where = ' AND ';
       }
+      if($this->codalmacen)
+      {
+         $sql .= $where."codalmacen = ".$this->agente->var2str($this->codalmacen);
+         $where = ' AND ';
+      }
       
       if($this->cliente)
       {
@@ -495,6 +524,11 @@ class ventas_presupuestos extends fs_controller
          $sql .= $where."codserie = ".$this->agente->var2str($this->codserie);
          $where = ' AND ';
       }
+      if($this->codpago)
+      {
+         $sql .= $where."codpago= ".$this->agente->var2str($this->codpago);
+         $where = ' AND ';
+      } 
       
       if($this->desde != '')
       {
