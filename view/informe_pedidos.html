@@ -164,7 +164,7 @@
          {/if}
          <div class="col-sm-2">
             <div class="form-group">
-               Estado
+               Estado:
                <select name="estado" class="form-control" onchange="this.form.submit()">
                   <option value="">Todos</option>
                   <option value="">------</option>
@@ -248,6 +248,15 @@
       <div role="tabpanel" class="tab-pane active" id="mensual">
          <div class="row">
             <div class="col-sm-12">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title"><span class="text-capitalize">{#FS_PEDIDOS#}</span> mes en curso</h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_pedidos_mes_actual" style="height: 350px;"></canvas>
+                     <p class="help-block">Se muestran valores <b>netos</b>, es decir, sin impuestos.</p>
+                  </div>
+               </div>
                <div class="panel panel-default">
                   <div class="panel-heading">
                      <h3 class="panel-title"><span class="text-capitalize">{#FS_PEDIDOS#}</span> por mes</h3>
@@ -632,7 +641,44 @@
          '#3B3EAC'
       ];
       
-      /// cargamos los datos de los pedios por mes
+      /// cargamos los datos de los pedidos del mes actual
+      var pedidos_mes_actual_labels = [];
+      var pedidos_mes_actual_data = [
+         [],[]
+      ];
+      
+      {loop="$fsc->stats_current_month()"}
+      pedidos_mes_actual_labels.push("{$value['day']}");
+      pedidos_mes_actual_data[0].push("{$value['total_pro']}");
+      pedidos_mes_actual_data[1].push("{$value['total_cli']}");
+      {/loop}
+      
+      /// esto es un apaño para evitar los problemas de charts.js con tabs en bootstrap
+      var ctx1 = document.getElementById('chart_pedidos_mes_actual').getContext('2d');
+      ctx1.canvas.height = 150;
+      
+      var chart1 = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+               labels: pedidos_mes_actual_labels,
+               datasets: [
+                  {
+                     label: 'compras',
+                     backgroundColor: "rgba(255, 99, 132,0.8)",
+                     data: pedidos_mes_actual_data[0]
+                  },
+                  {
+                     label: 'ventas',
+                     backgroundColor: "rgba(54, 162, 235,0.8)",
+                     data: pedidos_mes_actual_data[1]
+                  }
+               ]
+            }
+         }
+      );
+      
+
+      /// cargamos los datos de los pedidos por mes
       var pedidos_mes_labels = [];
       var pedidos_mes_data = [
          [],[]
