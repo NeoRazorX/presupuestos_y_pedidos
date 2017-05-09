@@ -383,7 +383,7 @@ class imprimir_presu_pedi extends fs_controller
       
       for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
       {
-         $descripcion = $pdf_doc->fix_html($lineas[$linea_actual]->descripcion);
+         $descripcion = fs_fix_html($lineas[$linea_actual]->descripcion);
          if( !is_null($lineas[$linea_actual]->referencia) )
          {
             if( get_class_name($lineas[$linea_actual]) == 'linea_pedido_proveedor' )
@@ -472,7 +472,7 @@ class imprimir_presu_pedi extends fs_controller
       {
          if($this->documento->observaciones != '')
          {
-            $pdf_doc->pdf->ezText("\n".$pdf_doc->fix_html($this->documento->observaciones), 9);
+            $pdf_doc->pdf->ezText("\n".fs_fix_html($this->documento->observaciones), 9);
          }
       }
    }
@@ -509,7 +509,7 @@ class imprimir_presu_pedi extends fs_controller
       $pdf_doc->add_table_row(
               array(
                   'campo1' => "<b>Cliente:</b> ",
-                  'dato1' => $pdf_doc->fix_html($this->documento->nombrecliente),
+                  'dato1' => fs_fix_html($this->documento->nombrecliente),
                   'campo2' => "<b>".$tipoidfiscal.":</b> ".$this->documento->cifnif
               )
       );
@@ -539,7 +539,7 @@ class imprimir_presu_pedi extends fs_controller
       }
       $row = array(
           'campo1' => "<b>Dirección:</b>",
-          'dato1' => $pdf_doc->fix_html($direccion),
+          'dato1' => fs_fix_html($direccion),
           'campo2' => ''
       );
       
@@ -604,7 +604,7 @@ class imprimir_presu_pedi extends fs_controller
          $lppag -= ceil(strlen($direccionenv)/54);
          $row_dir_env = array(
             'campo1' => "<b>Enviar a:</b>",
-            'dato1' => $pdf_doc->fix_html($direccionenv),
+            'dato1' => fs_fix_html($direccionenv),
             'campo2' => ''
          );
          $pdf_doc->add_table_row($row_dir_env);
@@ -886,7 +886,7 @@ class imprimir_presu_pedi extends fs_controller
             $pdf_doc->add_table_row(
                array(
                    'campo1' => "<b>Proveedor:</b>",
-                   'dato1' => $pdf_doc->fix_html($this->documento->nombre),
+                   'dato1' => fs_fix_html($this->documento->nombre),
                    'campo2' => "<b>".$tipoidfiscal.":</b> ".$this->documento->cifnif
                )
             );
