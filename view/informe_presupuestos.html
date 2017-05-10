@@ -36,11 +36,11 @@
             <div class="page-header">
                <h1>
                   <i class="fa fa-area-chart" aria-hidden="true"></i> Informe de {#FS_PRESUPUESTOS#}
-	               <a class="btn btn-xs btn-default" href="{$fsc->url()}" title="Recargar la página">
-	                  <span class="glyphicon glyphicon-refresh"></span>
-	               </a>
-	            </h1>
-	         </div>
+                  <a class="btn btn-xs btn-default" href="{$fsc->url()}" title="Recargar la página">
+                     <span class="glyphicon glyphicon-refresh"></span>
+                  </a>
+               </h1>
+            </div>
          </div>
       </div>
       <div class="row">
@@ -142,7 +142,7 @@
          {/if}
          <div class="col-sm-2">
             <div class="form-group">
-               Estado
+               Estado:
                <select name="estado" class="form-control" onchange="this.form.submit()">
                   <option value="">Todos</option>
                   <option value="">------</option>
@@ -213,6 +213,15 @@
       <div role="tabpanel" class="tab-pane active" id="mensual">
          <div class="row">
             <div class="col-sm-12">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h3 class="panel-title"><span class="text-capitalize">{#FS_PRESUPUESTOS#}</span> últimos 30 días</h3>
+                  </div>
+                  <div class="panel-body">
+                     <canvas id="chart_presupuestos_mes_actual" style="height: 350px;"></canvas>
+                     <p class="help-block">Se muestran valores <b>netos</b>, es decir, sin impuestos. Se aplican los mismos filtros, excepto el de fecha.</p>
+                  </div>
+               </div>
                <div class="panel panel-default">
                   <div class="panel-heading">
                      <h3 class="panel-title"><span class="text-capitalize">{#FS_PRESUPUESTOS#}</span> por mes</h3>
@@ -368,7 +377,7 @@
                   </div>
                </div>
             </div>
-          </div>
+         </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="empleados">
          <div class="row">
@@ -467,7 +476,38 @@
          '#3B3EAC'
       ];
       
-      /// cargamos los datos de los pedios por mes
+      /// cargamos los datos de los presupuestos del mes actual
+      var presupuestos_mes_actual_labels = [];
+      var presupuestos_mes_actual_data = [
+         [],[]
+      ];
+      
+      {loop="$fsc->stats_last_30_days()"}
+      presupuestos_mes_actual_labels.push("{$value['day']}");
+      presupuestos_mes_actual_data[0].push("{$value['total_cli']}");
+      {/loop}
+      
+      /// esto es un apaño para evitar los problemas de charts.js con tabs en bootstrap
+      var ctx1 = document.getElementById('chart_presupuestos_mes_actual').getContext('2d');
+      ctx1.canvas.height = 150;
+      
+      var chart1 = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+               labels: presupuestos_mes_actual_labels,
+               datasets: [
+                  {
+                     label: 'ventas',
+                     backgroundColor: "rgba(54, 162, 235,0.8)",
+                     data: presupuestos_mes_actual_data[0]
+                  }
+               ]
+            }
+         }
+      );
+      
+
+      /// cargamos los datos de los presupuestos por mes
       var presupuestos_mes_labels = [];
       var presupuestos_mes_data = [
          [],[]
