@@ -76,62 +76,6 @@ class informe_presupuestos extends informe_albaranes
       }
    }
    
-   public function stats_months()
-   {
-      $stats = array();
-      $stats_cli = $this->stats_months_aux($this->table_ventas);
-      $meses = array(
-          1 => 'ene',
-          2 => 'feb',
-          3 => 'mar',
-          4 => 'abr',
-          5 => 'may',
-          6 => 'jun',
-          7 => 'jul',
-          8 => 'ago',
-          9 => 'sep',
-          10 => 'oct',
-          11 => 'nov',
-          12 => 'dic'
-      );
-
-      foreach($stats_cli as $i => $value)
-      {
-         $mesletra = "";
-         $ano = "";
-
-         if(!empty($value['month']))
-         {
-            $mesletra = $meses[intval(substr((string) $value['month'], 0, strlen((string) $value['month']) - 2))];
-            $ano = substr((string) $value['month'], -2);
-         }
-
-         $stats[$i] = array(
-             'month' => $mesletra . $ano,
-             'total_cli' => round($value['total'], FS_NF0),
-         );
-      }
-
-
-      return $stats;
-   }
-
-   public function stats_years()
-   {
-      $stats = array();
-      $stats_cli = $this->stats_years_aux($this->table_ventas);
-
-      foreach($stats_cli as $i => $value)
-      {
-         $stats[$i] = array(
-             'year' => $value['year'],
-             'total_cli' => round($value['total'], FS_NF0),
-         );
-      }
-
-      return $stats;
-   }
-   
    public function stats_series($tabla = 'presupuestoscli')
    {
       return parent::stats_series($tabla);
