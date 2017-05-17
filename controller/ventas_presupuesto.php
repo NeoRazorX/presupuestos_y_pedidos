@@ -135,7 +135,7 @@ class ventas_presupuesto extends fs_controller
                /// ¿El presupuesto tiene una fecha de validez pasada y queremos ponerlo pendiente?
                if($this->presupuesto->finoferta() AND intval($_REQUEST['status']) == 0 )
                {
-                  $this->presupuesto->finoferta = date('d-m-Y', strtotime('+'.$this->setup_validez.'days'));
+                  $this->presupuesto->finoferta = date('d-m-Y', strtotime('+'.$this->setup_validez.' days'));
                }
                
                if($this->presupuesto->status == 1 AND is_null($this->presupuesto->idpedido))
@@ -183,6 +183,7 @@ class ventas_presupuesto extends fs_controller
       $presu->idpedido = NULL;
       $presu->fecha = $this->today();
       $presu->hora = $this->hour();
+      $presu->finoferta = date('d-m-Y', strtotime($presu->fecha.' +'.$this->setup_validez.' days'));
       $presu->femail = NULL;
       $presu->status = 0;
       $presu->numdocs = 0;
