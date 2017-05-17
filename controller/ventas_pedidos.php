@@ -18,21 +18,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+require_once 'plugins/facturacion_base/extras/fbase_controller.php';
 require_model('agente.php');
 require_model('articulo.php');
 require_model('cliente.php');
+require_model('forma_pago.php');
 require_model('pedido_cliente.php');
 require_model('serie.php');
 
-class ventas_pedidos extends fs_controller
+class ventas_pedidos extends fbase_controller
 {
    public $agente;
    public $articulo;
    public $buscar_lineas;
    public $cliente;
    public $codagente;
+   public $codalmacen;
+   public $codpago;
    public $codserie;
    public $desde;
+   public $forma_pago;
    public $hasta;
    public $lineas;
    public $mostrar;
@@ -51,8 +56,12 @@ class ventas_pedidos extends fs_controller
 
    protected function private_core()
    {
+      parent::private_core();
+      
       $pedido = new pedido_cliente();
       $this->agente = new agente();
+      $this->almacenes = new almacen();
+      $this->forma_pago = new forma_pago();
       $this->serie = new serie();
 
       $this->offset = 0;
@@ -94,7 +103,7 @@ class ventas_pedidos extends fs_controller
       }
       else if( isset($_REQUEST['buscar_cliente']) )
       {
-         $this->buscar_cliente();
+         $this->fbase_buscar_cliente($_REQUEST['buscar_cliente']);
       }
       else if( isset($_GET['ref']) )
       {
@@ -111,6 +120,8 @@ class ventas_pedidos extends fs_controller
          $this->share_extension();
          $this->cliente = FALSE;
          $this->codagente = '';
+         $this->codalmacen = '';
+         $this->codpago = '';
          $this->codserie = '';
          $this->desde = '';
          $this->hasta = '';
@@ -146,6 +157,16 @@ class ventas_pedidos extends fs_controller
             if( isset($_REQUEST['codagente']) )
             {
                $this->codagente = $_REQUEST['codagente'];
+            }
+            
+            if( isset($_REQUEST['codalmacen']) )
+            {
+               $this->codalmacen = $_REQUEST['codalmacen'];
+            }
+            
+            if( isset($_REQUEST['codpago']) )
+            {
+               $this->codpago = $_REQUEST['codpago'];
             }
             
             if( isset($_REQUEST['codserie']) )
@@ -247,9 +268,11 @@ class ventas_pedidos extends fs_controller
          
          $url = $this->url()."&mostrar=".$this->mostrar
                  ."&query=".$this->query
-                 ."&codserie=".$this->codserie
                  ."&codagente=".$this->codagente
+                 ."&codalmacen=".$this->codalmacen
                  ."&codcliente=".$codcliente
+                 ."&codpago=".$this->codpago
+                 ."&codserie=".$this->codserie
                  ."&desde=".$this->desde
                  ."&hasta=".$this->hasta;
          
@@ -261,20 +284,26 @@ class ventas_pedidos extends fs_controller
       }
    }
    
-   private function buscar_cliente()
+   public function paginas()
    {
-      /// desactivamos la plantilla HTML
-      $this->template = FALSE;
-      
-      $cli0 = new cliente();
-      $json = array();
-      foreach($cli0->search($_REQUEST['buscar_cliente']) as $cli)
+      if($this->mostrar == 'pendientes')
       {
-         $json[] = array('value' => $cli->nombre, 'data' => $cli->codcliente);
+         $total = $this->total_pendientes();
+      }
+      else if($this->mostrar == 'rechazados')
+      {
+         $total = $this->total_rechazados();
+      }
+      else if($this->mostrar == 'buscar')
+      {
+         $total = $this->num_resultados;
+      }
+      else
+      {
+         $total = $this->total_registros();
       }
       
-      header('Content-Type: application/json');
-      echo json_encode( array('query' => $_REQUEST['buscar_cliente'], 'suggestions' => $json) );
+      return $this->fbase_paginas($this->url(TRUE), $total, $this->offset);
    }
    
    public function buscar_lineas()
@@ -351,117 +380,31 @@ class ventas_pedidos extends fs_controller
       }
    }
    
-   public function paginas()
-   {
-      $url = $this->url(TRUE);
-      $paginas = array();
-      $i = 0;
-      $num = 0;
-      $actual = 1;
-      
-      if($this->mostrar == 'pendientes')
-      {
-         $total = $this->total_pendientes();
-      }
-      else if($this->mostrar == 'rechazados')
-      {
-         $total = $this->total_rechazados();
-      }
-      else if($this->mostrar == 'buscar')
-      {
-         $total = $this->num_resultados;
-      }
-      else
-      {
-         $total = $this->total_registros();
-      }
-      
-      /// añadimos todas la página
-      while($num < $total)
-      {
-         $paginas[$i] = array(
-             'url' => $url."&offset=".($i*FS_ITEM_LIMIT),
-             'num' => $i + 1,
-             'actual' => ($num == $this->offset)
-         );
-         
-         if($num == $this->offset)
-         {
-            $actual = $i;
-         }
-         
-         $i++;
-         $num += FS_ITEM_LIMIT;
-      }
-      
-      /// ahora descartamos
-      foreach($paginas as $j => $value)
-      {
-         $enmedio = intval($i/2);
-         
-         /**
-          * descartamos todo excepto la primera, la última, la de enmedio,
-          * la actual, las 5 anteriores y las 5 siguientes
-          */
-         if( ($j>1 AND $j<$actual-5 AND $j!=$enmedio) OR ($j>$actual+5 AND $j<$i-1 AND $j!=$enmedio) )
-         {
-            unset($paginas[$j]);
-         }
-      }
-      
-      if( count($paginas) > 1 )
-      {
-         return $paginas;
-      }
-      else
-      {
-         return array();
-      }
-   }
-   
    public function total_pendientes()
    {
-      $data = $this->db->select("SELECT COUNT(idpedido) as total FROM pedidoscli WHERE idalbaran IS NULL AND status=0;");
-      if($data)
-      {
-         return intval($data[0]['total']);
-      }
-      else
-         return 0;
+      return $this->fbase_sql_total('pedidoscli', 'idpedido', 'WHERE idalbaran IS NULL AND status = 0');
    }
    
    public function total_rechazados()
    {
-      $data = $this->db->select("SELECT COUNT(idpedido) as total FROM pedidoscli WHERE status=2;");
-      if($data)
-      {
-         return intval($data[0]['total']);
-      }
-      else
-         return 0;
+      return $this->fbase_sql_total('pedidoscli', 'idpedido', 'WHERE status = 2');
    }
    
    private function total_registros()
    {
-      $data = $this->db->select("SELECT COUNT(idpedido) as total FROM pedidoscli;");
-      if($data)
-      {
-         return intval($data[0]['total']);
-      }
-      else
-         return 0;
+      return $this->fbase_sql_total('pedidoscli', 'idpedido');
    }
    
    private function buscar($order2)
    {
       $this->resultados = array();
       $this->num_resultados = 0;
-      $query = $this->agente->no_html( strtolower($this->query) );
       $sql = " FROM pedidoscli ";
       $where = 'WHERE ';
       
       if($this->query != '')
       {
+         $query = $this->agente->no_html( mb_strtolower($this->query, 'UTF8') );
          $sql .= $where;
          if( is_numeric($query) )
          {
@@ -475,15 +418,27 @@ class ventas_pedidos extends fs_controller
          $where = ' AND ';
       }
       
+      if($this->cliente)
+      {
+         $sql .= $where."codcliente = ".$this->agente->var2str($this->cliente->codcliente);
+         $where = ' AND ';
+      }
+      
       if($this->codagente != '')
       {
          $sql .= $where."codagente = ".$this->agente->var2str($this->codagente);
          $where = ' AND ';
       }
       
-      if($this->cliente)
+      if($this->codalmacen != '')
       {
-         $sql .= $where."codcliente = ".$this->agente->var2str($this->cliente->codcliente);
+         $sql .= $where."codalmacen = ".$this->agente->var2str($this->codalmacen);
+         $where = ' AND ';
+      }
+      
+      if($this->codpago != '')
+      {
+         $sql .= $where."codpago = ".$this->agente->var2str($this->codpago);
          $where = ' AND ';
       }
       
@@ -493,13 +448,13 @@ class ventas_pedidos extends fs_controller
          $where = ' AND ';
       }
       
-      if($this->desde != '')
+      if($this->desde)
       {
          $sql .= $where."fecha >= ".$this->agente->var2str($this->desde);
          $where = ' AND ';
       }
       
-      if($this->hasta != '')
+      if($this->hasta)
       {
          $sql .= $where."fecha <= ".$this->agente->var2str($this->hasta);
          $where = ' AND ';
