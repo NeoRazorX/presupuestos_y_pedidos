@@ -176,8 +176,12 @@ class compras_pedidos extends fbase_controller {
          } else
             $this->resultados = $pedido->all($this->offset, $this->order . $order2);
 
-         /// ejecutamos el proceso del cron para pedidos.
-         $pedido->cron_job();       // ????                  
+         /**
+          * Ejecutamos el proceso del cron para pedidos.
+          * No es estrictamente necesario, pero viene bien para cuando el
+          * cliente no tiene configurado el cron.
+          */
+         $pedido->cron_job();
       }
    }
 

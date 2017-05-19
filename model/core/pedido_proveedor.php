@@ -849,11 +849,6 @@ class pedido_proveedor extends \fs_model
    
    public function cron_job()
    {
-      /*
-      $sql = "UPDATE ".$this->table_name." SET idalbaran = NULL, editable = TRUE"
-             ." WHERE idalbaran IS NOT NULL AND idalbaran NOT IN (SELECT idalbaran FROM albaranesprov);";
-      */
-      
       $sql = "UPDATE ".$this->table_name." SET idalbaran = NULL, editable = TRUE"
              ." WHERE idalbaran IS NOT NULL AND NOT EXISTS(SELECT 1 FROM albaranesprov t1 WHERE t1.idalbaran = " . $this->table_name .".idalbaran);";
       $this->db->exec($sql);
