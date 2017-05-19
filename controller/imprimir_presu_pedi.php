@@ -13,7 +13,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -44,14 +44,14 @@ class imprimir_presu_pedi extends fs_controller
    public $impresion;
    public $impuesto;
    public $proveedor;
-   
+
    private $numpaginas;
-   
+
    public function __construct()
    {
       parent::__construct(__CLASS__, 'imprimir', 'ventas', FALSE, FALSE);
    }
-   
+
    protected function private_core()
    {
       $this->articulo_proveedor = new articulo_proveedor();
@@ -59,7 +59,7 @@ class imprimir_presu_pedi extends fs_controller
       $this->documento = FALSE;
       $this->impuesto = new impuesto();
       $this->proveedor = FALSE;
-      
+
       /// obtenemos los datos de configuración de impresión
       $this->impresion = array(
           'print_ref' => '1',
@@ -69,7 +69,7 @@ class imprimir_presu_pedi extends fs_controller
       );
       $fsvar = new fs_var();
       $this->impresion = $fsvar->array_get($this->impresion, FALSE);
-      
+
       if( isset($_REQUEST['pedido_p']) AND isset($_REQUEST['id']) )
       {
          $ped = new pedido_proveedor();
@@ -79,7 +79,7 @@ class imprimir_presu_pedi extends fs_controller
             $proveedor = new proveedor();
             $this->proveedor = $proveedor->get($this->documento->codproveedor);
          }
-         
+
          if( isset($_POST['email']) )
          {
             $this->enviar_email_proveedor();
@@ -96,7 +96,7 @@ class imprimir_presu_pedi extends fs_controller
             $cliente = new cliente();
             $this->cliente = $cliente->get($this->documento->codcliente);
          }
-         
+
          if( isset($_POST['email']) )
          {
             $this->enviar_email('pedido');
@@ -113,7 +113,7 @@ class imprimir_presu_pedi extends fs_controller
             $cliente = new cliente();
             $this->cliente = $cliente->get($this->documento->codcliente);
          }
-         
+
          if( isset($_POST['email']) )
          {
             $this->enviar_email('presupuesto');
@@ -121,10 +121,10 @@ class imprimir_presu_pedi extends fs_controller
          else
             $this->generar_pdf_presupuesto();
       }
-      
+
       $this->share_extensions();
    }
-   
+
    private function share_extensions()
    {
       $extensiones = array(
@@ -194,7 +194,7 @@ class imprimir_presu_pedi extends fs_controller
          }
       }
    }
-   
+
    /**
     * Añade las líneas al documento pdf.
     * @param fs_pdf $pdf_doc
@@ -223,34 +223,34 @@ class imprimir_presu_pedi extends fs_controller
                      $len -= 85;
                      $linea_size += 0.5;
                   }
-                  
+
                   $aux = explode("\n", $lin->descripcion);
                   if( count($aux) > 1 )
                   {
                      $linea_size += 0.5 * ( count($aux) - 1);
                   }
-                  
+
                   if($linea_size > 1)
                   {
                      $lppag2 -= $linea_size - 1;
                   }
                }
             }
-            
+
             $linea_a += $lppag2;
             $this->numpaginas++;
          }
-         
+
          if($this->numpaginas == 0)
          {
             $this->numpaginas = 1;
          }
       }
-      
+
       if($this->impresion['print_dto'])
       {
          $this->impresion['print_dto'] = FALSE;
-         
+
          /// leemos las líneas para ver si de verdad mostramos los descuentos
          foreach($lineas as $lin)
          {
@@ -261,7 +261,7 @@ class imprimir_presu_pedi extends fs_controller
             }
          }
       }
-      
+
       $dec_cantidad = 0;
       $multi_iva = FALSE;
       $multi_re = FALSE;
@@ -276,7 +276,7 @@ class imprimir_presu_pedi extends fs_controller
          {
             $dec_cantidad = 2;
          }
-         
+
          if($iva === FALSE)
          {
             $iva = $lin->iva;
@@ -285,7 +285,7 @@ class imprimir_presu_pedi extends fs_controller
          {
             $multi_iva = TRUE;
          }
-         
+
          if($re === FALSE)
          {
             $re = $lin->recargo;
@@ -294,7 +294,7 @@ class imprimir_presu_pedi extends fs_controller
          {
             $multi_re = TRUE;
          }
-         
+
          if($irpf === FALSE)
          {
             $irpf = $lin->irpf;
@@ -303,7 +303,7 @@ class imprimir_presu_pedi extends fs_controller
          {
             $multi_irpf = TRUE;
          }
-         
+
          /// restamos líneas al documento en función del tamaño de la descripción
          if($i >= $linea_actual AND $i < $linea_actual+$lppag)
          {
@@ -314,20 +314,20 @@ class imprimir_presu_pedi extends fs_controller
                $len -= 85;
                $linea_size += 0.5;
             }
-            
+
             $aux = explode("\n", $lin->descripcion);
             if( count($aux) > 1 )
             {
                $linea_size += 0.5 * ( count($aux) - 1);
             }
-            
+
             if($linea_size > 1)
             {
                $lppag -= $linea_size - 1;
             }
          }
       }
-      
+
       /*
        * Creamos la tabla con las lineas del documento
        */
@@ -338,7 +338,7 @@ class imprimir_presu_pedi extends fs_controller
           'cantidad2' => '<b>Cant.</b>',
           'pvp' => '<b>Precio</b>',
       );
-      
+
       if( get_class_name($lineas[$linea_actual]) == 'linea_pedido_proveedor' )
       {
          unset($table_header['cantidad2']);
@@ -348,39 +348,39 @@ class imprimir_presu_pedi extends fs_controller
       {
          unset($table_header['cantidad']);
       }
-      
+
       if( isset($_GET['noval']) )
       {
          unset($table_header['pvp']);
       }
-      
+
       if( $this->impresion['print_dto'] AND !isset($_GET['noval']) )
       {
          $table_header['dto'] = '<b>Dto.</b>';
       }
-      
+
       if( $multi_iva AND !isset($_GET['noval']) )
       {
          $table_header['iva'] = '<b>'.FS_IVA.'</b>';
       }
-      
+
       if( $multi_re AND !isset($_GET['noval']) )
       {
          $table_header['re'] = '<b>R.E.</b>';
       }
-      
+
       if( $multi_irpf AND !isset($_GET['noval']) )
       {
          $table_header['irpf'] = '<b>'.FS_IRPF.'</b>';
       }
-      
+
       if( !isset($_GET['noval']) )
       {
          $table_header['importe'] = '<b>Importe</b>';
       }
-      
+
       $pdf_doc->add_table_header($table_header);
-      
+
       for($i = $linea_actual; (($linea_actual < ($lppag + $i)) AND ($linea_actual < count($lineas)));)
       {
          $descripcion = fs_fix_html($lineas[$linea_actual]->descripcion);
@@ -396,7 +396,7 @@ class imprimir_presu_pedi extends fs_controller
                $descripcion = '<b>'.$lineas[$linea_actual]->referencia.'</b> '.$descripcion;
             }
          }
-         
+
          $fila = array(
              'cantidad' => $this->show_numero($lineas[$linea_actual]->cantidad, $dec_cantidad),
              'cantidad2' => $this->show_numero($lineas[$linea_actual]->cantidad, $dec_cantidad),
@@ -408,22 +408,22 @@ class imprimir_presu_pedi extends fs_controller
              'irpf' => $this->show_numero($lineas[$linea_actual]->irpf) . " %",
              'importe' => $this->show_precio($lineas[$linea_actual]->pvptotal, $this->documento->coddivisa)
          );
-         
+
          if($lineas[$linea_actual]->dtopor == 0)
          {
             $fila['dto'] = '';
          }
-         
+
          if($lineas[$linea_actual]->recargo == 0)
          {
             $fila['re'] = '';
          }
-         
+
          if($lineas[$linea_actual]->irpf == 0)
          {
             $fila['irpf'] = '';
          }
-         
+
          if( get_class_name($lineas[$linea_actual]) != 'linea_pedido_proveedor' )
          {
             if( !$lineas[$linea_actual]->mostrar_cantidad )
@@ -431,7 +431,7 @@ class imprimir_presu_pedi extends fs_controller
                $fila['cantidad'] = '';
                $fila['cantidad2'] = '';
             }
-            
+
             if( !$lineas[$linea_actual]->mostrar_precio )
             {
                $fila['pvp'] = '';
@@ -442,11 +442,11 @@ class imprimir_presu_pedi extends fs_controller
                $fila['importe'] = '';
             }
          }
-         
+
          $pdf_doc->add_table_row($fila);
          $linea_actual++;
       }
-      
+
       $pdf_doc->save_table(
               array(
                   'fontSize' => 8,
@@ -466,7 +466,7 @@ class imprimir_presu_pedi extends fs_controller
                   'lineCol' => array(0.3, 0.3, 0.3),
               )
       );
-      
+
       /// ¿Última página?
       if( $linea_actual == count($lineas) )
       {
@@ -476,7 +476,7 @@ class imprimir_presu_pedi extends fs_controller
          }
       }
    }
-   
+
    private function generar_pdf_datos_cliente(&$pdf_doc, &$lppag)
    {
       $tipo_doc = ucfirst(FS_PRESUPUESTO);
@@ -484,13 +484,13 @@ class imprimir_presu_pedi extends fs_controller
       {
          $tipo_doc = ucfirst(FS_PEDIDO);
       }
-      
+
       $tipoidfiscal = FS_CIFNIF;
       if($this->cliente)
       {
          $tipoidfiscal = $this->cliente->tipoidfiscal;
       }
-      
+
       /*
        * Esta es la tabla con los datos del cliente:
        * Presupuesto:             Fecha:
@@ -505,7 +505,7 @@ class imprimir_presu_pedi extends fs_controller
                   'campo2' => "<b>Fecha:</b> ".$this->documento->fecha
               )
       );
-      
+
       $pdf_doc->add_table_row(
               array(
                   'campo1' => "<b>Cliente:</b> ",
@@ -513,7 +513,7 @@ class imprimir_presu_pedi extends fs_controller
                   'campo2' => "<b>".$tipoidfiscal.":</b> ".$this->documento->cifnif
               )
       );
-      
+
       $direccion = $this->documento->direccion;
       if($this->documento->apartado)
       {
@@ -542,7 +542,7 @@ class imprimir_presu_pedi extends fs_controller
           'dato1' => fs_fix_html($direccion),
           'campo2' => ''
       );
-      
+
       if(!$this->cliente)
       {
          /// nada
@@ -561,7 +561,7 @@ class imprimir_presu_pedi extends fs_controller
          $row['campo2'] = "<b>Teléfonos:</b> ".$this->cliente->telefono2;
       }
       $pdf_doc->add_table_row($row);
-      
+
       /* Si tenemos dirección de envío y es diferente a la de facturación */
       if($this->documento->envio_direccion && $this->documento->direccion != $this->documento->envio_direccion)
       {
@@ -609,7 +609,7 @@ class imprimir_presu_pedi extends fs_controller
          );
          $pdf_doc->add_table_row($row_dir_env);
       }
-      
+
       if($this->empresa->codpais != 'ESP')
       {
          $pdf_doc->add_table_row(
@@ -620,7 +620,7 @@ class imprimir_presu_pedi extends fs_controller
                  )
          );
       }
-      
+
       $pdf_doc->save_table(
               array(
                   'cols' => array(
@@ -635,7 +635,7 @@ class imprimir_presu_pedi extends fs_controller
       );
       $pdf_doc->pdf->ezText("\n", 10);
    }
-   
+
    private function generar_pdf_totales(&$pdf_doc, &$lineas_iva, $pagina)
    {
       if( isset($_GET['noval']) )
@@ -646,7 +646,7 @@ class imprimir_presu_pedi extends fs_controller
       {
          /*
           * Rellenamos la última tabla de la página:
-          * 
+          *
           * Página            Neto    IVA   Total
           */
          $pdf_doc->new_table();
@@ -674,34 +674,34 @@ class imprimir_presu_pedi extends fs_controller
             }
             else
                $titulo['iva'.$li['iva']] = '<b>'.FS_IVA.' '.$li['iva'].'%</b>';
-            
+
             $fila['iva'.$li['iva']] = $this->show_precio($li['totaliva'], $this->documento->coddivisa);
-            
+
             if($li['totalrecargo'] != 0)
             {
                $fila['iva'.$li['iva']] .= "\nR.E. ".$li['recargo']."%: ".$this->show_precio($li['totalrecargo'], $this->documento->coddivisa);
             }
-               
+
             $opciones['cols']['iva'.$li['iva']] = array('justification' => 'right');
          }
-         
+
          if($this->documento->totalirpf != 0)
          {
             $titulo['irpf'] = '<b>'.FS_IRPF.' '.$this->documento->irpf.'%</b>';
             $fila['irpf'] = $this->show_precio($this->documento->totalirpf);
             $opciones['cols']['irpf'] = array('justification' => 'right');
          }
-         
+
          $titulo['liquido'] = '<b>Total</b>';
          $fila['liquido'] = $this->show_precio($this->documento->total, $this->documento->coddivisa);
          $opciones['cols']['liquido'] = array('justification' => 'right');
-         
+
          $pdf_doc->add_table_header($titulo);
          $pdf_doc->add_table_row($fila);
          $pdf_doc->save_table($opciones);
       }
    }
-   
+
    public function generar_pdf_presupuesto($archivo = FALSE)
    {
       if( !$archivo )
@@ -709,44 +709,44 @@ class imprimir_presu_pedi extends fs_controller
          /// desactivamos la plantilla HTML
          $this->template = FALSE;
       }
-      
+
       $pdf_doc = new fs_pdf();
       $pdf_doc->pdf->addInfo('Title', ucfirst(FS_PRESUPUESTO).' '. $this->documento->codigo);
       $pdf_doc->pdf->addInfo('Subject', ucfirst(FS_PRESUPUESTO).' de cliente ' . $this->documento->codigo);
       $pdf_doc->pdf->addInfo('Author', $this->empresa->nombre);
-      
+
       $lineas = $this->documento->get_lineas();
       $lineas_iva = $pdf_doc->get_lineas_iva($lineas);
       if($lineas)
       {
          $linea_actual = 0;
          $pagina = 1;
-         
+
          /// imprimimos las páginas necesarias
          while( $linea_actual < count($lineas) )
          {
             $lppag = 35;
-            
+
             /// salto de página
             if($linea_actual > 0)
             {
                $pdf_doc->pdf->ezNewPage();
             }
-            
+
             $pdf_doc->generar_pdf_cabecera($this->empresa, $lppag);
             $this->generar_pdf_datos_cliente($pdf_doc, $lppag);
             $this->generar_pdf_lineas($pdf_doc, $lineas, $linea_actual, $lppag);
-            
+
             /// ¿Fecha de validez?
             if( $linea_actual == count($lineas) )
             {
                $texto_pago = '';
-               
+
                if($this->documento->finoferta)
                {
                   $texto_pago = "\n<b>".ucfirst(FS_PRESUPUESTO).' válido hasta:</b> '.$this->documento->finoferta;
                }
-               
+
                if($this->impresion['print_formapago'])
                {
                   $fp0 = new forma_pago();
@@ -754,7 +754,7 @@ class imprimir_presu_pedi extends fs_controller
                   if($forma_pago)
                   {
                      $texto_pago .= "\n<b>Forma de pago</b>: ".$forma_pago->descripcion;
-                     
+
                      if(!$forma_pago->imprimir)
                      {
                         /// nada
@@ -770,7 +770,7 @@ class imprimir_presu_pedi extends fs_controller
                            {
                               $texto_pago .= $cbc->iban(TRUE);
                            }
-                           
+
                            if($cbc->swift)
                            {
                               $texto_pago .= "\n<b>SWIFT/BIC</b>: ".$cbc->swift;
@@ -793,7 +793,7 @@ class imprimir_presu_pedi extends fs_controller
                            {
                               $texto_pago .= "\n<b>IBAN</b>: ".$cuenta_banco->iban(TRUE);
                            }
-                           
+
                            if($cuenta_banco->swift)
                            {
                               $texto_pago .= "\n<b>SWIFT o BIC</b>: ".$cuenta_banco->swift;
@@ -802,10 +802,10 @@ class imprimir_presu_pedi extends fs_controller
                      }
                   }
                }
-               
+
                $pdf_doc->pdf->ezText($texto_pago, 9);
             }
-            
+
             $pdf_doc->set_y(80);
             $this->generar_pdf_totales($pdf_doc, $lineas_iva, $pagina);
             $pagina++;
@@ -815,14 +815,14 @@ class imprimir_presu_pedi extends fs_controller
       {
          $pdf_doc->pdf->ezText('¡'.ucfirst(FS_PRESUPUESTO).' sin líneas!', 20);
       }
-      
+
       if($archivo)
       {
          if( !file_exists('tmp/'.FS_TMP_NAME.'enviar') )
          {
             mkdir('tmp/'.FS_TMP_NAME.'enviar');
          }
-         
+
          $pdf_doc->save('tmp/'.FS_TMP_NAME.'enviar/'.$archivo);
       }
       else
@@ -830,7 +830,7 @@ class imprimir_presu_pedi extends fs_controller
          $pdf_doc->show(FS_PRESUPUESTO.'_'.$this->documento->codigo.'.pdf');
       }
    }
-   
+
    public function generar_pdf_pedido_proveedor($archivo = FALSE)
    {
       if( !$archivo )
@@ -838,32 +838,32 @@ class imprimir_presu_pedi extends fs_controller
          /// desactivamos la plantilla HTML
          $this->template = FALSE;
       }
-      
+
       $pdf_doc = new fs_pdf();
       $pdf_doc->pdf->addInfo('Title', ucfirst(FS_PEDIDO).' '. $this->documento->codigo);
       $pdf_doc->pdf->addInfo('Subject', ucfirst(FS_PEDIDO).' de proveedor ' . $this->documento->codigo);
       $pdf_doc->pdf->addInfo('Author', $this->empresa->nombre);
-      
+
       $lineas = $this->documento->get_lineas();
       $lineas_iva = $pdf_doc->get_lineas_iva($lineas);
       if($lineas)
       {
          $linea_actual = 0;
          $pagina = 1;
-         
+
          /// imprimimos las páginas necesarias
          while( $linea_actual < count($lineas) )
          {
             $lppag = 35;
-            
+
             /// salto de página
             if($linea_actual > 0)
             {
                $pdf_doc->pdf->ezNewPage();
             }
-            
+
             $pdf_doc->generar_pdf_cabecera($this->empresa, $lppag);
-            
+
             /*
              * Esta es la tabla con los datos del proveedor:
              * Pedido:                  Fecha:
@@ -877,7 +877,7 @@ class imprimir_presu_pedi extends fs_controller
                    'campo2' => "<b>Fecha:</b> ".$this->documento->fecha
                )
             );
-            
+
             $tipoidfiscal = FS_CIFNIF;
             if($this->proveedor)
             {
@@ -890,7 +890,7 @@ class imprimir_presu_pedi extends fs_controller
                    'campo2' => "<b>".$tipoidfiscal.":</b> ".$this->documento->cifnif
                )
             );
-            
+
             $pdf_doc->save_table(
                array(
                    'cols' => array(
@@ -904,10 +904,10 @@ class imprimir_presu_pedi extends fs_controller
                )
             );
             $pdf_doc->pdf->ezText("\n", 10);
-            
+
             /// lineas + observaciones
             $this->generar_pdf_lineas($pdf_doc, $lineas, $linea_actual, $lppag);
-            
+
             $pdf_doc->set_y(80);
             $this->generar_pdf_totales($pdf_doc, $lineas_iva, $pagina);
             $pagina++;
@@ -917,20 +917,20 @@ class imprimir_presu_pedi extends fs_controller
       {
          $pdf_doc->pdf->ezText('¡'.ucfirst(FS_PEDIDO).' sin líneas!', 20);
       }
-      
+
       if($archivo)
       {
          if( !file_exists('tmp/'.FS_TMP_NAME.'enviar') )
          {
             mkdir('tmp/'.FS_TMP_NAME.'enviar');
          }
-         
+
          $pdf_doc->save('tmp/'.FS_TMP_NAME.'enviar/'.$archivo);
       }
       else
          $pdf_doc->show(FS_PEDIDO.'_compra_'.$this->documento->codigo.'.pdf');
    }
-   
+
    private function get_referencia_proveedor($ref, $codproveedor)
    {
       $artprov = $this->articulo_proveedor->get_by($ref, $codproveedor);
@@ -941,7 +941,7 @@ class imprimir_presu_pedi extends fs_controller
       else
          return $ref;
    }
-   
+
    public function generar_pdf_pedido($archivo = FALSE)
    {
       if( !$archivo )
@@ -949,34 +949,34 @@ class imprimir_presu_pedi extends fs_controller
          /// desactivamos la plantilla HTML
          $this->template = FALSE;
       }
-      
+
       $pdf_doc = new fs_pdf();
       $pdf_doc->pdf->addInfo('Title', ucfirst(FS_PEDIDO).' '. $this->documento->codigo);
       $pdf_doc->pdf->addInfo('Subject', ucfirst(FS_PEDIDO).' de cliente ' . $this->documento->codigo);
       $pdf_doc->pdf->addInfo('Author', $this->empresa->nombre);
-      
+
       $lineas = $this->documento->get_lineas();
       $lineas_iva = $pdf_doc->get_lineas_iva($lineas);
       if($lineas)
       {
          $linea_actual = 0;
          $pagina = 1;
-         
+
          /// imprimimos las páginas necesarias
          while( $linea_actual < count($lineas) )
          {
             $lppag = 35;
-            
+
             /// salto de página
             if($linea_actual > 0)
             {
                $pdf_doc->pdf->ezNewPage();
             }
-            
+
             $pdf_doc->generar_pdf_cabecera($this->empresa, $lppag);
             $this->generar_pdf_datos_cliente($pdf_doc, $lppag);
             $this->generar_pdf_lineas($pdf_doc, $lineas, $linea_actual, $lppag);
-            
+
             $pdf_doc->set_y(80);
             $this->generar_pdf_totales($pdf_doc, $lineas_iva, $pagina);
             $pagina++;
@@ -986,14 +986,14 @@ class imprimir_presu_pedi extends fs_controller
       {
          $pdf_doc->pdf->ezText('¡'.ucfirst(FS_PEDIDO).' sin líneas!', 20);
       }
-      
+
       if($archivo)
       {
          if( !file_exists('tmp/'.FS_TMP_NAME.'enviar') )
          {
             mkdir('tmp/'.FS_TMP_NAME.'enviar');
          }
-         
+
          $pdf_doc->save('tmp/'.FS_TMP_NAME.'enviar/'.$archivo);
       }
       else
@@ -1001,7 +1001,7 @@ class imprimir_presu_pedi extends fs_controller
          $pdf_doc->show(FS_PEDIDO.'_'.$this->documento->codigo.'.pdf');
       }
    }
-   
+
    private function enviar_email_proveedor()
    {
       if( $this->empresa->can_send_mail() )
@@ -1014,21 +1014,21 @@ class imprimir_presu_pedi extends fs_controller
                $this->proveedor->save();
             }
          }
-         
+
          $filename = 'pedido_'.$this->documento->codigo.'.pdf';
          $this->generar_pdf_pedido_proveedor($filename);
          $razonsocial = $this->documento->nombre;
-         
+
          if( file_exists('tmp/'.FS_TMP_NAME.'enviar/'.$filename) )
          {
             $mail = $this->empresa->new_mail();
             $mail->FromName = $this->user->get_agente_fullname();
-            
+
             if($_POST['de'] != $mail->From)
             {
                $mail->addReplyTo($_POST['de'], $mail->FromName);
             }
-            
+
             $mail->addAddress($_POST['email'], $razonsocial);
             if($_POST['email_copia'])
             {
@@ -1041,7 +1041,7 @@ class imprimir_presu_pedi extends fs_controller
                   $mail->addCC($_POST['email_copia'], $razonsocial);
                }
             }
-            
+
             $mail->Subject = $this->empresa->nombre . ': Mi '.FS_PEDIDO.' '.$this->documento->codigo;
             if( $this->is_html($_POST['mensaje']) )
             {
@@ -1053,13 +1053,13 @@ class imprimir_presu_pedi extends fs_controller
             {
                $mail->Body = $_POST['mensaje'];
             }
-            
+
             $mail->addAttachment('tmp/'.FS_TMP_NAME.'enviar/'.$filename);
             if( is_uploaded_file($_FILES['adjunto']['tmp_name']) )
             {
                $mail->addAttachment($_FILES['adjunto']['tmp_name'], $_FILES['adjunto']['name']);
             }
-            
+
             if( $this->empresa->mail_connect($mail) )
             {
                if( $mail->send() )
@@ -1072,14 +1072,14 @@ class imprimir_presu_pedi extends fs_controller
             }
             else
                $this->new_error_msg("Error al enviar el email: " . $mail->ErrorInfo);
-            
+
             unlink('tmp/'.FS_TMP_NAME.'enviar/'.$filename);
          }
          else
             $this->new_error_msg('Imposible generar el PDF.');
       }
    }
-   
+
    private function enviar_email($doc)
    {
       if( $this->empresa->can_send_mail() )
@@ -1094,7 +1094,7 @@ class imprimir_presu_pedi extends fs_controller
             $filename = 'pedido_'.$this->documento->codigo.'.pdf';
             $this->generar_pdf_pedido($filename);
          }
-         
+
          $razonsocial = $this->documento->nombrecliente;
          if($this->cliente)
          {
@@ -1104,17 +1104,17 @@ class imprimir_presu_pedi extends fs_controller
                $this->cliente->save();
             }
          }
-         
+
          if( file_exists('tmp/'.FS_TMP_NAME.'enviar/'.$filename) )
          {
             $mail = $this->empresa->new_mail();
             $mail->FromName = $this->user->get_agente_fullname();
-            
+
             if($_POST['de'] != $mail->From)
             {
                $mail->addReplyTo($_POST['de'], $mail->FromName);
             }
-            
+
             $mail->addAddress($_POST['email'], $razonsocial);
             if($_POST['email_copia'])
             {
@@ -1127,7 +1127,7 @@ class imprimir_presu_pedi extends fs_controller
                   $mail->addCC($_POST['email_copia'], $razonsocial);
                }
             }
-            
+
             if($doc == 'presupuesto')
             {
                $mail->Subject = $this->empresa->nombre . ': Su '.FS_PRESUPUESTO.' '.$this->documento->codigo;
@@ -1136,7 +1136,7 @@ class imprimir_presu_pedi extends fs_controller
             {
                $mail->Subject = $this->empresa->nombre . ': Su '.FS_PEDIDO.' '.$this->documento->codigo;
             }
-            
+
             if( $this->is_html($_POST['mensaje']) )
             {
                $mail->AltBody = strip_tags($_POST['mensaje']);
@@ -1147,23 +1147,23 @@ class imprimir_presu_pedi extends fs_controller
             {
                $mail->Body = $_POST['mensaje'];
             }
-            
+
             $mail->addAttachment('tmp/'.FS_TMP_NAME.'enviar/'.$filename);
             if( is_uploaded_file($_FILES['adjunto']['tmp_name']) )
             {
                $mail->addAttachment($_FILES['adjunto']['tmp_name'], $_FILES['adjunto']['name']);
             }
-            
+
             if( $this->empresa->mail_connect($mail) )
             {
                if( $mail->send() )
                {
                   $this->new_message('Mensaje enviado correctamente.');
-                  
+
                   /// nos guardamos la fecha del envío
                   $this->documento->femail = $this->today();
                   $this->documento->save();
-                  
+
                   $this->empresa->save_mail($mail);
                }
                else
@@ -1171,14 +1171,14 @@ class imprimir_presu_pedi extends fs_controller
             }
             else
                $this->new_error_msg("Error al enviar el email: " . $mail->ErrorInfo);
-            
+
             unlink('tmp/'.FS_TMP_NAME.'enviar/'.$filename);
          }
          else
             $this->new_error_msg('Imposible generar el PDF.');
       }
    }
-   
+
    public function is_html($txt)
    {
       return ( $txt != strip_tags($txt) ) ? TRUE : FALSE;
