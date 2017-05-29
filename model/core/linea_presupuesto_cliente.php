@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017    Carlos Garcia Gomez        neorazorx@gmail.com
@@ -27,114 +28,109 @@ require_model('presupuesto_cliente.php');
  * 
  * @author Carlos García Gómez <neorazorx@gmail.com>
  */
-class linea_presupuesto_cliente extends \fs_model
-{
+class linea_presupuesto_cliente extends \fs_model {
+
    /**
     * Clave primaria.
     * @var type 
     */
    public $idlinea;
-   
+
    /**
     * ID del presupuesto.
     * @var type 
     */
    public $idpresupuesto;
-   
    public $cantidad;
-   
+
    /**
     * Código del impuesto relacionado.
     * @var type 
     */
    public $codimpuesto;
    public $descripcion;
-   
+
    /**
     * % de descuento.
     * @var type 
     */
    public $dtopor;
-   
+
    /**
     * % de retención IRPF.
     * @var type 
     */
    public $irpf;
-   
+
    /**
     * % del impuesto relacionado.
     * @var type 
     */
    public $iva;
-   
+
    /**
     * Importe neto sin descuento, es decir, pvpunitario * cantidad.
     * @var type 
     */
    public $pvpsindto;
-   
+
    /**
     * Importe neto de la linea, sin impuestos.
     * @var type 
     */
    public $pvptotal;
-   
+
    /**
     * Precio de una unidad.
     * @var type 
     */
    public $pvpunitario;
-   
+
    /**
     * % de recargo de equivalencia.
     * @var type 
     */
    public $recargo;
-   
+
    /**
     * Referencia del artículo.
     * @var type 
     */
    public $referencia;
-   
+
    /**
     * Código de la combinación seleccionada, en el caso de los artículos con atributos.
     * @var type 
     */
    public $codcombinacion;
-   
+
    /**
     * Posición de la linea en el documento. Cuanto más alto más abajo.
     * @var type 
     */
    public $orden;
-   
+
    /**
     * False -> no se muestra la columna cantidad al imprimir.
     * @var type 
     */
    public $mostrar_cantidad;
-   
+
    /**
     * False -> no se muestran las columnas precio, descuento, impuestos y total al imprimir.
     * @var type 
     */
    public $mostrar_precio;
-   
    private static $presupuestos;
-   
-   public function __construct($l = FALSE)
-   {
+
+   public function __construct($l = FALSE) {
       parent::__construct('lineaspresupuestoscli');
-      
-      if( !isset(self::$presupuestos) )
-      {
+
+      if (!isset(self::$presupuestos)) {
          self::$presupuestos = array();
       }
-      
-      if($l)
-      {
+
+      if ($l) {
          $this->idlinea = intval($l['idlinea']);
          $this->idpresupuesto = intval($l['idpresupuesto']);
          $this->cantidad = floatval($l['cantidad']);
@@ -152,9 +148,7 @@ class linea_presupuesto_cliente extends \fs_model
          $this->orden = intval($l['orden']);
          $this->mostrar_cantidad = $this->str2bool($l['mostrar_cantidad']);
          $this->mostrar_precio = $this->str2bool($l['mostrar_precio']);
-      }
-      else
-      {
+      } else {
          $this->idlinea = NULL;
          $this->idpresupuesto = NULL;
          $this->cantidad = 0;
@@ -174,236 +168,196 @@ class linea_presupuesto_cliente extends \fs_model
          $this->mostrar_precio = TRUE;
       }
    }
-   
-   protected function install()
-   {
+
+   protected function install() {
       return '';
    }
-   
-   public function pvp_iva()
-   {
-      return $this->pvpunitario*(100+$this->iva)/100;
+
+   public function pvp_iva() {
+      return $this->pvpunitario * (100 + $this->iva) / 100;
    }
-   
-   public function total_iva()
-   {
-      return $this->pvptotal*(100+$this->iva-$this->irpf+$this->recargo)/100;
+
+   public function total_iva() {
+      return $this->pvptotal * (100 + $this->iva - $this->irpf + $this->recargo) / 100;
    }
-   
-   public function descripcion()
-   {
+
+   public function descripcion() {
       return nl2br($this->descripcion);
    }
-   
-   public function show_codigo()
-   {
+
+   public function show_codigo() {
       $codigo = 'desconocido';
-      
+
       $encontrado = FALSE;
-      foreach(self::$presupuestos as $p)
-      {
-         if($p->idpresupuesto == $this->idpresupuesto)
-         {
+      foreach (self::$presupuestos as $p) {
+         if ($p->idpresupuesto == $this->idpresupuesto) {
             $codigo = $p->codigo;
             $encontrado = TRUE;
             break;
          }
       }
-      
-      if( !$encontrado )
-      {
+
+      if (!$encontrado) {
          $pre = new \presupuesto_cliente();
          self::$presupuestos[] = $pre->get($this->idpresupuesto);
-         $codigo = self::$presupuestos[ count(self::$presupuestos)-1 ]->codigo;
+         $codigo = self::$presupuestos[count(self::$presupuestos) - 1]->codigo;
       }
-      
+
       return $codigo;
    }
-   
-   public function show_fecha()
-   {
+
+   public function show_fecha() {
       $fecha = 'desconocida';
-      
+
       $encontrado = FALSE;
-      foreach(self::$presupuestos as $p)
-      {
-         if($p->idpresupuesto == $this->idpresupuesto)
-         {
+      foreach (self::$presupuestos as $p) {
+         if ($p->idpresupuesto == $this->idpresupuesto) {
             $fecha = $p->fecha;
             $encontrado = TRUE;
             break;
          }
       }
-      
-      if( !$encontrado )
-      {
+
+      if (!$encontrado) {
          $pre = new \presupuesto_cliente();
          self::$presupuestos[] = $pre->get($this->idpresupuesto);
-         $fecha = self::$presupuestos[ count(self::$presupuestos)-1 ]->fecha;
+         $fecha = self::$presupuestos[count(self::$presupuestos) - 1]->fecha;
       }
-      
+
       return $fecha;
    }
-   
-   public function show_nombrecliente()
-   {
+
+   public function show_nombrecliente() {
       $nombre = 'desconocido';
-      
+
       $encontrado = FALSE;
-      foreach(self::$presupuestos as $p)
-      {
-         if($p->idpresupuesto == $this->idpresupuesto)
-         {
+      foreach (self::$presupuestos as $p) {
+         if ($p->idpresupuesto == $this->idpresupuesto) {
             $nombre = $p->nombrecliente;
             $encontrado = TRUE;
             break;
          }
       }
-      
-      if( !$encontrado )
-      {
+
+      if (!$encontrado) {
          $pre = new \presupuesto_cliente();
          self::$presupuestos[] = $pre->get($this->idpresupuesto);
-         $nombre = self::$presupuestos[ count(self::$presupuestos)-1 ]->nombrecliente;
+         $nombre = self::$presupuestos[count(self::$presupuestos) - 1]->nombrecliente;
       }
-      
+
       return $nombre;
    }
-   
-   public function url()
-   {
-      return 'index.php?page=ventas_presupuesto&id='.$this->idpresupuesto;
+
+   public function url() {
+      return 'index.php?page=ventas_presupuesto&id=' . $this->idpresupuesto;
    }
-   
-   public function articulo_url()
-   {
-      if( is_null($this->referencia) OR $this->referencia == '')
-      {
+
+   public function articulo_url() {
+      if (is_null($this->referencia) OR $this->referencia == '') {
          return "index.php?page=ventas_articulos";
-      }
-      else
-         return "index.php?page=ventas_articulo&ref=".urlencode($this->referencia);
+      } else
+         return "index.php?page=ventas_articulo&ref=" . urlencode($this->referencia);
    }
-   
-   public function exists()
-   {
-      if( is_null($this->idlinea) )
-      {
+
+   public function exists() {
+      if (is_null($this->idlinea)) {
          return FALSE;
-      }
-      else
-         return $this->db->select("SELECT * FROM ".$this->table_name." WHERE idlinea = ".$this->var2str($this->idlinea).";");
+      } else
+         return $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idlinea = " . $this->var2str($this->idlinea) . ";");
    }
-   
-   public function test()
-   {
+
+   public function test() {
       $this->descripcion = $this->no_html($this->descripcion);
       $total = $this->pvpunitario * $this->cantidad * (100 - $this->dtopor) / 100;
       $totalsindto = $this->pvpunitario * $this->cantidad;
-      
-      if( !$this->floatcmp($this->pvptotal, $total, FS_NF0, TRUE) )
-      {
-         $this->new_error_msg("Error en el valor de pvptotal de la línea ".$this->referencia." del ".FS_PRESUPUESTO.". Valor correcto: ".$total);
+
+      if (!$this->floatcmp($this->pvptotal, $total, FS_NF0, TRUE)) {
+         $this->new_error_msg("Error en el valor de pvptotal de la línea " . $this->referencia . " del " . FS_PRESUPUESTO . ". Valor correcto: " . $total);
          return FALSE;
-      }
-      else if( !$this->floatcmp($this->pvpsindto, $totalsindto, FS_NF0, TRUE) )
-      {
-         $this->new_error_msg("Error en el valor de pvpsindto de la línea ".$this->referencia." del ".FS_PRESUPUESTO.". Valor correcto: ".$totalsindto);
+      } else if (!$this->floatcmp($this->pvpsindto, $totalsindto, FS_NF0, TRUE)) {
+         $this->new_error_msg("Error en el valor de pvpsindto de la línea " . $this->referencia . " del " . FS_PRESUPUESTO . ". Valor correcto: " . $totalsindto);
          return FALSE;
-      }
-      else
+      } else
          return TRUE;
    }
-   
-   public function save()
-   {
-      if( $this->test() )
-      {
-         if( $this->exists() )
-         {
-            $sql = "UPDATE ".$this->table_name." SET cantidad = ".$this->var2str($this->cantidad)
-                    .", codimpuesto = ".$this->var2str($this->codimpuesto)
-                    .", descripcion = ".$this->var2str($this->descripcion)
-                    .", dtopor = ".$this->var2str($this->dtopor)
-                    .", idpresupuesto = ".$this->var2str($this->idpresupuesto)
-                    .", irpf = ".$this->var2str($this->irpf)
-                    .", iva = ".$this->var2str($this->iva)
-                    .", pvpsindto = ".$this->var2str($this->pvpsindto)
-                    .", pvptotal = ".$this->var2str($this->pvptotal)
-                    .", pvpunitario = ".$this->var2str($this->pvpunitario)
-                    .", recargo = ".$this->var2str($this->recargo)
-                    .", referencia = ".$this->var2str($this->referencia)
-                    .", codcombinacion = ".$this->var2str($this->codcombinacion)
-                    .", orden = ".$this->var2str($this->orden)
-                    .", mostrar_cantidad = ".$this->var2str($this->mostrar_cantidad)
-                    .", mostrar_precio = ".$this->var2str($this->mostrar_precio)
-                    ."  WHERE idlinea = ".$this->var2str($this->idlinea).";";
-            
+
+   public function save() {
+      if ($this->test()) {
+         if ($this->exists()) {
+            $sql = "UPDATE " . $this->table_name . " SET cantidad = " . $this->var2str($this->cantidad)
+                    . ", codimpuesto = " . $this->var2str($this->codimpuesto)
+                    . ", descripcion = " . $this->var2str($this->descripcion)
+                    . ", dtopor = " . $this->var2str($this->dtopor)
+                    . ", idpresupuesto = " . $this->var2str($this->idpresupuesto)
+                    . ", irpf = " . $this->var2str($this->irpf)
+                    . ", iva = " . $this->var2str($this->iva)
+                    . ", pvpsindto = " . $this->var2str($this->pvpsindto)
+                    . ", pvptotal = " . $this->var2str($this->pvptotal)
+                    . ", pvpunitario = " . $this->var2str($this->pvpunitario)
+                    . ", recargo = " . $this->var2str($this->recargo)
+                    . ", referencia = " . $this->var2str($this->referencia)
+                    . ", codcombinacion = " . $this->var2str($this->codcombinacion)
+                    . ", orden = " . $this->var2str($this->orden)
+                    . ", mostrar_cantidad = " . $this->var2str($this->mostrar_cantidad)
+                    . ", mostrar_precio = " . $this->var2str($this->mostrar_precio)
+                    . "  WHERE idlinea = " . $this->var2str($this->idlinea) . ";";
+
             return $this->db->exec($sql);
-         }
-         else
-         {
-            $sql = "INSERT INTO ".$this->table_name." (cantidad,codimpuesto,descripcion,dtopor,
+         } else {
+            $sql = "INSERT INTO " . $this->table_name . " (cantidad,codimpuesto,descripcion,dtopor,
                idpresupuesto,irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,codcombinacion,
                orden,mostrar_cantidad,mostrar_precio) VALUES 
-                      (".$this->var2str($this->cantidad)
-                    .",".$this->var2str($this->codimpuesto)
-                    .",".$this->var2str($this->descripcion)
-                    .",".$this->var2str($this->dtopor)
-                    .",".$this->var2str($this->idpresupuesto)
-                    .",".$this->var2str($this->irpf)
-                    .",".$this->var2str($this->iva)
-                    .",".$this->var2str($this->pvpsindto)
-                    .",".$this->var2str($this->pvptotal)
-                    .",".$this->var2str($this->pvpunitario)
-                    .",".$this->var2str($this->recargo)
-                    .",".$this->var2str($this->referencia)
-                    .",".$this->var2str($this->codcombinacion)
-                    .",".$this->var2str($this->orden)
-                    .",".$this->var2str($this->mostrar_cantidad)
-                    .",".$this->var2str($this->mostrar_precio).");";
-            
-            if( $this->db->exec($sql) )
-            {
+                      (" . $this->var2str($this->cantidad)
+                    . "," . $this->var2str($this->codimpuesto)
+                    . "," . $this->var2str($this->descripcion)
+                    . "," . $this->var2str($this->dtopor)
+                    . "," . $this->var2str($this->idpresupuesto)
+                    . "," . $this->var2str($this->irpf)
+                    . "," . $this->var2str($this->iva)
+                    . "," . $this->var2str($this->pvpsindto)
+                    . "," . $this->var2str($this->pvptotal)
+                    . "," . $this->var2str($this->pvpunitario)
+                    . "," . $this->var2str($this->recargo)
+                    . "," . $this->var2str($this->referencia)
+                    . "," . $this->var2str($this->codcombinacion)
+                    . "," . $this->var2str($this->orden)
+                    . "," . $this->var2str($this->mostrar_cantidad)
+                    . "," . $this->var2str($this->mostrar_precio) . ");";
+
+            if ($this->db->exec($sql)) {
                $this->idlinea = $this->db->lastval();
                return TRUE;
-            }
-            else
+            } else
                return FALSE;
          }
-      }
-      else
+      } else
          return FALSE;
    }
-   
-   public function delete()
-   {
-      return $this->db->exec("DELETE FROM ".$this->table_name." WHERE idlinea = ".$this->var2str($this->idlinea).";");
+
+   public function delete() {
+      return $this->db->exec("DELETE FROM " . $this->table_name . " WHERE idlinea = " . $this->var2str($this->idlinea) . ";");
    }
-   
+
    /**
     * Devuelve las líneas del presupuesto $idp
     * @param type $idp
     * @return \linea_presupuesto_cliente
     */
-   public function all_from_presupuesto($idp)
-   {
+   public function all_from_presupuesto($idp) {
       $plist = array();
-      $sql = "SELECT * FROM ".$this->table_name." WHERE idpresupuesto = ".$this->var2str($idp)
-              ." ORDER BY orden DESC, idlinea ASC;";
-      
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE idpresupuesto = " . $this->var2str($idp)
+              . " ORDER BY orden DESC, idlinea ASC;";
+
       $data = $this->db->select($sql);
-      if($data)
-      {
-         foreach($data as $d)
-         {
+      if ($data) {
+         foreach ($data as $d) {
             $plist[] = new \linea_presupuesto_cliente($d);
          }
       }
-      
+
       return $plist;
    }
-   
+
    /**
     * Devuelve todas las líneas que hagan referencia al artículo $ref
     * @param type $ref
@@ -411,59 +365,50 @@ class linea_presupuesto_cliente extends \fs_model
     * @param type $limit
     * @return \linea_presupuesto_cliente
     */
-   public function all_from_articulo($ref, $offset=0, $limit=FS_ITEM_LIMIT)
-   {
+   public function all_from_articulo($ref, $offset = 0, $limit = FS_ITEM_LIMIT) {
       $linealist = array();
-      $sql = "SELECT * FROM ".$this->table_name." WHERE referencia = ".$this->var2str($ref)
-              ." ORDER BY idpresupuesto DESC";
-      
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE referencia = " . $this->var2str($ref)
+              . " ORDER BY idpresupuesto DESC";
+
       $data = $this->db->select_limit($sql, $limit, $offset);
-      if($data)
-      {
-         foreach($data as $l)
-         {
+      if ($data) {
+         foreach ($data as $l) {
             $linealist[] = new \linea_presupuesto_cliente($l);
          }
       }
-      
+
       return $linealist;
    }
-   
+
    /**
     * Busca todas las coincidencias de $query en las líneas.
     * @param type $query
     * @param type $offset
     * @return \linea_presupuesto_cliente
     */
-   public function search($query = '', $offset = 0)
-   {
+   public function search($query = '', $offset = 0) {
       $linealist = array();
-      $query = mb_strtolower( $this->no_html($query), 'UTF8' );
-      
-      $sql = "SELECT * FROM ".$this->table_name." WHERE ";
-      if( is_numeric($query) )
-      {
-         $sql .= "referencia LIKE '%".$query."%' OR descripcion LIKE '%".$query."%'";
-      }
-      else
-      {
+      $query = mb_strtolower($this->no_html($query), 'UTF8');
+
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE ";
+      if (is_numeric($query)) {
+         $sql .= "referencia LIKE '%" . $query . "%' OR descripcion LIKE '%" . $query . "%'";
+      } else {
          $buscar = str_replace(' ', '%', $query);
-         $sql .= "lower(referencia) LIKE '%".$buscar."%' OR lower(descripcion) LIKE '%".$buscar."%'";
+         $sql .= "lower(referencia) LIKE '%" . $buscar . "%' OR lower(descripcion) LIKE '%" . $buscar . "%'";
       }
       $sql .= " ORDER BY idpresupuesto DESC, idlinea ASC";
-      
+
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
-      if($data)
-      {
-         foreach($data as $l)
-         {
+      if ($data) {
+         foreach ($data as $l) {
             $linealist[] = new \linea_presupuesto_cliente($l);
          }
       }
-      
+
       return $linealist;
    }
-   
+
    /**
     * Busca todas las coincidencias de $query en las líneas del cliente $codcliente
     * @param type $codcliente
@@ -472,35 +417,30 @@ class linea_presupuesto_cliente extends \fs_model
     * @param type $offset
     * @return \linea_presupuesto_cliente
     */
-   public function search_from_cliente2($codcliente, $ref='', $obs='', $offset=0)
-   {
+   public function search_from_cliente2($codcliente, $ref = '', $obs = '', $offset = 0) {
       $linealist = array();
-      $ref = mb_strtolower( $this->no_html($ref), 'UTF8' );
-      $obs = mb_strtolower( $this->no_html($obs), 'UTF8' );
-      
-      $sql = "SELECT * FROM ".$this->table_name." WHERE idpresupuesto IN
-         (SELECT idpresupuesto FROM presupuestoscli WHERE codcliente = ".$this->var2str($codcliente)."
-         AND lower(observaciones) LIKE '".$obs."%') AND ";
-      if( is_numeric($ref) )
-      {
-         $sql .= "(referencia LIKE '%".$ref."%' OR descripcion LIKE '%".$ref."%')";
-      }
-      else
-      {
+      $ref = mb_strtolower($this->no_html($ref), 'UTF8');
+      $obs = mb_strtolower($this->no_html($obs), 'UTF8');
+
+      $sql = "SELECT * FROM " . $this->table_name . " WHERE idpresupuesto IN
+         (SELECT idpresupuesto FROM presupuestoscli WHERE codcliente = " . $this->var2str($codcliente) . "
+         AND lower(observaciones) LIKE '" . $obs . "%') AND ";
+      if (is_numeric($ref)) {
+         $sql .= "(referencia LIKE '%" . $ref . "%' OR descripcion LIKE '%" . $ref . "%')";
+      } else {
          $buscar = str_replace(' ', '%', $ref);
-         $sql .= "(lower(referencia) LIKE '%".$ref."%' OR lower(descripcion) LIKE '%".$ref."%')";
+         $sql .= "(lower(referencia) LIKE '%" . $ref . "%' OR lower(descripcion) LIKE '%" . $ref . "%')";
       }
       $sql .= " ORDER BY idpresupuesto DESC, idlinea ASC";
-      
+
       $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
-      if($data)
-      {
-         foreach($data as $l)
-         {
+      if ($data) {
+         foreach ($data as $l) {
             $linealist[] = new \linea_presupuesto_cliente($l);
          }
       }
-      
+
       return $linealist;
    }
+
 }

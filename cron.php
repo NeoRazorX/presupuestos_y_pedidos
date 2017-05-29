@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -21,19 +22,19 @@ require_model('pedido_cliente.php');
 require_model('pedido_proveedor.php');
 require_model('presupuesto_cliente.php');
 
-class presupuestos_pedidos_cron
-{
-   public function __construct()
-   {
+class presupuestos_pedidos_cron {
+
+   public function __construct() {
       $pre = new presupuesto_cliente();
       $pre->cron_job();
-      
+
       $ped = new pedido_cliente();
       $ped->cron_job();
-      
+
       $pedp = new pedido_proveedor();
       $pedp->cron_job();
    }
+
 }
 
 new presupuestos_pedidos_cron();

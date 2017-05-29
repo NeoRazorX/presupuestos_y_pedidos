@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2016-2017 Carlos Garcia Gomez  neorazorx@gmail.com
@@ -19,7 +20,6 @@
 
 require_once 'plugins/presupuestos_y_pedidos/model/core/linea_pedido_proveedor.php';
 
-class linea_pedido_proveedor extends FacturaScripts\model\linea_pedido_proveedor
-{
+class linea_pedido_proveedor extends FacturaScripts\model\linea_pedido_proveedor {
    
 }

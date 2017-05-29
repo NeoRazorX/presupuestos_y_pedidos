@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2016-2017 Carlos Garcia Gomez  neorazorx@gmail.com
@@ -22,7 +23,6 @@ require_once 'plugins/presupuestos_y_pedidos/model/core/presupuesto_cliente.php'
 /**
  * Presupuesto de cliente
  */
-class presupuesto_cliente extends FacturaScripts\model\presupuesto_cliente
-{
+class presupuesto_cliente extends FacturaScripts\model\presupuesto_cliente {
    
 }
