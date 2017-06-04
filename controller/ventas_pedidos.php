@@ -121,7 +121,7 @@ class ventas_pedidos extends fbase_controller {
          if (isset($_POST['delete'])) {
             $this->delete_pedido();
          } else {
-            if (!isset($_GET['mostrar']) AND ( isset($_REQUEST['codagente']) OR isset($_REQUEST['codcliente']) OR isset($_REQUEST['codserie']))) {
+            if (!isset($_GET['mostrar']) AND ( $this->query != '' OR isset($_REQUEST['codagente']) OR isset($_REQUEST['codcliente']) OR isset($_REQUEST['codserie']))) {
                /**
                 * si obtenermos un codagente, un codcliente o un codserie pasamos direcatemente
                 * a la pestaña de búsqueda, a menos que tengamos un mostrar, que
