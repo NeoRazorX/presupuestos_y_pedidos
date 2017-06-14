@@ -20,75 +20,34 @@
  */
 
 require_once 'plugins/facturacion_base/extras/fbase_controller.php';
+require_once __DIR__ . '/tree_controller_shared.php';
+
 require_model('agente.php');
 require_model('articulo.php');
 require_model('proveedor.php');
 require_model('pedido_proveedor.php');
 
 class compras_pedidos extends fbase_controller {
+   use tree_controller;
 
-   public $agente;
-   public $almacenes;
-   public $articulo;
-   public $buscar_lineas;
-   public $codagente;
-   public $codalmacen;
-   public $codserie;
-   public $desde;
-   public $hasta;
-   public $lineas;
-   public $mostrar;
-   public $num_resultados;
-   public $offset;
-   public $order;
    public $proveedor;
-   public $resultados;
-   public $serie;
-   public $total_resultados;
-   public $total_resultados_txt;
-
+   
    public function __construct() {
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS), 'compras');
    }
 
-   protected function private_core() {
-      parent::private_core();
-
-      $pedido = new pedido_proveedor();
-      $this->agente = new agente();
-      $this->almacenes = new almacen();
-      $this->serie = new serie();
-
-      $this->mostrar = 'todo';
-      if (isset($_GET['mostrar'])) {
-         $this->mostrar = $_GET['mostrar'];
-         setcookie('compras_ped_mostrar', $this->mostrar, time() + FS_COOKIES_EXPIRE);
-      } else if (isset($_COOKIE['compras_ped_mostrar'])) {
-         $this->mostrar = $_COOKIE['compras_ped_mostrar'];
-      }
-
-      $this->offset = 0;
-      if (isset($_GET['offset'])) {
-         $this->offset = intval($_GET['offset']);
-      }
-
-      $this->order = 'fecha DESC';
-      if (isset($_GET['order'])) {
-         $orden_l = $this->orden();
-         if (isset($orden_l[$_GET['order']])) {
-            $this->order = $orden_l[$_GET['order']]['orden'];
-         }
-
-         setcookie('compras_ped_order', $this->order, time() + FS_COOKIES_EXPIRE);
-      } else if (isset($_COOKIE['compras_ped_order'])) {
-         $this->order = $_COOKIE['compras_ped_order'];
-      }
-
+   private function acciones() {
       if (isset($_POST['buscar_lineas'])) {
          $this->buscar_lineas();
-      } else if (isset($_REQUEST['buscar_proveedor'])) {
+         return TRUE;
+      }
+
+      if (isset($_REQUEST['buscar_proveedor'])) {
          $this->fbase_buscar_proveedor($_REQUEST['buscar_proveedor']);
-      } else if (isset($_GET['ref'])) {
+         return TRUE;
+      }
+         
+      if (isset($_GET['ref'])) {
          $this->template = 'extension/compras_pedidos_articulo';
 
          $articulo = new articulo();
@@ -96,21 +55,28 @@ class compras_pedidos extends fbase_controller {
 
          $linea = new linea_pedido_proveedor();
          $this->resultados = $linea->all_from_articulo($_GET['ref'], $this->offset);
-      } else {
-         $this->share_extension();
-         $this->codagente = '';
-         $this->codalmacen = '';
-         $this->codserie = '';
-         $this->desde = '';
-         $this->hasta = '';
-         $this->num_resultados = '';
-         $this->proveedor = FALSE;
-         $this->total_resultados = array();
-         $this->total_resultados_txt = '';
+         return TRUE;
+      } 
+      
+      return FALSE;
+   }
 
-         if (isset($_POST['delete'])) {
+   protected function private_core() {
+      parent::private_core();
+
+      $pedido = new pedido_proveedor();
+            
+      $this->private_core_shared('compras_ped');
+      
+      if (!$this->acciones()) {
+         $this->share_extension();
+         $this->init_parametros();
+
+         $this->proveedor = FALSE;
+
+         if (isset($_POST['delete']))
             $this->delete_pedido();
-         } else {
+         else {
             if (!isset($_GET['mostrar']) AND ( isset($_REQUEST['codagente']) OR isset($_REQUEST['codproveedor']) OR isset($_REQUEST['codserie']))) {
                /**
                 * si obtenermos un codagente, un codproveedor o un codserie pasamos direcatemente
@@ -127,54 +93,35 @@ class compras_pedidos extends fbase_controller {
                }
             }
 
-            if (isset($_REQUEST['codagente'])) {
-               $this->codagente = $_REQUEST['codagente'];
-            }
-
-            if (isset($_REQUEST['codalmacen'])) {
-               $this->codalmacen = $_REQUEST['codalmacen'];
-            }
-
-            if (isset($_REQUEST['codserie'])) {
-               $this->codserie = $_REQUEST['codserie'];
-            }
-
-            if (isset($_REQUEST['desde'])) {
-               $this->desde = $_REQUEST['desde'];
-               $this->hasta = $_REQUEST['hasta'];
-            }
+            $this->obten_parametros();
          }
 
          /// añadimos segundo nivel de ordenación
-         $order2 = '';
-         if ($this->order == 'fecha DESC') {
-            $order2 = ', hora DESC';
-         } else if ($this->order == 'fecha ASC') {
-            $order2 = ', hora ASC';
-         }
+         $order2 = $this->obten_segundo_orden($this->order);
 
-         if ($this->mostrar == 'pendientes') {
-            $this->resultados = $pedido->all_ptealbaran($this->offset, $this->order . $order2);
-
-            if ($this->offset == 0) {
-               /// calculamos el total, pero desglosando por divisa
-               $this->total_resultados = array();
-               $this->total_resultados_txt = 'Suma total de esta página:';
-               foreach ($this->resultados as $doc) {
-                  if (!isset($this->total_resultados[$doc->coddivisa])) {
-                     $this->total_resultados[$doc->coddivisa] = array(
-                        'coddivisa' => $doc->coddivisa,
-                        'total' => 0
-                     );
-                  }
-
-                  $this->total_resultados[$doc->coddivisa]['total'] += $doc->total;
+         // lanzamos la accion de consulta
+         switch ($this->mostrar) {
+            case 'pendientes': {
+               $this->resultados = $pedido->all_ptealbaran($this->offset, $this->order . $order2);
+               if ($this->offset == 0) {
+                  /// calculamos el total, pero desglosando por divisa
+                  $this->total_resultados = array();
+                  $this->total_resultados_txt = 'Suma total de esta página:';
+                  $this->total_resultados = $this->total_por_divisa($this->resultados);
                }
+               break;
             }
-         } else if ($this->mostrar == 'buscar') {
-            $this->buscar($order2);
-         } else
-            $this->resultados = $pedido->all($this->offset, $this->order . $order2);
+
+            case 'buscar': {
+               $this->buscar($order2);
+               break;
+            }
+
+            default: {
+               $this->resultados = $pedido->all($this->offset, $this->order . $order2);
+               break;
+            }
+         }
 
          /**
           * Ejecutamos el proceso del cron para pedidos.
@@ -186,38 +133,18 @@ class compras_pedidos extends fbase_controller {
    }
 
    public function url($busqueda = FALSE) {
+      $url = $this->url_shared($busqueda);
       if ($busqueda) {
-         $codproveedor = '';
-         if ($this->proveedor) {
-            $codproveedor = $this->proveedor->codproveedor;
-         }
-
-         $url = parent::url() . "&mostrar=" . $this->mostrar
-            . "&query=" . $this->query
-            . "&codserie=" . $this->codserie
-            . "&codagente=" . $this->codagente
-            . "&codalmacen=" . $this->codalmacen
-            . "&codproveedor=" . $codproveedor
-            . "&desde=" . $this->desde
-            . "&hasta=" . $this->hasta;
-
-         return $url;
-      } 
-      else
-         return parent::url();
+         if ($this->proveedor)
+            $url .= "&codproveedor=" .$this->proveedor->codproveedor;
+         else
+            $url .= "&codproveedor=";
+      }
+      return $url;      
    }
 
    public function paginas() {
-      if ($this->mostrar == 'pendientes')
-         $total = $this->total_pendientes();
-      else
-         if ($this->mostrar == 'buscar')
-            $total = $this->num_resultados;
-         else
-            $total = $this->total_registros();
-
-
-      return $this->fbase_paginas($this->url(TRUE), $total, $this->offset);
+      return $this->paginas_shared();
    }
 
    public function buscar_lineas() {
@@ -234,51 +161,20 @@ class compras_pedidos extends fbase_controller {
    }
 
    private function delete_pedido() {
-      $ped0 = new pedido_proveedor();
-      $pedido = $ped0->get($_POST['delete']);
-      if ($pedido) {
-         if ($pedido->delete()) {
-            $this->clean_last_changes();
-         } else
-            $this->new_error_msg("¡Imposible eliminar el " . FS_PEDIDO . "!");
-      } else
-         $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " no encontrado!");
+      $this->delete_shared("pedido_proveedor", FS_PEDIDO);
    }
 
    private function share_extension() {
       /// añadimos las extensiones para proveedors, agentes y artículos
-      $extensiones = array(
-         array(
+      $extensiones[] = array(
             'name' => 'pedidos_proveedor',
             'page_from' => __CLASS__,
             'page_to' => 'compras_proveedor',
             'type' => 'button',
             'text' => '<span class="glyphicon glyphicon-list" aria-hidden="true"></span> &nbsp; ' . ucfirst(FS_PEDIDOS),
-            'params' => ''
-         ),
-         array(
-            'name' => 'pedidos_agente',
-            'page_from' => __CLASS__,
-            'page_to' => 'admin_agente',
-            'type' => 'button',
-            'text' => '<span class="glyphicon glyphicon-list" aria-hidden="true"></span> &nbsp; ' . ucfirst(FS_PEDIDOS) . ' a proveedor',
-            'params' => ''
-         ),
-         array(
-            'name' => 'pedidos_articulo',
-            'page_from' => __CLASS__,
-            'page_to' => 'ventas_articulo',
-            'type' => 'tab_button',
-            'text' => '<span class="glyphicon glyphicon-list" aria-hidden="true"></span> &nbsp; ' . ucfirst(FS_PEDIDOS) . ' a proveedor',
-            'params' => ''
-         ),
-      );
-      foreach ($extensiones as $ext) {
-         $fsext0 = new fs_extension($ext);
-         if (!$fsext0->save()) {
-            $this->new_error_msg('Imposible guardar los datos de la extensión ' . $ext['name'] . '.');
-         }
-      }
+            'params' => '');
+      
+      $this->share_extension_shared($extensiones, 'pedidos', FS_PEDIDOS);
    }
 
    public function total_pendientes()
@@ -291,123 +187,15 @@ class compras_pedidos extends fbase_controller {
       return $this->fbase_sql_total('pedidosprov', 'idpedido');
    }
 
-   private function buscar($order2)
-   {
-      $this->resultados = array();
-      $this->num_resultados = 0;
-      $sql = " FROM pedidosprov ";
-      $where = 'WHERE ';
-      
-      if($this->query)
-      {
-         $query = $this->agente->no_html( mb_strtolower($this->query, 'UTF8') );
-         $sql .= $where;
-         if( is_numeric($query) )
-         {
-            $sql .= "(codigo LIKE '%".$query."%' OR numproveedor LIKE '%".$query."%' OR observaciones LIKE '%".$query."%')";
-         }
-         else
-         {
-            $sql .= "(lower(codigo) LIKE '%".$query."%' OR lower(numproveedor) LIKE '%".$query."%' "
-                    . "OR lower(observaciones) LIKE '%".str_replace(' ', '%', $query)."%')";
-         }
-         $where = ' AND ';
-      }
-      
-      if($this->codagente)
-      {
-         $sql .= $where."codagente = ".$this->agente->var2str($this->codagente);
-         $where = ' AND ';
-      }
-      
-      if($this->codalmacen)
-      {
-         $sql .= $where."codalmacen = ".$this->agente->var2str($this->codalmacen);
-         $where = ' AND ';
-      }
-      
+   private function buscar($order2) {
+      $where = "";
       if($this->proveedor)
-      {
-         $sql .= $where."codproveedor = ".$this->agente->var2str($this->proveedor->codproveedor);
-         $where = ' AND ';
-      }
-      
-      if($this->codserie)
-      {
-         $sql .= $where."codserie = ".$this->agente->var2str($this->codserie);
-         $where = ' AND ';
-      }
-      
-      if($this->desde)
-      {
-         $sql .= $where."fecha >= ".$this->agente->var2str($this->desde);
-         $where = ' AND ';
-      }
-      
-      if($this->hasta)
-      {
-         $sql .= $where."fecha <= ".$this->agente->var2str($this->hasta);
-         $where = ' AND ';
-      }
-      
-      $data = $this->db->select("SELECT COUNT(idpedido) as total".$sql);
-      if($data)
-      {
-         $this->num_resultados = intval($data[0]['total']);
-         
-         $data2 = $this->db->select_limit("SELECT *".$sql." ORDER BY ".$this->order.$order2, FS_ITEM_LIMIT, $this->offset);
-         if($data2)
-         {
-            foreach($data2 as $d)
-            {
-               $this->resultados[] = new pedido_proveedor($d);
-            }
-         }
-         
-         $data2 = $this->db->select("SELECT coddivisa,SUM(total) as total".$sql." GROUP BY coddivisa");
-         if($data2)
-         {
-            $this->total_resultados_txt = 'Suma total de los resultados:';
+         $where .= " AND codproveedor = ".$this->agente->var2str($this->proveedor->codproveedor);
             
-            foreach($data2 as $d)
-            {
-               $this->total_resultados[] = array(
-                   'coddivisa' => $d['coddivisa'],
-                   'total' => floatval($d['total'])
-               );
-            }
-         }
-      }
+      $this->buscar_shared("pedido_proveedor", "pedidosprov", "numproveedor", $where, $order2);
    }
    
-   public function orden()
-   {
-      return array(
-          'fecha_desc' => array(
-              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>',
-              'texto' => 'Fecha',
-              'orden' => 'fecha DESC'
-          ),
-          'fecha_asc' => array(
-              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>',
-              'texto' => 'Fecha',
-              'orden' => 'fecha ASC'
-          ),
-          'codigo_desc' => array(
-              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>',
-              'texto' => 'Código',
-              'orden' => 'codigo DESC'
-          ),
-          'codigo_asc' => array(
-              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>',
-              'texto' => 'Código',
-              'orden' => 'codigo ASC'
-          ),
-          'total_desc' => array(
-              'icono' => '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>',
-              'texto' => 'Total',
-              'orden' => 'total DESC'
-          )
-      );
+   public function orden() {
+      return $this->orden_shared();
    }  
 }
