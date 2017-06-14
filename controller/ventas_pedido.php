@@ -42,16 +42,41 @@ require_model('serie.php');
 class ventas_pedido extends fbase_controller {
    use form_controller;
 
+   /**
+    * Cliente del documento de venta
+    * @var fs_model
+    */
    public $cliente;
    public $cliente_s;
+   
+   /**
+    * Agencia de transporte del documento de venta
+    * @var fs_model
+    */
    public $agencia;
+   
+   /**
+    * Lista histórica del documento de venta
+    * @var array
+    */
    public $historico;
+   
+   /**
+    * País del documento de venta
+    * @var fs_model
+    */
    public $pais;
 
+   /**
+    * Constructor de la clase
+    */
    public function __construct() {
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDO), 'ventas', FALSE, FALSE);
    }
    
+   /**
+    * Punto de entrada al controlador
+    */
    protected function private_core() {
       parent::private_core();
 
@@ -117,6 +142,10 @@ class ventas_pedido extends fbase_controller {
       $this->get_historico();
    }
 
+   /**
+    * Método para crear una nueva versión
+    * del documento de venta
+    */
    private function nueva_version() {
       $pedi = clone $this->pedido;
       $pedi->femail = NULL;
@@ -124,10 +153,19 @@ class ventas_pedido extends fbase_controller {
       $this->nueva_version_shared($this->pedido, $pedi);      
    }
 
+   /**
+    * Método para obtener la url válida del controlador
+    * según los parámetros de la llamada
+    * @return string
+    */
    public function url() {
       return $this->url_shared($this->pedido);
    }
    
+   /**
+    * Método para grabar los datos modificados
+    * del documento de venta
+    */
    private function modificar() {
       $this->pedido->observaciones = $_POST['observaciones'];
       $this->pedido->numero2 = $_POST['numero2'];      
@@ -218,10 +256,19 @@ class ventas_pedido extends fbase_controller {
          $this->new_error_msg("¡Imposible modificar el " . FS_PEDIDO . "!");
    }
    
+   /**
+    * Método para obtener la lista de stock de los artículos
+    * del documento de venta
+    * @return array
+    */
    public function get_lineas_stock() {
       return $this->get_lineas_stock_shared($this->pedido, "idpedido");
    }   
 
+   /**
+    * Método para calcular la ruta histórica de los documentos dependientes
+    * del documento de venta
+    */
    private function get_historico() {
       $this->historico = array();
       $orden = 0;

@@ -42,19 +42,50 @@ require_model('serie.php');
 class ventas_presupuesto extends fbase_controller {
    use form_controller;
 
+   /**
+    * Cliente del documento de venta
+    * @var fs_model
+    */
    public $cliente;
    public $cliente_s;
+   
+   /**
+    * Agencia de transporte del documento de venta
+    * @var fs_model
+    */
    public $agencia;
+   
+   /**
+    * Lista histórica del documento de venta
+    * @var array
+    */
    public $historico;
+   
+   /**
+    * País del documento de venta
+    * @var fs_model
+    */
    public $pais;
+
    public $setup_validez;
    public $nuevo_presupuesto_url;
-   public $presupuesto;
 
+   /**
+    * Documento de venta con el que se está operando
+    * @var fs_model
+    */
+   public $presupuesto;
+   
+   /**
+    * Constructor de la clase
+    */
    public function __construct() {
       parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTO), 'ventas', FALSE, FALSE);
    }
 
+   /**
+    * Punto de entrada al controlador
+    */
    protected function private_core() {
       parent::private_core();
 
@@ -124,6 +155,10 @@ class ventas_presupuesto extends fbase_controller {
       $this->get_historico();
    }
 
+   /**
+    * Método para crear una nueva versión
+    * del documento de venta
+    */
    private function nueva_version() {
       $presu = clone $this->presupuesto;
       $presu->finoferta = date('d-m-Y', strtotime($presu->fecha . ' +' . $this->setup_validez . ' days'));
@@ -135,7 +170,6 @@ class ventas_presupuesto extends fbase_controller {
 
    /**
     * Comprobamos si los artículos han variado su precio.
-    * @return type
     */
    private function check_lineas() {
       if ($this->presupuesto->status == 0 AND $this->presupuesto->coddivisa == $this->empresa->coddivisa) {
@@ -159,10 +193,19 @@ class ventas_presupuesto extends fbase_controller {
       }
    }
 
+   /**
+    * Método para obtener la url válida del controlador
+    * según los parámetros de la llamada
+    * @return string
+    */
    public function url() {
       return $this->url_shared($this->presupuesto);      
    }
 
+   /**
+    * Método para grabar los datos modificados
+    * del documento de venta
+    */
    private function modificar() {
       $this->presupuesto->observaciones = $_POST['observaciones'];
       $this->presupuesto->numero2 = $_POST['numero2'];
@@ -264,10 +307,19 @@ class ventas_presupuesto extends fbase_controller {
       }
    }
 
+   /**
+    * Método para obtener la lista de stock de los artículos
+    * del documento de venta
+    * @return array
+    */
    public function get_lineas_stock() {
       return $this->get_lineas_stock_shared($this->presupuesto, "idpresupuesto");
    }
 
+   /**
+    * Método para calcular la ruta histórica de los documentos dependientes
+    * del documento de venta
+    */
    private function get_historico() {
       $this->historico = array();
       $orden = 0;

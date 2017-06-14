@@ -33,16 +33,48 @@ require_model('serie.php');
 class ventas_pedidos extends fbase_controller {
    use tree_controller;
 
+   /**
+    * Cliente del documento de venta
+    * @var fs_model
+    */
    public $cliente;
+   
+   /**
+    * Identificador del grupo de clientes al que pertenece el cliente
+    * @var string
+    */
    public $codgrupo;
+   
+   /**
+    * Identificador de la forma de pago
+    * @var string
+    */
    public $codpago;
+   
+   /**
+    * Forma de pago del documento de venta
+    * @var fs_model
+    */
    public $forma_pago;
+   
+   /**
+    * Grupo de cliente del documento de venta
+    * @var fs_model
+    */
    public $grupo;
 
+   /**
+    * Constructor de la clase
+    */
    public function __construct() {
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS), 'ventas');
    }
 
+   /**
+    * Agrupa las distintas acciones que se pueden realizar al
+    * visualizar el controlador
+    * @return boolean
+    */
    private function acciones() {
       if (isset($_POST['buscar_lineas'])) {
          $this->buscar_lineas();
@@ -68,6 +100,9 @@ class ventas_pedidos extends fbase_controller {
       return FALSE;
    }
    
+   /**
+    * Método de entrada del controlador
+    */
    protected function private_core() {
       parent::private_core();
 
@@ -151,6 +186,12 @@ class ventas_pedidos extends fbase_controller {
       }
    }
 
+   /**
+    * Calcula la url válida para el controlador según 
+    * los parámetros pasados en la llamada
+    * @param mixed $busqueda
+    * @return string
+    */
    public function url($busqueda = FALSE) {
       $url = $this->url_shared($busqueda);
       if ($busqueda) {
@@ -166,10 +207,17 @@ class ventas_pedidos extends fbase_controller {
       return $url;
    }
 
+   /**
+    * Calcula la lista de páginas a visualizar según los resultados
+    * @return array
+    */
    public function paginas() {
       return $this->paginas_shared();
    }
 
+   /**
+    * Método para búsqueda de lineas por referencia
+    */
    public function buscar_lineas() {
       /// cambiamos la plantilla HTML
       $this->template = 'ajax/ventas_lineas_pedidos';
@@ -183,10 +231,16 @@ class ventas_pedidos extends fbase_controller {
          $this->lineas = $linea->search($this->buscar_lineas);      
    }
 
+   /**
+    * Método para el borrado del documento
+    */
    private function delete_pedido() {
       $this->delete_shared("pedido_cliente", FS_PEDIDO);
    }
 
+   /**
+    * Método para la inclusión de extensiones de la clase
+    */
    private function share_extension() {
       /// añadimos las extensiones para clientes, agentes y artículos
       $extensiones [] = array(
@@ -200,26 +254,41 @@ class ventas_pedidos extends fbase_controller {
       $this->share_extension_shared($extensiones, 'pedidos', FS_PEDIDOS);
    }
 
+   /**
+    * Número de registros con estado pendiente
+    * @return int
+    */
    public function total_pendientes() {
       return $this->fbase_sql_total('pedidoscli', 'idpedido', 'WHERE idalbaran IS NULL AND status = 0');
    }
 
+   /**
+    * Número de registros con estado rechazado
+    * @return int
+    */
    public function total_rechazados() {
       return $this->fbase_sql_total('pedidoscli', 'idpedido', 'WHERE status = 2');
    }
 
+   /**
+    * Número total de registros
+    * @return int
+    */
    private function total_registros() {
       return $this->fbase_sql_total('pedidoscli', 'idpedido');
    }
 
+   /**
+    * Método para filtrar los registros según 
+    * los parámetros de búsqueda pasados
+    */
    private function buscar($order2) {
       $where = "";
       if ($this->cliente)
          $where .= " AND codcliente = " . $this->agente->var2str($this->cliente->codcliente);
 
-      /* FIXME: Quitar "Select IN" por "Select EXISTS" */
       if ($this->codgrupo != '')
-         $where .= " AND codcliente IN (SELECT codcliente FROM clientes WHERE codgrupo = " . $this->agente->var2str($this->codgrupo) . ")";
+         $where .= " AND EXISTS(SELECT 1 FROM clientes WHERE clientes.codgrupo = ". $this->agente->var2str($this->codgrupo) ." AND clientes.codcliente = pedidoscli.codcliente)";
 
       if ($this->codpago != '')
          $where .= " AND codpago = " . $this->agente->var2str($this->codpago);
@@ -227,6 +296,10 @@ class ventas_pedidos extends fbase_controller {
       $this->buscar_shared("pedido_cliente", "pedidoscli", "numero2", $where, $order2);      
    }
 
+   /**
+    * Método con la lista de ordenaciones posibles
+    * @return array
+    */
    public function orden() {
       $order = array('fechasalida_desc' => array(
                         'icono' => '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>',

@@ -28,26 +28,121 @@
 require_model('agente.php');
 
 trait tree_controller {
-      
+
+   /**
+    * Lineas del documento
+    * @var array
+    */
    public $lineas;
+   
+   /**
+    * Serie del documento
+    * @var fs_model 
+    */
    public $serie;
+   
+   /**
+    * Agende del documento
+    * @var fs_model
+    */
    public $agente;
+   
+   /**
+    * Almacen del documento donde se realizan los movimientos de stock
+    * @var fs_model
+    */
    public $almacenes;
+   
+   /**
+    * Articulo de la linea de documento
+    * @var fs_model
+    */
    public $articulo;
+   
+   /**
+    * Código del agente del documento
+    * @var string
+    */
    public $codagente;
+   
+   /**
+    * Identificador del almacén del documento
+    * @var string
+    */
    public $codalmacen;
+   
+   /**
+    * Identificador de la serie del documento
+    * @var string
+    */
    public $codserie;
+   
+   /**
+    * Valor "desde" de filtrado para la fecha del documento
+    * @var string 
+    */
    public $desde;
+
+   /**
+    * Valor "hasta" de filtrado para la fecha del documento
+    * @var string 
+    */
    public $hasta;
+   
+   /**
+    * Switch para indicar que página mostrar
+    * @var string
+    */
    public $mostrar;
+   
+   /**
+    * Recoge el valor su propio POST
+    * @var string
+    */
    public $buscar_lineas;
+   
+   /**
+    * Número de registros totales
+    * @var int
+    */
    public $num_resultados;
+   
+   /**
+    * Identificador de paginación dentro de los resultados
+    * @var int
+    */
    public $offset;
+   
+   /**
+    * Campo de ordenación de los registros
+    * @var string
+    */
    public $order;
+   
+   /** 
+    * Lista de registros
+    * @var array
+    */
    public $resultados;
+   
+   /**
+    * Importe total de los registros
+    * @var float
+    */
    public $total_resultados;
+   
+   /**
+    * Texto visible para el total_resultados
+    * @var string
+    */
    public $total_resultados_txt;      
    
+   /**
+    * Dado un array de lineas de documento, nos devuelve un array con los
+    * totales por moneda del documento.
+    * @param array $data
+    * @return array
+    */
    private function total_por_divisa($data) {
       $result = array();
       foreach ($data as $record) {
@@ -58,7 +153,12 @@ trait tree_controller {
       }
       return $result;
    }
-      
+   
+   /**
+    * Calcula un segundo campo para la clausula ORDER BY según el campo principal
+    * @param string $order
+    * @return string
+    */
    private function obten_segundo_orden($order) {
       switch ($order) {
          case 'fecha DESC': {
@@ -90,6 +190,9 @@ trait tree_controller {
       return $result;
    }
    
+   /**
+    * Inicializa valores comunes a los documentos de presupuestos y pedidos
+    */
    private function init_parametros() {
       $this->codagente = '';
       $this->codalmacen = '';
@@ -101,6 +204,10 @@ trait tree_controller {
       $this->total_resultados_txt = '';      
    }
 
+   /**
+    * Recoge los valores comunes pasados por parametro para los documentos
+    * de presupuestos y pedidos
+    */
    private function obten_parametros() {
       if (isset($_REQUEST['codagente']))
          $this->codagente = $_REQUEST['codagente'];
@@ -118,6 +225,11 @@ trait tree_controller {
       }      
    }
    
+   /**
+    * Código unificado del método "private_core" 
+    * en documentos de presupuestos y pedidos
+    * @param string $id
+    */
    protected function private_core_shared($id) {
       $this->agente = new agente();
       $this->almacenes = new almacen();
@@ -155,6 +267,13 @@ trait tree_controller {
       }
    }   
  
+   /**
+    * Código unificado del método "share_extension" 
+    * en documentos de presupuestos y pedidos
+    * @param array $extensions
+    * @param object $document
+    * @param string $text
+    */
    private function share_extension_shared($extensions, $document, $text) {
       /// añadimos las extensiones para proveedors, agentes y artículos      
       $extensions [] = array(
@@ -181,6 +300,12 @@ trait tree_controller {
       }
    }
    
+   /**
+    * Código unificado del método "delete" 
+    * en documentos de presupuestos y pedidos
+    * @param string $model
+    * @param string $text
+    */
    private function delete_shared($model, $text) {
       $model0 = new $model();
       $record = $model0->get($_POST['delete']);
@@ -192,7 +317,16 @@ trait tree_controller {
       } else
          $this->new_error_msg("¡" . ucfirst($text) . " no encontrado!");
    }
-   
+
+   /**
+    * Código unificado del método "buscar" 
+    * en documentos de presupuestos y pedidos
+    * @param string $model
+    * @param string $table
+    * @param string $field
+    * @param string $where
+    * @param string $order2
+    */
    private function buscar_shared($model, $table, $field, $where, $order2) {
       $this->resultados = array();
       $from = " FROM " .$table;
@@ -249,6 +383,12 @@ trait tree_controller {
       }
    }
    
+   /**
+    * Código unificado del método "url" 
+    * en documentos de presupuestos y pedidos
+    * @param mixed $busqueda
+    * @return string
+    */
    public function url_shared($busqueda = FALSE) {
       $url = parent::url();
       if ($busqueda) {
@@ -263,6 +403,11 @@ trait tree_controller {
       return $url;
    }
    
+   /**
+    * Código unificado del método "paginas" 
+    * en documentos de presupuestos y pedidos
+    * @return array
+    */
    public function paginas_shared() {
       switch ($this->mostrar) {
          case 'pendientes': {
@@ -289,6 +434,11 @@ trait tree_controller {
       return $this->fbase_paginas($this->url(TRUE), $total, $this->offset);
    }
    
+   /**
+    * Código unificado del método "orden" 
+    * en documentos de presupuestos y pedidos
+    * @return array
+    */
    public function orden_shared() {
       return [
           'fecha_desc' => [

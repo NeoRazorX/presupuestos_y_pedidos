@@ -30,12 +30,24 @@ require_model('pedido_proveedor.php');
 class compras_pedidos extends fbase_controller {
    use tree_controller;
 
+   /**
+    * Proveedor del documento de compra
+    * @var fs_model
+    */
    public $proveedor;
    
+   /**
+    * Constructor de la clase
+    */
    public function __construct() {
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS), 'compras');
    }
 
+   /**
+    * Agrupa las distintas acciones que se pueden realizar al
+    * visualizar el controlador
+    * @return boolean
+    */
    private function acciones() {
       if (isset($_POST['buscar_lineas'])) {
          $this->buscar_lineas();
@@ -61,6 +73,9 @@ class compras_pedidos extends fbase_controller {
       return FALSE;
    }
 
+   /**
+    * Método de entrada del controlador
+    */
    protected function private_core() {
       parent::private_core();
 
@@ -132,6 +147,12 @@ class compras_pedidos extends fbase_controller {
       }
    }
 
+   /**
+    * Calcula la url válida para el controlador según 
+    * los parámetros pasados en la llamada
+    * @param mixed $busqueda
+    * @return string
+    */
    public function url($busqueda = FALSE) {
       $url = $this->url_shared($busqueda);
       if ($busqueda) {
@@ -143,10 +164,17 @@ class compras_pedidos extends fbase_controller {
       return $url;      
    }
 
+   /**
+    * Calcula la lista de páginas a visualizar según los resultados
+    * @return array
+    */
    public function paginas() {
       return $this->paginas_shared();
    }
 
+   /**
+    * Método para búsqueda de lineas por referencia
+    */
    public function buscar_lineas() {
       /// cambiamos la plantilla HTML
       $this->template = 'ajax/compras_lineas_pedidos';
@@ -160,10 +188,16 @@ class compras_pedidos extends fbase_controller {
          $this->lineas = $linea->search($this->buscar_lineas, $this->offset);
    }
 
+   /**
+    * Método para el borrado del documento
+    */
    private function delete_pedido() {
       $this->delete_shared("pedido_proveedor", FS_PEDIDO);
    }
 
+   /**
+    * Método para la inclusión de extensiones de la clase
+    */
    private function share_extension() {
       /// añadimos las extensiones para proveedors, agentes y artículos
       $extensiones[] = array(
@@ -177,16 +211,26 @@ class compras_pedidos extends fbase_controller {
       $this->share_extension_shared($extensiones, 'pedidos', FS_PEDIDOS);
    }
 
-   public function total_pendientes()
-   {
+   /**
+    * Número de registros con estado pendiente
+    * @return int
+    */
+   public function total_pendientes() {
       return $this->fbase_sql_total('pedidosprov', 'idpedido', 'WHERE idalbaran IS NULL');
    }
    
-   private function total_registros()
-   {
+   /**
+    * Número total de registros
+    * @return int
+    */
+   private function total_registros() {
       return $this->fbase_sql_total('pedidosprov', 'idpedido');
    }
 
+   /**
+    * Método para filtrar los registros según 
+    * los parámetros de búsqueda pasados
+    */
    private function buscar($order2) {
       $where = "";
       if($this->proveedor)
@@ -195,6 +239,10 @@ class compras_pedidos extends fbase_controller {
       $this->buscar_shared("pedido_proveedor", "pedidosprov", "numproveedor", $where, $order2);
    }
    
+   /**
+    * Método con la lista de ordenaciones posibles
+    * @return array
+    */
    public function orden() {
       return $this->orden_shared();
    }  

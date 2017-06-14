@@ -39,13 +39,23 @@ require_model('serie.php');
 class compras_pedido extends fbase_controller {
    use form_controller;
 
+   /**
+    * Proveedor del documento de compra
+    * @var fs_model
+    */
    public $proveedor;
    public $proveedor_s;
 
+   /**
+    * Constructor de la clase
+    */
    public function __construct() {
       parent::__construct(__CLASS__, ucfirst(FS_PEDIDO), 'compras', FALSE, FALSE);
    }
    
+   /**
+    * Punto de entrada al controlador
+    */
    protected function private_core() {
       parent::private_core();
             
@@ -110,15 +120,28 @@ class compras_pedido extends fbase_controller {
       $this->versiones = $this->pedido->get_versiones();
    }
 
+   /**
+    * Método para crear una nueva versión
+    * del documento de compra
+    */
    private function nueva_version() {
       $pedi = clone $this->pedido;
       $this->nueva_version_shared($this->pedido, $pedi);
    }
 
+   /**
+    * Método para obtener la url válida del controlador
+    * según los parámetros de la llamada
+    * @return string
+    */
    public function url() {
       return $this->url_shared($this->pedido);
    }
 
+   /**
+    * Método para cambiar el proveedor del
+    * documento de compra
+    */
    private function cambiar_proveedor() {
       $proveedor = $this->proveedor->get($_POST['proveedor']);
       if ($proveedor) {
@@ -133,6 +156,10 @@ class compras_pedido extends fbase_controller {
       }      
    }
    
+   /**
+    * Método para grabar los datos modificados
+    * del documento de compra
+    */
    private function modificar() {
       $this->pedido->observaciones = $_POST['observaciones'];
       $this->pedido->numproveedor = $_POST['numproveedor'];
