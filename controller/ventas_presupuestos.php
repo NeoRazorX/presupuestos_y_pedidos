@@ -291,9 +291,8 @@ class ventas_presupuestos extends fbase_controller {
       if ($this->cliente)
          $where .= " AND codcliente = " . $this->agente->var2str($this->cliente->codcliente);
 
-      /* FIXME: Quitar "Select IN" por "Select EXISTS" */
       if ($this->codgrupo != '')
-         $where .= " AND codcliente IN (SELECT codcliente FROM clientes WHERE codgrupo = " . $this->agente->var2str($this->codgrupo) . ")";
+         $where .= " AND EXISTS(SELECT 1 FROM clientes WHERE clientes.codgrupo = ". $this->agente->var2str($this->codgrupo) ." AND clientes.codcliente = presupuestoscli.codcliente)";
 
       if ($this->codpago != '')
          $where .= " AND codpago = " . $this->agente->var2str($this->codpago);
