@@ -35,13 +35,12 @@ class informe_pedidos extends informe_albaranes {
    }
 
    protected function private_core() {
-      /// declaramos los objetos sólo para asegurarnos de que existen las tablas
       $pedido_cli = new pedido_cliente();
       $pedido_pro = new pedido_proveedor();
 
       $this->nombre_docs = FS_PEDIDOS;
-      $this->table_compras = 'pedidosprov';
-      $this->table_ventas = 'pedidoscli';
+      $this->table_compras = $pedido_pro->table_name();
+      $this->table_ventas = $pedido_cli->table_name();
 
       parent::private_core();
    }
@@ -120,12 +119,12 @@ class informe_pedidos extends informe_albaranes {
          $sql .= $this->where_compras;
          $sql .= " and idalbaran is null order by total desc;";
 
-         $data = $this->db->select($sql);
-         if ($data) {
-            if (floatval($data[0]['total'])) {
+         $data2 = $this->db->select($sql);
+         if ($data2) {
+            if (floatval($data2[0]['total'])) {
                $stats[] = array(
                    'txt' => 'pendiente',
-                   'total' => round(floatval($data[0]['total']), FS_NF0)
+                   'total' => round(floatval($data2[0]['total']), FS_NF0)
                );
             }
          }

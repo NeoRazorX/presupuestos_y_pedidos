@@ -32,12 +32,11 @@ class informe_presupuestos extends informe_albaranes {
    }
 
    protected function private_core() {
-      /// declaramos los objetos sólo para asegurarnos de que existen las tablas
       $presupuesto_cli = new presupuesto_cliente();
 
       $this->nombre_docs = FS_PRESUPUESTOS;
-      $this->table_compras = 'presupuestoscli';
-      $this->table_ventas = 'presupuestoscli';
+      $this->table_compras = $presupuesto_cli->table_name();
+      $this->table_ventas = $presupuesto_cli->table_name();
 
       parent::private_core();
    }
@@ -84,7 +83,7 @@ class informe_presupuestos extends informe_albaranes {
    public function stats_estados($tabla = 'presupuestoscli') {
       $stats = array();
 
-      $sql = "select status,sum(neto) as total from presupuestoscli ";
+      $sql = "select status,sum(neto) as total from " .$tabla;
       $sql .= $this->where_ventas;
       $sql .= " group by status order by total desc;";
 
