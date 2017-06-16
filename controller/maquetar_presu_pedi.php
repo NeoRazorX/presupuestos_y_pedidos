@@ -47,19 +47,21 @@ class maquetar_presu_pedi extends fs_controller {
             $this->titulo = FS_PRESUPUESTO . ' ' . $this->documento->codigo;
             $this->lineas = $this->documento->get_lineas();
 
-            if (isset($_POST['idlinea'])) {
+            $idlinea = filter_input(INPUT_POST, 'idlinea');
+            if (isset($idlinea)) {
                if ($this->documento->editable) {
-                  $orden = 1 + count($_POST['idlinea']);
-                  foreach ($_POST['idlinea'] as $idl) {
+                  $orden = 1 + count($idlinea);
+                  foreach ($idlinea as $idl) {
                      foreach ($this->lineas as $lin) {
                         if ($lin->idlinea == $idl) {
                            $lin->orden = $orden;
 
                            $lin->mostrar_cantidad = FALSE;
                            $lin->mostrar_precio = FALSE;
-                           if (isset($_POST['mostrar_cantidad_' . $idl])) {
+                           $mostrar_cantidad = filter_input(INPUT_POST, 'mostrar_cantidad_' . $idl);
+                           if (isset($mostrar_cantidad)) {
                               $lin->mostrar_cantidad = TRUE;
-                              $lin->mostrar_precio = isset($_POST['mostrar_precio_' . $idl]);
+                              $lin->mostrar_precio = (null !== input_filter(INPUT_POST, 'mostrar_precio_' . $idl));
                            }
 
                            $lin->save();
@@ -84,21 +86,18 @@ class maquetar_presu_pedi extends fs_controller {
             $this->titulo = FS_PEDIDO . ' ' . $this->documento->codigo;
             $this->lineas = $this->documento->get_lineas();
 
-            if (isset($_POST['idlinea'])) {
+            $idlinea = filter_input(INPUT_POST, 'idlinea');
+            if (isset($idlinea)) {
                if ($this->documento->editable) {
-                  $orden = 1 + count($_POST['idlinea']);
-                  foreach ($_POST['idlinea'] as $idl) {
+                  $orden = 1 + count($idlinea);
+                  foreach ($idlinea as $idl) {
                      foreach ($this->lineas as $lin) {
                         if ($lin->idlinea == $idl) {
                            $lin->orden = $orden;
 
-                           $lin->mostrar_cantidad = FALSE;
-                           $lin->mostrar_precio = FALSE;
-                           if (isset($_POST['mostrar_cantidad_' . $idl])) {
-                              $lin->mostrar_cantidad = TRUE;
-                              $lin->mostrar_precio = isset($_POST['mostrar_precio_' . $idl]);
-                           }
-
+                           $mostrar_cantidad = filter_input(INPUT_POST, 'mostrar_cantidad_' . $idl);
+                           $lin->mostrar_cantidad = isset($mostrar_cantidad);
+                           $lin->mostrar_precio = $lin->mostrar_cantidad AND (null !== filter_input(INPUT_POST, 'mostrar_precio_' . $idl));
                            $lin->save();
                            break;
                         }

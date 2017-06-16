@@ -143,7 +143,7 @@ trait tree_controller {
     * @param array $data
     * @return array
     */
-   private function total_por_divisa($data) {
+   public function total_por_divisa($data) {
       $result = array();
       foreach ($data as $record) {
          if (!isset($result[$record->coddivisa]))

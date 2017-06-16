@@ -277,7 +277,7 @@ class ventas_pedidos extends fbase_controller {
     * Número total de registros
     * @return int
     */
-   private function total_registros() {
+   public function total_registros() {
       return $this->fbase_sql_total('pedidoscli', 'idpedido');
    }
 

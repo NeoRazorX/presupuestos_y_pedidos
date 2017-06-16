@@ -71,7 +71,7 @@ class compras_pedido extends fbase_controller {
        */
       $pedido->cron_job();
 
-      if (!$this->get_documento($pedido, 'idpedido', $this->pedido)) {
+      if (!$this->has_documento($pedido, 'idpedido', $this->pedido)) {
          $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " de proveedor no encontrado!", 'error', FALSE, FALSE);
          return;
       }
@@ -166,7 +166,7 @@ class compras_pedido extends fbase_controller {
     * Método para grabar los datos modificados
     * del documento de compra
     */
-   private function modificar() {
+   public function modificar() {
       $this->pedido->observaciones = filter_input(INPUT_POST, 'observaciones');
       $this->pedido->numproveedor = filter_input(INPUT_POST, 'numproveedor');
       $serie = $this->serie->get($this->pedido->codserie);

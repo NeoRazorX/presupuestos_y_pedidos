@@ -88,7 +88,7 @@ class ventas_pedido extends fbase_controller {
       
       $this->private_core_shared('ventas_pedidos', 'nueva_venta', $this->nuevo_pedido_url);
 
-      if (!$this->get_documento($pedido, 'idpedido', $this->pedido )) {
+      if (!$this->has_documento($pedido, 'idpedido', $this->pedido )) {
          $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " de cliente no encontrado!", 'error', FALSE, FALSE);
          return;
       }
@@ -166,7 +166,7 @@ class ventas_pedido extends fbase_controller {
     * Método para grabar los datos modificados
     * del documento de venta
     */
-   private function modificar() {
+   public function modificar() {
       $this->pedido->observaciones = filter_input(INPUT_POST, 'observaciones');
       $this->pedido->numero2 = filter_input(INPUT_POST, 'numero2');
       $serie = $this->serie->get($this->pedido->codserie);

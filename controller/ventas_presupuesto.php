@@ -99,7 +99,7 @@ class ventas_presupuesto extends fbase_controller {
 
       $this->private_core_shared('ventas_presupuestos', 'nueva_venta', $this->nuevo_presupuesto_url);
 
-      if (!$this->get_documento($presupuesto, 'idpresupuesto', $this->presupuesto)) {
+      if (!$this->has_documento($presupuesto, 'idpresupuesto', $this->presupuesto)) {
          $this->new_error_msg("¡" .ucfirst(FS_PRESUPUESTO)." de cliente no encontrado!", 'error', FALSE, FALSE);
          return;
       }
@@ -206,7 +206,7 @@ class ventas_presupuesto extends fbase_controller {
     * Método para grabar los datos modificados
     * del documento de venta
     */
-   private function modificar() {
+   public function modificar() {
       $this->presupuesto->observaciones = filter_input(INPUT_POST, 'observaciones');
       $this->presupuesto->numero2 = filter_input(INPUT_POST, 'numero2');
       $serie = $this->serie->get($this->presupuesto->codserie);

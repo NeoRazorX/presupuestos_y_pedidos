@@ -76,7 +76,7 @@ class imprimir_presu_pedi extends fs_controller {
             $this->proveedor = $proveedor->get($this->documento->codproveedor);
          }
 
-         if (isset($_POST['email'])) {
+         if (null !== filter_input(INPUT_POST, 'email')) {
             $this->enviar_email_proveedor();
          } else
             $this->generar_pdf_pedido_proveedor();
@@ -89,7 +89,7 @@ class imprimir_presu_pedi extends fs_controller {
             $this->cliente = $cliente->get($this->documento->codcliente);
          }
 
-         if (isset($_POST['email'])) {
+         if (null !== filter_input(INPUT_POST, 'email')) {
             $this->enviar_email('pedido');
          } else
             $this->generar_pdf_pedido();
@@ -102,7 +102,7 @@ class imprimir_presu_pedi extends fs_controller {
             $this->cliente = $cliente->get($this->documento->codcliente);
          }
 
-         if (isset($_POST['email'])) {
+         if (null !== filter_input(INPUT_POST, 'email')) {
             $this->enviar_email('presupuesto');
          } else
             $this->generar_pdf_presupuesto();
@@ -302,29 +302,24 @@ class imprimir_presu_pedi extends fs_controller {
          unset($table_header['cantidad']);
       }
 
-      if (isset($_GET['noval'])) {
+      $noval = (null !== filter_input(INPUT_GET, 'noval'));
+      if ($noval)
          unset($table_header['pvp']);
-      }
 
-      if ($this->impresion['print_dto'] AND ! isset($_GET['noval'])) {
+      if ($this->impresion['print_dto'] AND !$noval)
          $table_header['dto'] = '<b>Dto.</b>';
-      }
 
-      if ($multi_iva AND ! isset($_GET['noval'])) {
+      if ($multi_iva AND !$noval)
          $table_header['iva'] = '<b>' . FS_IVA . '</b>';
-      }
 
-      if ($multi_re AND ! isset($_GET['noval'])) {
+      if ($multi_re AND !$noval)
          $table_header['re'] = '<b>R.E.</b>';
-      }
 
-      if ($multi_irpf AND ! isset($_GET['noval'])) {
+      if ($multi_irpf AND !$noval)
          $table_header['irpf'] = '<b>' . FS_IRPF . '</b>';
-      }
 
-      if (!isset($_GET['noval'])) {
+      if (!$noval)
          $table_header['importe'] = '<b>Importe</b>';
-      }
 
       $pdf_doc->add_table_header($table_header);
 
@@ -548,9 +543,9 @@ class imprimir_presu_pedi extends fs_controller {
    }
 
    private function generar_pdf_totales(&$pdf_doc, &$lineas_iva, $pagina) {
-      if (isset($_GET['noval'])) {
+      if (null !== filter_input(INPUT_GET, 'noval'))
          $pdf_doc->pdf->addText(10, 10, 8, $pdf_doc->center_text('Página ' . $pagina . '/' . $this->numpaginas, 250));
-      } else {
+      else {
          /*
           * Rellenamos la última tabla de la página:
           * 
@@ -854,9 +849,10 @@ class imprimir_presu_pedi extends fs_controller {
 
    private function enviar_email_proveedor() {
       if ($this->empresa->can_send_mail()) {
+         $email = filter_input(INPUT_POST, 'email');
          if ($this->proveedor) {
-            if ($_POST['email'] != $this->proveedor->email AND isset($_POST['guardar'])) {
-               $this->proveedor->email = $_POST['email'];
+            if ($email != $this->proveedor->email AND (null !== filter_input(INPUT_POST, 'guardar'))) {
+               $this->proveedor->email = $email;
                $this->proveedor->save();
             }
          }
@@ -869,27 +865,28 @@ class imprimir_presu_pedi extends fs_controller {
             $mail = $this->empresa->new_mail();
             $mail->FromName = $this->user->get_agente_fullname();
 
-            if ($_POST['de'] != $mail->From) {
-               $mail->addReplyTo($_POST['de'], $mail->FromName);
-            }
+            $de = filter_input(INPUT_POST, 'de');
+            if ($de != $mail->From)
+               $mail->addReplyTo($de, $mail->FromName);
 
-            $mail->addAddress($_POST['email'], $razonsocial);
-            if ($_POST['email_copia']) {
-               if (isset($_POST['cco'])) {
-                  $mail->addBCC($_POST['email_copia'], $razonsocial);
-               } else {
-                  $mail->addCC($_POST['email_copia'], $razonsocial);
-               }
+            $mail->addAddress($email, $razonsocial);
+            $email_copia = filter_input(INPUT_POST, 'email_copia');
+            if ($email_copia) {
+               if (null !== filter_input(INPUT_POST, 'cco'))
+                  $mail->addBCC($email_copia, $razonsocial);
+               else
+                  $mail->addCC($email_copia, $razonsocial);
             }
 
             $mail->Subject = $this->empresa->nombre . ': Mi ' . FS_PEDIDO . ' ' . $this->documento->codigo;
-            if ($this->is_html($_POST['mensaje'])) {
-               $mail->AltBody = strip_tags($_POST['mensaje']);
-               $mail->msgHTML($_POST['mensaje']);
+            $mensaje = filter_input(INPUT_POST, 'mensaje');
+            if ($this->is_html($mensaje)) {
+               $mail->AltBody = strip_tags($mensaje);
+               $mail->msgHTML($mensaje);
                $mail->isHTML(TRUE);
-            } else {
-               $mail->Body = $_POST['mensaje'];
-            }
+            } 
+            else
+               $mail->Body = $mensaje;
 
             $mail->addAttachment('tmp/' . FS_TMP_NAME . 'enviar/' . $filename);
             if (is_uploaded_file($_FILES['adjunto']['tmp_name'])) {
@@ -922,9 +919,10 @@ class imprimir_presu_pedi extends fs_controller {
          }
 
          $razonsocial = $this->documento->nombrecliente;
+         $email = filter_input(INPUT_POST, 'email');
          if ($this->cliente) {
-            if ($_POST['email'] != $this->cliente->email AND isset($_POST['guardar'])) {
-               $this->cliente->email = $_POST['email'];
+            if ($email != $this->cliente->email AND (null !== filter_input(INPUT_POST, 'guardar'))) {
+               $this->cliente->email = $email;
                $this->cliente->save();
             }
          }
@@ -933,17 +931,18 @@ class imprimir_presu_pedi extends fs_controller {
             $mail = $this->empresa->new_mail();
             $mail->FromName = $this->user->get_agente_fullname();
 
-            if ($_POST['de'] != $mail->From) {
-               $mail->addReplyTo($_POST['de'], $mail->FromName);
+            $de = filter_input(INPUT_POST, 'de');
+            if ($de != $mail->From) {
+               $mail->addReplyTo($de, $mail->FromName);
             }
 
-            $mail->addAddress($_POST['email'], $razonsocial);
-            if ($_POST['email_copia']) {
-               if (isset($_POST['cco'])) {
-                  $mail->addBCC($_POST['email_copia'], $razonsocial);
-               } else {
-                  $mail->addCC($_POST['email_copia'], $razonsocial);
-               }
+            $mail->addAddress($email, $razonsocial);
+            $email_copia = input_filter(INPUT_POST, 'email_copia');               
+            if ($email_copia) {
+               if (null !== filter_input(INPUT_POST, 'cco'))
+                  $mail->addBCC($email_copia, $razonsocial);
+               else
+                  $mail->addCC($email_copia, $razonsocial);
             }
 
             if ($doc == 'presupuesto') {
@@ -952,14 +951,15 @@ class imprimir_presu_pedi extends fs_controller {
                $mail->Subject = $this->empresa->nombre . ': Su ' . FS_PEDIDO . ' ' . $this->documento->codigo;
             }
 
-            if ($this->is_html($_POST['mensaje'])) {
-               $mail->AltBody = strip_tags($_POST['mensaje']);
-               $mail->msgHTML($_POST['mensaje']);
+            $mensaje = filter_input(INPUT_POST, 'mensaje');
+            if ($this->is_html($mensaje)) {
+               $mail->AltBody = strip_tags($mensaje);
+               $mail->msgHTML($mensaje);
                $mail->isHTML(TRUE);
-            } else {
-               $mail->Body = $_POST['mensaje'];
             }
-
+            else
+               $mail->Body = $mensaje;
+            
             $mail->addAttachment('tmp/' . FS_TMP_NAME . 'enviar/' . $filename);
             if (is_uploaded_file($_FILES['adjunto']['tmp_name'])) {
                $mail->addAttachment($_FILES['adjunto']['tmp_name'], $_FILES['adjunto']['name']);

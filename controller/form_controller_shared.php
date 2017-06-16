@@ -47,7 +47,7 @@ trait form_controller {
     * @param model  $documento
     * @return boolean
     */
-   private function get_documento($modelo, $campo_id, &$documento) {
+   private function has_documento($modelo, $campo_id, &$documento) {
       $valor_id = filter_input(INPUT_POST, $campo_id);
       if (isset($valor_id)) {
          $documento = $modelo->get($valor_id);
