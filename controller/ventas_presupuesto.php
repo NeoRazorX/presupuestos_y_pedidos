@@ -139,10 +139,10 @@ class ventas_presupuesto extends fbase_controller {
             }
          }
          else {
-            if (isset($_GET['nversion']))
+            if (null !== filter_input(INPUT_GET, 'nversion'))
                $this->nueva_version();
             else {
-               if (isset($_GET['nversionok']))
+               if (null !== filter_input(INPUT_GET, 'nversionok'))
                   $this->new_message('Esta es la nueva versión del ' . FS_PRESUPUESTO . '.');
 
                /// Comprobamos las líneas
@@ -207,21 +207,22 @@ class ventas_presupuesto extends fbase_controller {
     * del documento de venta
     */
    private function modificar() {
-      $this->presupuesto->observaciones = $_POST['observaciones'];
-      $this->presupuesto->numero2 = $_POST['numero2'];
+      $this->presupuesto->observaciones = filter_input(INPUT_POST, 'observaciones');
+      $this->presupuesto->numero2 = filter_input(INPUT_POST, 'numero2');
       $serie = $this->serie->get($this->presupuesto->codserie);
 
       if ($this->modificar_shared($this->presupuesto, $serie)) {
          /// ¿cambiamos el cliente?
-         if ($_POST['cliente'] != $this->presupuesto->codcliente)
+         if (filter_input(INPUT_POST, 'cliente') != $this->presupuesto->codcliente)
             $this->cambiar_cliente_shared($this->presupuesto);
          else {
             $this->update_desde_params($this->presupuesto);
             $cliente = $this->cliente->get($this->presupuesto->codcliente);
          }
 
-         if (isset($_POST['numlineas'])) {
-            $numlineas = intval($_POST['numlineas']);
+         $numlineas = filter_input(INPUT_POST, 'numlineas');
+         if (isset($numlineas)) {
+            $numlineas = intval($numlineas);
             $lineas = $this->presupuesto->get_lineas();
             $articulo = new articulo();
             
@@ -234,12 +235,13 @@ class ventas_presupuesto extends fbase_controller {
 
             // modificamos y/o añadimos las demás líneas
             for ($num = 0; $num <= $numlineas; $num++) {
-               if (!isset($_POST['idlinea_' . $num]))
+               $idlinea = filter_input(INPUT_POST, 'idlinea_'.$num);
+               if (!isset($idlinea))
                   continue;
                
                $encontrada = FALSE;
                foreach ($lineas as $k => $value) {
-                  if ($value->idlinea == intval($_POST['idlinea_' . $num])) {
+                  if ($value->idlinea == intval($idlinea)) {
                      $encontrada = TRUE;
 
                      // Calculamos impuesto a aplicar
@@ -251,14 +253,15 @@ class ventas_presupuesto extends fbase_controller {
                   }
                }
                   
-               if (!$encontrada AND intval($_POST['idlinea_' . $num]) == -1 AND isset($_POST['referencia_' . $num])) {
+               $referencia = filter_input(INPUT_POST, 'referencia_'.$num);
+               if (!$encontrada AND intval($idlinea) == -1 AND isset($referencia)) {
                   $linea = new linea_presupuesto_cliente();
                   $linea->idpresupuesto = $this->presupuesto->idpresupuesto;
-                  $linea->descripcion = $_POST['desc_' . $num];
-                  $linea->irpf = floatval($_POST['irpf_' . $num]);
-                  $linea->cantidad = floatval($_POST['cantidad_' . $num]);
-                  $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
-                  $linea->dtopor = floatval($_POST['dto_' . $num]);
+                  $linea->descripcion = filter_input(INPUT_POST, 'desc_' . $num);
+                  $linea->irpf = floatval(filter_input(INPUT_POST, 'irpf_' . $num));
+                  $linea->cantidad = floatval(filter_input(INPUT_POST, 'cantidad_' . $num));
+                  $linea->pvpunitario = floatval(filter_input(INPUT_POST, 'pvp_' . $num));
+                  $linea->dtopor = floatval(filter_input(INPUT_POST, 'dto_' . $num));
                   $linea->pvpsindto = ($linea->cantidad * $linea->pvpunitario);
                   $linea->pvptotal = ($linea->cantidad * $linea->pvpunitario * (100 - $linea->dtopor) / 100);
 
@@ -266,11 +269,12 @@ class ventas_presupuesto extends fbase_controller {
                   $this->calcular_impuesto_linea($linea, $serie, $regimeniva, $num);
 
                   // Cargamos datos del producto
-                  $art0 = $articulo->get($_POST['referencia_' . $num]);
+                  $art0 = $articulo->get($referencia);
                   if ($art0) {
                      $linea->referencia = $art0->referencia;
-                     if ($_POST['codcombinacion_' . $num])
-                        $linea->codcombinacion = $_POST['codcombinacion_' . $num];
+                     $codcombinacion = filter_input(INPUT_POST, 'codcombinacion_'.$num);
+                     if ($codcombinacion)
+                        $linea->codcombinacion = $codcombinacion;
                   }
 
                   // Grabamos la nueva linea
@@ -295,8 +299,9 @@ class ventas_presupuesto extends fbase_controller {
 
    private function configurar_validez() {
       $fsvar = new fs_var();
-      if (isset($_POST['setup_validez'])) {
-         $this->setup_validez = intval($_POST['setup_validez']);
+      $validez = filter_input(INPUT_POST, 'setup_validez');
+      if (isset($validez)) {
+         $this->setup_validez = intval($validez);
          $fsvar->simple_save('presu_validez', $this->setup_validez);
          $this->new_message('Configuración modificada correctamente.');
       } else {

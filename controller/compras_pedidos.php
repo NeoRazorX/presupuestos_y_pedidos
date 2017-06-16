@@ -49,7 +49,7 @@ class compras_pedidos extends fbase_controller {
     * @return boolean
     */
    private function acciones() {
-      if (isset($_POST['buscar_lineas'])) {
+      if (null !== filter_input(INPUT_POST, 'buscar_lineas')) {
          $this->buscar_lineas();
          return TRUE;
       }
@@ -58,15 +58,16 @@ class compras_pedidos extends fbase_controller {
          $this->fbase_buscar_proveedor($_REQUEST['buscar_proveedor']);
          return TRUE;
       }
-         
-      if (isset($_GET['ref'])) {
+      
+      $ref = filter_input(INPUT_GET, 'ref'); 
+      if (isset($ref)) {
          $this->template = 'extension/compras_pedidos_articulo';
 
          $articulo = new articulo();
-         $this->articulo = $articulo->get($_GET['ref']);
+         $this->articulo = $articulo->get($ref);
 
          $linea = new linea_pedido_proveedor();
-         $this->resultados = $linea->all_from_articulo($_GET['ref'], $this->offset);
+         $this->resultados = $linea->all_from_articulo($ref, $this->offset);
          return TRUE;
       } 
       
@@ -89,10 +90,11 @@ class compras_pedidos extends fbase_controller {
 
          $this->proveedor = FALSE;
 
-         if (isset($_POST['delete']))
+         if (null !== filter_input(INPUT_POST, 'delete'))
             $this->delete_pedido();
          else {
-            if (!isset($_GET['mostrar']) AND ( $this->query != '' OR isset($_REQUEST['codagente']) OR isset($_REQUEST['codproveedor']) OR isset($_REQUEST['codserie']))) {
+            $mostrar = filter_input(INPUT_GET, 'mostrar'); 
+            if (!isset($mostrar) AND ($this->query != '' OR isset($_REQUEST['codagente']) OR isset($_REQUEST['codproveedor']) OR isset($_REQUEST['codserie']))) {
                /**
                 * si obtenermos un codagente, un codproveedor o un codserie pasamos direcatemente
                 * a la pestaña de búsqueda, a menos que tengamos un mostrar, que
@@ -179,11 +181,11 @@ class compras_pedidos extends fbase_controller {
       /// cambiamos la plantilla HTML
       $this->template = 'ajax/compras_lineas_pedidos';
 
-      $this->buscar_lineas = $_POST['buscar_lineas'];
+      $this->buscar_lineas = filter_input(INPUT_POST, 'buscar_lineas');
       $linea = new linea_pedido_proveedor();
-
-      if (isset($_POST['codproveedor']))
-         $this->lineas = $linea->search_from_proveedor($_POST['codproveedor'], $this->buscar_lineas, $this->offset);
+      $codproveedor = filter_input(INPUT_POST, 'codproveedor');
+      if (isset($codproveedor))
+         $this->lineas = $linea->search_from_proveedor($codproveedor, $this->buscar_lineas, $this->offset);
       else
          $this->lineas = $linea->search($this->buscar_lineas, $this->offset);
    }

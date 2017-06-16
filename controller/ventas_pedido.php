@@ -129,10 +129,10 @@ class ventas_pedido extends fbase_controller {
             }
          } 
          else {
-            if (isset($_GET['nversion']))
+            if (null !== filter_input(INPUT_GET, 'nversion'))
                $this->nueva_version();
             else {
-               if (isset($_GET['nversionok']))
+               if (null !== filter_input(INPUT_GET, 'nversionok'))
                   $this->new_message('Esta es la nueva versión del ' . FS_PEDIDO . '.');
             }
          }
@@ -167,21 +167,22 @@ class ventas_pedido extends fbase_controller {
     * del documento de venta
     */
    private function modificar() {
-      $this->pedido->observaciones = $_POST['observaciones'];
-      $this->pedido->numero2 = $_POST['numero2'];      
+      $this->pedido->observaciones = filter_input(INPUT_POST, 'observaciones');
+      $this->pedido->numero2 = filter_input(INPUT_POST, 'numero2');
       $serie = $this->serie->get($this->pedido->codserie);
 
       if ($this->modificar_shared($this->pedido, $serie)) {
          /// ¿cambiamos el cliente?
-         if ($_POST['cliente'] != $this->pedido->codcliente)
+         if (filter_input(INPUT_POST, 'cliente') != $this->pedido->codcliente)
             $this->cambiar_cliente_shared($this->pedido);
          else {
             $this->update_desde_params($this->pedido);
             $cliente = $this->cliente->get($this->pedido->codcliente);
          }
 
-         if (isset($_POST['numlineas'])) {
-            $numlineas = intval($_POST['numlineas']);
+         $numlineas = filter_input(INPUT_POST, 'numlineas');
+         if (isset($numlineas)) {
+            $numlineas = intval($numlineas);
             $lineas = $this->pedido->get_lineas();
             $articulo = new articulo();
 
@@ -194,13 +195,14 @@ class ventas_pedido extends fbase_controller {
 
             // modificamos y/o añadimos las demás líneas
             for ($num = 0; $num <= $numlineas; $num++) {
-               if (!isset($_POST['idlinea_' . $num]))
+               $idlinea = filter_input(INPUT_POST, 'idlinea_'.$num);
+               if (!isset($idlinea))
                   continue;
                
                $encontrada = FALSE;
                foreach ($lineas as $k => $value) {
                   /// modificamos la línea
-                  if ($value->idlinea == intval($_POST['idlinea_' . $num])) {
+                  if ($value->idlinea == intval($idlinea)) {
                      $encontrada = TRUE;
 
                      // Calculamos impuesto a aplicar
@@ -213,14 +215,15 @@ class ventas_pedido extends fbase_controller {
                }
 
                /// añadimos la línea
-               if (!$encontrada AND intval($_POST['idlinea_' . $num]) == -1 AND isset($_POST['referencia_' . $num])) {
+               $referencia = filter_input(INPUT_POST, 'referencia_'.$num);
+               if (!$encontrada AND intval($idlinea) == -1 AND isset($referencia)) {
                   $linea = new linea_pedido_cliente();
                   $linea->idpedido = $this->pedido->idpedido;
-                  $linea->descripcion = $_POST['desc_' . $num];
-                  $linea->irpf = floatval($_POST['irpf_' . $num]);
-                  $linea->cantidad = floatval($_POST['cantidad_' . $num]);
-                  $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
-                  $linea->dtopor = floatval($_POST['dto_' . $num]);
+                  $linea->descripcion = filter_input(INPUT_POST, 'desc_' . $num);
+                  $linea->irpf = floatval(filter_input(INPUT_POST, 'irpf_' . $num));
+                  $linea->cantidad = floatval(filter_input(INPUT_POST, 'cantidad_' . $num));
+                  $linea->pvpunitario = floatval(filter_input(INPUT_POST, 'pvp_' . $num));
+                  $linea->dtopor = floatval(filter_input(INPUT_POST, 'dto_' . $num));
                   $linea->pvpsindto = ($linea->cantidad * $linea->pvpunitario);
                   $linea->pvptotal = ($linea->cantidad * $linea->pvpunitario * (100 - $linea->dtopor) / 100);
 
@@ -228,11 +231,12 @@ class ventas_pedido extends fbase_controller {
                   $this->calcular_impuesto_linea($linea, $serie, $regimeniva, $num);
 
                   // Cargamos datos del producto
-                  $art0 = $articulo->get($_POST['referencia_' . $num]);
+                  $art0 = $articulo->get($referencia);
                   if ($art0) {
                      $linea->referencia = $art0->referencia;
-                     if ($_POST['codcombinacion_' . $num])
-                        $linea->codcombinacion = $_POST['codcombinacion_' . $num];
+                     $codcombinacion = filter_input(INPUT_POST, 'codcombinacion_'.$num);
+                     if ($codcombinacion)
+                        $linea->codcombinacion = $codcombinacion;
                   }
 
                   // Grabamos la nueva linea

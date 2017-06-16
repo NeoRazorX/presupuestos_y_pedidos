@@ -230,13 +230,14 @@ trait tree_controller {
     * en documentos de presupuestos y pedidos
     * @param string $id
     */
-   protected function private_core_shared($id) {
+   private function private_core_shared($id) {
       $this->agente = new agente();
       $this->almacenes = new almacen();
       $this->serie = new serie();
 
-      if (isset($_GET['mostrar'])) {
-         $this->mostrar = $_GET['mostrar'];
+      $mostrar = filter_input(INPUT_GET, 'mostrar'); 
+      if (isset($mostrar)) {
+         $this->mostrar = $mostrar;
          setcookie($id.'_mostrar', $this->mostrar, time() + FS_COOKIES_EXPIRE);
       }
       else {
@@ -246,16 +247,18 @@ trait tree_controller {
             $this->mostrar = 'todo';
       }
 
-      if (isset($_GET['offset']))
-         $this->offset = intval($_GET['offset']);
+      $offset = filter_input(INPUT_GET, 'offset');
+      if (isset($offset))
+         $this->offset = intval($offset);
       else
          $this->offset = 0;
 
       $this->order = 'fecha DESC';
-      if (isset($_GET['order'])) {
+      $order = filter_input(INPUT_GET, 'order');
+      if (isset($order)) {
          $orden_l = $this->orden();
-         if (isset($orden_l[$_GET['order']])) {
-            $this->order = $orden_l[$_GET['order']]['orden'];
+         if (isset($orden_l[$order])) {
+            $this->order = $orden_l[$order]['orden'];
          }
 
          setcookie($id.'_order', $this->order, time() + FS_COOKIES_EXPIRE);
@@ -308,7 +311,7 @@ trait tree_controller {
     */
    private function delete_shared($model, $text) {
       $model0 = new $model();
-      $record = $model0->get($_POST['delete']);
+      $record = $model0->get(filter_input(INPUT_POST, 'delete'));
       if ($record) {
          if ($record->delete()) {
             $this->clean_last_changes();
@@ -389,7 +392,7 @@ trait tree_controller {
     * @param mixed $busqueda
     * @return string
     */
-   public function url_shared($busqueda = FALSE) {
+   private function url_shared($busqueda = FALSE) {
       $url = parent::url();
       if ($busqueda) {
          $url .= "&mostrar=" . $this->mostrar
@@ -408,7 +411,7 @@ trait tree_controller {
     * en documentos de presupuestos y pedidos
     * @return array
     */
-   public function paginas_shared() {
+   private function paginas_shared() {
       switch ($this->mostrar) {
          case 'pendientes': {
             $total = $this->total_pendientes();
@@ -439,7 +442,7 @@ trait tree_controller {
     * en documentos de presupuestos y pedidos
     * @return array
     */
-   public function orden_shared() {
+   private function orden_shared() {
       return [
           'fecha_desc' => [
               'icono' => '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>',

@@ -90,8 +90,10 @@ class compras_pedido extends fbase_controller {
       /// comprobamos el pedido
       $this->pedido->full_test();
 
-      if (isset($_POST['aprobar']) AND isset($_POST['petid']) AND is_null($this->pedido->idalbaran)) {
-         if ($this->duplicated_petition($_POST['petid']))
+      $aprobar = filter_input(INPUT_POST, 'aprobar');
+      $petid = filter_input(INPUT_POST, 'petid');
+      if (isset($aprobar) AND isset($petid) AND is_null($this->pedido->idalbaran)) {
+         if ($this->duplicated_petition($petid))
             $this->new_error_msg('Petición duplicada. Evita hacer doble clic sobre los botones.');
          else
             $this->generar_documento(
@@ -103,15 +105,18 @@ class compras_pedido extends fbase_controller {
             );
       }
       else {
-         if (isset($_GET['desbloquear'])) {
+         $desbloquear = filter_input(INPUT_GET, 'desbloquear'); 
+         if (isset($desbloquear)) {
             $this->pedido->editable = TRUE;
             $this->pedido->save();
          } 
          else {
-            if (isset($_GET['nversion']))
+            $nversion = filter_input(INPUT_GET, 'nversion');
+            if (isset($nversion))
                $this->nueva_version();
             else { 
-               if (isset($_GET['nversionok']))
+               $nversionok = filter_input(INPUT_GET, 'nversionok');
+               if (isset($nversionok))
                   $this->new_message('Esta es la nueva versión del ' . FS_PEDIDO . '.');
             }
          }
@@ -143,7 +148,8 @@ class compras_pedido extends fbase_controller {
     * documento de compra
     */
    private function cambiar_proveedor() {
-      $proveedor = $this->proveedor->get($_POST['proveedor']);
+      $codproveedor = filter_input(INPUT_POST, 'proveedor');
+      $proveedor = $this->proveedor->get($codproveedor);
       if ($proveedor) {
          $this->pedido->codproveedor = $proveedor->codproveedor;
          $this->pedido->nombre = $proveedor->razonsocial;
@@ -151,8 +157,8 @@ class compras_pedido extends fbase_controller {
       } 
       else {
          $this->pedido->codproveedor = NULL;
-         $this->pedido->nombre = $_POST['nombre'];
-         $this->pedido->cifnif = $_POST['cifnif'];
+         $this->pedido->nombre = filter_input(INPUT_POST, 'nombre');
+         $this->pedido->cifnif = filter_input(INPUT_POST, 'cifnif');
       }      
    }
    
@@ -161,22 +167,24 @@ class compras_pedido extends fbase_controller {
     * del documento de compra
     */
    private function modificar() {
-      $this->pedido->observaciones = $_POST['observaciones'];
-      $this->pedido->numproveedor = $_POST['numproveedor'];
+      $this->pedido->observaciones = filter_input(INPUT_POST, 'observaciones');
+      $this->pedido->numproveedor = filter_input(INPUT_POST, 'numproveedor');
       $serie = $this->serie->get($this->pedido->codserie);
 
       if ($this->modificar_shared($this->pedido, $serie)) {
          /// ¿cambiamos el proveedor?
-         if ($_POST['proveedor'] != $this->pedido->codproveedor)
+         $codproveedor = filter_input(INPUT_POST, 'proveedor');
+         if ($codproveedor != $this->pedido->codproveedor)
             $this->cambiar_proveedor();
          else {
-            $this->pedido->nombre = $_POST['nombre'];
-            $this->pedido->cifnif = $_POST['cifnif'];
+            $this->pedido->nombre = filter_input(INPUT_POST, 'nombre');
+            $this->pedido->cifnif = filter_input(INPUT_POST, 'cifnif');
             $proveedor = $this->proveedor->get($this->pedido->codproveedor);
          }
 
-         if (isset($_POST['numlineas'])) {
-            $numlineas = intval($_POST['numlineas']);
+         $numlineas = filter_input(INPUT_POST, 'numlineas');
+         if (isset($numlineas)) {
+            $numlineas = intval($numlineas);
             $lineas = $this->pedido->get_lineas();
             $articulo = new articulo();
 
@@ -189,13 +197,14 @@ class compras_pedido extends fbase_controller {
 
             // modificamos y/o añadimos las demás líneas
             for ($num = 0; $num <= $numlineas; $num++) {
-               if (!isset($_POST['idlinea_' . $num]))
+               $idlinea = filter_input(INPUT_POST, 'idlinea_'.$num);
+               if (!isset($idlinea))
                   continue;
                
                $encontrada = FALSE;
                foreach ($lineas as $k => $value) {
                   /// modificamos la línea
-                  if ($value->idlinea == intval($_POST['idlinea_' . $num])) {
+                  if ($value->idlinea == intval($idlinea)) {
                      $encontrada = TRUE;
                      
                      // Calculamos impuesto a aplicar
@@ -208,14 +217,15 @@ class compras_pedido extends fbase_controller {
                }
 
                /// añadimos la línea
-               if (!$encontrada AND intval($_POST['idlinea_' . $num]) == -1 AND isset($_POST['referencia_' . $num])) {
+               $referencia = filter_input(INPUT_POST, 'referencia_' .$num);
+               if (!$encontrada AND intval($idlinea) == -1 AND isset($referencia)) {
                   $linea = new linea_pedido_proveedor();
                   $linea->idpedido = $this->pedido->idpedido;
-                  $linea->descripcion = $_POST['desc_' . $num];
-                  $linea->irpf = floatval($_POST['irpf_' . $num]);
-                  $linea->cantidad = floatval($_POST['cantidad_' . $num]);
-                  $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
-                  $linea->dtopor = floatval($_POST['dto_' . $num]);
+                  $linea->descripcion = filter_input(INPUT_POST, 'desc_' . $num);
+                  $linea->irpf = floatval(filter_input(INPUT_POST, 'irpf_' . $num));
+                  $linea->cantidad = floatval(filter_input(INPUT_POST, 'cantidad_' . $num));
+                  $linea->pvpunitario = floatval(filter_input(INPUT_POST, 'pvp_' . $num));
+                  $linea->dtopor = floatval(filter_input(INPUT_POST, 'dto_' . $num));
                   $linea->pvpsindto = ($linea->cantidad * $linea->pvpunitario);
                   $linea->pvptotal = ($linea->cantidad * $linea->pvpunitario * (100 - $linea->dtopor) / 100);
 
@@ -223,11 +233,12 @@ class compras_pedido extends fbase_controller {
                   $this->calcular_impuesto_linea($linea, $serie, $regimeniva, $num);
 
                   // Cargamos datos del producto
-                  $art0 = $articulo->get($_POST['referencia_' . $num]);
+                  $art0 = $articulo->get($referencia);
                   if ($art0) {
                      $linea->referencia = $art0->referencia;
-                     if ($_POST['codcombinacion_' . $num])
-                        $linea->codcombinacion = $_POST['codcombinacion_' . $num];
+                     $codcombinacion = filter_input(INPUT_POST, 'codcombinacion_' .$num);
+                     if (isset($codcombinacion))
+                        $linea->codcombinacion = $codcombinacion;
                   }
 
                   // Grabamos la nueva linea

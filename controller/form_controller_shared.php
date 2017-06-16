@@ -39,21 +39,35 @@ trait form_controller {
    public $serie;
    public $versiones;
    
+   /**
+    * Busca un documento del tipo indicado en $modelo por su identificador
+    * o por el parámetro GET 'id' y lo enlaza a $documento
+    * @param string $modelo
+    * @param string $campo_id
+    * @param model  $documento
+    * @return boolean
+    */
    private function get_documento($modelo, $campo_id, &$documento) {
-      if (isset($_POST[$campo_id])) {
-         $documento = $modelo->get($_POST[$campo_id]);
+      $valor_id = filter_input(INPUT_POST, $campo_id);
+      if (isset($valor_id)) {
+         $documento = $modelo->get($valor_id);
          $this->modificar();
          return TRUE;
       } 
 
-      if (isset($_GET['id'])) {
-         $documento = $modelo->get($_GET['id']);
+      $id = filter_input(INPUT_GET, 'id');
+      if (isset($id)) {
+         $documento = $modelo->get($id);
          return TRUE;
       }
       
       return FALSE;
    }
    
+   /**
+    * Elimina el documento indicado
+    * @param model $documento
+    */
    private function delete_documento($documento) {
       if ($documento->delete())
          $message = "El documento se ha borrado.";
@@ -63,6 +77,14 @@ trait form_controller {
       $this->new_error_msg($message);
    }
    
+   /**
+    * Crear las líneas de un documento en base a las líneas de otro documento
+    * @param model  $documento            (al que se añaden las lineas)
+    * @param model  $origen               (de donde se leen las lineas)
+    * @param string $linea_model
+    * @param boolean $trazabilidad
+    * @return boolean
+    */
    private function generar_lineas_documento($documento, $origen, $linea_model, &$trazabilidad) {
       $result = TRUE;
       $art0 = new articulo();
@@ -100,7 +122,7 @@ trait form_controller {
                $linea->idpedido = $linea_origen->idpedido;
                $linea->idalbaran = $documento->idalbaran;
                $cantidad = $linea_origen->cantidad;
-               $costemedio = isset($_POST['costemedio']);
+               $costemedio = (null !== filter_input(INPUT_POST, 'costemedio'));
                break;
             }
             
@@ -129,7 +151,8 @@ trait form_controller {
             if ($cantidad == 0)
                continue;
             
-            if ($linea->referencia AND isset($_POST['stock'])) {
+            $stock = filter_input(INPUT_POST, 'stock');
+            if ($linea->referencia AND isset($stock)) {
                $articulo = $art0->get($linea->referencia);
                if ($articulo) {
                   $articulo->sum_stock($documento->codalmacen, $cantidad, $costemedio, $linea_origen->codcombinacion);
@@ -146,12 +169,21 @@ trait form_controller {
       return $result;
    }   
       
+   /**
+    * Crea un documento en base a un documento origen.
+    * Graba los campos indicados en el origen.
+    * @param string $model
+    * @param string $fecha
+    * @param model  $origen
+    * @param array  $grabar_origen                [campo => valor]
+    */
    private function generar_documento($model, $fecha, $origen, $grabar_origen) {
       $documento = new $model;
       
       // Calculamos la fecha del documento
-      if (isset($_POST[$fecha]))
-         $documento->fecha = $_POST[$fecha];
+      $date = filter_input(INPUT_POST, $fecha);
+      if (isset($date))
+         $documento->fecha = $date;
       
       // Calculamos el ejercicio
       $eje0 = $this->ejercicio->get_by_fecha($documento->fecha, FALSE);
@@ -175,7 +207,7 @@ trait form_controller {
             $documento->codproveedor = $origen->codproveedor;
             $documento->nombre = $origen->nombre;
             $documento->numproveedor = $origen->numproveedor;
-            $trazabilidad_page = 'compras_trazabilidad';
+            $trazabilidad_page = 'compras_trazabilidad';            
             break;
          }
 
@@ -232,7 +264,7 @@ trait form_controller {
       
       // Grabamos el nuevo documento
       if (!$documento->save()) {
-         $this->new_error_msg("¡Imposible guardar el " . FS_ALBARAN . "!");
+         $this->new_error_msg("¡Imposible guardar el documento!");
          return;
       }
          
@@ -252,9 +284,11 @@ trait form_controller {
             $this->new_message("<a href='" . $documento->url() . "'>Documento</a> generado correctamente.");
             if ($trazabilidad)
                header('Location: index.php?page='.$trazabilidad_page.'&doc=albaran&id=' . $documento->idalbaran);
-            else
-               if (isset($_POST['facturar']))
-                  header('Location: ' . $documento->url() . '&facturar=' . $_POST['facturar'] . '&petid=' . $this->random_string());
+            else {
+               $facturar = filter_input(INPUT_POST, 'facturar');
+               if (isset($facturar))
+                  header('Location: ' . $documento->url() . '&facturar=' . $facturar . '&petid=' . $this->random_string());
+            }
          } 
          else {
             $this->new_error_msg("¡Imposible vincular el documento origen con el nuevo documento!");
@@ -265,11 +299,17 @@ trait form_controller {
          $this->delete_documento($documento);
    }
    
+   /**
+    * Elimina en la base de datos las lineas borradas en el controllador
+    * @param array   $lineas
+    * @param integer $numlineas
+    */
    private function eliminar_lineas_borradas($lineas, $numlineas) {
       foreach ($lineas as $lin) {
          for ($num = 0; $num <= $numlineas; $num++) {
-            if (isset($_POST['idlinea_' . $num])) {
-               if ($lin->idlinea == intval($_POST['idlinea_' . $num]))
+            $idlinea = filter_input(INPUT_POST, 'idlinea_' .$num);
+            if (isset($idlinea)) {
+               if ($lin->idlinea == intval($idlinea))
                   break;
             }
          }
@@ -281,29 +321,45 @@ trait form_controller {
       }      
    }
    
+   /**
+    * Calcula los campos de impuesto de una linea de documento
+    * @param model   $linea
+    * @param string  $serie
+    * @param string  $regimeniva
+    * @param integer $indice
+    */
    private function calcular_impuesto_linea($linea, $serie, $regimeniva, $indice) {
       $linea->codimpuesto = NULL;
       $linea->iva = 0;
       $linea->recargo = 0;
 
       if (!$serie->siniva AND $regimeniva != 'Exento') {
-         $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $indice]);
+         $pct_iva = filter_input(INPUT_POST, 'iva_'.$indice);
+         $imp0 = $this->impuesto->get_by_iva($pct_iva);
          if ($imp0)
             $linea->codimpuesto = $imp0->codimpuesto;
 
-         $linea->iva = floatval($_POST['iva_' . $indice]);
-         $linea->recargo = floatval($_POST['recargo_' . $indice]);
+         $linea->iva = floatval($pct_iva);
+         $linea->recargo = floatval(filter_input(INPUT_POST, 'recargo_' . $indice));
       }      
    }
    
+   /**
+    * Actualiza la linea de documento en base a los parametros POST
+    * y la lista de valores indicados
+    * @param model   $documento
+    * @param model   $linea
+    * @param object  $valores
+    * @param integer $indice
+    */
    private function actualizar_linea_documento($documento, $linea, $valores, $indice) {
-      $linea->cantidad = floatval($_POST['cantidad_' . $indice]);
-      $linea->pvpunitario = floatval($_POST['pvp_' . $indice]);
-      $linea->dtopor = floatval($_POST['dto_' . $indice]);
+      $linea->cantidad = floatval(filter_input(INPUT_POST, 'cantidad_' . $indice));
+      $linea->pvpunitario = floatval(filter_input(INPUT_POST, 'pvp_' . $indice));
+      $linea->dtopor = floatval(filter_input(INPUT_POST, 'dto_' . $indice));
       $linea->pvpsindto = ($valores->cantidad * $valores->pvpunitario);
       $linea->pvptotal = ($valores->cantidad * $valores->pvpunitario * (100 - $valores->dtopor) / 100);
-      $linea->descripcion = $_POST['desc_' . $indice];
-      $linea->irpf = floatval($_POST['irpf_' . $indice]);
+      $linea->descripcion = filter_input(INPUT_POST, 'desc_' . $indice);
+      $linea->irpf = floatval(filter_input(INPUT_POST, 'irpf_' . $indice));
 
       if ($linea->save())
          $this->acumular_linea_documento($documento, $valores);
@@ -311,6 +367,11 @@ trait form_controller {
          $this->new_error_msg("¡Imposible modificar la línea del artículo " . $valores->referencia . "!");      
    }
    
+   /**
+    * Acumula en la cabecera de documento los importes de la linea indicada
+    * @param model $documento
+    * @param model $linea
+    */
    private function acumular_linea_documento($documento, $linea) {
       $documento->neto += $linea->pvptotal;
       $documento->totaliva += ($linea->pvptotal * $linea->iva) / 100;
@@ -321,6 +382,10 @@ trait form_controller {
          $documento->irpf = $linea->irpf;
    }
    
+   /**
+    * Redondea los importes del documento
+    * @param model $documento
+    */
    private function redondear_importes_documento($documento) {
       $documento->neto = round($documento->neto, FS_NF0);
       $documento->totaliva = round($documento->totaliva, FS_NF0);
@@ -328,12 +393,23 @@ trait form_controller {
       $documento->totalrecargo = round($documento->totalrecargo, FS_NF0);
       $documento->total = $documento->neto + $documento->totaliva - $documento->totalirpf + $documento->totalrecargo;
 
-      if (abs(floatval($_POST['atotal']) - $documento->total) >= .02) {
+      $atotal = filter_input(INPUT_POST, 'atotal');
+      if (abs(floatval($atotal) - $documento->total) >= .02) {
          $this->new_error_msg("El total difiere entre el controlador y la vista (" . $documento->total .
-                 " frente a " . $_POST['atotal'] . "). Debes informar del error.");
+                 " frente a " . $atotal . "). Debes informar del error.");
       }      
    }
-      
+   
+   /**
+    * Añade al parametro $historico la lista de documentos 
+    * dependientes del documento origen.
+    * @param array  $historico
+    * @param string  $ignorar_modelo
+    * @param string  $campo_id
+    * @param integer $valor_id
+    * @param integer $contador
+    * @param string  $modelo
+    */
    private function get_historico_documento($historico, $ignorar_modelo, $campo_id, $valor_id, &$contador, $modelo = "presupuesto_cliente") {
       $sender = new $modelo();
       $tabla = $sender->table_name();
@@ -407,6 +483,41 @@ trait form_controller {
       }
    }
    
+   /**
+    * Actualiza los campos del documento en base a los parametros POST
+    * @param model $documento
+    */
+   private function update_desde_params($documento) {
+      $documento->nombrecliente = filter_input(INPUT_POST, 'nombrecliente');
+      $documento->cifnif = filter_input(INPUT_POST, 'cifnif');
+      $documento->codpais = filter_input(INPUT_POST, 'codpais');
+      $documento->provincia = filter_input(INPUT_POST, 'provincia');
+      $documento->ciudad = filter_input(INPUT_POST, 'ciudad');
+      $documento->codpostal = filter_input(INPUT_POST, 'codpostal');
+      $documento->direccion = filter_input(INPUT_POST, 'direccion');
+      $documento->apartado = filter_input(INPUT_POST, 'apartado');
+
+      $documento->envio_nombre = filter_input(INPUT_POST, 'envio_nombre');
+      $documento->envio_apellidos = filter_input(INPUT_POST, 'envio_apellidos');
+      $documento->envio_codigo = filter_input(INPUT_POST, 'envio_codigo');
+      $documento->envio_codpais = filter_input(INPUT_POST, 'envio_codpais');
+      $documento->envio_provincia = filter_input(INPUT_POST, 'envio_provincia');
+      $documento->envio_ciudad = filter_input(INPUT_POST, 'envio_ciudad');
+      $documento->envio_codpostal = filter_input(INPUT_POST, 'envio_codpostal');
+      $documento->envio_direccion = filter_input(INPUT_POST, 'envio_direccion');
+      $documento->envio_apartado = filter_input(INPUT_POST, 'envio_apartado');
+
+      $envio = filter_input(INPUT_POST, 'envio_codtrans');
+      $documento->envio_codtrans = ($envio != '') ? $envio : NULL;            
+   }
+   
+   /**
+    * Código unificado del método "private_core" 
+    * en documentos de presupuestos y pedidos
+    * @param string $id
+    * @param string $id_new
+    * @param string $url
+    */
    protected function private_core_shared($id, $id_new, &$url) {
       $this->almacen = new almacen();
       $this->divisa = new divisa();
@@ -431,6 +542,12 @@ trait form_controller {
       }
    }
    
+   /**
+    * Código unificado del método "nueva_version" 
+    * en documentos de presupuestos y pedidos
+    * @param model $document
+    * @param model $new_document
+    */
    private function nueva_version_shared($document, $new_document) {
       if (isset($new_document->idpresupuesto))
          $new_document->idpresupuesto = NULL;
@@ -486,6 +603,12 @@ trait form_controller {
          $this->new_error_msg('Error al copiar el documento.');
    }
    
+   /**
+    * Código unificado del método "url" 
+    * en documentos de presupuestos y pedidos
+    * @param model $document
+    * @return string
+    */
    private function url_shared($document) {
       if (!isset($document))
          return parent::url();
@@ -496,21 +619,31 @@ trait form_controller {
       return $this->page->url();
    }
    
+   /**
+    * Código unificado del método "modificar" 
+    * en documentos de presupuestos y pedidos
+    * @param model $documento
+    * @param string $serie
+    * @return boolean
+    */
    private function modificar_shared($documento, &$serie) {
       // Si el documento es editable
       $result = $documento->editable;
       if ($result) {
          // Calculamos el ejercicio
-         $eje0 = $this->ejercicio->get_by_fecha($_POST['fecha'], FALSE);
+         $fecha = filter_input(INPUT_POST, 'fecha');
+         $eje0 = $this->ejercicio->get_by_fecha($fecha, FALSE);
          if ($eje0) {
-            $documento->fecha = $_POST['fecha'];
-            $documento->hora = $_POST['hora'];
+            $documento->fecha = $fecha;
+            $documento->hora = filter_input(INPUT_POST, 'hora');
 
-            if (isset($_POST['fechasalida']))
-               $documento->fechasalida = $_POST['fechasalida'] != '' ? $_POST['fechasalida'] : NULL;
+            $fechasalida = filter_input(INPUT_POST, 'fechasalida');
+            if (isset($fechasalida))
+               $documento->fechasalida = ($fechasalida != '') ? $fechasalida : NULL;
 
-            if (isset($_POST['finoferta']))
-               $documento->finoferta = $_POST['finoferta'] != '' ? $_POST['finoferta'] : NULL;
+            $finoferta = filter_input(INPUT_POST, 'finoferta');
+            if (isset($finoferta))
+               $documento->finoferta = ($finoferta != '') ? $finoferta : NULL;
                         
             if ($documento->codejercicio != $eje0->codejercicio) {
                $documento->codejercicio = $eje0->codejercicio;
@@ -520,12 +653,13 @@ trait form_controller {
          else
             $this->new_error_msg('Ningún ejercicio encontrado.');
       
-         $documento->codalmacen = $_POST['almacen'];
-         $documento->codpago = $_POST['forma_pago'];         
+         $documento->codalmacen = filter_input(INPUT_POST, 'almacen');
+         $documento->codpago = filter_input(INPUT_POST, 'forma_pago');
 
          // Hay cambio de serie
-         if ($_POST['serie'] != $documento->codserie) {
-            $serie2 = $this->serie->get($_POST['serie']);
+         $nueva_serie = filter_input(INPUT_POST, 'serie');
+         if ($nueva_serie != $documento->codserie) {
+            $serie2 = $this->serie->get($nueva_serie);
             if ($serie2) {
                $documento->codserie = $serie2->codserie;
                $documento->new_codigo();
@@ -535,19 +669,21 @@ trait form_controller {
          }
          
          // Hay cambio de divisa
-         if ($_POST['divisa'] != $documento->coddivisa) {
-            $divisa = $this->divisa->get($_POST['divisa']);
+         $coddivisa = filter_input(INPUT_POST, 'divisa');
+         if ($coddivisa != $documento->coddivisa) {
+            $divisa = $this->divisa->get($coddivisa);
             if ($divisa) {
                $documento->coddivisa = $divisa->coddivisa;
                $documento->tasaconv = $divisa->tasaconv;
             }
          }
          else {
-            if ($_POST['tasaconv'] != '')
-               $documento->tasaconv = floatval($_POST['tasaconv']);
+            $tasaconv = filter_input(INPUT_POST, 'tasaconv');
+            if ($tasaconv != '')
+               $documento->tasaconv = floatval($tasaconv);
          }
          
-         if (isset($_POST['numlineas'])) {
+         if (null !== filter_input(INPUT_POST, 'numlineas')) {
             $documento->neto = 0;
             $documento->totaliva = 0;
             $documento->totalirpf = 0;
@@ -558,8 +694,14 @@ trait form_controller {
       return $result;
    }
    
+   /**
+    * Código unificado del método "cambiar_cliente" 
+    * en documentos de presupuestos y pedidos
+    * @param model $documento
+    */
    private function cambiar_cliente_shared($documento) {
-      $cliente = $this->cliente->get($_POST['cliente']);
+      $codcliente = filter_input(INPUT_POST, 'cliente');
+      $cliente = $this->cliente->get($codcliente);
       if ($cliente) {
          $documento->codcliente = $cliente->codcliente;
          $documento->cifnif = $cliente->cifnif;
@@ -587,35 +729,19 @@ trait form_controller {
       }
       else {
          $documento->codcliente = NULL;
-         $documento->nombrecliente = $_POST['nombrecliente'];
-         $documento->cifnif = $_POST['cifnif'];
+         $documento->nombrecliente = filter_input(INPUT_POST, 'nombrecliente');
+         $documento->cifnif = filter_input(INPUT_POST, 'cifnif');
          $documento->coddir = NULL;
       }      
    }
-   
-   private function update_desde_params($documento) {
-      $documento->nombrecliente = $_POST['nombrecliente'];
-      $documento->cifnif = $_POST['cifnif'];
-      $documento->codpais = $_POST['codpais'];
-      $documento->provincia = $_POST['provincia'];
-      $documento->ciudad = $_POST['ciudad'];
-      $documento->codpostal = $_POST['codpostal'];
-      $documento->direccion = $_POST['direccion'];
-      $documento->apartado = $_POST['apartado'];
 
-      $documento->envio_nombre = $_POST['envio_nombre'];
-      $documento->envio_apellidos = $_POST['envio_apellidos'];            
-      $documento->envio_codigo = $_POST['envio_codigo'];
-      $documento->envio_codpais = $_POST['envio_codpais'];
-      $documento->envio_provincia = $_POST['envio_provincia'];
-      $documento->envio_ciudad = $_POST['envio_ciudad'];
-      $documento->envio_codpostal = $_POST['envio_codpostal'];
-      $documento->envio_direccion = $_POST['envio_direccion'];
-      $documento->envio_apartado = $_POST['envio_apartado'];
-
-      $documento->envio_codtrans = $_POST['envio_codtrans'] != '' ? $_POST['envio_codtrans'] : NULL;            
-   }
-
+   /**
+    * Código unificado del método "get_lineas_stock" 
+    * en documentos de presupuestos y pedidos
+    * @param model  $documento
+    * @param string $campo_id
+    * @return array
+    */
    private function get_lineas_stock_shared($documento, $campo_id) {
       $lineas = array();
       $valor_id = $documento->$campo_id;

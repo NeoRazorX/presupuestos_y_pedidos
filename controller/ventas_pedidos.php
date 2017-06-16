@@ -76,7 +76,7 @@ class ventas_pedidos extends fbase_controller {
     * @return boolean
     */
    private function acciones() {
-      if (isset($_POST['buscar_lineas'])) {
+      if (null !== filter_input(INPUT_POST, 'buscar_lineas')) {
          $this->buscar_lineas();
          return TRUE;
       }
@@ -86,14 +86,15 @@ class ventas_pedidos extends fbase_controller {
          return TRUE;
       }
 
-      if (isset($_GET['ref'])) {
+      $ref = filter_input(INPUT_GET, 'ref');
+      if (isset($ref)) {
          $this->template = 'extension/ventas_pedidos_articulo';
 
          $articulo = new articulo();
-         $this->articulo = $articulo->get($_GET['ref']);
+         $this->articulo = $articulo->get($ref);
 
          $linea = new linea_pedido_cliente();
-         $this->resultados = $linea->all_from_articulo($_GET['ref'], $this->offset);
+         $this->resultados = $linea->all_from_articulo($ref, $this->offset);
          return TRUE;
       } 
    
@@ -120,10 +121,11 @@ class ventas_pedidos extends fbase_controller {
          $this->codpago = '';
          $this->codgrupo = '';
 
-         if (isset($_POST['delete']))
+         if (null !== filter_input(INPUT_POST, 'delete'))
             $this->delete_pedido();
          else {
-            if (!isset($_GET['mostrar']) AND ( $this->query != '' OR isset($_REQUEST['codagente']) OR isset($_REQUEST['codcliente']) OR isset($_REQUEST['codserie']))) {
+            $mostrar = filter_input(INPUT_GET, 'mostrar');
+            if (!isset($mostrar) AND ( $this->query != '' OR isset($_REQUEST['codagente']) OR isset($_REQUEST['codcliente']) OR isset($_REQUEST['codserie']))) {
                /**
                 * si obtenermos un codagente, un codcliente o un codserie pasamos direcatemente
                 * a la pestaña de búsqueda, a menos que tengamos un mostrar, que
@@ -222,11 +224,12 @@ class ventas_pedidos extends fbase_controller {
       /// cambiamos la plantilla HTML
       $this->template = 'ajax/ventas_lineas_pedidos';
 
-      $this->buscar_lineas = $_POST['buscar_lineas'];
+      $this->buscar_lineas = filter_input(INPUT_POST, 'buscar_lineas');
       $linea = new linea_pedido_cliente();
 
-      if (isset($_POST['codcliente']))
-         $this->lineas = $linea->search_from_cliente2($_POST['codcliente'], $this->buscar_lineas, $_POST['buscar_lineas_o'], $this->offset);
+      $codcliente = filter_input(INPUT_POST, 'codcliente');
+      if (isset($codcliente))
+         $this->lineas = $linea->search_from_cliente2($codcliente, $this->buscar_lineas, filter_input(INPUT_POST, 'buscar_lineas_o'), $this->offset);
       else
          $this->lineas = $linea->search($this->buscar_lineas);      
    }
