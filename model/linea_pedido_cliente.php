@@ -21,5 +21,5 @@
 require_once 'plugins/presupuestos_y_pedidos/model/core/linea_pedido_cliente.php';
 
 class linea_pedido_cliente extends FacturaScripts\model\linea_pedido_cliente {
-   
+    
 }

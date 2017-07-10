@@ -21,5 +21,5 @@
 require_once 'plugins/presupuestos_y_pedidos/model/core/linea_pedido_proveedor.php';
 
 class linea_pedido_proveedor extends FacturaScripts\model\linea_pedido_proveedor {
-   
+    
 }

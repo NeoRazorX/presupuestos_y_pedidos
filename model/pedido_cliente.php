@@ -24,5 +24,5 @@ require_once 'plugins/presupuestos_y_pedidos/model/core/pedido_cliente.php';
  * Pedido de cliente
  */
 class pedido_cliente extends FacturaScripts\model\pedido_cliente {
-   
+    
 }

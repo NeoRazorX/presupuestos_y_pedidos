@@ -24,5 +24,5 @@ require_once 'plugins/presupuestos_y_pedidos/model/core/pedido_proveedor.php';
  * Pedido de proveedor
  */
 class pedido_proveedor extends FacturaScripts\model\pedido_proveedor {
-   
+    
 }
