@@ -21,10 +21,6 @@
 
 namespace FacturaScripts\model;
 
-require_model('pedido_cliente.php');
-require_model('linea_presupuesto_cliente.php');
-require_model('secuencia.php');
-
 /**
  * Presupuesto de cliente
  */

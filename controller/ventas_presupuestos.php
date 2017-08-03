@@ -19,13 +19,6 @@
  */
 
 require_once 'plugins/facturacion_base/extras/fbase_controller.php';
-require_model('agente.php');
-require_model('articulo.php');
-require_model('cliente.php');
-require_model('forma_pago.php');
-require_model('grupo_clientes.php');
-require_model('presupuesto_cliente.php');
-require_model('serie.php');
 
 class ventas_presupuestos extends fbase_controller {
 

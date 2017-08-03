@@ -21,7 +21,6 @@
  */
 
 require_once 'plugins/facturacion_base/controller/informe_albaranes.php';
-require_model('presupuesto_cliente.php');
 
 class informe_presupuestos extends informe_albaranes {
 

@@ -18,9 +18,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-require_model('articulos.php');
-require_model('pedido_proveedor.php');
-require_model('pedido_cliente.php');
 
 /**
  * Description of articulos_compras

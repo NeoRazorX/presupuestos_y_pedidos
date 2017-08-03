@@ -20,19 +20,6 @@
  */
 
 require_once 'plugins/facturacion_base/extras/fbase_controller.php';
-require_model('albaran_proveedor.php');
-require_model('almacen.php');
-require_model('articulo.php');
-require_model('divisa.php');
-require_model('ejercicio.php');
-require_model('fabricante.php');
-require_model('familia.php');
-require_model('forma_pago.php');
-require_model('impuesto.php');
-require_model('linea_pedido_proveedor.php');
-require_model('pedido_proveedor.php');
-require_model('proveedor.php');
-require_model('serie.php');
 
 class compras_pedido extends fbase_controller {
 

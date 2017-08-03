@@ -21,11 +21,6 @@
 
 namespace FacturaScripts\model;
 
-require_model('albaran_cliente.php');
-require_model('cliente.php');
-require_model('linea_pedido_cliente.php');
-require_model('secuencia.php');
-
 /**
  * Pedido de cliente
  */

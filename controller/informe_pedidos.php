@@ -20,8 +20,6 @@
  */
 
 require_once 'plugins/facturacion_base/controller/informe_albaranes.php';
-require_model('pedido_cliente.php');
-require_model('pedido_proveedor.php');
 
 /**
  * Heredamos del controlador de informe_albaranes, para reaprovechar el código.

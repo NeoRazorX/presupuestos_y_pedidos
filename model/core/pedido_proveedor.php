@@ -21,11 +21,6 @@
 
 namespace FacturaScripts\model;
 
-require_model('albaran_proveedor.php');
-require_model('proveedor.php');
-require_model('linea_pedido_proveedor.php');
-require_model('secuencia.php');
-
 /**
  * Pedido de proveedor
  */

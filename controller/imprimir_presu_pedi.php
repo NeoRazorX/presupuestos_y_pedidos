@@ -19,9 +19,6 @@
  */
 
 require_once 'plugins/facturacion_base/controller/ventas_imprimir.php';
-require_model('pedido_cliente.php');
-require_model('pedido_proveedor.php');
-require_model('presupuesto_cliente.php');
 
 /**
  * Esta clase agrupa los procedimientos de imprimir/enviar presupuestos y pedidos.
@@ -29,9 +26,9 @@ require_model('presupuesto_cliente.php');
 class imprimir_presu_pedi extends ventas_imprimir
 {
 
-    public function __construct()
+    public function __construct($name = __CLASS__, $title = 'imprimir', $folder = 'ventas')
     {
-        parent::__construct(__CLASS__, 'imprimir', 'ventas', FALSE, FALSE);
+        parent::__construct($name, $title, $folder);
     }
 
     protected function private_core()
@@ -87,7 +84,7 @@ class imprimir_presu_pedi extends ventas_imprimir
         $this->share_extensions();
     }
 
-    private function share_extensions()
+    protected function share_extensions()
     {
         $extensiones = array(
             array(

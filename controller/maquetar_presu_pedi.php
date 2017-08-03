@@ -18,9 +18,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_model('pedido_cliente.php');
-require_model('presupuesto_cliente.php');
-
 /**
  * Description of maquetar_presu_pedi
  *
