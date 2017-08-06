@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of pedidos_y_pedidos
  * Copyright (C) 2015-2017    Carlos Garcia Gomez  neorazorx@gmail.com
@@ -24,15 +23,18 @@ require_once 'plugins/facturacion_base/controller/informe_albaranes.php';
 /**
  * Heredamos del controlador de informe_albaranes, para reaprovechar el código.
  */
-class informe_pedidos extends informe_albaranes {
+class informe_pedidos extends informe_albaranes
+{
 
     public $estado;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS), 'informes');
     }
 
-    protected function private_core() {
+    protected function private_core()
+    {
         /// declaramos los objetos sólo para asegurarnos de que existen las tablas
         $pedido_cli = new pedido_cliente();
         $pedido_pro = new pedido_proveedor();
@@ -44,7 +46,8 @@ class informe_pedidos extends informe_albaranes {
         parent::private_core();
     }
 
-    protected function ini_filters() {
+    protected function ini_filters()
+    {
         parent::ini_filters();
 
         $this->estado = '';
@@ -53,7 +56,8 @@ class informe_pedidos extends informe_albaranes {
         }
     }
 
-    protected function set_where() {
+    protected function set_where()
+    {
         parent::set_where();
 
         if ($this->estado != '') {
@@ -76,23 +80,28 @@ class informe_pedidos extends informe_albaranes {
         }
     }
 
-    public function stats_series($tabla = 'pedidosprov') {
+    public function stats_series($tabla = 'pedidosprov')
+    {
         return parent::stats_series($tabla);
     }
 
-    public function stats_agentes($tabla = 'pedidosprov') {
+    public function stats_agentes($tabla = 'pedidosprov')
+    {
         return parent::stats_agentes($tabla);
     }
 
-    public function stats_almacenes($tabla = 'pedidosprov') {
+    public function stats_almacenes($tabla = 'pedidosprov')
+    {
         return parent::stats_almacenes($tabla);
     }
 
-    public function stats_formas_pago($tabla = 'pedidosprov') {
+    public function stats_formas_pago($tabla = 'pedidosprov')
+    {
         return parent::stats_formas_pago($tabla);
     }
 
-    public function stats_estados($tabla = 'pedidosprov') {
+    public function stats_estados($tabla = 'pedidosprov')
+    {
         $stats = array();
 
         if ($tabla == 'pedidoscli') {
@@ -132,7 +141,8 @@ class informe_pedidos extends informe_albaranes {
         return $stats;
     }
 
-    private function stats_estados_pedidoscli() {
+    private function stats_estados_pedidoscli()
+    {
         $stats = array();
         $tabla = 'pedidoscli';
 
@@ -160,7 +170,8 @@ class informe_pedidos extends informe_albaranes {
         return $stats;
     }
 
-    protected function get_documentos($tabla) {
+    protected function get_documentos($tabla)
+    {
         $doclist = array();
 
         $where = $this->where_compras;
@@ -182,5 +193,4 @@ class informe_pedidos extends informe_albaranes {
 
         return $doclist;
     }
-
 }

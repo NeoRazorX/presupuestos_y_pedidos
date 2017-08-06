@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2016  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -23,17 +22,20 @@
  *
  * @author Carlos García Gómez <neorazorx@gmail.com>
  */
-class maquetar_presu_pedi extends fs_controller {
+class maquetar_presu_pedi extends fs_controller
+{
 
     public $documento;
     public $lineas;
     public $titulo;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(__CLASS__, 'Maquetar', 'ventas', FALSE, FALSE);
     }
 
-    protected function private_core() {
+    protected function private_core()
+    {
         $this->share_extensions();
 
         $this->documento = FALSE;
@@ -114,7 +116,8 @@ class maquetar_presu_pedi extends fs_controller {
         }
     }
 
-    private function share_extensions() {
+    private function share_extensions()
+    {
         $fsext = new fs_extension();
         $fsext->name = 'maquetar_presu';
         $fsext->from = __CLASS__;
@@ -134,7 +137,8 @@ class maquetar_presu_pedi extends fs_controller {
         $fsext2->save();
     }
 
-    public function url() {
+    public function url()
+    {
         switch (get_class_name($this->documento)) {
             case 'presupuesto_cliente':
                 return 'index.php?page=' . __CLASS__ . '&presu=TRUE&id=' . $this->documento->idpresupuesto;
@@ -149,5 +153,4 @@ class maquetar_presu_pedi extends fs_controller {
                 break;
         }
     }
-
 }

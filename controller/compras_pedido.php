@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017  Carlos Garcia Gomez       neorazorx@gmail.com
@@ -21,7 +20,8 @@
 
 require_once 'plugins/facturacion_base/extras/fbase_controller.php';
 
-class compras_pedido extends fbase_controller {
+class compras_pedido extends fbase_controller
+{
 
     public $agente;
     public $almacen;
@@ -38,11 +38,13 @@ class compras_pedido extends fbase_controller {
     public $serie;
     public $versiones;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(__CLASS__, ucfirst(FS_PEDIDO), 'compras', FALSE, FALSE);
     }
 
-    protected function private_core() {
+    protected function private_core()
+    {
         parent::private_core();
 
         $this->ppage = $this->page->get('compras_pedidos');
@@ -122,7 +124,8 @@ class compras_pedido extends fbase_controller {
         }
     }
 
-    private function nueva_version() {
+    private function nueva_version()
+    {
         $pedi = clone $this->pedido;
         $pedi->idpedido = NULL;
         $pedi->idalbaran = NULL;
@@ -158,7 +161,8 @@ class compras_pedido extends fbase_controller {
         }
     }
 
-    public function url() {
+    public function url()
+    {
         if (!isset($this->pedido)) {
             return parent::url();
         } else if ($this->pedido) {
@@ -167,7 +171,8 @@ class compras_pedido extends fbase_controller {
             return $this->page->url();
     }
 
-    private function modificar() {
+    private function modificar()
+    {
         $this->pedido->observaciones = $_POST['observaciones'];
         $this->pedido->numproveedor = $_POST['numproveedor'];
 
@@ -366,7 +371,7 @@ class compras_pedido extends fbase_controller {
 
                 if (abs(floatval($_POST['atotal']) - $this->pedido->total) >= .02) {
                     $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->pedido->total .
-                            " frente a " . $_POST['atotal'] . "). Debes informar del error.");
+                        " frente a " . $_POST['atotal'] . "). Debes informar del error.");
                 }
             }
         }
@@ -378,7 +383,8 @@ class compras_pedido extends fbase_controller {
             $this->new_error_msg("¡Imposible modificar el " . FS_PEDIDO . "!");
     }
 
-    private function generar_albaran() {
+    private function generar_albaran()
+    {
         $albaran = new albaran_proveedor();
         $albaran->cifnif = $this->pedido->cifnif;
         $albaran->codagente = $this->pedido->codagente;
@@ -481,5 +487,4 @@ class compras_pedido extends fbase_controller {
         } else
             $this->new_error_msg("¡Imposible guardar el " . FS_ALBARAN . "!");
     }
-
 }

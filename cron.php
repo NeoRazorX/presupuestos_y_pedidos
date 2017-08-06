@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -18,9 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class presupuestos_pedidos_cron {
+class presupuestos_pedidos_cron
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         $pre = new presupuesto_cliente();
         $pre->cron_job();
 
@@ -30,7 +31,6 @@ class presupuestos_pedidos_cron {
         $pedp = new pedido_proveedor();
         $pedp->cron_job();
     }
-
 }
 
 new presupuestos_pedidos_cron();

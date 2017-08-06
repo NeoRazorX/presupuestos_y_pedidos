@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of presupuestos_y_presupuestos
  * Copyright (C) 2015-2017    Carlos Garcia Gomez  neorazorx@gmail.com
@@ -22,15 +21,18 @@
 
 require_once 'plugins/facturacion_base/controller/informe_albaranes.php';
 
-class informe_presupuestos extends informe_albaranes {
+class informe_presupuestos extends informe_albaranes
+{
 
     public $estado;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTOS), 'informes', FALSE, TRUE);
     }
 
-    protected function private_core() {
+    protected function private_core()
+    {
         /// declaramos los objetos sólo para asegurarnos de que existen las tablas
         $presupuesto_cli = new presupuesto_cliente();
 
@@ -41,7 +43,8 @@ class informe_presupuestos extends informe_albaranes {
         parent::private_core();
     }
 
-    protected function ini_filters() {
+    protected function ini_filters()
+    {
         parent::ini_filters();
 
         $this->estado = '';
@@ -50,7 +53,8 @@ class informe_presupuestos extends informe_albaranes {
         }
     }
 
-    protected function set_where() {
+    protected function set_where()
+    {
         parent::set_where();
 
         if ($this->estado != '') {
@@ -64,23 +68,28 @@ class informe_presupuestos extends informe_albaranes {
         }
     }
 
-    public function stats_series($tabla = 'presupuestoscli') {
+    public function stats_series($tabla = 'presupuestoscli')
+    {
         return parent::stats_series($tabla);
     }
 
-    public function stats_agentes($tabla = 'presupuestoscli') {
+    public function stats_agentes($tabla = 'presupuestoscli')
+    {
         return parent::stats_agentes($tabla);
     }
 
-    public function stats_almacenes($tabla = 'presupuestoscli') {
+    public function stats_almacenes($tabla = 'presupuestoscli')
+    {
         return parent::stats_almacenes($tabla);
     }
 
-    public function stats_formas_pago($tabla = 'presupuestoscli') {
+    public function stats_formas_pago($tabla = 'presupuestoscli')
+    {
         return parent::stats_formas_pago($tabla);
     }
 
-    public function stats_estados($tabla = 'presupuestoscli') {
+    public function stats_estados($tabla = 'presupuestoscli')
+    {
         $stats = array();
 
         $sql = "select status,sum(neto) as total from presupuestoscli ";
@@ -110,7 +119,8 @@ class informe_presupuestos extends informe_albaranes {
      * 
      * @return type array datos
      */
-    public function stats_clientes() {
+    public function stats_clientes()
+    {
         $stats = array();
 
         $sql = "select codcliente,sum(neto) as total from presupuestoscli";
@@ -146,7 +156,8 @@ class informe_presupuestos extends informe_albaranes {
         return $stats;
     }
 
-    protected function get_documentos($tabla) {
+    protected function get_documentos($tabla)
+    {
         $doclist = array();
 
         $sql = "select * from " . $tabla . $this->where_ventas . " order by fecha asc, hora asc;";
@@ -159,5 +170,4 @@ class informe_presupuestos extends informe_albaranes {
 
         return $doclist;
     }
-
 }

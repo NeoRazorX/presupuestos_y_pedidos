@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2016-2017 Carlos Garcia Gomez      neorazorx@gmail.com
@@ -24,18 +23,21 @@
  *
  * @author Luismipr <luismipr@gmail.com>
  */
-class articulos_pedidos extends fs_controller {
+class articulos_pedidos extends fs_controller
+{
 
     public $compras;
     public $pedidocli;
     public $pedidoprov;
     public $resultados;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(__CLASS__, 'Artículos Pedidos', 'ventas', FALSE, FALSE);
     }
 
-    protected function private_core() {
+    protected function private_core()
+    {
         /// Cargamos extensiones
         $this->share_extensions();
 
@@ -47,7 +49,8 @@ class articulos_pedidos extends fs_controller {
         $this->resultados = $this->buscar_articulos();
     }
 
-    public function share_extensions() {
+    public function share_extensions()
+    {
         //botón articulos pendientes de recibir en copras_pedidos
         $fsext = new fs_extension();
         $fsext->name = 'articulos_pedidos_compras';
@@ -68,17 +71,18 @@ class articulos_pedidos extends fs_controller {
         $fsext1->save();
     }
 
-    public function buscar_articulos() {
+    public function buscar_articulos()
+    {
         $artlist = array();
         $art0 = new articulo();
 
         /// compras
         if ($this->db->table_exists('lineaspedidosprov')) {
             $sql = "SELECT sum(cantidad) as cantidadcompras,referencia,lineaspedidosprov.idpedido "
-                    . "FROM lineaspedidosprov LEFT JOIN pedidosprov ON lineaspedidosprov.idpedido = pedidosprov.idpedido "
-                    . "WHERE pedidosprov.idalbaran IS NULL AND editable AND lineaspedidosprov.referencia IS NOT NULL "
-                    . "GROUP BY referencia,lineaspedidosprov.idpedido "
-                    . "ORDER BY idpedido DESC, referencia ASC";
+                . "FROM lineaspedidosprov LEFT JOIN pedidosprov ON lineaspedidosprov.idpedido = pedidosprov.idpedido "
+                . "WHERE pedidosprov.idalbaran IS NULL AND editable AND lineaspedidosprov.referencia IS NOT NULL "
+                . "GROUP BY referencia,lineaspedidosprov.idpedido "
+                . "ORDER BY idpedido DESC, referencia ASC";
             $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, 0);
             if ($data) {
                 foreach ($data as $d) {
@@ -114,11 +118,11 @@ class articulos_pedidos extends fs_controller {
         /// ventas
         if ($this->db->table_exists('lineaspedidoscli')) {
             $sql1 = "SELECT sum(cantidad) as cantidadventas,referencia,lineaspedidoscli.idpedido "
-                    . "FROM lineaspedidoscli LEFT JOIN pedidoscli ON lineaspedidoscli.idpedido = pedidoscli.idpedido "
-                    . "WHERE pedidoscli.idalbaran IS NULL AND status = '0' "
-                    . "AND lineaspedidoscli.referencia IS NOT NULL AND lineaspedidoscli.referencia != '' "
-                    . "GROUP BY referencia,lineaspedidoscli.idpedido "
-                    . "ORDER BY idpedido DESC, referencia ASC";
+                . "FROM lineaspedidoscli LEFT JOIN pedidoscli ON lineaspedidoscli.idpedido = pedidoscli.idpedido "
+                . "WHERE pedidoscli.idalbaran IS NULL AND status = '0' "
+                . "AND lineaspedidoscli.referencia IS NOT NULL AND lineaspedidoscli.referencia != '' "
+                . "GROUP BY referencia,lineaspedidoscli.idpedido "
+                . "ORDER BY idpedido DESC, referencia ASC";
             $data1 = $this->db->select_limit($sql1, FS_ITEM_LIMIT, 0);
             if ($data1) {
                 foreach ($data1 as $d1) {
@@ -163,5 +167,4 @@ class articulos_pedidos extends fs_controller {
 
         return $artlist;
     }
-
 }

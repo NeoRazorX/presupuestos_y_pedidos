@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017  Carlos Garcia Gomez       neorazorx@gmail.com
@@ -21,7 +20,8 @@
 
 require_once 'plugins/facturacion_base/extras/fbase_controller.php';
 
-class ventas_pedidos extends fbase_controller {
+class ventas_pedidos extends fbase_controller
+{
 
     public $agente;
     public $articulo;
@@ -46,11 +46,13 @@ class ventas_pedidos extends fbase_controller {
     public $total_resultados;
     public $total_resultados_txt;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS), 'ventas');
     }
 
-    protected function private_core() {
+    protected function private_core()
+    {
         parent::private_core();
 
         $pedido = new pedido_cliente();
@@ -213,7 +215,8 @@ class ventas_pedidos extends fbase_controller {
         }
     }
 
-    public function url($busqueda = FALSE) {
+    public function url($busqueda = FALSE)
+    {
         if ($busqueda) {
             $codcliente = '';
             if ($this->cliente) {
@@ -221,15 +224,15 @@ class ventas_pedidos extends fbase_controller {
             }
 
             $url = $this->url() . "&mostrar=" . $this->mostrar
-                    . "&query=" . $this->query
-                    . "&codagente=" . $this->codagente
-                    . "&codalmacen=" . $this->codalmacen
-                    . "&codcliente=" . $codcliente
-                    . "&codgrupo=" . $this->codgrupo
-                    . "&codpago=" . $this->codpago
-                    . "&codserie=" . $this->codserie
-                    . "&desde=" . $this->desde
-                    . "&hasta=" . $this->hasta;
+                . "&query=" . $this->query
+                . "&codagente=" . $this->codagente
+                . "&codalmacen=" . $this->codalmacen
+                . "&codcliente=" . $codcliente
+                . "&codgrupo=" . $this->codgrupo
+                . "&codpago=" . $this->codpago
+                . "&codserie=" . $this->codserie
+                . "&desde=" . $this->desde
+                . "&hasta=" . $this->hasta;
 
             return $url;
         } else {
@@ -237,7 +240,8 @@ class ventas_pedidos extends fbase_controller {
         }
     }
 
-    public function paginas() {
+    public function paginas()
+    {
         if ($this->mostrar == 'pendientes') {
             $total = $this->total_pendientes();
         } else if ($this->mostrar == 'rechazados') {
@@ -251,7 +255,8 @@ class ventas_pedidos extends fbase_controller {
         return $this->fbase_paginas($this->url(TRUE), $total, $this->offset);
     }
 
-    public function buscar_lineas() {
+    public function buscar_lineas()
+    {
         /// cambiamos la plantilla HTML
         $this->template = 'ajax/ventas_lineas_pedidos';
 
@@ -265,7 +270,8 @@ class ventas_pedidos extends fbase_controller {
         }
     }
 
-    private function delete_pedido() {
+    private function delete_pedido()
+    {
         $ped0 = new pedido_cliente();
         $pedido = $ped0->get($_POST['delete']);
         if ($pedido) {
@@ -277,7 +283,8 @@ class ventas_pedidos extends fbase_controller {
             $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " no encontrado!");
     }
 
-    private function share_extension() {
+    private function share_extension()
+    {
         /// añadimos las extensiones para clientes, agentes y artículos
         $extensiones = array(
             array(
@@ -313,19 +320,23 @@ class ventas_pedidos extends fbase_controller {
         }
     }
 
-    public function total_pendientes() {
+    public function total_pendientes()
+    {
         return $this->fbase_sql_total('pedidoscli', 'idpedido', 'WHERE idalbaran IS NULL AND status = 0');
     }
 
-    public function total_rechazados() {
+    public function total_rechazados()
+    {
         return $this->fbase_sql_total('pedidoscli', 'idpedido', 'WHERE status = 2');
     }
 
-    private function total_registros() {
+    private function total_registros()
+    {
         return $this->fbase_sql_total('pedidoscli', 'idpedido');
     }
 
-    private function buscar($order2) {
+    private function buscar($order2)
+    {
         $this->resultados = array();
         $this->num_resultados = 0;
         $sql = " FROM pedidoscli ";
@@ -338,7 +349,7 @@ class ventas_pedidos extends fbase_controller {
                 $sql .= "(codigo LIKE '%" . $query . "%' OR numero2 LIKE '%" . $query . "%' OR observaciones LIKE '%" . $query . "%')";
             } else {
                 $sql .= "(lower(codigo) LIKE '%" . $query . "%' OR lower(numero2) LIKE '%" . $query . "%' "
-                        . "OR lower(observaciones) LIKE '%" . str_replace(' ', '%', $query) . "%')";
+                    . "OR lower(observaciones) LIKE '%" . str_replace(' ', '%', $query) . "%')";
             }
             $where = ' AND ';
         }
@@ -408,7 +419,8 @@ class ventas_pedidos extends fbase_controller {
         }
     }
 
-    public function orden() {
+    public function orden()
+    {
         return array(
             'fecha_desc' => array(
                 'icono' => '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>',
@@ -447,5 +459,4 @@ class ventas_pedidos extends fbase_controller {
             )
         );
     }
-
 }

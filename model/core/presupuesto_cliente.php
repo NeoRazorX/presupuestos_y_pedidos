@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017    Carlos Garcia Gomez        neorazorx@gmail.com
@@ -18,84 +17,84 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 namespace FacturaScripts\model;
 
 /**
  * Presupuesto de cliente
  */
-class presupuesto_cliente extends \fs_model {
+class presupuesto_cliente extends \fs_model
+{
 
     /**
      * Clave primaria.
-     * @var type 
+     * @var integer 
      */
     public $idpresupuesto;
 
     /**
      * ID del pedido relacionado, si lo hay.
-     * @var type 
+     * @var integer 
      */
     public $idpedido;
 
     /**
      * Código identificador único. Para humanos.
-     * @var type 
+     * @var string 
      */
     public $codigo;
 
     /**
      * Serie relacionada.
-     * @var type 
+     * @var string 
      */
     public $codserie;
 
     /**
      * Ejercicio relacionado. El que corresponde ala fecha.
-     * @var type 
+     * @var string 
      */
     public $codejercicio;
 
     /**
      * Código del cliente del presupuesto.
-     * @var type 
+     * @var string 
      */
     public $codcliente;
 
     /**
      * Empleado que ha creado el presupuesto.
-     * @var type 
+     * @var string 
      */
     public $codagente;
 
     /**
      * Forma de pago del presupuesto.
-     * @var type 
+     * @var string 
      */
     public $codpago;
 
     /**
      * Divisa del presupuesto.
-     * @var type 
+     * @var string 
      */
     public $coddivisa;
 
     /**
      * Almacén del que saldría la mercancía.
-     * @var type 
+     * @var string 
      */
     public $codalmacen;
 
     /**
      * país del cliente.
-     * @var type 
+     * @var string 
      */
     public $codpais;
 
     /**
      * ID de la dirección del cliente.
      * Modelo direccion_cliente.
-     * @var type 
+     * @var integer 
      */
     public $coddir;
     public $codpostal;
@@ -103,13 +102,13 @@ class presupuesto_cliente extends \fs_model {
     /**
      * Número de presupuesto.
      * Único en la serie+ejercicio.
-     * @var type 
+     * @var string 
      */
     public $numero;
 
     /**
      * Número opcional a disposición del usuario.
-     * @var type 
+     * @var string 
      */
     public $numero2;
     public $nombrecliente;
@@ -122,7 +121,7 @@ class presupuesto_cliente extends \fs_model {
 
     /**
      * Fecha en la que termina la validéz del presupuesto.
-     * @var type 
+     * @var float 
      */
     public $finoferta;
     public $hora;
@@ -130,19 +129,19 @@ class presupuesto_cliente extends \fs_model {
     /**
      * Importe del presupuesto antes de impuestos.
      * Es la suma del pvptotal de las líneas.
-     * @var type 
+     * @var float 
      */
     public $neto;
 
     /**
      * Importe total del presupuesto, con impuestos.
-     * @var type 
+     * @var float 
      */
     public $total;
 
     /**
      * Suma del IVA de las líneas.
-     * @var type 
+     * @var float 
      */
     public $totaliva;
 
@@ -150,38 +149,38 @@ class presupuesto_cliente extends \fs_model {
      * Total expresado en euros, por si no fuese la divisa del presupuesto.
      * totaleuros = total/tasaconv
      * No hace falta rellenarlo, al hacer save() se calcula el valor.
-     * @var type 
+     * @var float 
      */
     public $totaleuros;
 
     /**
      * % de retención IRPF del presupuesto. Se obtiene de la serie.
      * Cada línea puede tener un % distinto.
-     * @var type 
+     * @var float 
      */
     public $irpf;
 
     /**
      * Suma de las retenciones IRPF de las líneas del presupuesto.
-     * @var type 
+     * @var float 
      */
     public $totalirpf;
 
     /**
      * % de comisión del empleado.
-     * @var type 
+     * @var float 
      */
     public $porcomision;
 
     /**
      * Tasa de conversión a Euros de la divisa seleccionada.
-     * @var type 
+     * @var float 
      */
     public $tasaconv;
 
     /**
      * Suma total del recargo de equivalencia de las líneas.
-     * @var type 
+     * @var float 
      */
     public $totalrecargo;
     public $observaciones;
@@ -198,7 +197,7 @@ class presupuesto_cliente extends \fs_model {
 
     /**
      * Fecha en la que se envió el presupuesto por email.
-     * @var type 
+     * @var string 
      */
     public $femail;
     /// datos de transporte
@@ -221,11 +220,12 @@ class presupuesto_cliente extends \fs_model {
 
     /**
      * Si este presupuesto es la versión de otro, aquí se almacena el idpresupuesto del original.
-     * @var type 
+     * @var integer 
      */
     public $idoriginal;
 
-    public function __construct($p = FALSE) {
+    public function __construct($p = FALSE)
+    {
         parent::__construct('presupuestoscli');
         if ($p) {
             $this->idpresupuesto = $this->intval($p['idpresupuesto']);
@@ -329,15 +329,15 @@ class presupuesto_cliente extends \fs_model {
             $this->fecha = Date('d-m-Y');
             $this->finoferta = date("d-m-Y", strtotime(Date('d-m-Y') . " +1month"));
             $this->hora = Date('H:i:s');
-            $this->neto = 0;
-            $this->total = 0;
-            $this->totaliva = 0;
-            $this->totaleuros = 0;
-            $this->irpf = 0;
-            $this->totalirpf = 0;
-            $this->porcomision = 0;
-            $this->tasaconv = 1;
-            $this->totalrecargo = 0;
+            $this->neto = 0.0;
+            $this->total = 0.0;
+            $this->totaliva = 0.0;
+            $this->totaleuros = 0.0;
+            $this->irpf = 0.0;
+            $this->totalirpf = 0.0;
+            $this->porcomision = 0.0;
+            $this->tasaconv = 1.0;
+            $this->totalrecargo = 0.0;
             $this->observaciones = NULL;
             $this->status = 0;
             $this->editable = TRUE;
@@ -359,64 +359,80 @@ class presupuesto_cliente extends \fs_model {
         }
     }
 
-    protected function install() {
+    protected function install()
+    {
         return '';
     }
 
-    public function show_hora($s = TRUE) {
+    public function show_hora($s = TRUE)
+    {
         if ($s) {
             return Date('H:i:s', strtotime($this->hora));
-        } else
-            return Date('H:i', strtotime($this->hora));
+        }
+
+        return Date('H:i', strtotime($this->hora));
     }
 
-    public function observaciones_resume() {
+    public function observaciones_resume()
+    {
         if ($this->observaciones == '') {
             return '-';
         } else if (strlen($this->observaciones) < 60) {
             return $this->observaciones;
-        } else
-            return substr($this->observaciones, 0, 50) . '...';
+        }
+
+        return substr($this->observaciones, 0, 50) . '...';
     }
 
-    public function finoferta() {
+    public function finoferta()
+    {
         return ( strtotime(Date('d-m-Y')) > strtotime($this->finoferta) );
     }
 
-    public function url() {
+    public function url()
+    {
         if (is_null($this->idpresupuesto)) {
             return 'index.php?page=ventas_presupuestos';
-        } else
-            return 'index.php?page=ventas_presupuesto&id=' . $this->idpresupuesto;
+        }
+
+        return 'index.php?page=ventas_presupuesto&id=' . $this->idpresupuesto;
     }
 
-    public function pedido_url() {
+    public function pedido_url()
+    {
         if (is_null($this->idpedido)) {
             return 'index.php?page=ventas_pedido';
-        } else
-            return 'index.php?page=ventas_pedido&id=' . $this->idpedido;
+        }
+
+        return 'index.php?page=ventas_pedido&id=' . $this->idpedido;
     }
 
-    public function agente_url() {
+    public function agente_url()
+    {
         if (is_null($this->codagente)) {
             return "index.php?page=admin_agentes";
-        } else
-            return "index.php?page=admin_agente&cod=" . $this->codagente;
+        }
+
+        return "index.php?page=admin_agente&cod=" . $this->codagente;
     }
 
-    public function cliente_url() {
+    public function cliente_url()
+    {
         if (is_null($this->codcliente)) {
             return "index.php?page=ventas_clientes";
-        } else
-            return "index.php?page=ventas_cliente&cod=" . $this->codcliente;
+        }
+
+        return "index.php?page=ventas_cliente&cod=" . $this->codcliente;
     }
 
-    public function get_lineas() {
+    public function get_lineas()
+    {
         $linea = new \linea_presupuesto_cliente();
         return $linea->all_from_presupuesto($this->idpresupuesto);
     }
 
-    public function get_versiones() {
+    public function get_versiones()
+    {
         $versiones = array();
 
         $sql = "SELECT * FROM " . $this->table_name . " WHERE idoriginal = " . $this->var2str($this->idpresupuesto);
@@ -436,22 +452,27 @@ class presupuesto_cliente extends \fs_model {
         return $versiones;
     }
 
-    public function get($id) {
+    public function get($id)
+    {
         $presupuesto = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idpresupuesto = " . $this->var2str($id) . ";");
         if ($presupuesto) {
             return new \presupuesto_cliente($presupuesto[0]);
-        } else
-            return FALSE;
+        }
+
+        return FALSE;
     }
 
-    public function exists() {
+    public function exists()
+    {
         if (is_null($this->idpresupuesto)) {
             return FALSE;
-        } else
-            return $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";");
+        }
+
+        return $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";");
     }
 
-    public function new_codigo() {
+    public function new_codigo()
+    {
         $this->numero = fs_documento_new_numero($this->db, $this->table_name, $this->codejercicio, $this->codserie, 'npresupuestocli');
 
         /**
@@ -469,7 +490,8 @@ class presupuesto_cliente extends \fs_model {
      * Comprueba los datos del presupuesto, devuelve TRUE si está todo correcto
      * @return boolean
      */
-    public function test() {
+    public function test()
+    {
         $this->nombrecliente = $this->no_html($this->nombrecliente);
         if ($this->nombrecliente == '') {
             $this->nombrecliente = '-';
@@ -505,13 +527,14 @@ class presupuesto_cliente extends \fs_model {
 
         if ($this->floatcmp($this->total, $this->neto + $this->totaliva - $this->totalirpf + $this->totalrecargo, FS_NF0, TRUE)) {
             return TRUE;
-        } else {
-            $this->new_error_msg("Error grave: El total está mal calculado. ¡Informa del error!");
-            return FALSE;
         }
+
+        $this->new_error_msg("Error grave: El total está mal calculado. ¡Informa del error!");
+        return FALSE;
     }
 
-    public function full_test($duplicados = TRUE) {
+    public function full_test($duplicados = TRUE)
+    {
         $status = TRUE;
 
         /// comprobamos las líneas
@@ -556,276 +579,242 @@ class presupuesto_cliente extends \fs_model {
         return $status;
     }
 
-    public function save() {
+    public function save()
+    {
         if ($this->test()) {
             if ($this->exists()) {
                 $sql = "UPDATE " . $this->table_name . " SET apartado = " . $this->var2str($this->apartado)
-                        . ", cifnif = " . $this->var2str($this->cifnif)
-                        . ", ciudad = " . $this->var2str($this->ciudad)
-                        . ", codagente = " . $this->var2str($this->codagente)
-                        . ", codalmacen = " . $this->var2str($this->codalmacen)
-                        . ", codcliente = " . $this->var2str($this->codcliente)
-                        . ", coddir = " . $this->var2str($this->coddir)
-                        . ", coddivisa = " . $this->var2str($this->coddivisa)
-                        . ", codejercicio = " . $this->var2str($this->codejercicio)
-                        . ", codigo = " . $this->var2str($this->codigo)
-                        . ", codpago = " . $this->var2str($this->codpago)
-                        . ", codpais = " . $this->var2str($this->codpais)
-                        . ", codpostal = " . $this->var2str($this->codpostal)
-                        . ", codserie = " . $this->var2str($this->codserie)
-                        . ", direccion = " . $this->var2str($this->direccion)
-                        . ", editable = " . $this->var2str($this->editable)
-                        . ", fecha = " . $this->var2str($this->fecha)
-                        . ", finoferta = " . $this->var2str($this->finoferta)
-                        . ", hora = " . $this->var2str($this->hora)
-                        . ", idpedido = " . $this->var2str($this->idpedido)
-                        . ", irpf = " . $this->var2str($this->irpf)
-                        . ", neto = " . $this->var2str($this->neto)
-                        . ", nombrecliente = " . $this->var2str($this->nombrecliente)
-                        . ", numero = " . $this->var2str($this->numero)
-                        . ", numero2 = " . $this->var2str($this->numero2)
-                        . ", observaciones = " . $this->var2str($this->observaciones)
-                        . ", status = " . $this->var2str($this->status)
-                        . ", porcomision = " . $this->var2str($this->porcomision)
-                        . ", provincia = " . $this->var2str($this->provincia)
-                        . ", tasaconv = " . $this->var2str($this->tasaconv)
-                        . ", total = " . $this->var2str($this->total)
-                        . ", totaleuros = " . $this->var2str($this->totaleuros)
-                        . ", totalirpf = " . $this->var2str($this->totalirpf)
-                        . ", totaliva = " . $this->var2str($this->totaliva)
-                        . ", totalrecargo = " . $this->var2str($this->totalrecargo)
-                        . ", femail = " . $this->var2str($this->femail)
-                        . ", codtrans = " . $this->var2str($this->envio_codtrans)
-                        . ", codigoenv = " . $this->var2str($this->envio_codigo)
-                        . ", nombreenv = " . $this->var2str($this->envio_nombre)
-                        . ", apellidosenv = " . $this->var2str($this->envio_apellidos)
-                        . ", apartadoenv = " . $this->var2str($this->envio_apartado)
-                        . ", direccionenv = " . $this->var2str($this->envio_direccion)
-                        . ", codpostalenv = " . $this->var2str($this->envio_codpostal)
-                        . ", ciudadenv = " . $this->var2str($this->envio_ciudad)
-                        . ", provinciaenv = " . $this->var2str($this->envio_provincia)
-                        . ", codpaisenv = " . $this->var2str($this->envio_codpais)
-                        . ", numdocs = " . $this->var2str($this->numdocs)
-                        . ", idoriginal = " . $this->var2str($this->idoriginal)
-                        . "  WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";";
+                    . ", cifnif = " . $this->var2str($this->cifnif)
+                    . ", ciudad = " . $this->var2str($this->ciudad)
+                    . ", codagente = " . $this->var2str($this->codagente)
+                    . ", codalmacen = " . $this->var2str($this->codalmacen)
+                    . ", codcliente = " . $this->var2str($this->codcliente)
+                    . ", coddir = " . $this->var2str($this->coddir)
+                    . ", coddivisa = " . $this->var2str($this->coddivisa)
+                    . ", codejercicio = " . $this->var2str($this->codejercicio)
+                    . ", codigo = " . $this->var2str($this->codigo)
+                    . ", codpago = " . $this->var2str($this->codpago)
+                    . ", codpais = " . $this->var2str($this->codpais)
+                    . ", codpostal = " . $this->var2str($this->codpostal)
+                    . ", codserie = " . $this->var2str($this->codserie)
+                    . ", direccion = " . $this->var2str($this->direccion)
+                    . ", editable = " . $this->var2str($this->editable)
+                    . ", fecha = " . $this->var2str($this->fecha)
+                    . ", finoferta = " . $this->var2str($this->finoferta)
+                    . ", hora = " . $this->var2str($this->hora)
+                    . ", idpedido = " . $this->var2str($this->idpedido)
+                    . ", irpf = " . $this->var2str($this->irpf)
+                    . ", neto = " . $this->var2str($this->neto)
+                    . ", nombrecliente = " . $this->var2str($this->nombrecliente)
+                    . ", numero = " . $this->var2str($this->numero)
+                    . ", numero2 = " . $this->var2str($this->numero2)
+                    . ", observaciones = " . $this->var2str($this->observaciones)
+                    . ", status = " . $this->var2str($this->status)
+                    . ", porcomision = " . $this->var2str($this->porcomision)
+                    . ", provincia = " . $this->var2str($this->provincia)
+                    . ", tasaconv = " . $this->var2str($this->tasaconv)
+                    . ", total = " . $this->var2str($this->total)
+                    . ", totaleuros = " . $this->var2str($this->totaleuros)
+                    . ", totalirpf = " . $this->var2str($this->totalirpf)
+                    . ", totaliva = " . $this->var2str($this->totaliva)
+                    . ", totalrecargo = " . $this->var2str($this->totalrecargo)
+                    . ", femail = " . $this->var2str($this->femail)
+                    . ", codtrans = " . $this->var2str($this->envio_codtrans)
+                    . ", codigoenv = " . $this->var2str($this->envio_codigo)
+                    . ", nombreenv = " . $this->var2str($this->envio_nombre)
+                    . ", apellidosenv = " . $this->var2str($this->envio_apellidos)
+                    . ", apartadoenv = " . $this->var2str($this->envio_apartado)
+                    . ", direccionenv = " . $this->var2str($this->envio_direccion)
+                    . ", codpostalenv = " . $this->var2str($this->envio_codpostal)
+                    . ", ciudadenv = " . $this->var2str($this->envio_ciudad)
+                    . ", provinciaenv = " . $this->var2str($this->envio_provincia)
+                    . ", codpaisenv = " . $this->var2str($this->envio_codpais)
+                    . ", numdocs = " . $this->var2str($this->numdocs)
+                    . ", idoriginal = " . $this->var2str($this->idoriginal)
+                    . "  WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";";
 
                 return $this->db->exec($sql);
-            } else {
-                $this->new_codigo();
-                $sql = "INSERT INTO " . $this->table_name . " (apartado,cifnif,ciudad,codagente,codalmacen,
+            }
+
+            $this->new_codigo();
+            $sql = "INSERT INTO " . $this->table_name . " (apartado,cifnif,ciudad,codagente,codalmacen,
                codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,codpostal,codserie,
                direccion,editable,fecha,finoferta,hora,idpedido,irpf,neto,nombrecliente,numero,
                observaciones,status,porcomision,provincia,tasaconv,total,totaleuros,totalirpf,
                totaliva,totalrecargo,numero2,femail,codtrans,codigoenv,nombreenv,apellidosenv,apartadoenv,
                direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs,idoriginal) VALUES ("
-                        . $this->var2str($this->apartado) . ","
-                        . $this->var2str($this->cifnif) . ","
-                        . $this->var2str($this->ciudad) . ","
-                        . $this->var2str($this->codagente) . ","
-                        . $this->var2str($this->codalmacen) . ","
-                        . $this->var2str($this->codcliente) . ","
-                        . $this->var2str($this->coddir) . ","
-                        . $this->var2str($this->coddivisa) . ","
-                        . $this->var2str($this->codejercicio) . ","
-                        . $this->var2str($this->codigo) . ","
-                        . $this->var2str($this->codpais) . ","
-                        . $this->var2str($this->codpago) . ","
-                        . $this->var2str($this->codpostal) . ","
-                        . $this->var2str($this->codserie) . ","
-                        . $this->var2str($this->direccion) . ","
-                        . $this->var2str($this->editable) . ","
-                        . $this->var2str($this->fecha) . ","
-                        . $this->var2str($this->finoferta) . ","
-                        . $this->var2str($this->hora) . ","
-                        . $this->var2str($this->idpedido) . ","
-                        . $this->var2str($this->irpf) . ","
-                        . $this->var2str($this->neto) . ","
-                        . $this->var2str($this->nombrecliente) . ","
-                        . $this->var2str($this->numero) . ","
-                        . $this->var2str($this->observaciones) . ","
-                        . $this->var2str($this->status) . ","
-                        . $this->var2str($this->porcomision) . ","
-                        . $this->var2str($this->provincia) . ","
-                        . $this->var2str($this->tasaconv) . ","
-                        . $this->var2str($this->total) . ","
-                        . $this->var2str($this->totaleuros) . ","
-                        . $this->var2str($this->totalirpf) . ","
-                        . $this->var2str($this->totaliva) . ","
-                        . $this->var2str($this->totalrecargo) . ","
-                        . $this->var2str($this->numero2) . ","
-                        . $this->var2str($this->femail) . ","
-                        . $this->var2str($this->envio_codtrans) . ","
-                        . $this->var2str($this->envio_codigo) . ","
-                        . $this->var2str($this->envio_nombre) . ","
-                        . $this->var2str($this->envio_apellidos) . ","
-                        . $this->var2str($this->envio_apartado) . ","
-                        . $this->var2str($this->envio_direccion) . ","
-                        . $this->var2str($this->envio_codpostal) . ","
-                        . $this->var2str($this->envio_ciudad) . ","
-                        . $this->var2str($this->envio_provincia) . ","
-                        . $this->var2str($this->envio_codpais) . ","
-                        . $this->var2str($this->numdocs) . ","
-                        . $this->var2str($this->idoriginal) . ");";
+                . $this->var2str($this->apartado) . ","
+                . $this->var2str($this->cifnif) . ","
+                . $this->var2str($this->ciudad) . ","
+                . $this->var2str($this->codagente) . ","
+                . $this->var2str($this->codalmacen) . ","
+                . $this->var2str($this->codcliente) . ","
+                . $this->var2str($this->coddir) . ","
+                . $this->var2str($this->coddivisa) . ","
+                . $this->var2str($this->codejercicio) . ","
+                . $this->var2str($this->codigo) . ","
+                . $this->var2str($this->codpais) . ","
+                . $this->var2str($this->codpago) . ","
+                . $this->var2str($this->codpostal) . ","
+                . $this->var2str($this->codserie) . ","
+                . $this->var2str($this->direccion) . ","
+                . $this->var2str($this->editable) . ","
+                . $this->var2str($this->fecha) . ","
+                . $this->var2str($this->finoferta) . ","
+                . $this->var2str($this->hora) . ","
+                . $this->var2str($this->idpedido) . ","
+                . $this->var2str($this->irpf) . ","
+                . $this->var2str($this->neto) . ","
+                . $this->var2str($this->nombrecliente) . ","
+                . $this->var2str($this->numero) . ","
+                . $this->var2str($this->observaciones) . ","
+                . $this->var2str($this->status) . ","
+                . $this->var2str($this->porcomision) . ","
+                . $this->var2str($this->provincia) . ","
+                . $this->var2str($this->tasaconv) . ","
+                . $this->var2str($this->total) . ","
+                . $this->var2str($this->totaleuros) . ","
+                . $this->var2str($this->totalirpf) . ","
+                . $this->var2str($this->totaliva) . ","
+                . $this->var2str($this->totalrecargo) . ","
+                . $this->var2str($this->numero2) . ","
+                . $this->var2str($this->femail) . ","
+                . $this->var2str($this->envio_codtrans) . ","
+                . $this->var2str($this->envio_codigo) . ","
+                . $this->var2str($this->envio_nombre) . ","
+                . $this->var2str($this->envio_apellidos) . ","
+                . $this->var2str($this->envio_apartado) . ","
+                . $this->var2str($this->envio_direccion) . ","
+                . $this->var2str($this->envio_codpostal) . ","
+                . $this->var2str($this->envio_ciudad) . ","
+                . $this->var2str($this->envio_provincia) . ","
+                . $this->var2str($this->envio_codpais) . ","
+                . $this->var2str($this->numdocs) . ","
+                . $this->var2str($this->idoriginal) . ");";
 
-                if ($this->db->exec($sql)) {
-                    $this->idpresupuesto = $this->db->lastval();
-                    return TRUE;
-                } else
-                    return FALSE;
+            if ($this->db->exec($sql)) {
+                $this->idpresupuesto = $this->db->lastval();
+                return TRUE;
             }
-        } else
-            return FALSE;
+        }
+
+        return FALSE;
     }
 
     /**
      * Elimina el presupuesto de la base de datos.
      * Devuelve FALSE en caso de fallo, TRUE en caso de éxito.
-     * @return type
+     * @return boolean
      */
-    public function delete() {
+    public function delete()
+    {
         $this->new_message(ucfirst(FS_PRESUPUESTO) . " de venta " . $this->codigo . " eliminado correctamente.");
         return $this->db->exec("DELETE FROM " . $this->table_name . " WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";");
     }
 
     /**
      * Devuelve un array con los últimos presupuestos
-     * @param type $offset
-     * @param type $order
+     * @param integer $offset
+     * @param string $order
      * @return \presupuesto_cliente
      */
-    public function all($offset = 0, $order = 'fecha DESC', $limit = FS_ITEM_LIMIT) {
-        $preslist = array();
+    public function all($offset = 0, $order = 'fecha DESC', $limit = FS_ITEM_LIMIT)
+    {
         $sql = "SELECT * FROM " . $this->table_name . " ORDER BY " . $order;
 
         $data = $this->db->select_limit($sql, $limit, $offset);
-        if ($data) {
-            foreach ($data as $p) {
-                $preslist[] = new \presupuesto_cliente($p);
-            }
-        }
-
-        return $preslist;
+        return $this->all_from_data($data);
     }
 
     /**
      * Devuelve un array con los presupuestos de venta pendientes.
-     * @param type $offset
-     * @param type $order
+     * @param integer $offset
+     * @param string $order
      * @return \presupuesto_cliente
      */
-    public function all_ptepedir($offset = 0, $order = 'fecha ASC', $limit = FS_ITEM_LIMIT) {
-        $preslist = array();
+    public function all_ptepedir($offset = 0, $order = 'fecha ASC', $limit = FS_ITEM_LIMIT)
+    {
         $sql = "SELECT * FROM " . $this->table_name . " WHERE idpedido IS NULL"
-                . " AND status = 0 ORDER BY " . $order;
+            . " AND status = 0 ORDER BY " . $order;
 
         $data = $this->db->select_limit($sql, $limit, $offset);
-        if ($data) {
-            foreach ($data as $p) {
-                $preslist[] = new \presupuesto_cliente($p);
-            }
-        }
-
-        return $preslist;
+        return $this->all_from_data($data);
     }
 
     /**
      * Devuelve un array con los presupuestos rechazados.
-     * @param type $offset
-     * @param type $order
+     * @param integer $offset
+     * @param string $order
      * @return \presupuesto_cliente
      */
-    public function all_rechazados($offset = 0, $order = 'fecha DESC', $limit = FS_ITEM_LIMIT) {
-        $preclist = array();
+    public function all_rechazados($offset = 0, $order = 'fecha DESC', $limit = FS_ITEM_LIMIT)
+    {
         $sql = "SELECT * FROM " . $this->table_name . " WHERE status = 2 ORDER BY " . $order;
 
         $data = $this->db->select_limit($sql, $limit, $offset);
-        if ($data) {
-            foreach ($data as $p) {
-                $preclist[] = new \presupuesto_cliente($p);
-            }
-        }
-
-        return $preclist;
+        return $this->all_from_data($data);
     }
 
     /**
      * Devuelve un array con los presupuestos del cliente.
-     * @param type $codcliente
-     * @param type $offset
+     * @param string $codcliente
+     * @param integer $offset
      * @return \presupuesto_cliente
      */
-    public function all_from_cliente($codcliente, $offset = 0) {
-        $preslist = array();
+    public function all_from_cliente($codcliente, $offset = 0)
+    {
         $sql = "SELECT * FROM " . $this->table_name . " WHERE codcliente = " . $this->var2str($codcliente)
-                . " ORDER BY fecha DESC, codigo DESC";
+            . " ORDER BY fecha DESC, codigo DESC";
 
         $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
-        if ($data) {
-            foreach ($data as $p) {
-                $preslist[] = new \presupuesto_cliente($p);
-            }
-        }
-
-        return $preslist;
+        return $this->all_from_data($data);
     }
 
     /**
      * Devuelve un array con los presupuestos del agente/empleado.
-     * @param type $codagente
-     * @param type $offset
+     * @param string $codagente
+     * @param integer $offset
      * @return \presupuesto_cliente
      */
-    public function all_from_agente($codagente, $offset = 0) {
-        $preslist = array();
+    public function all_from_agente($codagente, $offset = 0)
+    {
         $sql = "SELECT * FROM " . $this->table_name . " WHERE codagente = " . $this->var2str($codagente)
-                . " ORDER BY fecha DESC, codigo DESC";
+            . " ORDER BY fecha DESC, codigo DESC";
 
         $data = $this->db->select_limit($sql, FS_ITEM_LIMIT, $offset);
-        if ($data) {
-            foreach ($data as $p) {
-                $preslist[] = new \presupuesto_cliente($p);
-            }
-        }
-
-        return $preslist;
+        return $this->all_from_data($data);
     }
 
     /**
      * Devuelve todos los presupuestos relacionados con el pedido.
-     * @param type $id
+     * @param integer $id
      * @return \presupuesto_cliente
      */
-    public function all_from_pedido($id) {
-        $preslist = array();
+    public function all_from_pedido($id)
+    {
         $sql = "SELECT * FROM " . $this->table_name . " WHERE idpedido = " . $this->var2str($id)
-                . " ORDER BY fecha DESC, codigo DESC;";
+            . " ORDER BY fecha DESC, codigo DESC;";
 
         $data = $this->db->select($sql);
-        if ($data) {
-            foreach ($data as $p) {
-                $preslist[] = new \presupuesto_cliente($p);
-            }
-        }
-
-        return $preslist;
+        return $this->all_from_data($data);
     }
 
     /**
      * Devuelve un array con los presupuestos según los filtros:
      * 
-     * @param type $desde
-     * @param type $hasta
-     * @param type $codserie
-     * @param type $codagente
-     * @param type $codcliente
-     * @param type $estado
-     * @param type $forma_pago
-     * @param type $almacen
-     * @param type $divisa
+     * @param string $desde
+     * @param string $hasta
+     * @param string $codserie
+     * @param string $codagente
+     * @param string $codcliente
+     * @param string $estado
+     * @param string $forma_pago
+     * @param string $almacen
+     * @param string $divisa
      * @return \presupuesto_cliente
      */
-    public function all_desde($desde, $hasta, $codserie = FALSE, $codagente = FALSE, $codcliente = FALSE, $estado = FALSE, $forma_pago = FALSE, $almacen = FALSE, $divisa = FALSE) {
-        $preslist = array();
+    public function all_desde($desde, $hasta, $codserie = FALSE, $codagente = FALSE, $codcliente = FALSE, $estado = FALSE, $forma_pago = FALSE, $almacen = FALSE, $divisa = FALSE)
+    {
         $sql = "SELECT * FROM " . $this->table_name . " WHERE fecha >= " . $this->var2str($desde) . " AND fecha <= " . $this->var2str($hasta);
         if ($codserie) {
             $sql .= " AND codserie = " . $this->var2str($codserie);
@@ -857,23 +846,17 @@ class presupuesto_cliente extends \fs_model {
         $sql .= " ORDER BY fecha ASC, codigo ASC;";
 
         $data = $this->db->select($sql);
-        if ($data) {
-            foreach ($data as $p) {
-                $preslist[] = new \presupuesto_cliente($p);
-            }
-        }
-
-        return $preslist;
+        return $this->all_from_data($data);
     }
 
     /**
      * Devuelve un array con los presupuestos que coinciden con $query
-     * @param type $query
-     * @param type $offset
+     * @param string $query
+     * @param integer $offset
      * @return \presupuesto_cliente
      */
-    public function search($query, $offset = 0) {
-        $preslist = array();
+    public function search($query, $offset = 0)
+    {
         $query = mb_strtolower($this->no_html($query), 'UTF8');
 
         $consulta = "SELECT * FROM " . $this->table_name . " WHERE ";
@@ -885,35 +868,28 @@ class presupuesto_cliente extends \fs_model {
             $consulta .= "fecha = " . $this->var2str($query) . " OR observaciones LIKE '%" . $query . "%'";
         } else {
             $consulta .= "lower(codigo) LIKE '%" . $query . "%' OR lower(numero2) LIKE '%" . $query . "%' "
-                    . "OR lower(observaciones) LIKE '%" . str_replace(' ', '%', $query) . "%'";
+                . "OR lower(observaciones) LIKE '%" . str_replace(' ', '%', $query) . "%'";
         }
         $consulta .= " ORDER BY fecha DESC, codigo DESC";
 
         $data = $this->db->select_limit($consulta, FS_ITEM_LIMIT, $offset);
-        if ($data) {
-            foreach ($data as $p) {
-                $preslist[] = new \presupuesto_cliente($p);
-            }
-        }
-
-        return $preslist;
+        return $this->all_from_data($data);
     }
 
     /**
      * Devuelve un array con los presupuestos del cliente $codcliente que coinciden con $query
-     * @param type $codcliente
-     * @param type $desde
-     * @param type $hasta
-     * @param type $serie
-     * @param type $obs
+     * @param string $codcliente
+     * @param string $desde
+     * @param string $hasta
+     * @param string $serie
+     * @param string $obs
      * @return \presupuesto_cliente
      */
-    public function search_from_cliente($codcliente, $desde, $hasta, $serie, $obs = '') {
-        $pedilist = array();
-
+    public function search_from_cliente($codcliente, $desde, $hasta, $serie, $obs = '')
+    {
         $sql = "SELECT * FROM " . $this->table_name . " WHERE codcliente = " . $this->var2str($codcliente) .
-                " AND idpedido AND fecha BETWEEN " . $this->var2str($desde) . " AND " . $this->var2str($hasta) .
-                " AND codserie = " . $this->var2str($serie);
+            " AND idpedido AND fecha BETWEEN " . $this->var2str($desde) . " AND " . $this->var2str($hasta) .
+            " AND codserie = " . $this->var2str($serie);
 
         if ($obs != '') {
             $sql .= " AND lower(observaciones) = " . $this->var2str(strtolower($obs));
@@ -922,6 +898,12 @@ class presupuesto_cliente extends \fs_model {
         $sql .= " ORDER BY fecha DESC, codigo DESC;";
 
         $data = $this->db->select($sql);
+        return $this->all_from_data($data);
+    }
+
+    private function all_from_data(&$data)
+    {
+        $pedilist = array();
         if ($data) {
             foreach ($data as $p) {
                 $preslist[] = new \presupuesto_cliente($p);
@@ -931,22 +913,22 @@ class presupuesto_cliente extends \fs_model {
         return $preslist;
     }
 
-    public function cron_job() {
+    public function cron_job()
+    {
         /// marcamos como aprobados los presupuestos con idpedido
         $this->db->exec("UPDATE " . $this->table_name . " SET status = '1', editable = FALSE"
-                . " WHERE status != '1' AND idpedido IS NOT NULL;");
+            . " WHERE status != '1' AND idpedido IS NOT NULL;");
 
         /// devolvemos al estado pendiente a los presupuestos con estado 1 a los que se haya borrado el pedido
         $this->db->exec("UPDATE " . $this->table_name . " SET status = '0', idpedido = NULL, editable = TRUE"
-                . " WHERE status = '1' AND idpedido NOT IN (SELECT idpedido FROM pedidoscli);");
+            . " WHERE status = '1' AND idpedido NOT IN (SELECT idpedido FROM pedidoscli);");
 
         /// marcamos como rechazados todos los presupuestos con finoferta ya pasada
         $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE finoferta IS NOT NULL AND"
-                . " finoferta < " . $this->var2str(Date('d-m-Y')) . " AND idpedido IS NULL;");
+            . " finoferta < " . $this->var2str(Date('d-m-Y')) . " AND idpedido IS NULL;");
 
         /// marcamos como rechazados todos los presupuestos no editables y sin pedido asociado
         $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE idpedido IS NULL AND"
-                . " editable = false;");
+            . " editable = false;");
     }
-
 }

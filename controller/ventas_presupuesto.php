@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017  Carlos Garcia Gomez       neorazorx@gmail.com
@@ -21,7 +20,8 @@
 
 require_once 'plugins/facturacion_base/extras/fbase_controller.php';
 
-class ventas_presupuesto extends fbase_controller {
+class ventas_presupuesto extends fbase_controller
+{
 
     public $agencia;
     public $agente;
@@ -42,11 +42,13 @@ class ventas_presupuesto extends fbase_controller {
     public $setup_validez;
     public $versiones;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(__CLASS__, ucfirst(FS_PRESUPUESTO), 'ventas', FALSE, FALSE);
     }
 
-    protected function private_core() {
+    protected function private_core()
+    {
         parent::private_core();
 
         $this->ppage = $this->page->get('ventas_presupuestos');
@@ -136,7 +138,8 @@ class ventas_presupuesto extends fbase_controller {
         }
     }
 
-    private function nueva_version() {
+    private function nueva_version()
+    {
         $presu = clone $this->presupuesto;
         $presu->idpresupuesto = NULL;
         $presu->idpedido = NULL;
@@ -178,7 +181,8 @@ class ventas_presupuesto extends fbase_controller {
      * Comprobamos si los artículos han variado su precio.
      * @return type
      */
-    private function check_lineas() {
+    private function check_lineas()
+    {
         if ($this->presupuesto->status == 0 AND $this->presupuesto->coddivisa == $this->empresa->coddivisa) {
             foreach ($this->presupuesto->get_lineas() as $l) {
                 if ($l->referencia != '') {
@@ -187,10 +191,10 @@ class ventas_presupuesto extends fbase_controller {
                         if (strtotime($data[0]["factualizado"]) > strtotime($this->presupuesto->fecha)) {
                             if ($l->pvpunitario > floatval($data[0]['pvp'])) {
                                 $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
-                                        . " ha bajado desde la elaboración del " . FS_PRESUPUESTO . ".");
+                                    . " ha bajado desde la elaboración del " . FS_PRESUPUESTO . ".");
                             } else if ($l->pvpunitario < floatval($data[0]['pvp'])) {
                                 $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
-                                        . " ha subido desde la elaboración del " . FS_PRESUPUESTO . ".");
+                                    . " ha subido desde la elaboración del " . FS_PRESUPUESTO . ".");
                             }
                         }
                     }
@@ -199,7 +203,8 @@ class ventas_presupuesto extends fbase_controller {
         }
     }
 
-    public function url() {
+    public function url()
+    {
         if (!isset($this->presupuesto)) {
             return parent::url();
         } else if ($this->presupuesto) {
@@ -208,7 +213,8 @@ class ventas_presupuesto extends fbase_controller {
             return $this->page->url();
     }
 
-    private function modificar() {
+    private function modificar()
+    {
         $this->presupuesto->observaciones = $_POST['observaciones'];
         $this->presupuesto->numero2 = $_POST['numero2'];
 
@@ -455,7 +461,7 @@ class ventas_presupuesto extends fbase_controller {
 
                 if (abs(floatval($_POST['atotal']) - $this->presupuesto->total) >= .02) {
                     $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->presupuesto->total .
-                            " frente a " . $_POST['atotal'] . "). Debes informar del error.");
+                        " frente a " . $_POST['atotal'] . "). Debes informar del error.");
                 }
             }
         }
@@ -467,7 +473,8 @@ class ventas_presupuesto extends fbase_controller {
             $this->new_error_msg("¡Imposible modificar el " . FS_PRESUPUESTO . "!");
     }
 
-    private function generar_pedido() {
+    private function generar_pedido()
+    {
         $pedido = new pedido_cliente();
         $pedido->apartado = $this->presupuesto->apartado;
         $pedido->cifnif = $this->presupuesto->cifnif;
@@ -576,7 +583,8 @@ class ventas_presupuesto extends fbase_controller {
             $this->new_error_msg("¡Imposible guardar el " . FS_PEDIDO . "!");
     }
 
-    private function configurar_validez() {
+    private function configurar_validez()
+    {
         $fsvar = new fs_var();
         if (isset($_POST['setup_validez'])) {
             $this->setup_validez = intval($_POST['setup_validez']);
@@ -590,14 +598,15 @@ class ventas_presupuesto extends fbase_controller {
         }
     }
 
-    public function get_lineas_stock() {
+    public function get_lineas_stock()
+    {
         $lineas = array();
 
         $sql = "SELECT l.referencia,l.descripcion,l.cantidad,s.cantidad as stock,s.ubicacion FROM lineaspresupuestoscli l"
-                . " LEFT JOIN stocks s ON l.referencia = s.referencia"
-                . " AND s.codalmacen = " . $this->presupuesto->var2str($this->presupuesto->codalmacen)
-                . " WHERE l.idpresupuesto = " . $this->presupuesto->var2str($this->presupuesto->idpresupuesto)
-                . " ORDER BY referencia ASC;";
+            . " LEFT JOIN stocks s ON l.referencia = s.referencia"
+            . " AND s.codalmacen = " . $this->presupuesto->var2str($this->presupuesto->codalmacen)
+            . " WHERE l.idpresupuesto = " . $this->presupuesto->var2str($this->presupuesto->idpresupuesto)
+            . " ORDER BY referencia ASC;";
         $data = $this->db->select($sql);
         if ($data) {
             $art0 = new articulo();
@@ -619,14 +628,15 @@ class ventas_presupuesto extends fbase_controller {
         return $lineas;
     }
 
-    private function get_historico() {
+    private function get_historico()
+    {
         $this->historico = array();
         $orden = 0;
 
         if ($this->presupuesto->idpedido) {
             /// pedido
             $sql = "SELECT * FROM pedidoscli WHERE idpedido = " . $this->presupuesto->var2str($this->presupuesto->idpedido)
-                    . " ORDER BY idpedido ASC;";
+                . " ORDER BY idpedido ASC;";
 
             $data = $this->db->select($sql);
             if ($data) {
@@ -642,7 +652,7 @@ class ventas_presupuesto extends fbase_controller {
                     if ($pedido->idalbaran) {
                         /// albarán
                         $sql1 = "SELECT * FROM albaranescli WHERE idalbaran = " . $pedido->var2str($pedido->idalbaran)
-                                . " ORDER BY idalbaran ASC;";
+                            . " ORDER BY idalbaran ASC;";
 
                         $data1 = $this->db->select($sql1);
                         if ($data1) {
@@ -658,7 +668,7 @@ class ventas_presupuesto extends fbase_controller {
                                 if ($albaran->idfactura) {
                                     /// factura
                                     $sql2 = "SELECT * FROM facturascli WHERE idfactura = " . $albaran->var2str($albaran->idfactura)
-                                            . " ORDER BY idfactura ASC;";
+                                        . " ORDER BY idfactura ASC;";
 
                                     $data2 = $this->db->select($sql2);
                                     if ($data2) {
@@ -680,5 +690,4 @@ class ventas_presupuesto extends fbase_controller {
             }
         }
     }
-
 }

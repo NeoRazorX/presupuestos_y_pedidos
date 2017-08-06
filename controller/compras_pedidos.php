@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -21,7 +20,8 @@
 
 require_once 'plugins/facturacion_base/extras/fbase_controller.php';
 
-class compras_pedidos extends fbase_controller {
+class compras_pedidos extends fbase_controller
+{
 
     public $agente;
     public $almacenes;
@@ -43,11 +43,13 @@ class compras_pedidos extends fbase_controller {
     public $total_resultados;
     public $total_resultados_txt;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(__CLASS__, ucfirst(FS_PEDIDOS), 'compras');
     }
 
-    protected function private_core() {
+    protected function private_core()
+    {
         parent::private_core();
 
         $pedido = new pedido_proveedor();
@@ -181,7 +183,8 @@ class compras_pedidos extends fbase_controller {
         }
     }
 
-    public function url($busqueda = FALSE) {
+    public function url($busqueda = FALSE)
+    {
         if ($busqueda) {
             $codproveedor = '';
             if ($this->proveedor) {
@@ -189,20 +192,21 @@ class compras_pedidos extends fbase_controller {
             }
 
             $url = parent::url() . "&mostrar=" . $this->mostrar
-                    . "&query=" . $this->query
-                    . "&codserie=" . $this->codserie
-                    . "&codagente=" . $this->codagente
-                    . "&codalmacen=" . $this->codalmacen
-                    . "&codproveedor=" . $codproveedor
-                    . "&desde=" . $this->desde
-                    . "&hasta=" . $this->hasta;
+                . "&query=" . $this->query
+                . "&codserie=" . $this->codserie
+                . "&codagente=" . $this->codagente
+                . "&codalmacen=" . $this->codalmacen
+                . "&codproveedor=" . $codproveedor
+                . "&desde=" . $this->desde
+                . "&hasta=" . $this->hasta;
 
             return $url;
         } else
             return parent::url();
     }
 
-    public function paginas() {
+    public function paginas()
+    {
         if ($this->mostrar == 'pendientes')
             $total = $this->total_pendientes();
         else
@@ -215,7 +219,8 @@ class compras_pedidos extends fbase_controller {
         return $this->fbase_paginas($this->url(TRUE), $total, $this->offset);
     }
 
-    public function buscar_lineas() {
+    public function buscar_lineas()
+    {
         /// cambiamos la plantilla HTML
         $this->template = 'ajax/compras_lineas_pedidos';
 
@@ -228,7 +233,8 @@ class compras_pedidos extends fbase_controller {
             $this->lineas = $linea->search($this->buscar_lineas, $this->offset);
     }
 
-    private function delete_pedido() {
+    private function delete_pedido()
+    {
         $ped0 = new pedido_proveedor();
         $pedido = $ped0->get($_POST['delete']);
         if ($pedido) {
@@ -240,7 +246,8 @@ class compras_pedidos extends fbase_controller {
             $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " no encontrado!");
     }
 
-    private function share_extension() {
+    private function share_extension()
+    {
         /// añadimos las extensiones para proveedors, agentes y artículos
         $extensiones = array(
             array(
@@ -276,15 +283,18 @@ class compras_pedidos extends fbase_controller {
         }
     }
 
-    public function total_pendientes() {
+    public function total_pendientes()
+    {
         return $this->fbase_sql_total('pedidosprov', 'idpedido', 'WHERE idalbaran IS NULL');
     }
 
-    private function total_registros() {
+    private function total_registros()
+    {
         return $this->fbase_sql_total('pedidosprov', 'idpedido');
     }
 
-    private function buscar($order2) {
+    private function buscar($order2)
+    {
         $this->resultados = array();
         $this->num_resultados = 0;
         $sql = " FROM pedidosprov ";
@@ -297,7 +307,7 @@ class compras_pedidos extends fbase_controller {
                 $sql .= "(codigo LIKE '%" . $query . "%' OR numproveedor LIKE '%" . $query . "%' OR observaciones LIKE '%" . $query . "%')";
             } else {
                 $sql .= "(lower(codigo) LIKE '%" . $query . "%' OR lower(numproveedor) LIKE '%" . $query . "%' "
-                        . "OR lower(observaciones) LIKE '%" . str_replace(' ', '%', $query) . "%')";
+                    . "OR lower(observaciones) LIKE '%" . str_replace(' ', '%', $query) . "%')";
             }
             $where = ' AND ';
         }
@@ -357,7 +367,8 @@ class compras_pedidos extends fbase_controller {
         }
     }
 
-    public function orden() {
+    public function orden()
+    {
         return array(
             'fecha_desc' => array(
                 'icono' => '<span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>',
@@ -386,5 +397,4 @@ class compras_pedidos extends fbase_controller {
             )
         );
     }
-
 }

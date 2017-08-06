@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of presupuestos_y_pedidos
  * Copyright (C) 2014-2017  Carlos Garcia Gomez       neorazorx@gmail.com
@@ -21,7 +20,8 @@
 
 require_once 'plugins/facturacion_base/extras/fbase_controller.php';
 
-class ventas_pedido extends fbase_controller {
+class ventas_pedido extends fbase_controller
+{
 
     public $agencia;
     public $agente;
@@ -41,11 +41,13 @@ class ventas_pedido extends fbase_controller {
     public $serie;
     public $versiones;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(__CLASS__, ucfirst(FS_PEDIDO), 'ventas', FALSE, FALSE);
     }
 
-    protected function private_core() {
+    protected function private_core()
+    {
         parent::private_core();
 
         $this->ppage = $this->page->get('ventas_pedidos');
@@ -127,7 +129,8 @@ class ventas_pedido extends fbase_controller {
         }
     }
 
-    private function nueva_version() {
+    private function nueva_version()
+    {
         $pedi = clone $this->pedido;
         $pedi->idpedido = NULL;
         $pedi->idalbaran = NULL;
@@ -164,7 +167,8 @@ class ventas_pedido extends fbase_controller {
         }
     }
 
-    public function url() {
+    public function url()
+    {
         if (!isset($this->pedido)) {
             return parent::url();
         } else if ($this->pedido) {
@@ -173,7 +177,8 @@ class ventas_pedido extends fbase_controller {
             return $this->page->url();
     }
 
-    private function modificar() {
+    private function modificar()
+    {
         $this->pedido->observaciones = $_POST['observaciones'];
         $this->pedido->numero2 = $_POST['numero2'];
 
@@ -419,7 +424,7 @@ class ventas_pedido extends fbase_controller {
 
                 if (abs(floatval($_POST['atotal']) - $this->pedido->total) >= .02) {
                     $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->pedido->total .
-                            " frente a " . $_POST['atotal'] . "). Debes informar del error.");
+                        " frente a " . $_POST['atotal'] . "). Debes informar del error.");
                 }
             }
         }
@@ -431,7 +436,8 @@ class ventas_pedido extends fbase_controller {
             $this->new_error_msg("¡Imposible modificar el " . FS_PEDIDO . "!");
     }
 
-    private function generar_albaran() {
+    private function generar_albaran()
+    {
         $albaran = new albaran_cliente();
         $albaran->apartado = $this->pedido->apartado;
         $albaran->cifnif = $this->pedido->cifnif;
@@ -565,14 +571,15 @@ class ventas_pedido extends fbase_controller {
             $this->new_error_msg("¡Imposible guardar el " . FS_ALBARAN . "!");
     }
 
-    public function get_lineas_stock() {
+    public function get_lineas_stock()
+    {
         $lineas = array();
 
         $sql = "SELECT l.referencia,l.descripcion,l.cantidad,s.cantidad as stock,s.ubicacion FROM lineaspedidoscli l"
-                . " LEFT JOIN stocks s ON l.referencia = s.referencia"
-                . " AND s.codalmacen = " . $this->pedido->var2str($this->pedido->codalmacen)
-                . " WHERE l.idpedido = " . $this->pedido->var2str($this->pedido->idpedido)
-                . " ORDER BY referencia ASC;";
+            . " LEFT JOIN stocks s ON l.referencia = s.referencia"
+            . " AND s.codalmacen = " . $this->pedido->var2str($this->pedido->codalmacen)
+            . " WHERE l.idpedido = " . $this->pedido->var2str($this->pedido->idpedido)
+            . " ORDER BY referencia ASC;";
         $data = $this->db->select($sql);
         if ($data) {
             $art0 = new articulo();
@@ -594,13 +601,14 @@ class ventas_pedido extends fbase_controller {
         return $lineas;
     }
 
-    private function get_historico() {
+    private function get_historico()
+    {
         $this->historico = array();
         $orden = 0;
 
         /// presupuestos
         $sql = "SELECT * FROM presupuestoscli WHERE idpedido = " . $this->pedido->var2str($this->pedido->idpedido)
-                . " ORDER BY idpresupuesto ASC;";
+            . " ORDER BY idpresupuesto ASC;";
 
         $data = $this->db->select($sql);
         if ($data) {
@@ -617,7 +625,7 @@ class ventas_pedido extends fbase_controller {
 
         if ($this->pedido->idalbaran) {
             $sql1 = "SELECT * FROM albaranescli WHERE idalbaran = " . $this->pedido->var2str($this->pedido->idalbaran)
-                    . " ORDER BY idalbaran ASC;";
+                . " ORDER BY idalbaran ASC;";
 
             $data1 = $this->db->select($sql1);
             if ($data1) {
@@ -632,7 +640,7 @@ class ventas_pedido extends fbase_controller {
 
                     if ($albaran->idfactura) {
                         $sql2 = "SELECT * FROM facturascli WHERE idfactura = " . $albaran->var2str($albaran->idfactura)
-                                . " ORDER BY idfactura ASC;";
+                            . " ORDER BY idfactura ASC;";
 
                         $data2 = $this->db->select($sql2);
                         if ($data2) {
@@ -657,7 +665,8 @@ class ventas_pedido extends fbase_controller {
      * Devuelve TRUE si hay suficiente stock.
      * @return boolean
      */
-    private function comprobar_stock() {
+    private function comprobar_stock()
+    {
         $ok = TRUE;
 
         $art0 = new articulo();
@@ -693,5 +702,4 @@ class ventas_pedido extends fbase_controller {
 
         return $ok;
     }
-
 }
