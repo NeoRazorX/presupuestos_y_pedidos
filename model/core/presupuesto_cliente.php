@@ -903,7 +903,7 @@ class presupuesto_cliente extends \fs_model
 
     private function all_from_data(&$data)
     {
-        $pedilist = array();
+        $preslist = array();
         if ($data) {
             foreach ($data as $p) {
                 $preslist[] = new \presupuesto_cliente($p);
