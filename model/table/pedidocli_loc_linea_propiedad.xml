@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Document   : pedidocli_loc_linea_propiedades.xml
+    Author     : Carlos Garcia Gomez
+    Description:
+        Estructura de la tabla pedidocli_loc_linea_propiedades.
+-->
+<tabla>
+    <columna>
+        <nombre>name</nombre>
+        <tipo>character varying(50)</tipo>
+        <nulo>NO</nulo>
+    </columna>
+    <columna>
+        <nombre>idpedido</nombre>
+        <tipo>integer</tipo>
+        <nulo>NO</nulo>
+    </columna>
+    <columna>
+        <nombre>text</nombre>
+        <tipo>text</tipo>
+    </columna>
+    <restriccion>
+        <nombre>pedidocli_loc_linea_propiedades_pkey</nombre>
+        <consulta>PRIMARY KEY (name,idpedido)</consulta>
+    </restriccion>
+    <restriccion>
+        <nombre>ca_pedidocli_loc_linea_propiedades_pedidos</nombre>
+        <consulta>FOREIGN KEY (idpedido)
+            REFERENCES pedidos (idpedido)
+            ON DELETE CASCADE ON UPDATE CASCADE</consulta>
+    </restriccion>
+</tabla>
