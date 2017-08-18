@@ -65,6 +65,24 @@ class linea_pedido_cliente extends \fs_model
      * @var float
      */
     public $dtopor;
+    
+    /**
+     * % de descuento 2
+     * @var float
+     */
+    public $dtopor2;
+    
+    /**
+     * % de descuento 3
+     * @var float
+     */
+    public $dtopor3;
+    
+    /**
+     * % de descuento 4
+     * @var float
+     */
+    public $dtopor4;
 
     /**
      * % de retención IRPF.
@@ -150,6 +168,9 @@ class linea_pedido_cliente extends \fs_model
             $this->codimpuesto = $l['codimpuesto'];
             $this->descripcion = $l['descripcion'];
             $this->dtopor = floatval($l['dtopor']);
+            $this->dtopor2 = floatval($l['dtopor2']);
+            $this->dtopor3 = floatval($l['dtopor3']);
+            $this->dtopor4 = floatval($l['dtopor4']);
             $this->irpf = floatval($l['irpf']);
             $this->iva = floatval($l['iva']);
             $this->pvpsindto = floatval($l['pvpsindto']);
@@ -170,6 +191,9 @@ class linea_pedido_cliente extends \fs_model
             $this->codimpuesto = NULL;
             $this->descripcion = '';
             $this->dtopor = 0.0;
+            $this->dtopor2 = 0.0;
+            $this->dtopor3 = 0.0;
+            $this->dtopor4 = 0.0;
             $this->irpf = 0.0;
             $this->iva = 0.0;
             $this->pvpsindto = 0.0;
@@ -296,14 +320,15 @@ class linea_pedido_cliente extends \fs_model
     public function test()
     {
         $this->descripcion = $this->no_html($this->descripcion);
-        $total = $this->pvpunitario * $this->cantidad * (100 - $this->dtopor) / 100;
         $totalsindto = $this->pvpunitario * $this->cantidad;
+        $dto_due = (1-((1-$this->dtopor/100)*(1-$this->dtopor2/100)*(1-$this->dtopor3/100)*(1-$this->dtopor4/100)))*100;
+        $total = $totalsindto * (1 - $dto_due / 100);
 
         if (!$this->floatcmp($this->pvptotal, $total, FS_NF0, TRUE)) {
-            $this->new_error_msg("Error en el valor de pvptotal de la línea " . $this->referencia . " del " . FS_PEDIDO . ". Valor correcto: " . $total);
+            $this->new_error_msg("Error en el valor de pvptotal de la línea " . $this->referencia . " del " . FS_PEDIDO . ". Valor correcto: " . $total . " y se recibe " . $this->pvptotal);
             return FALSE;
         } else if (!$this->floatcmp($this->pvpsindto, $totalsindto, FS_NF0, TRUE)) {
-            $this->new_error_msg("Error en el valor de pvpsindto de la línea " . $this->referencia . " del " . FS_PEDIDO . ". Valor correcto: " . $totalsindto);
+            $this->new_error_msg("Error en el valor de pvpsindto de la línea " . $this->referencia . " del " . FS_PEDIDO . ". Valor correcto: " . $totalsindto . " y se recibe " . $this->pvpsindto);
             return FALSE;
         }
 
@@ -318,6 +343,9 @@ class linea_pedido_cliente extends \fs_model
                     . ", codimpuesto = " . $this->var2str($this->codimpuesto)
                     . ", descripcion = " . $this->var2str($this->descripcion)
                     . ", dtopor = " . $this->var2str($this->dtopor)
+                    . ", dtopor2 = " . $this->var2str($this->dtopor2)
+                    . ", dtopor3 = " . $this->var2str($this->dtopor3)
+                    . ", dtopor4 = " . $this->var2str($this->dtopor4)
                     . ", idpedido = " . $this->var2str($this->idpedido)
                     . ", idlineapresupuesto = " . $this->var2str($this->idlineapresupuesto)
                     . ", idpresupuesto = " . $this->var2str($this->idpresupuesto)
@@ -343,6 +371,9 @@ class linea_pedido_cliente extends \fs_model
                 . "," . $this->var2str($this->codimpuesto)
                 . "," . $this->var2str($this->descripcion)
                 . "," . $this->var2str($this->dtopor)
+                . "," . $this->var2str($this->dtopor2)
+                . "," . $this->var2str($this->dtopor3)
+                . "," . $this->var2str($this->dtopor4)
                 . "," . $this->var2str($this->idpedido)
                 . "," . $this->var2str($this->irpf)
                 . "," . $this->var2str($this->iva)

@@ -121,11 +121,48 @@ class pedido_cliente extends \fs_model
     public $hora;
 
     /**
+     * Importe total antes de descuentos e impuestos.
+     * Es la suma del pvptotal de las líneas.
+     * @var float 
+     */
+    public $netosindto;
+    
+    /**
      * Importe total antes de impuestos.
      * Es la suma del pvptotal de las líneas.
      * @var float 
      */
     public $neto;
+            
+    /**
+     * Descuento porcentual 1
+     * @var float
+     */
+    public $dtopor1;
+    
+    /**
+     * Descuento porcentual 2
+     * @var float
+     */
+    public $dtopor2;
+    
+    /**
+     * Descuento porcentual 3
+     * @var float
+     */
+    public $dtopor3;
+    
+    /**
+     * Descuento porcentual 4
+     * @var float
+     */
+    public $dtopor4;
+    
+    /**
+     * Descuento porcentual 5
+     * @var float
+     */
+    public $dtopor5;
 
     /**
      * Importe total de la factura, con impuestos.
@@ -256,7 +293,13 @@ class pedido_cliente extends \fs_model
                 $this->hora = date('H:i:s', strtotime($p['hora']));
             }
 
+            $this->netosindto = isset($p['netosindto']) ? floatval($p['netosindto']) : 0;
             $this->neto = floatval($p['neto']);
+            $this->dtopor1 = isset($p['dtopor1']) ? floatval($p['dtopor1']) : 0;
+            $this->dtopor2 = isset($p['dtopor2']) ? floatval($p['dtopor2']) : 0;
+            $this->dtopor3 = isset($p['dtopor3']) ? floatval($p['dtopor3']) : 0;
+            $this->dtopor4 = isset($p['dtopor4']) ? floatval($p['dtopor4']) : 0;
+            $this->dtopor5 = isset($p['dtopor5']) ? floatval($p['dtopor5']) : 0;
             $this->total = floatval($p['total']);
             $this->totaliva = floatval($p['totaliva']);
             $this->totaleuros = floatval($p['totaleuros']);
@@ -328,7 +371,13 @@ class pedido_cliente extends \fs_model
             $this->apartado = NULL;
             $this->fecha = Date('d-m-Y');
             $this->hora = Date('H:i:s');
+            $this->netosindto = 0;
             $this->neto = 0;
+            $this->dtopor1 = 0;
+            $this->dtopor2 = 0;
+            $this->dtopor3 = 0;
+            $this->dtopor4 = 0;
+            $this->dtopor5 = 0;
             $this->total = 0;
             $this->totaliva = 0;
             $this->totaleuros = 0;
@@ -531,6 +580,8 @@ class pedido_cliente extends \fs_model
         $status = TRUE;
 
         /// comprobamos las líneas
+        $netosindto = 0;
+        $netosindto = 0;
         $neto = 0;
         $iva = 0;
         $irpf = 0;
@@ -540,12 +591,19 @@ class pedido_cliente extends \fs_model
                 $status = FALSE;
             }
 
-            $neto += $l->pvptotal;
-            $iva += $l->pvptotal * $l->iva / 100;
-            $irpf += $l->pvptotal * $l->irpf / 100;
-            $recargo += $l->pvptotal * $l->recargo / 100;
+            // Neto total de la línea
+            $netosindto += $l->pvptotal;
+            // Descuento total adicional del total del documento
+            $t_dto_due = (1-((1-$this->dtopor1/100)*(1-$this->dtopor2/100)*(1-$this->dtopor3/100)*(1-$this->dtopor4/100)*(1-$this->dtopor5/100)))*100;
+            // Neto total de la línea, con el descuento total del documento
+            $netocondto = $l->pvptotal*(1-$t_dto_due/100);
+            $neto += $netocondto;
+            $iva += $netocondto * $l->iva / 100;
+            $irpf += $netocondto * $l->irpf / 100;
+            $recargo += $netocondto * $l->recargo / 100;
         }
-
+        
+        $netosindto = round($netosindto, FS_NF0);
         $neto = round($neto, FS_NF0);
         $iva = round($iva, FS_NF0);
         $irpf = round($irpf, FS_NF0);
@@ -553,21 +611,31 @@ class pedido_cliente extends \fs_model
         $total = $neto + $iva - $irpf + $recargo;
 
         if (!$this->floatcmp($this->neto, $neto, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor neto de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $neto);
+            $this->new_error_msg("Valor neto de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $neto . " y tiene el valor " . $this->neto);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totaliva de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $iva);
+        } elseif (!$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor totaliva de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $iva . " y tiene el valor " . $this->totaliva);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totalirpf de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $irpf);
+        } elseif (!$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor totalirpf de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $irpf . " y tiene el valor " . $this->totalirpf);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totalrecargo de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $recargo);
+        } elseif (!$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor totalrecargo de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $recargo . " y tiene el valor " . $this->totalrecargo);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->total, $total, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor total de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $total);
+        } elseif (!$this->floatcmp($this->total, $total, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor total de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $total . " y tiene el valor " . $this->total);
             $status = FALSE;
         }
+        
+        /*
+        $this->new_message(
+            "total " . $total
+            . " neto " . $neto
+            . " iva " . $iva
+            . " irpf " . $irpf
+            . " recargo " . $recargo
+        );
+         */
 
         if ($this->idalbaran) {
             $alb0 = new \albaran_cliente();
@@ -607,7 +675,13 @@ class pedido_cliente extends \fs_model
                     . ", hora = " . $this->var2str($this->hora)
                     . ", idalbaran = " . $this->var2str($this->idalbaran)
                     . ", irpf = " . $this->var2str($this->irpf)
+                    . ", netosindto = " . $this->var2str($this->netosindto)
                     . ", neto = " . $this->var2str($this->neto)
+                    . ", dtopor1 = " . $this->var2str($this->dtopor1)
+                    . ", dtopor2 = " . $this->var2str($this->dtopor2)
+                    . ", dtopor3 = " . $this->var2str($this->dtopor3)
+                    . ", dtopor4 = " . $this->var2str($this->dtopor4)
+                    . ", dtopor5 = " . $this->var2str($this->dtopor5)
                     . ", nombrecliente = " . $this->var2str($this->nombrecliente)
                     . ", numero = " . $this->var2str($this->numero)
                     . ", numero2 = " . $this->var2str($this->numero2)
@@ -643,10 +717,11 @@ class pedido_cliente extends \fs_model
             $this->new_codigo();
             $sql = "INSERT INTO " . $this->table_name . " (apartado,cifnif,ciudad,codagente,codalmacen,
                codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,codpostal,codserie,
-               direccion,editable,fecha,hora,idalbaran,irpf,neto,nombrecliente,numero,observaciones,
-               status,porcomision,provincia,tasaconv,total,totaleuros,totalirpf,totaliva,totalrecargo,
-               numero2,femail,fechasalida,codtrans,codigoenv,nombreenv,apellidosenv,apartadoenv,direccionenv,
-               codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs,idoriginal) VALUES ("
+               direccion,editable,fecha,hora,idalbaran,irpf,netosindto,neto,dtopor1,dtopor2,dtopor3,dtopor4,dtopor5,
+               nombrecliente,numero,observaciones,status,porcomision,provincia,tasaconv,total,totaleuros,
+               totalirpf,totaliva,totalrecargo,numero2,femail,fechasalida,codtrans,codigoenv,nombreenv,
+               apellidosenv,apartadoenv,direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv,
+               numdocs,idoriginal) VALUES ("
                 . $this->var2str($this->apartado) . ","
                 . $this->var2str($this->cifnif) . ","
                 . $this->var2str($this->ciudad) . ","
@@ -667,7 +742,13 @@ class pedido_cliente extends \fs_model
                 . $this->var2str($this->hora) . ","
                 . $this->var2str($this->idalbaran) . ","
                 . $this->var2str($this->irpf) . ","
+                . $this->var2str($this->netosindto) . ","
                 . $this->var2str($this->neto) . ","
+                . $this->var2str($this->dtopor1) . ","
+                . $this->var2str($this->dtopor2) . ","
+                . $this->var2str($this->dtopor3) . ","
+                . $this->var2str($this->dtopor4) . ","
+                . $this->var2str($this->dtopor5) . ","
                 . $this->var2str($this->nombrecliente) . ","
                 . $this->var2str($this->numero) . ","
                 . $this->var2str($this->observaciones) . ","

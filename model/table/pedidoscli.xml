@@ -128,6 +128,12 @@
         <nulo>NO</nulo>
     </columna>
     <columna>
+        <nombre>netosindto</nombre>
+        <tipo>double precision</tipo>
+        <nulo>NO</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
         <nombre>neto</nombre>
         <tipo>double precision</tipo>
         <nulo>NO</nulo>
@@ -257,6 +263,36 @@
     <columna>
         <nombre>idoriginal</nombre>
         <tipo>integer</tipo>
+    </columna>
+    <columna>
+        <nombre>dtopor1</nombre>
+        <tipo>double precision</tipo>
+        <nulo>NO</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>dtopor2</nombre>
+        <tipo>double precision</tipo>
+        <nulo>NO</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>dtopor3</nombre>
+        <tipo>double precision</tipo>
+        <nulo>NO</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>dtopor4</nombre>
+        <tipo>double precision</tipo>
+        <nulo>NO</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>dtopor5</nombre>
+        <tipo>double precision</tipo>
+        <nulo>NO</nulo>
+        <defecto>0</defecto>
     </columna>
     <restriccion>
         <nombre>pedidoscli_pkey</nombre>
