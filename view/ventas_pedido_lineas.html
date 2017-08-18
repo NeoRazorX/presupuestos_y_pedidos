@@ -9,9 +9,9 @@
                 <th width="50"></th>
                 <th class="text-right" width="110">Precio</th>
                 <th class="text-right no-wrap" width="90">Dto. %</th>
-                <th class="text-right no-wrap dtos" width="90">Dto. 2 %</th>
-                <th class="text-right no-wrap dtos" width="90">Dto. 3 %</th>
-                <th class="text-right no-wrap dtos" width="90">Dto. 4 %</th>
+                <th class="text-right no-wrap dtosl" width="90">Dto. 2 %</th>
+                <th class="text-right no-wrap dtosl" width="90">Dto. 3 %</th>
+                <th class="text-right no-wrap dtosl" width="90">Dto. 4 %</th>
                 <th class="text-right no-wrap" width="130">Neto</th>
                 <th class="text-right" width="115">{#FS_IVA#}</th>
                 <th class="text-right recargo" width="115">RE %</th>
@@ -59,15 +59,15 @@
                     <input type="text" id="dto_{$counter}" name="dto_{$counter}" value="{$value->dtopor}" class="form-control text-right"
                            onkeyup="recalcular()" onclick="this.select()" autocomplete="off"/>
                 </td>
-                <td class="dtos">
+                <td class="dtosl">
                     <input type="text" id="dto2_{$counter}" name="dto2_{$counter}" value="{$value->dtopor2}" class="form-control text-right"
                            onkeyup="recalcular()" onclick="this.select()" autocomplete="off"/>
                 </td>
-                <td class="dtos">
+                <td class="dtosl">
                     <input type="text" id="dto3_{$counter}" name="dto3_{$counter}" value="{$value->dtopor3}" class="form-control text-right"
                            onkeyup="recalcular()" onclick="this.select()" autocomplete="off"/>
                 </td>
-                <td class="dtos">
+                <td class="dtosl">
                     <input type="text" id="dto4_{$counter}" name="dto4_{$counter}" value="{$value->dtopor4}" class="form-control text-right"
                            onkeyup="recalcular()" onclick="this.select()" autocomplete="off"/>
                 </td>
@@ -119,12 +119,12 @@
             <tfoot>
                 <th></th>
                 <th class="text-right no-wrap vertical-align-bottom">Neto</th>
-                <th class="dtos text-right vertical-align-bottom no-wrap">Dto. 1 %</th>
-                <th class="dtos text-right vertical-align-bottom no-wrap">Dto. 2 %</th>
-                <th class="dtos text-right vertical-align-bottom no-wrap">Dto. 3 %</th>
-                <th class="dtos text-right vertical-align-bottom no-wrap">Dto. 4 %</th>
-                <th class="dtos text-right vertical-align-bottom no-wrap">Dto. 5 %</th>
-                <th class="text-right vertical-align-bottom no-wrap">Base</th>
+                <th class="dtost text-right vertical-align-bottom no-wrap">Dto. 1 %</th>
+                <th class="dtost text-right vertical-align-bottom no-wrap">Dto. 2 %</th>
+                <th class="dtost text-right vertical-align-bottom no-wrap">Dto. 3 %</th>
+                <th class="dtost text-right vertical-align-bottom no-wrap">Dto. 4 %</th>
+                <th class="dtost text-right vertical-align-bottom no-wrap">Dto. 5 %</th>
+                <th class="dtost text-right vertical-align-bottom no-wrap">Base</th>
                 <th class="text-right vertical-align-bottom no-wrap">{#FS_IVA#}</th>
                 <th class="recargo text-right vertical-align-bottom no-wrap">Recargo</th>
                 <th class="irpf text-right vertical-align-bottom no-wrap">{#FS_IRPF#}</th>
@@ -141,22 +141,22 @@
                 <td>
                     <div id="anetosindto" class="form-control text-right" onkeyup="recalcular()" onclick="this.select()" style="font-weight: bold;" disabled>{$fsc->show_numero(0)}</div>
                 </td>
-                <td class="dtos">
+                <td class="dtost">
                     <input id="adtopor1" name="adtopor1" class="form-control text-right" onkeyup="recalcular()" onclick="this.select()" style="font-weight: bold;" value="{$fsc->pedido->dtopor1}"></input>
                 </td>
-                <td class="dtos">
+                <td class="dtost">
                     <input id="adtopor2" name="adtopor2" class="form-control text-right" onkeyup="recalcular()" onclick="this.select()" style="font-weight: bold;" value="{$fsc->pedido->dtopor2}"></input>
                 </td>
-                <td class="dtos">
+                <td class="dtost">
                     <input id="adtopor3" name="adtopor3" class="form-control text-right" onkeyup="recalcular()" onclick="this.select()" style="font-weight: bold;" value="{$fsc->pedido->dtopor3}"></input>
                 </td>
-                <td class="dtos">
+                <td class="dtost">
                     <input id="adtopor4" name="adtopor4" class="form-control text-right" onkeyup="recalcular()" onclick="this.select()" style="font-weight: bold;" value="{$fsc->pedido->dtopor4}"></input>
                 </td>
-                <td class="dtos">
+                <td class="dtost">
                     <input id="adtopor5" name="adtopor5" class="form-control text-right" onkeyup="recalcular()" onclick="this.select()" style="font-weight: bold;" value="{$fsc->pedido->dtopor5}"></input>
                 </td>
-                <td>
+                <td class="dtost">
                     <div id="aneto" class="form-control text-right" style="font-weight: bold;" disabled>{$fsc->show_numero(0)}</div>
                 </td>
                 <td>
@@ -177,12 +177,12 @@
             <tr>
                 <td></td>
                 <td class="text-right">{$fsc->show_precio($fsc->pedido->netosindto, $fsc->pedido->coddivisa)}</td>
-                <td class="dtos text-right">{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100), $fsc->pedido->coddivisa)}</td>
-                <td class="dtos text-right">{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100), $fsc->pedido->coddivisa)}</td>
-                <td class="dtos text-right">{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100)*($fsc->pedido->dtopor3/100), $fsc->pedido->coddivisa)}</td>
-                <td class="dtos text-right">{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100)*($fsc->pedido->dtopor3/100)*($fsc->pedido->dtopor4/100), $fsc->pedido->coddivisa)}</td>
-                <td class="dtos text-right">{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100)*($fsc->pedido->dtopor3/100)*($fsc->pedido->dtopor4/100)*($fsc->pedido->dtopor5/100), $fsc->pedido->coddivisa)}</td>
-                <td class="text-right">{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</td>
+                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100), $fsc->pedido->coddivisa)}</td>
+                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100), $fsc->pedido->coddivisa)}</td>
+                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100)*($fsc->pedido->dtopor3/100), $fsc->pedido->coddivisa)}</td>
+                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100)*($fsc->pedido->dtopor3/100)*($fsc->pedido->dtopor4/100), $fsc->pedido->coddivisa)}</td>
+                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100)*($fsc->pedido->dtopor3/100)*($fsc->pedido->dtopor4/100)*($fsc->pedido->dtopor5/100), $fsc->pedido->coddivisa)}</td>
+                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</td>
                 <td class="text-right">{$fsc->show_precio($fsc->pedido->totaliva, $fsc->pedido->coddivisa)}</td>
                 <td class="recargo text-right">{$fsc->show_precio($fsc->pedido->totalrecargo, $fsc->pedido->coddivisa)}</td>
                 <td class="irpf text-right">{$fsc->show_precio($fsc->pedido->totalirpf, $fsc->pedido->coddivisa)}</td>
@@ -200,9 +200,9 @@
                 <th class="text-right" width="70">Cantidad</th>
                 <th class="text-right" width="80">Precio</th>
                 <th class="text-right" width="70">Dto %</th>
-                <th class="text-right dtos" width="70">Dto 2 %</th>
-                <th class="text-right dtos" width="70">Dto 3 %</th>
-                <th class="text-right dtos" width="70">Dto 4 %</th>
+                <th class="text-right dtosl" width="70">Dto 2 %</th>
+                <th class="text-right dtosl" width="70">Dto 3 %</th>
+                <th class="text-right dtosl" width="70">Dto 4 %</th>
                 <th class="text-right" width="80">Neto</th>
                 <th class="text-right" width="70">{#FS_IVA#}</th>
                 <th class="text-right recargo" width="70">RE</th>
@@ -226,9 +226,9 @@
                 <td class="text-right">{$value->cantidad}</td>
                 <td class="text-right">{$fsc->show_precio($value->pvpunitario, $fsc->pedido->coddivisa, TRUE, FS_NF0_ART)}</td>
                 <td class="text-right">{$fsc->show_numero($value->dtopor, 2)} %</td>
-                <td class="text-right dtos">{$fsc->show_numero($value->dtopor2, 2)} %</td>
-                <td class="text-right dtos">{$fsc->show_numero($value->dtopor3, 2)} %</td>
-                <td class="text-right dtos">{$fsc->show_numero($value->dtopor4, 2)} %</td>
+                <td class="text-right dtosl">{$fsc->show_numero($value->dtopor2, 2)} %</td>
+                <td class="text-right dtosl">{$fsc->show_numero($value->dtopor3, 2)} %</td>
+                <td class="text-right dtosl">{$fsc->show_numero($value->dtopor4, 2)} %</td>
                 <td class="text-right">{$fsc->show_precio($value->pvptotal, $fsc->pedido->coddivisa)}</td>
                 <td class="text-right">{$fsc->show_numero($value->iva, 2)} %</td>
                 <td class="text-right recargo">{$fsc->show_numero($value->recargo, 2)} %</td>
@@ -247,17 +247,17 @@
         <tfoot>
             <tr>
                 {if="$fsc->pedido->coddivisa!=$fsc->empresa->coddivisa"}
-                <td colspan='{if="$fsc->pedido->netosindto==$fsc->pedido->neto"}4{else}2{/if}' class="text-right warning"><b>{$fsc->pedido->coddivisa}:</b></td>
+                <td colspan='{if="$fsc->pedido->netosindto==$fsc->pedido->neto"}5{else}2{/if}' class="text-right warning"><b>{$fsc->pedido->coddivisa}:</b></td>
                 {else}
-                <td colspan='{if="$fsc->pedido->netosindto==$fsc->pedido->neto"}4{else}2{/if}'></td>
+                <td colspan='{if="$fsc->pedido->netosindto==$fsc->pedido->neto"}5{else}2{/if}'></td>
                 {/if}
                 <td class="text-right"><b>Neto<br/><br/>{$fsc->show_precio($fsc->pedido->netosindto, $fsc->pedido->coddivisa)}</b></td>
-                <td class="text-right dtos"><b>Dto. 1<br/>{$fsc->pedido->dtopor1}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100), $fsc->pedido->coddivisa)}</b></td>
-                <td class="text-right dtos"><b>Dto. 2<br/>{$fsc->pedido->dtopor2}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor2/100), $fsc->pedido->coddivisa)}</b></td>
-                <td class="text-right dtos"><b>Dto. 3<br/>{$fsc->pedido->dtopor3}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor3/100), $fsc->pedido->coddivisa)}</b></td>
-                <td class="text-right dtos"><b>Dto. 4<br/>{$fsc->pedido->dtopor4}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor4/100), $fsc->pedido->coddivisa)}</b></td>
-                <td class="text-right dtos"><b>Dto. 5<br/>{$fsc->pedido->dtopor5}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor5/100), $fsc->pedido->coddivisa)}</b></td>
-                <td class="text-right"><b>Base<br/><br/>{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</b></td>
+                <td class="text-right dtost"><b>Dto. 1<br/>{$fsc->pedido->dtopor1}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100), $fsc->pedido->coddivisa)}</b></td>
+                <td class="text-right dtost"><b>Dto. 2<br/>{$fsc->pedido->dtopor2}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor2/100), $fsc->pedido->coddivisa)}</b></td>
+                <td class="text-right dtost"><b>Dto. 3<br/>{$fsc->pedido->dtopor3}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor3/100), $fsc->pedido->coddivisa)}</b></td>
+                <td class="text-right dtost"><b>Dto. 4<br/>{$fsc->pedido->dtopor4}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor4/100), $fsc->pedido->coddivisa)}</b></td>
+                <td class="text-right dtost"><b>Dto. 5<br/>{$fsc->pedido->dtopor5}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor5/100), $fsc->pedido->coddivisa)}</b></td>
+                <td class="text-right dtost"><b>Base<br/><br/>{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</b></td>
                 <td class="text-right"><b>{#FS_IVA#}<br/><br/>{$fsc->show_precio($fsc->pedido->totaliva, $fsc->pedido->coddivisa)}</b></td>
                 <td class="text-right recargo"><b>Recargo<br/><br/>{$fsc->show_precio($fsc->pedido->totalrecargo, $fsc->pedido->coddivisa)}</b></td>
                 <td class="text-right irpf"><b>{#FS_IRPF#}<br/><br/>-{$fsc->show_precio($fsc->pedido->totalirpf, $fsc->pedido->coddivisa)}</b></td>
@@ -265,14 +265,14 @@
             </tr>
             {if="$fsc->pedido->coddivisa!=$fsc->empresa->coddivisa"}
             <tr class="warning">
-                <td colspan="2"></td>
+                <td colspan='{if="$fsc->pedido->netosindto==$fsc->pedido->neto"}5{else}2{/if}'></td>
                 <td class="text-right"><b>{$fsc->empresa->coddivisa}:</b></td>
-                <td class="dtos"></td>
-                <td class="dtos"></td>
-                <td class="dtos"></td>
-                <td class="dtos"></td>
-                <td class="dtos"></td>
-                <td></td>
+                <td class="dtost"></td>
+                <td class="dtost"></td>
+                <td class="dtost"></td>
+                <td class="dtost"></td>
+                <td class="dtost"></td>
+                <td class="dtost"></td>
                 <td></td>
                 <td class="recargo"></td>
                 <td class="irpf"></td>
@@ -288,8 +288,12 @@
         <div class="col-sm-12">
             {if="$fsc->pedido->editable"}
             <div class="text-right">
-                <a href="#" class="label label-default" onclick="cliente.dtos = true;recalcular();" title="Mostrar descuentos adicionales">
-                    <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp; Dtos
+                <a href="#" class="label label-default" onclick="cliente.dtosl = !cliente.dtosl; recalcular();" title="Mostrar descuentos líneas adicionales">
+                    <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp; Dtos líneas
+                </a>
+                &nbsp;
+                <a href="#" class="label label-default" onclick="cliente.dtost = !cliente.dtost; recalcular();" title="Mostrar descuentos totales adicionales">
+                    <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp; Dtos Totales
                 </a>
                 &nbsp;
                 <a href="#" class="label label-default" onclick="cliente.recargo = true;recalcular();" title="Mostrar Recargo de Equivalencia">
