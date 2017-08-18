@@ -70,6 +70,9 @@
          $('#modal_eliminar').modal('show');
       });
 
+      {if="$fsc->pedido->netosindto==$fsc->pedido->neto"}
+      $('.dtos').hide();
+      {/if}
       {if="$fsc->pedido->totalrecargo==0"}
       $('.recargo').hide();
       {/if}

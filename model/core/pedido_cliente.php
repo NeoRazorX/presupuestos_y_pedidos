@@ -1019,7 +1019,10 @@ class pedido_cliente extends \fs_model
             . "WHERE status = '1' AND idalbaran NOT IN (SELECT idalbaran FROM albaranescli);");
 
         /// marcamos como rechazados todos los presupuestos no editables y sin pedido asociado
-        $this->db->exec("UPDATE pedidoscli SET status = '2' WHERE idalbaran IS NULL AND"
+        $this->db->exec("UPDATE " . $this->table_name . " SET status = '2' WHERE idalbaran IS NULL AND"
             . " editable = false;");
+        
+        /// asignamos netosindto a neto a todos los que estén a 0
+        $this->db->exec("UPDATE " . $this->table_name . " SET netosindto = neto WHERE netosindto = 0;");
     }
 }
