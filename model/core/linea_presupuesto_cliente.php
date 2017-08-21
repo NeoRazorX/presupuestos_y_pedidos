@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of presupuestos_y_pedidos
- * Copyright (C) 2014-2017    Carlos Garcia Gomez        neorazorx@gmail.com
- * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2017  Carlos Garcia Gomez      neorazorx@gmail.com
+ * Copyright (C) 2014-2017  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -29,95 +29,128 @@ class linea_presupuesto_cliente extends \fs_model
 
     /**
      * Clave primaria.
-     * @var integer 
+     * @var integer
      */
     public $idlinea;
 
     /**
      * ID del presupuesto.
-     * @var integer 
+     * @var integer
      */
     public $idpresupuesto;
+
+    /**
+     * Cantidad del artículo.
+     * @var float
+     */
     public $cantidad;
 
     /**
      * Código del impuesto relacionado.
-     * @var string 
+     * @var string
      */
     public $codimpuesto;
+
+    /**
+     * Descripción del artículo.
+     * @var string
+     */
     public $descripcion;
 
     /**
      * % de descuento.
-     * @var float 
+     * @var float
      */
     public $dtopor;
 
     /**
+     * % de descuento 2
+     * @var float
+     */
+    public $dtopor2;
+    
+    /**
+     * % de descuento 3
+     * @var float
+     */
+    public $dtopor3;
+    
+    /**
+     * % de descuento 4
+     * @var float
+     */
+    public $dtopor4;
+
+    /**
      * % de retención IRPF.
-     * @var float 
+     * @var float
      */
     public $irpf;
 
     /**
-     * % del impuesto relacionado.
-     * @var float 
+     * % de IVA de la línea, el que corresponde al impuesto.
+     * @var float
      */
     public $iva;
 
     /**
      * Importe neto sin descuento, es decir, pvpunitario * cantidad.
-     * @var float 
+     * @var float
      */
     public $pvpsindto;
 
     /**
-     * Importe neto de la linea, sin impuestos.
-     * @var float 
+     * Importe neto de la línea, sin impuestos.
+     * @var float
      */
     public $pvptotal;
 
     /**
-     * Precio de una unidad.
-     * @var float 
+     * Precio del artículo, una unidad.
+     * @var float
      */
     public $pvpunitario;
 
     /**
-     * % de recargo de equivalencia.
-     * @var float 
+     * % de recargo de equivalencia RE.
+     * @var float
      */
     public $recargo;
 
     /**
      * Referencia del artículo.
-     * @var string 
+     * @var string
      */
     public $referencia;
 
     /**
      * Código de la combinación seleccionada, en el caso de los artículos con atributos.
-     * @var string 
+     * @var string
      */
     public $codcombinacion;
 
     /**
      * Posición de la linea en el documento. Cuanto más alto más abajo.
-     * @var integer 
+     * @var integer
      */
     public $orden;
 
     /**
      * False -> no se muestra la columna cantidad al imprimir.
-     * @var boolean 
+     * @var boolean
      */
     public $mostrar_cantidad;
 
     /**
      * False -> no se muestran las columnas precio, descuento, impuestos y total al imprimir.
-     * @var boolean 
+     * @var boolean
      */
     public $mostrar_precio;
+
+    /**
+     * Listado de presupuestos.
+     * @var array
+     */
     private static $presupuestos;
 
     public function __construct($l = FALSE)
@@ -132,9 +165,13 @@ class linea_presupuesto_cliente extends \fs_model
             $this->idlinea = intval($l['idlinea']);
             $this->idpresupuesto = intval($l['idpresupuesto']);
             $this->cantidad = floatval($l['cantidad']);
+            $this->codcombinacion = $l['codcombinacion'];
             $this->codimpuesto = $l['codimpuesto'];
             $this->descripcion = $l['descripcion'];
             $this->dtopor = floatval($l['dtopor']);
+            $this->dtopor2 = floatval($l['dtopor2']);
+            $this->dtopor3 = floatval($l['dtopor3']);
+            $this->dtopor4 = floatval($l['dtopor4']);
             $this->irpf = floatval($l['irpf']);
             $this->iva = floatval($l['iva']);
             $this->pvpsindto = floatval($l['pvpsindto']);
@@ -142,7 +179,6 @@ class linea_presupuesto_cliente extends \fs_model
             $this->pvpunitario = floatval($l['pvpunitario']);
             $this->recargo = floatval($l['recargo']);
             $this->referencia = $l['referencia'];
-            $this->codcombinacion = $l['codcombinacion'];
             $this->orden = intval($l['orden']);
             $this->mostrar_cantidad = $this->str2bool($l['mostrar_cantidad']);
             $this->mostrar_precio = $this->str2bool($l['mostrar_precio']);
@@ -151,19 +187,22 @@ class linea_presupuesto_cliente extends \fs_model
             $this->idpresupuesto = NULL;
             $this->cantidad = 0.0;
             $this->codimpuesto = NULL;
+            $this->codcombinacion = NULL;
             $this->descripcion = '';
             $this->dtopor = 0.0;
+            $this->dtopor2 = 0.0;
+            $this->dtopor3 = 0.0;
+            $this->dtopor4 = 0.0;
             $this->irpf = 0.0;
             $this->iva = 0.0;
+            $this->mostrar_cantidad = TRUE;
+            $this->mostrar_precio = TRUE;
+            $this->orden = 0;
             $this->pvpsindto = 0.0;
             $this->pvptotal = 0.0;
             $this->pvpunitario = 0.0;
             $this->recargo = 0.0;
             $this->referencia = NULL;
-            $this->codcombinacion = NULL;
-            $this->orden = 0;
-            $this->mostrar_cantidad = TRUE;
-            $this->mostrar_precio = TRUE;
         }
     }
 
@@ -279,14 +318,15 @@ class linea_presupuesto_cliente extends \fs_model
     public function test()
     {
         $this->descripcion = $this->no_html($this->descripcion);
-        $total = $this->pvpunitario * $this->cantidad * (100 - $this->dtopor) / 100;
         $totalsindto = $this->pvpunitario * $this->cantidad;
+        $dto_due = (1-((1-$this->dtopor/100)*(1-$this->dtopor2/100)*(1-$this->dtopor3/100)*(1-$this->dtopor4/100)))*100;
+        $total = $totalsindto * (1 - $dto_due / 100);
 
         if (!$this->floatcmp($this->pvptotal, $total, FS_NF0, TRUE)) {
-            $this->new_error_msg("Error en el valor de pvptotal de la línea " . $this->referencia . " del " . FS_PRESUPUESTO . ". Valor correcto: " . $total);
+            $this->new_error_msg("Error en el valor de pvptotal de la línea " . $this->referencia . " del " . FS_PRESUPUESTO . ". Valor correcto: " . $total . " y se recibe " . $this->pvptotal);
             return FALSE;
         } else if (!$this->floatcmp($this->pvpsindto, $totalsindto, FS_NF0, TRUE)) {
-            $this->new_error_msg("Error en el valor de pvpsindto de la línea " . $this->referencia . " del " . FS_PRESUPUESTO . ". Valor correcto: " . $totalsindto);
+            $this->new_error_msg("Error en el valor de pvpsindto de la línea " . $this->referencia . " del " . FS_PRESUPUESTO . ". Valor correcto: " . $totalsindto . " y se recibe " . $this->pvpsindto);
             return FALSE;
         }
 
@@ -301,6 +341,9 @@ class linea_presupuesto_cliente extends \fs_model
                     . ", codimpuesto = " . $this->var2str($this->codimpuesto)
                     . ", descripcion = " . $this->var2str($this->descripcion)
                     . ", dtopor = " . $this->var2str($this->dtopor)
+                    . ", dtopor2 = " . $this->var2str($this->dtopor2)
+                    . ", dtopor3 = " . $this->var2str($this->dtopor3)
+                    . ", dtopor4 = " . $this->var2str($this->dtopor4)
                     . ", idpresupuesto = " . $this->var2str($this->idpresupuesto)
                     . ", irpf = " . $this->var2str($this->irpf)
                     . ", iva = " . $this->var2str($this->iva)
@@ -318,13 +361,16 @@ class linea_presupuesto_cliente extends \fs_model
                 return $this->db->exec($sql);
             }
 
-            $sql = "INSERT INTO " . $this->table_name . " (cantidad,codimpuesto,descripcion,dtopor,
+            $sql = "INSERT INTO " . $this->table_name . " (cantidad,codimpuesto,descripcion,dtopor,dtopor2,dtopor3,dtopor4,
                idpresupuesto,irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,codcombinacion,
                orden,mostrar_cantidad,mostrar_precio) VALUES 
                       (" . $this->var2str($this->cantidad)
                 . "," . $this->var2str($this->codimpuesto)
                 . "," . $this->var2str($this->descripcion)
                 . "," . $this->var2str($this->dtopor)
+                . "," . $this->var2str($this->dtopor2)
+                . "," . $this->var2str($this->dtopor3)
+                . "," . $this->var2str($this->dtopor4)
                 . "," . $this->var2str($this->idpresupuesto)
                 . "," . $this->var2str($this->irpf)
                 . "," . $this->var2str($this->iva)
@@ -353,7 +399,7 @@ class linea_presupuesto_cliente extends \fs_model
     }
 
     /**
-     * Devuelve las líneas del presupuesto $idp
+     * Devuelve todas las líneas del presupuesto $idp
      * @param integer $idp
      * @return \linea_presupuesto_cliente
      */

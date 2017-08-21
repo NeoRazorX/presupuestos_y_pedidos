@@ -27,15 +27,15 @@
       document.f_presupuesto.ac_cliente.focus();
    }
    $(document).ready(function () {
-      $('#numlineas').val(numlineas);
+      $("#numlineas").val(numlineas);
       usar_serie();
       usar_almacen();
       usar_divisa();
       recalcular();
-      $('#ac_cliente').autocomplete({
+      $("#ac_cliente").autocomplete({
          serviceUrl: nueva_venta_url,
          paramName: 'buscar_cliente',
-         onSelect: function(suggestion) {
+         onSelect: function (suggestion) {
             if(suggestion)
             {
                if(document.f_presupuesto.cliente.value != suggestion.data && suggestion.data != '')
@@ -56,27 +56,37 @@
       document.f_enviar_email.submit();
    }
    $(document).ready(function () {
-      $('#b_imprimir').click(function (event) {
+      $("#b_imprimir").click(function (event) {
          event.preventDefault();
-         $('#modal_imprimir_presupuesto').modal('show');
+         $("#modal_imprimir_presupuesto").modal('show');
       });
-      $('#b_enviar').click(function (event) {
+      $("#b_enviar").click(function (event) {
          event.preventDefault();
-         $('#modal_enviar').modal('show');
+         $("#modal_enviar").modal('show');
          document.f_enviar_email.email.select();
       });
       $('#b_eliminar').click(function (event) {
          event.preventDefault();
-         $('#modal_eliminar').modal('show');
+         $("#modal_eliminar").modal('show');
       });
 
+      show = false;
+      {loop="$lineas"}{if="$value->dtopor2!=0 || $value->dtopor3!=0 || $value->dtopor4!=0"}show = true;{break}{/if}{/loop}
+      if(!show) {
+          $('.dtosl').hide();
+      } else {
+          $('.dtosl').show();
+      }
+      {if="$fsc->presupuesto->netosindto==$fsc->presupuesto->neto"}
+      $('.dtost').hide();
+      {/if}
       {if="$fsc->presupuesto->totalrecargo==0"}
-      $('.recargo').hide();
+      $(".recargo").hide();
       {/if}
       {if="$fsc->presupuesto->totalirpf==0"}
-      $('.irpf').hide();
+      $(".irpf").hide();
       {/if}
-      });
+   });
 </script>
 
 <form name="f_presupuesto" action="{$fsc->presupuesto->url()}" method="post" class="form">
@@ -944,11 +954,11 @@
                   <td>{$value->nombrecliente}</td>
                   <td class="text-right hidden-sm">
                      <span title="{$value->numdocs} documentos adjuntos">
-                        {if="$value->numdocs==1"}
-                        <i class="fa fa-file" aria-hidden="true"></i>
-                        {elseif="$value->numdocs>1"}
-                        {$value->numdocs} <i class="fa fa-file" aria-hidden="true"></i>
-                        {/if}
+                     {if="$value->numdocs==1"}
+                     <i class="fa fa-file" aria-hidden="true"></i>
+                     {elseif="$value->numdocs>1"}
+                     {$value->numdocs} <i class="fa fa-file" aria-hidden="true"></i>
+                     {/if}
                      </span>
                   </td>
                   <td>{$value->observaciones_resume()}</td>

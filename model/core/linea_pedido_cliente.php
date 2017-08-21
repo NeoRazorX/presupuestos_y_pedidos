@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of presupuestos_y_pedidos
- * Copyright (C) 2014-2017    Carlos Garcia Gomez        neorazorx@gmail.com
- * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2014-2017  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -41,16 +41,21 @@ class linea_pedido_cliente extends \fs_model
     public $idlineapresupuesto;
 
     /**
-     * ID del pedido.
+     * ID del pedido de esta línea.
      * @var integer
      */
     public $idpedido;
 
     /**
-     * ID del presupuesto relacionado, si lo hay.
+     * ID del presupuesto relacionado con este pedido, si lo hay.
      * @var integer
      */
     public $idpresupuesto;
+
+    /**
+     * Cantidad del artículo.
+     * @var float
+     */
     public $cantidad;
 
     /**
@@ -58,14 +63,19 @@ class linea_pedido_cliente extends \fs_model
      * @var string
      */
     public $codimpuesto;
+
+    /**
+     * Descripción del artículo.
+     * @var string
+     */
     public $descripcion;
 
     /**
-     * % de descuento
+     * % de descuento.
      * @var float
      */
     public $dtopor;
-    
+
     /**
      * % de descuento 2
      * @var float
@@ -91,7 +101,7 @@ class linea_pedido_cliente extends \fs_model
     public $irpf;
 
     /**
-     * % del impuesto relacionado.
+     * % de IVA de la línea, el que corresponde al impuesto.
      * @var float
      */
     public $iva;
@@ -103,13 +113,13 @@ class linea_pedido_cliente extends \fs_model
     public $pvpsindto;
 
     /**
-     * Importe neto de la linea, sin impuestos.
+     * Importe neto de la línea, sin impuestos.
      * @var float
      */
     public $pvptotal;
 
     /**
-     * Precio de una unidad.
+     * Precio del artículo, una unidad.
      * @var float
      */
     public $pvpunitario;
@@ -149,6 +159,11 @@ class linea_pedido_cliente extends \fs_model
      * @var boolean
      */
     public $mostrar_precio;
+
+    /**
+     * Listado de pedidos.
+     * @var array
+     */
     private static $pedidos;
 
     public function __construct($l = FALSE)
@@ -165,6 +180,7 @@ class linea_pedido_cliente extends \fs_model
             $this->idpedido = $this->intval($l['idpedido']);
             $this->idpresupuesto = $this->intval($l['idpresupuesto']);
             $this->cantidad = floatval($l['cantidad']);
+            $this->codcombinacion = $l['codcombinacion'];
             $this->codimpuesto = $l['codimpuesto'];
             $this->descripcion = $l['descripcion'];
             $this->dtopor = floatval($l['dtopor']);
@@ -178,7 +194,6 @@ class linea_pedido_cliente extends \fs_model
             $this->pvpunitario = floatval($l['pvpunitario']);
             $this->recargo = floatval($l['recargo']);
             $this->referencia = $l['referencia'];
-            $this->codcombinacion = $l['codcombinacion'];
             $this->orden = intval($l['orden']);
             $this->mostrar_cantidad = $this->str2bool($l['mostrar_cantidad']);
             $this->mostrar_precio = $this->str2bool($l['mostrar_precio']);
@@ -189,6 +204,7 @@ class linea_pedido_cliente extends \fs_model
             $this->idpresupuesto = NULL;
             $this->cantidad = 0.0;
             $this->codimpuesto = NULL;
+            $this->codcombinacion = NULL;
             $this->descripcion = '';
             $this->dtopor = 0.0;
             $this->dtopor2 = 0.0;
@@ -196,15 +212,14 @@ class linea_pedido_cliente extends \fs_model
             $this->dtopor4 = 0.0;
             $this->irpf = 0.0;
             $this->iva = 0.0;
+            $this->mostrar_cantidad = TRUE;
+            $this->mostrar_precio = TRUE;
+            $this->orden = 0;
             $this->pvpsindto = 0.0;
             $this->pvptotal = 0.0;
             $this->pvpunitario = 0.0;
             $this->recargo = 0.0;
             $this->referencia = NULL;
-            $this->codcombinacion = NULL;
-            $this->orden = 0;
-            $this->mostrar_cantidad = TRUE;
-            $this->mostrar_precio = TRUE;
         }
     }
 
@@ -328,7 +343,7 @@ class linea_pedido_cliente extends \fs_model
             $this->new_error_msg("Error en el valor de pvptotal de la línea " . $this->referencia . " del " . FS_PEDIDO . ". Valor correcto: " . $total . " y se recibe " . $this->pvptotal);
             return FALSE;
         } else if (!$this->floatcmp($this->pvpsindto, $totalsindto, FS_NF0, TRUE)) {
-            $this->new_error_msg("Error en el valor de pvpsindto de la línea " . $this->referencia . " del " . FS_PEDIDO . ". Valor correcto: " . $totalsindto . " y se recibe " . $this->pvpsindto);
+            $this->new_error_msg("Error en el valor de pvpsindto de la línea " . $this->referencia . " del " . FS_PEDIDO . ". Valor correcto: " . $totalsindto . " y se recibe " . $this->pvptotal);
             return FALSE;
         }
 
@@ -339,8 +354,10 @@ class linea_pedido_cliente extends \fs_model
     {
         if ($this->test()) {
             if ($this->exists()) {
-                $sql = "UPDATE " . $this->table_name . " SET cantidad = " . $this->var2str($this->cantidad)
+                $sql = "UPDATE " . $this->table_name . " SET "
+                    . "cantidad = " . $this->var2str($this->cantidad)
                     . ", codimpuesto = " . $this->var2str($this->codimpuesto)
+                    . ", codcombinacion = " . $this->var2str($this->codcombinacion)
                     . ", descripcion = " . $this->var2str($this->descripcion)
                     . ", dtopor = " . $this->var2str($this->dtopor)
                     . ", dtopor2 = " . $this->var2str($this->dtopor2)
@@ -356,7 +373,6 @@ class linea_pedido_cliente extends \fs_model
                     . ", pvpunitario = " . $this->var2str($this->pvpunitario)
                     . ", recargo = " . $this->var2str($this->recargo)
                     . ", referencia = " . $this->var2str($this->referencia)
-                    . ", codcombinacion = " . $this->var2str($this->codcombinacion)
                     . ", orden = " . $this->var2str($this->orden)
                     . ", mostrar_cantidad = " . $this->var2str($this->mostrar_cantidad)
                     . ", mostrar_precio = " . $this->var2str($this->mostrar_precio)
@@ -365,9 +381,10 @@ class linea_pedido_cliente extends \fs_model
                 return $this->db->exec($sql);
             }
 
-            $sql = "INSERT INTO " . $this->table_name . " (cantidad,codimpuesto,descripcion,dtopor,idpedido,
-               irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,codcombinacion,idlineapresupuesto,
-               idpresupuesto,orden,mostrar_cantidad,mostrar_precio) VALUES (" . $this->var2str($this->cantidad)
+            $sql = "INSERT INTO " . $this->table_name . " (cantidad,codimpuesto,descripcion,dtopor,dtopor2,dtopor3,dtopor4,
+               idpedido,irpf,iva,pvpsindto,pvptotal,pvpunitario,recargo,referencia,codcombinacion,idlineapresupuesto,
+               idpresupuesto,orden,mostrar_cantidad,mostrar_precio) VALUES 
+                      (" . $this->var2str($this->cantidad)
                 . "," . $this->var2str($this->codimpuesto)
                 . "," . $this->var2str($this->descripcion)
                 . "," . $this->var2str($this->dtopor)

@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of presupuestos_y_pedidos
- * Copyright (C) 2014-2017    Carlos Garcia Gomez        neorazorx@gmail.com
- * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2017  Carlos Garcia Gomez      neorazorx@gmail.com
+ * Copyright (C) 2014-2017  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -39,109 +39,191 @@ class presupuesto_cliente extends \fs_model
 
     /**
      * Código identificador único. Para humanos.
-     * @var string 
+     * @var string
      */
     public $codigo;
 
     /**
      * Serie relacionada.
-     * @var string 
+     * @var string
      */
     public $codserie;
 
     /**
-     * Ejercicio relacionado. El que corresponde ala fecha.
-     * @var string 
+     * Ejercicio relacionado. El que corresponde a la fecha.
+     * @var string
      */
     public $codejercicio;
 
     /**
      * Código del cliente del presupuesto.
-     * @var string 
+     * @var string
      */
     public $codcliente;
 
     /**
      * Empleado que ha creado el presupuesto.
-     * @var string 
+     * @var string
      */
     public $codagente;
 
     /**
      * Forma de pago del presupuesto.
-     * @var string 
+     * @var string
      */
     public $codpago;
 
     /**
      * Divisa del presupuesto.
-     * @var string 
+     * @var string
      */
     public $coddivisa;
 
     /**
      * Almacén del que saldría la mercancía.
-     * @var string 
+     * @var string
      */
     public $codalmacen;
 
     /**
-     * país del cliente.
-     * @var string 
+     * País del cliente.
+     * @var string
      */
     public $codpais;
 
     /**
      * ID de la dirección del cliente.
      * Modelo direccion_cliente.
-     * @var integer 
+     * @var string
      */
     public $coddir;
+
+    /**
+     * Código postal del cliente.
+     * @var string
+     */
     public $codpostal;
 
     /**
      * Número de presupuesto.
-     * Único en la serie+ejercicio.
-     * @var string 
+     * Único dentro de la serie+ejercicio.
+     * @var string
      */
     public $numero;
 
     /**
      * Número opcional a disposición del usuario.
-     * @var string 
+     * @var string
      */
     public $numero2;
+
+    /**
+     * TODO
+     * @var
+     */
     public $nombrecliente;
+
+    /**
+     * TODO
+     * @var
+     */
     public $cifnif;
+
+    /**
+     * TODO
+     * @var
+     */
     public $direccion;
+
+    /**
+     * TODO
+     * @var
+     */
     public $ciudad;
+
+    /**
+     * TODO
+     * @var
+     */
     public $provincia;
+
+    /**
+     * TODO
+     * @var
+     */
     public $apartado;
+
+    /**
+     * TODO
+     * @var
+     */
     public $fecha;
 
     /**
-     * Fecha en la que termina la validéz del presupuesto.
-     * @var float 
+     * TODO
+     * @var
      */
-    public $finoferta;
     public $hora;
 
     /**
-     * Importe del presupuesto antes de impuestos.
+     * Fecha en la que termina la validéz del presupuesto.
+     * @var float
+     */
+    public $finoferta;
+
+    /**
+     * Importe total antes de descuentos e impuestos.
      * Es la suma del pvptotal de las líneas.
-     * @var float 
+     * @var float
+     */
+    public $netosindto;
+
+    /**
+     * Importe total antes de impuestos.
+     * Es la suma del pvptotal de las líneas.
+     * @var float
      */
     public $neto;
 
     /**
+     * Descuento porcentual 1
+     * @var float
+     */
+    public $dtopor1;
+    
+    /**
+     * Descuento porcentual 2
+     * @var float
+     */
+    public $dtopor2;
+    
+    /**
+     * Descuento porcentual 3
+     * @var float
+     */
+    public $dtopor3;
+    
+    /**
+     * Descuento porcentual 4
+     * @var float
+     */
+    public $dtopor4;
+    
+    /**
+     * Descuento porcentual 5
+     * @var float
+     */
+    public $dtopor5;
+
+    /**
      * Importe total del presupuesto, con impuestos.
-     * @var float 
+     * @var float
      */
     public $total;
 
     /**
      * Suma del IVA de las líneas.
-     * @var float 
+     * @var float
      */
     public $totaliva;
 
@@ -149,40 +231,45 @@ class presupuesto_cliente extends \fs_model
      * Total expresado en euros, por si no fuese la divisa del presupuesto.
      * totaleuros = total/tasaconv
      * No hace falta rellenarlo, al hacer save() se calcula el valor.
-     * @var float 
+     * @var float
      */
     public $totaleuros;
 
     /**
      * % de retención IRPF del presupuesto. Se obtiene de la serie.
      * Cada línea puede tener un % distinto.
-     * @var float 
+     * @var float
      */
     public $irpf;
 
     /**
-     * Suma de las retenciones IRPF de las líneas del presupuesto.
-     * @var float 
+     * Suma total de las retenciones IRPF de las líneas.
+     * @var float
      */
     public $totalirpf;
 
     /**
-     * % de comisión del empleado.
-     * @var float 
+     * % de comisión del empleado (agente).
+     * @var float
      */
     public $porcomision;
 
     /**
      * Tasa de conversión a Euros de la divisa seleccionada.
-     * @var float 
+     * @var float
      */
     public $tasaconv;
 
     /**
      * Suma total del recargo de equivalencia de las líneas.
-     * @var float 
+     * @var float
      */
     public $totalrecargo;
+
+    /**
+     * Observaciones del pedido
+     * @var float
+     */
     public $observaciones;
 
     /**
@@ -200,16 +287,67 @@ class presupuesto_cliente extends \fs_model
      * @var string 
      */
     public $femail;
+
     /// datos de transporte
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codtrans;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codigo;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_nombre;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_apellidos;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_apartado;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_direccion;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codpostal;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_ciudad;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_provincia;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codpais;
 
     /**
@@ -220,7 +358,7 @@ class presupuesto_cliente extends \fs_model
 
     /**
      * Si este presupuesto es la versión de otro, aquí se almacena el idpresupuesto del original.
-     * @var integer 
+     * @var integer
      */
     public $idoriginal;
 
@@ -261,7 +399,13 @@ class presupuesto_cliente extends \fs_model
                 $this->hora = date('H:i:s', strtotime($p['hora']));
             }
 
+            $this->netosindto = isset($p['netosindto']) ? floatval($p['netosindto']) : 0;
             $this->neto = floatval($p['neto']);
+            $this->dtopor1 = isset($p['dtopor1']) ? floatval($p['dtopor1']) : 0;
+            $this->dtopor2 = isset($p['dtopor2']) ? floatval($p['dtopor2']) : 0;
+            $this->dtopor3 = isset($p['dtopor3']) ? floatval($p['dtopor3']) : 0;
+            $this->dtopor4 = isset($p['dtopor4']) ? floatval($p['dtopor4']) : 0;
+            $this->dtopor5 = isset($p['dtopor5']) ? floatval($p['dtopor5']) : 0;
             $this->total = floatval($p['total']);
             $this->totaliva = floatval($p['totaliva']);
             $this->totaleuros = floatval($p['totaleuros']);
@@ -279,6 +423,7 @@ class presupuesto_cliente extends \fs_model
                 $this->status = 1;
                 $this->editable = FALSE;
             } else if ($this->status == 2) {
+                /// cancelado
                 $this->editable = FALSE;
             } else if ($this->editable) {
                 $this->status = 0;
@@ -329,7 +474,13 @@ class presupuesto_cliente extends \fs_model
             $this->fecha = Date('d-m-Y');
             $this->finoferta = date("d-m-Y", strtotime(Date('d-m-Y') . " +1month"));
             $this->hora = Date('H:i:s');
+            $this->netosindto = 0.0;
             $this->neto = 0.0;
+            $this->dtopor1 = 0.0;
+            $this->dtopor2 = 0.0;
+            $this->dtopor3 = 0.0;
+            $this->dtopor4 = 0.0;
+            $this->dtopor5 = 0.0;
             $this->total = 0.0;
             $this->totaliva = 0.0;
             $this->totaleuros = 0.0;
@@ -425,6 +576,10 @@ class presupuesto_cliente extends \fs_model
         return "index.php?page=ventas_cliente&cod=" . $this->codcliente;
     }
 
+    /**
+     * Devuelve las líneas del presupuesto.
+     * @return \linea_presupuesto_cliente
+     */
     public function get_lineas()
     {
         $linea = new \linea_presupuesto_cliente();
@@ -471,6 +626,9 @@ class presupuesto_cliente extends \fs_model
         return $this->db->select("SELECT * FROM " . $this->table_name . " WHERE idpresupuesto = " . $this->var2str($this->idpresupuesto) . ";");
     }
 
+    /**
+     * Genera un nuevo código y número para este presupuesto
+     */
     public function new_codigo()
     {
         $this->numero = fs_documento_new_numero($this->db, $this->table_name, $this->codejercicio, $this->codserie, 'npresupuestocli');
@@ -533,52 +691,87 @@ class presupuesto_cliente extends \fs_model
         return FALSE;
     }
 
+    /**
+     * Comprobaciones extra del presupuesto, devuelve TRUE si está todo correcto
+     * @param boolean $duplicados
+     * @return boolean
+     */
     public function full_test($duplicados = TRUE)
     {
         $status = TRUE;
 
         /// comprobamos las líneas
+        $netos = array();
+        $netosindto = 0;
+        $netocondto = 0;
+        $subtotal = 0;
         $neto = 0;
         $iva = 0;
         $irpf = 0;
         $recargo = 0;
+        $total = 0;
+        
+        // Descuento total adicional del total del documento
+        $t_dto_due = (1-((1-$this->dtopor1/100)*(1-$this->dtopor2/100)*(1-$this->dtopor3/100)*(1-$this->dtopor4/100)*(1-$this->dtopor5/100)))*100;
+        $due_totales = (1-$t_dto_due/100);
+            
         foreach ($this->get_lineas() as $l) {
             if (!$l->test()) {
                 $status = FALSE;
             }
-
-            $neto += $l->pvptotal;
-            $iva += $l->pvptotal * $l->iva / 100;
-            $irpf += $l->pvptotal * $l->irpf / 100;
-            $recargo += $l->pvptotal * $l->recargo / 100;
+            $codimpuesto = ($l->codimpuesto === null ) ? 0 : $l->codimpuesto;
+            if (!array_key_exists($codimpuesto, $netos)) {
+                $netos[$codimpuesto] = array(
+                    'subtotal' => 0,    // Subtotal (Sumatorio de netos de línea)
+                    'base' => 0,        // Base imponible
+                    'iva' => 0,         // Total IVA
+                    'irpf' => 0,        // Total IRPF
+                    'recargo' => 0      // Total Recargo
+                );
+            }
+            // Acumulamos por tipos de IVAs, que es el desglose de pie de página
+            $netosindto = $l->pvptotal;                 // Precio neto por línea
+            $netocondto = $netosindto * $due_totales;   // Precio neto - % desc sobre total
+            $netos[$codimpuesto]['subtotal'] += $netosindto;
+            $netos[$codimpuesto]['base'] += $netocondto;
+            $netos[$codimpuesto]['iva'] += $netocondto * ($l->iva / 100);
+            $netos[$codimpuesto]['irpf'] += $netocondto * ($this->irpf / 100);
+            $netos[$codimpuesto]['recargo'] += $netocondto * ($l->recargo / 100);
         }
 
-        $neto = round($neto, FS_NF0);
-        $iva = round($iva, FS_NF0);
-        $irpf = round($irpf, FS_NF0);
-        $recargo = round($recargo, FS_NF0);
-        $total = $neto + $iva - $irpf + $recargo;
+        foreach ($netos as $codimp => $ne) {
+            $subtotal += $ne['subtotal'];               // Subtotal (Sumatorio de netos de línea)
+            $neto += $ne['base'];                       // Sumatorio de bases imponibles
+            $iva += $ne['iva'];                         // Sumatorio de IVAs
+            $irpf += $ne['irpf'];                       // Sumatorio de IRPFs
+            $recargo += $ne['recargo'];                 // Sumatorio de REs
+            $total = $neto + $iva - $irpf + $recargo;   // Sumatorio del total
+        }
 
         if (!$this->floatcmp($this->neto, $neto, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor neto de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $neto);
+            $this->new_error_msg("Valor neto de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $neto . " y tiene el valor " . $this->neto);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totaliva de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $iva);
+        } elseif (!$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor totaliva de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $iva . " y tiene el valor " . $this->totaliva);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totalirpf de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $irpf);
+        } elseif (!$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor totalirpf de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $irpf . " y tiene el valor " . $this->totalirpf);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totalrecargo de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $recargo);
+        } elseif (!$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor totalrecargo de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $recargo . " y tiene el valor " . $this->totalrecargo);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->total, $total, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor total de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $total);
+        } elseif (!$this->floatcmp($this->total, $total, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor total de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $total . " y tiene el valor " . $this->total);
             $status = FALSE;
         }
 
         return $status;
     }
 
+    /**
+     * Guarda los datos en la base de datos
+     * @return boolean
+     */
     public function save()
     {
         if ($this->test()) {
@@ -604,7 +797,13 @@ class presupuesto_cliente extends \fs_model
                     . ", hora = " . $this->var2str($this->hora)
                     . ", idpedido = " . $this->var2str($this->idpedido)
                     . ", irpf = " . $this->var2str($this->irpf)
+                    . ", netosindto = " . $this->var2str($this->netosindto)
                     . ", neto = " . $this->var2str($this->neto)
+                    . ", dtopor1 = " . $this->var2str($this->dtopor1)
+                    . ", dtopor2 = " . $this->var2str($this->dtopor2)
+                    . ", dtopor3 = " . $this->var2str($this->dtopor3)
+                    . ", dtopor4 = " . $this->var2str($this->dtopor4)
+                    . ", dtopor5 = " . $this->var2str($this->dtopor5)
                     . ", nombrecliente = " . $this->var2str($this->nombrecliente)
                     . ", numero = " . $this->var2str($this->numero)
                     . ", numero2 = " . $this->var2str($this->numero2)
@@ -639,9 +838,9 @@ class presupuesto_cliente extends \fs_model
             $this->new_codigo();
             $sql = "INSERT INTO " . $this->table_name . " (apartado,cifnif,ciudad,codagente,codalmacen,
                codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,codpostal,codserie,
-               direccion,editable,fecha,finoferta,hora,idpedido,irpf,neto,nombrecliente,numero,
-               observaciones,status,porcomision,provincia,tasaconv,total,totaleuros,totalirpf,
-               totaliva,totalrecargo,numero2,femail,codtrans,codigoenv,nombreenv,apellidosenv,apartadoenv,
+               direccion,editable,fecha,finoferta,hora,idpedido,irpf,netosindto,neto,dtopor1,dtopor2,dtopor3,dtopor4,dtopor5,
+               nombrecliente,numero,observaciones,status,porcomision,provincia,tasaconv,total,totaleuros,
+               totalirpf,totaliva,totalrecargo,numero2,femail,codtrans,codigoenv,nombreenv,apellidosenv,apartadoenv,
                direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs,idoriginal) VALUES ("
                 . $this->var2str($this->apartado) . ","
                 . $this->var2str($this->cifnif) . ","
@@ -664,7 +863,13 @@ class presupuesto_cliente extends \fs_model
                 . $this->var2str($this->hora) . ","
                 . $this->var2str($this->idpedido) . ","
                 . $this->var2str($this->irpf) . ","
+                . $this->var2str($this->netosindto) . ","
                 . $this->var2str($this->neto) . ","
+                . $this->var2str($this->dtopor1) . ","
+                . $this->var2str($this->dtopor2) . ","
+                . $this->var2str($this->dtopor3) . ","
+                . $this->var2str($this->dtopor4) . ","
+                . $this->var2str($this->dtopor5) . ","
                 . $this->var2str($this->nombrecliente) . ","
                 . $this->var2str($this->numero) . ","
                 . $this->var2str($this->observaciones) . ","
@@ -713,7 +918,7 @@ class presupuesto_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con los últimos presupuestos
+     * Devuelve un array con los últimos presupuestos de venta.
      * @param integer $offset
      * @param string $order
      * @return \presupuesto_cliente
@@ -877,7 +1082,8 @@ class presupuesto_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con los presupuestos del cliente $codcliente que coinciden con $query
+     * Devuelve un array con los presupuestos del cliente $codcliente que coincidan
+     * con los filtros.
      * @param string $codcliente
      * @param string $desde
      * @param string $hasta
@@ -887,9 +1093,9 @@ class presupuesto_cliente extends \fs_model
      */
     public function search_from_cliente($codcliente, $desde, $hasta, $serie, $obs = '')
     {
-        $sql = "SELECT * FROM " . $this->table_name . " WHERE codcliente = " . $this->var2str($codcliente) .
-            " AND idpedido AND fecha BETWEEN " . $this->var2str($desde) . " AND " . $this->var2str($hasta) .
-            " AND codserie = " . $this->var2str($serie);
+        $sql = "SELECT * FROM " . $this->table_name . " WHERE codcliente = " . $this->var2str($codcliente)
+            . " AND idpedido AND fecha BETWEEN " . $this->var2str($desde) . " AND " . $this->var2str($hasta)
+            . " AND codserie = " . $this->var2str($serie);
 
         if ($obs != '') {
             $sql .= " AND lower(observaciones) = " . $this->var2str(strtolower($obs));
@@ -920,15 +1126,18 @@ class presupuesto_cliente extends \fs_model
             . " WHERE status != '1' AND idpedido IS NOT NULL;");
 
         /// devolvemos al estado pendiente a los presupuestos con estado 1 a los que se haya borrado el pedido
-        $this->db->exec("UPDATE " . $this->table_name . " SET status = '0', idpedido = NULL, editable = TRUE"
-            . " WHERE status = '1' AND idpedido NOT IN (SELECT idpedido FROM pedidoscli);");
+        $this->db->exec("UPDATE " . $this->table_name . " SET status = '0', idpedido = NULL, editable = TRUE "
+            . "WHERE status = '1' AND idpedido NOT IN (SELECT idpedido FROM pedidoscli);");
 
         /// marcamos como rechazados todos los presupuestos con finoferta ya pasada
-        $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE finoferta IS NOT NULL AND"
-            . " finoferta < " . $this->var2str(Date('d-m-Y')) . " AND idpedido IS NULL;");
+        $this->db->exec("UPDATE " . $this->table_name . " SET status = '2' WHERE finoferta IS NOT NULL AND "
+            . "finoferta < " . $this->var2str(Date('d-m-Y')) . " AND idpedido IS NULL;");
 
         /// marcamos como rechazados todos los presupuestos no editables y sin pedido asociado
-        $this->db->exec("UPDATE presupuestoscli SET status = '2' WHERE idpedido IS NULL AND"
-            . " editable = false;");
+        $this->db->exec("UPDATE " . $this->table_name . " SET status = '2' WHERE idpedido IS NULL AND "
+            . "editable = false;");
+        
+        /// asignamos netosindto a neto a todos los que estén a 0
+        $this->db->exec("UPDATE " . $this->table_name . " SET netosindto = neto WHERE netosindto = 0;");
     }
 }

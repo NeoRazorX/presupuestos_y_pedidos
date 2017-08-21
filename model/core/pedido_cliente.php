@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of presupuestos_y_pedidos
- * Copyright (C) 2014-2017    Carlos Garcia Gomez        neorazorx@gmail.com
- * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2014-2017  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -20,7 +20,7 @@
 namespace FacturaScripts\model;
 
 /**
- * Pedido de cliente
+ * Pedido de cliente.
  */
 class pedido_cliente extends \fs_model
 {
@@ -38,102 +38,147 @@ class pedido_cliente extends \fs_model
     public $idalbaran;
 
     /**
-     * Código único. Para humanos.
-     * @var string 
+     * Código identificador único. Para humanos.
+     * @var string
      */
     public $codigo;
 
     /**
      * Serie relacionada.
-     * @var string 
+     * @var string
      */
     public $codserie;
 
     /**
      * Ejercicio relacionado. El que corresponde a la fecha.
-     * @var string 
+     * @var string
      */
     public $codejercicio;
 
     /**
      * Código del cliente del pedido.
-     * @var string 
+     * @var string
      */
     public $codcliente;
 
     /**
-     * Empleado que ha creado el pedido.
-     * @var string 
+     * Empleado que ha creado el pedido. Modelo agente.
+     * @var string
      */
     public $codagente;
 
     /**
      * Forma de pago asociada.
-     * @var string 
+     * @var string
      */
     public $codpago;
 
     /**
      * Divisa del pedido.
-     * @var string 
+     * @var string
      */
     public $coddivisa;
 
     /**
      * Almacén del que saldrá el material
-     * @var string 
+     * @var string
      */
     public $codalmacen;
 
     /**
      * País del cliente.
-     * @var string 
+     * @var string
      */
     public $codpais;
 
     /**
      * ID de la dirección del cliente.
      * Modelo direccion_cliente.
-     * @var integer 
+     * @var string
      */
     public $coddir;
+
+    /**
+     * Código postal del cliente.
+     * @var string
+     */
     public $codpostal;
 
     /**
      * Número del pedido.
      * Único dentro de la serie+ejercicio.
-     * @var string 
+     * @var string
      */
     public $numero;
 
     /**
      * Número opcional a disposición del usuario.
-     * @var string 
+     * @var string
      */
     public $numero2;
+
+    /**
+     * TODO
+     * @var
+     */
     public $nombrecliente;
+
+    /**
+     * TODO
+     * @var
+     */
     public $cifnif;
+
+    /**
+     * TODO
+     * @var
+     */
     public $direccion;
+
+    /**
+     * TODO
+     * @var
+     */
     public $ciudad;
+
+    /**
+     * TODO
+     * @var
+     */
     public $provincia;
+
+    /**
+     * TODO
+     * @var
+     */
     public $apartado;
+
+    /**
+     * TODO
+     * @var
+     */
     public $fecha;
+
+    /**
+     * TODO
+     * @var
+     */
     public $hora;
 
     /**
      * Importe total antes de descuentos e impuestos.
      * Es la suma del pvptotal de las líneas.
-     * @var float 
+     * @var float
      */
     public $netosindto;
-    
+
     /**
      * Importe total antes de impuestos.
      * Es la suma del pvptotal de las líneas.
-     * @var float 
+     * @var float
      */
     public $neto;
-            
+
     /**
      * Descuento porcentual 1
      * @var float
@@ -165,14 +210,14 @@ class pedido_cliente extends \fs_model
     public $dtopor5;
 
     /**
-     * Importe total de la factura, con impuestos.
-     * @var float 
+     * Importe total del pedido, con impuestos.
+     * @var float
      */
     public $total;
 
     /**
-     * Suma del IVA de las líneas.
-     * @var float 
+     * Suma total del IVA de las líneas.
+     * @var float
      */
     public $totaliva;
 
@@ -180,40 +225,45 @@ class pedido_cliente extends \fs_model
      * Total expresado en euros, por si no fuese la divisa del pedido.
      * totaleuros = total/tasaconv
      * No hace falta rellenarlo, al hacer save() se calcula el valor.
-     * @var float 
+     * @var float
      */
     public $totaleuros;
 
     /**
      * % de retención IRPF del pedido. Se obtiene de la serie.
      * Cada línea puede tener un % distinto.
-     * @var float 
+     * @var float
      */
     public $irpf;
 
     /**
-     * Suma de las retenciones IRPF de las líneas del pedido.
-     * @var float 
+     * Suma total de las retenciones IRPF de las líneas del pedido.
+     * @var float
      */
     public $totalirpf;
 
     /**
-     * % de comisión del empleado.
-     * @var float 
+     * % de comisión del empleado (agente).
+     * @var float
      */
     public $porcomision;
 
     /**
-     * Tasa de conversión a Euros de la divisa seleccionada.
-     * @var float 
+     * Tasa de conversión a Euros de la divisa del pedido.
+     * @var float
      */
     public $tasaconv;
 
     /**
      * Suma total del recargo de equivalencia de las líneas.
-     * @var float 
+     * @var float
      */
     public $totalrecargo;
+
+    /**
+     * Observaciones del pedido
+     * @var float
+     */
     public $observaciones;
 
     /**
@@ -221,7 +271,7 @@ class pedido_cliente extends \fs_model
      * 0 -> pendiente. (editable)
      * 1 -> aprobado. (hay un idalbaran y no es editable)
      * 2 -> rechazado. (no hay idalbaran y no es editable)
-     * @var integer 
+     * @var integer
      */
     public $status;
     public $editable;
@@ -234,19 +284,70 @@ class pedido_cliente extends \fs_model
 
     /**
      * Fecha de salida prevista del material.
-     * @var string 
+     * @var string
      */
     public $fechasalida;
+
     /// datos de transporte
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codtrans;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codigo;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_nombre;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_apellidos;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_apartado;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_direccion;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codpostal;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_ciudad;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_provincia;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codpais;
 
     /**
@@ -257,7 +358,7 @@ class pedido_cliente extends \fs_model
 
     /**
      * Si este presupuesto es la versión de otro, aquí se almacena el idpresupuesto del original.
-     * @var integer 
+     * @var integer
      */
     public $idoriginal;
 
@@ -371,21 +472,21 @@ class pedido_cliente extends \fs_model
             $this->apartado = NULL;
             $this->fecha = Date('d-m-Y');
             $this->hora = Date('H:i:s');
-            $this->netosindto = 0;
-            $this->neto = 0;
-            $this->dtopor1 = 0;
-            $this->dtopor2 = 0;
-            $this->dtopor3 = 0;
-            $this->dtopor4 = 0;
-            $this->dtopor5 = 0;
-            $this->total = 0;
-            $this->totaliva = 0;
-            $this->totaleuros = 0;
-            $this->irpf = 0;
-            $this->totalirpf = 0;
-            $this->porcomision = 0;
-            $this->tasaconv = 1;
-            $this->totalrecargo = 0;
+            $this->netosindto = 0.0;
+            $this->neto = 0.0;
+            $this->dtopor1 = 0.0;
+            $this->dtopor2 = 0.0;
+            $this->dtopor3 = 0.0;
+            $this->dtopor4 = 0.0;
+            $this->dtopor5 = 0.0;
+            $this->total = 0.0;
+            $this->totaliva = 0.0;
+            $this->totaleuros = 0.0;
+            $this->irpf = 0.0;
+            $this->totalirpf = 0.0;
+            $this->porcomision = 0.0;
+            $this->tasaconv = 1.0;
+            $this->totalrecargo = 0.0;
             $this->observaciones = NULL;
             $this->status = 0;
             $this->editable = TRUE;
@@ -575,40 +676,62 @@ class pedido_cliente extends \fs_model
         return FALSE;
     }
 
+    /**
+     * Comprobaciones extra del pedido, devuelve TRUE si está todo correcto
+     * @param boolean $duplicados
+     * @return boolean
+     */
     public function full_test($duplicados = TRUE)
     {
         $status = TRUE;
 
         /// comprobamos las líneas
+        $netos = array();
         $netosindto = 0;
-        $netosindto = 0;
+        $netocondto = 0;
+        $subtotal = 0;
         $neto = 0;
         $iva = 0;
         $irpf = 0;
         $recargo = 0;
+        $total = 0;
+        
+        // Descuento total adicional del total del documento
+        $t_dto_due = (1-((1-$this->dtopor1/100)*(1-$this->dtopor2/100)*(1-$this->dtopor3/100)*(1-$this->dtopor4/100)*(1-$this->dtopor5/100)))*100;
+        $due_totales = (1-$t_dto_due/100);
+            
         foreach ($this->get_lineas() as $l) {
             if (!$l->test()) {
                 $status = FALSE;
             }
-
-            // Neto total de la línea
-            $netosindto += $l->pvptotal;
-            // Descuento total adicional del total del documento
-            $t_dto_due = (1-((1-$this->dtopor1/100)*(1-$this->dtopor2/100)*(1-$this->dtopor3/100)*(1-$this->dtopor4/100)*(1-$this->dtopor5/100)))*100;
-            // Neto total de la línea, con el descuento total del documento
-            $netocondto = $l->pvptotal*(1-$t_dto_due/100);
-            $neto += $netocondto;
-            $iva += $netocondto * $l->iva / 100;
-            $irpf += $netocondto * $l->irpf / 100;
-            $recargo += $netocondto * $l->recargo / 100;
+            $codimpuesto = ($l->codimpuesto === null ) ? 0 : $l->codimpuesto;
+            if (!array_key_exists($codimpuesto, $netos)) {
+                $netos[$codimpuesto] = array(
+                    'subtotal' => 0,    // Subtotal (Sumatorio de netos de línea)
+                    'base' => 0,        // Base imponible
+                    'iva' => 0,         // Total IVA
+                    'irpf' => 0,        // Total IRPF
+                    'recargo' => 0      // Total Recargo
+                );
+            }
+            // Acumulamos por tipos de IVAs, que es el desglose de pie de página
+            $netosindto = $l->pvptotal;                 // Precio neto por línea
+            $netocondto = $netosindto * $due_totales;   // Precio neto - % desc sobre total
+            $netos[$codimpuesto]['subtotal'] += $netosindto;
+            $netos[$codimpuesto]['base'] += $netocondto;
+            $netos[$codimpuesto]['iva'] += $netocondto * ($l->iva / 100);
+            $netos[$codimpuesto]['irpf'] += $netocondto * ($this->irpf / 100);
+            $netos[$codimpuesto]['recargo'] += $netocondto * ($l->recargo / 100);
         }
-        
-        $netosindto = round($netosindto, FS_NF0);
-        $neto = round($neto, FS_NF0);
-        $iva = round($iva, FS_NF0);
-        $irpf = round($irpf, FS_NF0);
-        $recargo = round($recargo, FS_NF0);
-        $total = $neto + $iva - $irpf + $recargo;
+
+        foreach ($netos as $codimp => $ne) {
+            $subtotal += $ne['subtotal'];               // Subtotal (Sumatorio de netos de línea)
+            $neto += $ne['base'];                       // Sumatorio de bases imponibles
+            $iva += $ne['iva'];                         // Sumatorio de IVAs
+            $irpf += $ne['irpf'];                       // Sumatorio de IRPFs
+            $recargo += $ne['recargo'];                 // Sumatorio de REs
+            $total = $neto + $iva - $irpf + $recargo;   // Sumatorio del total
+        }
 
         if (!$this->floatcmp($this->neto, $neto, FS_NF0, TRUE)) {
             $this->new_error_msg("Valor neto de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $neto . " y tiene el valor " . $this->neto);
@@ -626,16 +749,6 @@ class pedido_cliente extends \fs_model
             $this->new_error_msg("Valor total de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $total . " y tiene el valor " . $this->total);
             $status = FALSE;
         }
-        
-        /*
-        $this->new_message(
-            "total " . $total
-            . " neto " . $neto
-            . " iva " . $iva
-            . " irpf " . $irpf
-            . " recargo " . $recargo
-        );
-         */
 
         if ($this->idalbaran) {
             $alb0 = new \albaran_cliente();
@@ -651,6 +764,10 @@ class pedido_cliente extends \fs_model
         return $status;
     }
 
+    /**
+     * Guarda los datos en la base de datos
+     * @return boolean
+     */
     public function save()
     {
         if ($this->test()) {
@@ -806,7 +923,7 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con los pedidos de venta.
+     * Devuelve un array con los últimos pedidos de venta.
      * @param integer $offset
      * @param string $order
      * @return \pedido_cliente
@@ -820,14 +937,15 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con los pedidos de venta pendientes
+     * Devuelve un array con los pedidos de venta pendientes.
      * @param integer $offset
      * @param string $order
      * @return \pedido_cliente
      */
     public function all_ptealbaran($offset = 0, $order = 'fecha ASC', $limit = FS_ITEM_LIMIT)
     {
-        $sql = "SELECT * FROM " . $this->table_name . " WHERE idalbaran IS NULL AND status = 0 ORDER BY " . $order;
+        $sql = "SELECT * FROM " . $this->table_name . " WHERE idalbaran IS NULL"
+            . " AND status = 0 ORDER BY " . $order;
 
         $data = $this->db->select_limit($sql, $limit, $offset);
         return $this->all_from_data($data);
@@ -848,7 +966,7 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con los pedidos del cliente $codcliente
+     * Devuelve un array con los pedidos del cliente $codcliente.
      * @param string $codcliente
      * @param integer $offset
      * @return \pedido_cliente
@@ -892,7 +1010,7 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * 
+     * Devuelve un array con los pedidos según los filtros:
      * @param string $desde
      * @param string $hasta
      * @param string $codserie
@@ -945,7 +1063,7 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con todos los pedidos que coinciden con $query
+     * Devuelve un array con los pedidos que coinciden con $query
      * @param string $query
      * @param integer $offset
      * @return \pedido_cliente
@@ -972,7 +1090,7 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con todos los pedidos que coincicen con $query del cliente $codcliente
+     * Devuelve un array con los pedidos que coincicen con $query del cliente $codcliente
      * @param string $codcliente
      * @param string $desde
      * @param string $hasta

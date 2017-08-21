@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of presupuestos_y_pedidos
- * Copyright (C) 2014-2017  Carlos Garcia Gomez       neorazorx@gmail.com
- * Copyright (C) 2014-2015  Francesc Pineda Segarra   shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2017  Carlos Garcia Gomez      neorazorx@gmail.com
+ * Copyright (C) 2014-2017  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -215,6 +215,19 @@ class ventas_presupuesto extends fbase_controller
 
     private function modificar()
     {
+        $netos = array();
+        $netosdto = array();
+        $ivas = array();
+        $irpfs = array();
+        $recargos = array();
+        $netosindto = 0;
+        $netocondto = 0;
+        $neto = 0;
+        $total_check = 0;
+        $iva = 0;
+        $irpf = 0;
+        $recargo = 0;
+        
         $this->presupuesto->observaciones = $_POST['observaciones'];
         $this->presupuesto->numero2 = $_POST['numero2'];
 
@@ -329,6 +342,12 @@ class ventas_presupuesto extends fbase_controller
             if (isset($_POST['numlineas'])) {
                 $numlineas = intval($_POST['numlineas']);
 
+                $this->presupuesto->netosindto = 0;
+                $this->presupuesto->dtopor1 = 0;
+                $this->presupuesto->dtopor2 = 0;
+                $this->presupuesto->dtopor3 = 0;
+                $this->presupuesto->dtopor4 = 0;
+                $this->presupuesto->dtopor5 = 0;
                 $this->presupuesto->neto = 0;
                 $this->presupuesto->totaliva = 0;
                 $this->presupuesto->totalirpf = 0;
@@ -372,8 +391,13 @@ class ventas_presupuesto extends fbase_controller
                                 $lineas[$k]->cantidad = floatval($_POST['cantidad_' . $num]);
                                 $lineas[$k]->pvpunitario = floatval($_POST['pvp_' . $num]);
                                 $lineas[$k]->dtopor = floatval($_POST['dto_' . $num]);
+                                $lineas[$k]->dtopor2 = floatval($_POST['dto2_' . $num]);
+                                $lineas[$k]->dtopor3 = floatval($_POST['dto3_' . $num]);
+                                $lineas[$k]->dtopor4 = floatval($_POST['dto4_' . $num]);
                                 $lineas[$k]->pvpsindto = ($value->cantidad * $value->pvpunitario);
-                                $lineas[$k]->pvptotal = ($value->cantidad * $value->pvpunitario * (100 - $value->dtopor) / 100);
+                                // Descuento Unificado Equivalente
+                                $l_dto_due = (1-((1-$lineas[$k]->dtopor/100)*(1-$lineas[$k]->dtopor2/100)*(1-$lineas[$k]->dtopor3/100)*(1-$lineas[$k]->dtopor4/100)))*100;
+                                $lineas[$k]->pvptotal = $lineas[$k]->cantidad * $lineas[$k]->pvpunitario * (1 - $l_dto_due / 100);
                                 $lineas[$k]->descripcion = $_POST['desc_' . $num];
 
                                 $lineas[$k]->codimpuesto = NULL;
@@ -391,11 +415,43 @@ class ventas_presupuesto extends fbase_controller
                                 }
 
                                 if ($lineas[$k]->save()) {
-                                    $this->presupuesto->neto += $value->pvptotal;
-                                    $this->presupuesto->totaliva += $value->pvptotal * $value->iva / 100;
-                                    $this->presupuesto->totalirpf += $value->pvptotal * $value->irpf / 100;
-                                    $this->presupuesto->totalrecargo += $value->pvptotal * $value->recargo / 100;
-
+                                    if (!array_key_exists($lineas[$k]->codimpuesto, $netos)) {
+                                        $netos[$lineas[$k]->codimpuesto] = 0;
+                                        $netosdto[$lineas[$k]->codimpuesto] = 0;
+                                        $ivas[$lineas[$k]->codimpuesto] = 0;
+                                        $irpfs[$lineas[$k]->codimpuesto] = 0;
+                                        $recargos[$lineas[$k]->codimpuesto] = 0;
+                                    }
+                                    $this->presupuesto->dtopor1 = floatval($_POST['adtopor1']);
+                                    $this->presupuesto->dtopor2 = floatval($_POST['adtopor2']);
+                                    $this->presupuesto->dtopor3 = floatval($_POST['adtopor3']);
+                                    $this->presupuesto->dtopor4 = floatval($_POST['adtopor4']);
+                                    $this->presupuesto->dtopor5 = floatval($_POST['adtopor5']);
+                                    // Acumulamos por tipos de IVAs, que es el desglose de pie de página
+                                    
+                                    // Descuento Unificado Equivalente
+                                    $t_dto_due = (1-((1-$this->presupuesto->dtopor1/100)*(1-$this->presupuesto->dtopor2/100)*(1-$this->presupuesto->dtopor3/100)*(1-$this->presupuesto->dtopor4/100)*(1-$this->presupuesto->dtopor5/100)))*100;
+                                    $due_totales = (1-$t_dto_due / 100);
+                                    // Hacemos el recalculo del PVP por línea, con el descuento adicional de fin de documento
+                                    $pvpcondto = $due_totales * $lineas[$k]->pvptotal;
+                                    
+                                    // Netos
+                                    $netos[$lineas[$k]->codimpuesto] += $lineas[$k]->pvptotal;
+                                    // Bases
+                                    $netosdto[$lineas[$k]->codimpuesto] += $pvpcondto;
+                                    // IVA
+                                    $ivas[$lineas[$k]->codimpuesto] += $pvpcondto * ($lineas[$k]->iva /100);
+                                    // IRPF
+                                    $irpfs[$lineas[$k]->codimpuesto] += $pvpcondto * ($lineas[$k]->irpf /100);
+                                    // RE
+                                    $recargos[$lineas[$k]->codimpuesto] += $pvpcondto * ($lineas[$k]->recargo /100);
+                                    // Comprobación para el total
+                                    $total_check += 
+                                        round($pvpcondto, FS_NF0)
+                                        + round($pvpcondto * ($lineas[$k]->iva /100), FS_NF0)
+                                        - round($pvpcondto * ($lineas[$k]->irpf /100), FS_NF0)
+                                        + round($pvpcondto * ($lineas[$k]->recargo /100), FS_NF0);
+                                    
                                     if ($value->irpf > $this->presupuesto->irpf) {
                                         $this->presupuesto->irpf = $value->irpf;
                                     }
@@ -426,8 +482,13 @@ class ventas_presupuesto extends fbase_controller
                             $linea->cantidad = floatval($_POST['cantidad_' . $num]);
                             $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
                             $linea->dtopor = floatval($_POST['dto_' . $num]);
-                            $linea->pvpsindto = ($linea->cantidad * $linea->pvpunitario);
-                            $linea->pvptotal = ($linea->cantidad * $linea->pvpunitario * (100 - $linea->dtopor) / 100);
+                            $linea->dtopor2 = floatval($_POST['dto2_' . $num]);
+                            $linea->dtopor3 = floatval($_POST['dto3_' . $num]);
+                            $linea->dtopor4 = floatval($_POST['dto4_' . $num]);
+                            $linea->pvpsindto = $linea->cantidad * $linea->pvpunitario;
+                            $l_dto_due = (1-((1-$linea->dtopor/100)*(1-$linea->dtopor2/100)*(1-$linea->dtopor3/100)*(1-$linea->dtopor4/100)))*100;
+                            $due_lineas = (1-$l_dto_due / 100);
+                            $linea->pvptotal = $linea->cantidad * $linea->pvpunitario * $due_lineas;
 
                             $art0 = $articulo->get($_POST['referencia_' . $num]);
                             if ($art0) {
@@ -438,11 +499,50 @@ class ventas_presupuesto extends fbase_controller
                             }
 
                             if ($linea->save()) {
-                                $this->presupuesto->neto += $linea->pvptotal;
-                                $this->presupuesto->totaliva += $linea->pvptotal * $linea->iva / 100;
-                                $this->presupuesto->totalirpf += $linea->pvptotal * $linea->irpf / 100;
-                                $this->presupuesto->totalrecargo += $linea->pvptotal * $linea->recargo / 100;
+                                if (!array_key_exists($linea->codimpuesto, $netos)) {
+                                    // Neto
+                                    $netos[$linea->codimpuesto] = 0;
+                                    // Base
+                                    $netosdto[$linea->codimpuesto] = 0;
+                                    // IVA
+                                    $ivas[$linea->codimpuesto] = 0;
+                                    // IRPF
+                                    $irpfs[$linea->codimpuesto] = 0;
+                                    // RE
+                                    $recargos[$linea->codimpuesto] = 0;
+                                }
 
+                                $this->presupuesto->netosindto += $netosindto;
+                                $this->presupuesto->dtopor1 = floatval($_POST['adtopor1']);
+                                $this->presupuesto->dtopor2 = floatval($_POST['adtopor2']);
+                                $this->presupuesto->dtopor3 = floatval($_POST['adtopor3']);
+                                $this->presupuesto->dtopor4 = floatval($_POST['adtopor4']);
+                                $this->presupuesto->dtopor5 = floatval($_POST['adtopor5']);
+                                // Acumulamos por tipos de IVAs, que es el desglose de pie de página
+
+                                // Descuento Unificado Equivalente
+                                $t_dto_due = (1-((1-$this->presupuesto->dtopor1/100)*(1-$this->presupuesto->dtopor2/100)*(1-$this->presupuesto->dtopor3/100)*(1-$this->presupuesto->dtopor4/100)*(1-$this->presupuesto->dtopor5/100)))*100;
+                                $due_totales = (1-$t_dto_due / 100);
+                                // Hacemos el recalculo del PVP por línea, con el descuento adicional de fin de documento
+                                $pvpcondto = $due_totales * $linea->pvptotal;
+
+                                // Neto
+                                $netos[$linea->codimpuesto] += $linea->pvptotal;
+                                // Base
+                                $netosdto[$linea->codimpuesto] += $pvpcondto;
+                                // IVA
+                                $ivas[$linea->codimpuesto] += $pvpcondto * ($linea->iva /100);
+                                // IRPF
+                                $irpfs[$linea->codimpuesto] += $pvpcondto * ($linea->irpf /100);
+                                // RE
+                                $recargos[$linea->codimpuesto] += $pvpcondto * ($linea->recargo /100);
+                                // Comprobación para el total
+                                $total_check += 
+                                        round($pvpcondto, FS_NF0)
+                                        + round($pvpcondto * ($linea->iva /100), FS_NF0)
+                                        - round($pvpcondto * ($linea->irpf /100), FS_NF0)
+                                        + round($pvpcondto * ($linea->recargo /100), FS_NF0);
+                                
                                 if ($linea->irpf > $this->presupuesto->irpf) {
                                     $this->presupuesto->irpf = $linea->irpf;
                                 }
@@ -451,13 +551,24 @@ class ventas_presupuesto extends fbase_controller
                         }
                     }
                 }
-
+                
+                foreach ($netos as $pos => $ne) {
+                    // Neto total de la línea (Neto)
+                    $netosindto += $netos[$pos];
+                    // Neto total de la línea, con el descuento total del documento (Base imponible)
+                    $netocondto += $netosdto[$pos];
+                    $iva += $ivas[$pos];
+                    $irpf += $irpfs[$pos];
+                    $recargo += $recargos[$pos];
+                }
+                
                 /// redondeamos
-                $this->presupuesto->neto = round($this->presupuesto->neto, FS_NF0);
-                $this->presupuesto->totaliva = round($this->presupuesto->totaliva, FS_NF0);
-                $this->presupuesto->totalirpf = round($this->presupuesto->totalirpf, FS_NF0);
-                $this->presupuesto->totalrecargo = round($this->presupuesto->totalrecargo, FS_NF0);
-                $this->presupuesto->total = $this->presupuesto->neto + $this->presupuesto->totaliva - $this->presupuesto->totalirpf + $this->presupuesto->totalrecargo;
+                $this->presupuesto->netosindto = $netosindto;
+                $this->presupuesto->neto = $netocondto;
+                $this->presupuesto->totaliva = $iva;
+                $this->presupuesto->totalirpf = $irpf;
+                $this->presupuesto->totalrecargo = $recargo;
+                $this->presupuesto->total = round($this->presupuesto->neto + $this->presupuesto->totaliva - $this->presupuesto->totalirpf + $this->presupuesto->totalrecargo, FS_NF0);
 
                 if (abs(floatval($_POST['atotal']) - $this->presupuesto->total) >= .02) {
                     $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->presupuesto->total .
@@ -490,6 +601,12 @@ class ventas_presupuesto extends fbase_controller
         $pedido->codpostal = $this->presupuesto->codpostal;
         $pedido->codserie = $this->presupuesto->codserie;
         $pedido->direccion = $this->presupuesto->direccion;
+        $pedido->netosindto = $this->presupuesto->netosindto;
+        $pedido->dtopor1 = $this->presupuesto->dtopor1;
+        $pedido->dtopor2 = $this->presupuesto->dtopor2;
+        $pedido->dtopor3 = $this->presupuesto->dtopor3;
+        $pedido->dtopor4 = $this->presupuesto->dtopor4;
+        $pedido->dtopor5 = $this->presupuesto->dtopor5;
         $pedido->neto = $this->presupuesto->neto;
         $pedido->nombrecliente = $this->presupuesto->nombrecliente;
         $pedido->observaciones = $this->presupuesto->observaciones;
@@ -541,6 +658,9 @@ class ventas_presupuesto extends fbase_controller
                 $n->codimpuesto = $l->codimpuesto;
                 $n->descripcion = $l->descripcion;
                 $n->dtopor = $l->dtopor;
+                $n->dtopor2 = $l->dtopor2;
+                $n->dtopor3 = $l->dtopor3;
+                $n->dtopor4 = $l->dtopor4;
                 $n->irpf = $l->irpf;
                 $n->iva = $l->iva;
                 $n->pvpsindto = $l->pvpsindto;

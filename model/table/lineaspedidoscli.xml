@@ -10,6 +10,7 @@
         <nombre>cantidad</nombre>
         <tipo>double precision</tipo>
         <nulo>NO</nulo>
+        <defecto>0</defecto>
     </columna>
     <columna>
         <nombre>codimpuesto</nombre>
@@ -30,6 +31,7 @@
         <nombre>dtopor</nombre>
         <tipo>double precision</tipo>
         <nulo>NO</nulo>
+        <defecto>0</defecto>
     </columna>
     <columna>
         <nombre>dtopor2</nombre>

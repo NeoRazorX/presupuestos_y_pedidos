@@ -27,12 +27,12 @@
       document.f_pedido.ac_cliente.focus();
    }
    $(document).ready(function () {
-      $('#numlineas').val(numlineas);
+      $("#numlineas").val(numlineas);
       usar_serie();
       usar_almacen();
       usar_divisa();
       recalcular();
-      $('#ac_cliente').autocomplete({
+      $("#ac_cliente").autocomplete({
          serviceUrl: nueva_venta_url,
          paramName: 'buscar_cliente',
          onSelect: function (suggestion) {
@@ -56,24 +56,22 @@
       document.f_enviar_email.submit();
    }
    $(document).ready(function () {
-      $('#b_imprimir').click(function (event) {
+      $("#b_imprimir").click(function (event) {
          event.preventDefault();
-         $('#modal_imprimir_pedido').modal('show');
+         $("#modal_imprimir_pedido").modal('show');
       });
-      $('#b_enviar').click(function (event) {
+      $("#b_enviar").click(function (event) {
          event.preventDefault();
-         $('#modal_enviar').modal('show');
+         $("#modal_enviar").modal('show');
          document.f_enviar_email.email.select();
       });
-      $('#b_eliminar').click(function (event) {
+      $("#b_eliminar").click(function (event) {
          event.preventDefault();
-         $('#modal_eliminar').modal('show');
+         $("#modal_eliminar").modal('show');
       });
 
       show = false;
-      {loop="$lineas"}
-      {if="$value->dtopor2!=0 || $value->dtopor3!=0 || $value->dtopor4!=0"}show = true;{break}{/if}
-      {/loop}
+      {loop="$lineas"}{if="$value->dtopor2!=0 || $value->dtopor3!=0 || $value->dtopor4!=0"}show = true;{break}{/if}{/loop}
       if(!show) {
           $('.dtosl').hide();
       } else {
@@ -83,10 +81,10 @@
       $('.dtost').hide();
       {/if}
       {if="$fsc->pedido->totalrecargo==0"}
-      $('.recargo').hide();
+      $(".recargo").hide();
       {/if}
       {if="$fsc->pedido->totalirpf==0"}
-      $('.irpf').hide();
+      $(".irpf").hide();
       {/if}
    });
 </script>

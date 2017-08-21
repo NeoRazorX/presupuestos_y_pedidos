@@ -14,7 +14,6 @@
     <columna>
         <nombre>cifnif</nombre>
         <tipo>character varying(30)</tipo>
-        <nulo>NO</nulo>
     </columna>
     <columna>
         <nombre>ciudad</nombre>
@@ -126,6 +125,7 @@
         <nombre>irpf</nombre>
         <tipo>double precision</tipo>
         <nulo>NO</nulo>
+        <defecto>0</defecto>
     </columna>
     <columna>
         <nombre>netosindto</nombre>
@@ -137,6 +137,7 @@
         <nombre>neto</nombre>
         <tipo>double precision</tipo>
         <nulo>NO</nulo>
+        <defecto>0</defecto>
     </columna>
     <columna>
         <nombre>nombrecliente</nombre>
@@ -180,26 +181,31 @@
         <nombre>tasaconv</nombre>
         <tipo>double precision</tipo>
         <nulo>NO</nulo>
+        <defecto>1</defecto>
     </columna>
     <columna>
         <nombre>total</nombre>
         <tipo>double precision</tipo>
         <nulo>NO</nulo>
+        <defecto>0</defecto>
     </columna>
     <columna>
         <nombre>totaleuros</nombre>
         <tipo>double precision</tipo>
         <nulo>NO</nulo>
+        <defecto>0</defecto>
     </columna>
     <columna>
         <nombre>totalirpf</nombre>
         <tipo>double precision</tipo>
         <nulo>NO</nulo>
+        <defecto>0</defecto>
     </columna>
     <columna>
         <nombre>totaliva</nombre>
         <tipo>double precision</tipo>
         <nulo>NO</nulo>
+        <defecto>0</defecto>
     </columna>
     <columna>
         <nombre>totalrecargo</nombre>
