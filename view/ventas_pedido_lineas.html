@@ -1,3 +1,8 @@
+{$dto1=$fsc->calcDUE(array($fsc->pedido->dtopor1))}
+{$dto2=$fsc->calcDUE(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2))}
+{$dto3=$fsc->calcDUE(array($dto2,$fsc->pedido->dtopor3))}
+{$dto4=$fsc->calcDUE(array($dto3,$fsc->pedido->dtopor4))}
+{$dto5=$fsc->calcDUE(array($dto4,$fsc->pedido->dtopor5))}
 <div class="table-responsive">
     {if="$fsc->pedido->editable"}
     <table class="table table-condensed">
@@ -177,11 +182,11 @@
             <tr>
                 <td></td>
                 <td class="text-right">{$fsc->show_precio($fsc->pedido->netosindto, $fsc->pedido->coddivisa)}</td>
-                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->netosindto*($fsc->pedido->dtopor1/100), $fsc->pedido->coddivisa)}</td>
-                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->netosindto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100), $fsc->pedido->coddivisa)}</td>
-                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->netosindto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100)*($fsc->pedido->dtopor3/100), $fsc->pedido->coddivisa)}</td>
-                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->netosindto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100)*($fsc->pedido->dtopor3/100)*($fsc->pedido->dtopor4/100), $fsc->pedido->coddivisa)}</td>
-                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->netosindto*($fsc->pedido->dtopor1/100)*($fsc->pedido->dtopor2/100)*($fsc->pedido->dtopor3/100)*($fsc->pedido->dtopor4/100)*($fsc->pedido->dtopor5/100), $fsc->pedido->coddivisa)}</td>
+                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->netosindto*($dto1)/100, $fsc->pedido->coddivisa)}</td>
+                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->netosindto*($dto2-$dto1)/100, $fsc->pedido->coddivisa)}</td>
+                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->netosindto*($dto3-$dto2)/100, $fsc->pedido->coddivisa)}</td>
+                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->netosindto*($dto4-$dto3)/100, $fsc->pedido->coddivisa)}</td>
+                <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->netosindto*($dto5-$dto4)/100, $fsc->pedido->coddivisa)}</td>
                 <td class="dtost text-right">{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</td>
                 <td class="text-right">{$fsc->show_precio($fsc->pedido->totaliva, $fsc->pedido->coddivisa)}</td>
                 <td class="recargo text-right">{$fsc->show_precio($fsc->pedido->totalrecargo, $fsc->pedido->coddivisa)}</td>
@@ -254,11 +259,11 @@
                 </td>
                 {/if}
                 <td class="text-right dtost"><b>Neto<br/><br/>{$fsc->show_precio($fsc->pedido->netosindto, $fsc->pedido->coddivisa)}</b></td>
-                <td class="text-right dtost"><b>Dto. 1<br/>{$fsc->pedido->dtopor1}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor1/100), $fsc->pedido->coddivisa)}</b></td>
-                <td class="text-right dtost"><b>Dto. 2<br/>{$fsc->pedido->dtopor2}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor2/100), $fsc->pedido->coddivisa)}</b></td>
-                <td class="text-right dtost"><b>Dto. 3<br/>{$fsc->pedido->dtopor3}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor3/100), $fsc->pedido->coddivisa)}</b></td>
-                <td class="text-right dtost"><b>Dto. 4<br/>{$fsc->pedido->dtopor4}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor4/100), $fsc->pedido->coddivisa)}</b></td>
-                <td class="text-right dtost"><b>Dto. 5<br/>{$fsc->pedido->dtopor5}%<br/>{$fsc->show_precio($fsc->pedido->neto*($fsc->pedido->dtopor5/100), $fsc->pedido->coddivisa)}</b></td>
+                <td class="text-right dtost"><b>Dto. 1<br/>{$fsc->pedido->dtopor1}%<br/>{$fsc->show_precio($fsc->pedido->netosindto*($dto1)/100, $fsc->pedido->coddivisa)}</b></td>
+                <td class="text-right dtost"><b>Dto. 2<br/>{$fsc->pedido->dtopor2}%<br/>{$fsc->show_precio($fsc->pedido->netosindto*($dto2-$dto1)/100, $fsc->pedido->coddivisa)}</b></td>
+                <td class="text-right dtost"><b>Dto. 3<br/>{$fsc->pedido->dtopor3}%<br/>{$fsc->show_precio($fsc->pedido->netosindto*($dto3-$dto2)/100, $fsc->pedido->coddivisa)}</b></td>
+                <td class="text-right dtost"><b>Dto. 4<br/>{$fsc->pedido->dtopor4}%<br/>{$fsc->show_precio($fsc->pedido->netosindto*($dto4-$dto3)/100, $fsc->pedido->coddivisa)}</b></td>
+                <td class="text-right dtost"><b>Dto. 5<br/>{$fsc->pedido->dtopor5}%<br/>{$fsc->show_precio($fsc->pedido->netosindto*($dto5-$dto4)/100, $fsc->pedido->coddivisa)}</b></td>
                 <td class="text-right"><b>Base<br/><br/>{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</b></td>
                 <td class="text-right"><b>{#FS_IVA#}<br/><br/>{$fsc->show_precio($fsc->pedido->totaliva, $fsc->pedido->coddivisa)}</b></td>
                 <td class="text-right recargo"><b>Recargo<br/><br/>{$fsc->show_precio($fsc->pedido->totalrecargo, $fsc->pedido->coddivisa)}</b></td>
