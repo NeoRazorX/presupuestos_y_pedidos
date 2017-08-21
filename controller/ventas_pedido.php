@@ -392,7 +392,7 @@ class ventas_pedido extends fbase_controller
                                     // Acumulamos por tipos de IVAs, que es el desglose de pie de página
                                     
                                     // Descuento Unificado Equivalente
-                                    $due_totales = $this->calcDUE(array($this->albaran->dtopor1,$this->albaran->dtopor2,$this->albaran->dtopor3,$this->albaran->dtopor4,$this->albaran->dtopor5));
+                                    $due_totales = $this->calcDUE(array($this->pedido->dtopor1,$this->pedido->dtopor2,$this->pedido->dtopor3,$this->pedido->dtopor4,$this->pedido->dtopor5));
                                     // Hacemos el recalculo del PVP por línea, con el descuento adicional de fin de documento
                                     $pvpcondto = $due_totales * $lineas[$k]->pvptotal;
                                     
@@ -476,7 +476,7 @@ class ventas_pedido extends fbase_controller
                                 // Acumulamos por tipos de IVAs, que es el desglose de pie de página
                                 
                                 // Descuento Unificado Equivalente
-                                $due_totales = $this->calcDUE(array($this->albaran->dtopor1,$this->albaran->dtopor2,$this->albaran->dtopor3,$this->albaran->dtopor4,$this->albaran->dtopor5));
+                                $due_totales = $this->calcDUE(array($this->pedido->dtopor1,$this->pedido->dtopor2,$this->pedido->dtopor3,$this->pedido->dtopor4,$this->pedido->dtopor5));
 
                                 // Hacemos el recalculo del PVP por línea, con el descuento adicional de fin de documento
                                 $pvpcondto = $due_totales * $linea->pvptotal;

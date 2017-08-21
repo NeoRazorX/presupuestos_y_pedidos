@@ -714,7 +714,7 @@ class presupuesto_cliente extends \fs_model
         // Descuento total adicional del total del documento
         $t_dto_due = (1-((1-$this->dtopor1/100)*(1-$this->dtopor2/100)*(1-$this->dtopor3/100)*(1-$this->dtopor4/100)*(1-$this->dtopor5/100)))*100;
         $due_totales = (1-$t_dto_due/100);
-            
+
         foreach ($this->get_lineas() as $l) {
             if (!$l->test()) {
                 $status = FALSE;
@@ -749,19 +749,19 @@ class presupuesto_cliente extends \fs_model
         }
 
         if (!$this->floatcmp($this->neto, $neto, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor neto de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $neto . " y tiene el valor " . $this->neto);
+            $this->new_error_msg("Valor neto de " . FS_PRESUPUESTO . " " . $this->codigo . " incorrecto. Valor correcto: " . $neto . " y tiene el valor " . $this->neto);
             $status = FALSE;
         } elseif (!$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totaliva de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $iva . " y tiene el valor " . $this->totaliva);
+            $this->new_error_msg("Valor totaliva de " . FS_PRESUPUESTO . " " . $this->codigo . " incorrecto. Valor correcto: " . $iva . " y tiene el valor " . $this->totaliva);
             $status = FALSE;
         } elseif (!$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totalirpf de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $irpf . " y tiene el valor " . $this->totalirpf);
+            $this->new_error_msg("Valor totalirpf de " . FS_PRESUPUESTO . " " . $this->codigo . " incorrecto. Valor correcto: " . $irpf . " y tiene el valor " . $this->totalirpf);
             $status = FALSE;
         } elseif (!$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totalrecargo de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $recargo . " y tiene el valor " . $this->totalrecargo);
+            $this->new_error_msg("Valor totalrecargo de " . FS_PRESUPUESTO . " " . $this->codigo . " incorrecto. Valor correcto: " . $recargo . " y tiene el valor " . $this->totalrecargo);
             $status = FALSE;
         } elseif (!$this->floatcmp($this->total, $total, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor total de " . FS_PRESUPUESTO . " incorrecto. Valor correcto: " . $total . " y tiene el valor " . $this->total);
+            $this->new_error_msg("Valor total de " . FS_PRESUPUESTO . " " . $this->codigo . " incorrecto. Valor correcto: " . $total . " y tiene el valor " . $this->total);
             $status = FALSE;
         }
 
