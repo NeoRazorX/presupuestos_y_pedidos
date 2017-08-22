@@ -70,12 +70,6 @@
          $("#modal_eliminar").modal('show');
       });
 
-      {loop="$lineas"}{if="$value->dtopor2!=0 || $value->dtopor3!=0 || $value->dtopor4!=0"}show = true;{break}{/if}{/loop}
-      if(!show) {
-          $('.dtosl').hide();
-      } else {
-          $('.dtosl').show();
-      }
       {if="$fsc->pedido->netosindto==$fsc->pedido->neto"}
       $('.dtost').hide();
       {/if}

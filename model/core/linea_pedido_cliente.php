@@ -166,7 +166,7 @@ class linea_pedido_cliente extends \fs_model
      */
     private static $pedidos;
 
-    public function __construct($l = FALSE)
+    public function __construct($data = FALSE)
     {
         parent::__construct('lineaspedidoscli');
 
@@ -174,29 +174,29 @@ class linea_pedido_cliente extends \fs_model
             self::$pedidos = array();
         }
 
-        if ($l) {
-            $this->idlinea = $this->intval($l['idlinea']);
-            $this->idlineapresupuesto = $this->intval($l['idlineapresupuesto']);
-            $this->idpedido = $this->intval($l['idpedido']);
-            $this->idpresupuesto = $this->intval($l['idpresupuesto']);
-            $this->cantidad = floatval($l['cantidad']);
-            $this->codcombinacion = $l['codcombinacion'];
-            $this->codimpuesto = $l['codimpuesto'];
-            $this->descripcion = $l['descripcion'];
-            $this->dtopor = floatval($l['dtopor']);
-            $this->dtopor2 = floatval($l['dtopor2']);
-            $this->dtopor3 = floatval($l['dtopor3']);
-            $this->dtopor4 = floatval($l['dtopor4']);
-            $this->irpf = floatval($l['irpf']);
-            $this->iva = floatval($l['iva']);
-            $this->pvpsindto = floatval($l['pvpsindto']);
-            $this->pvptotal = floatval($l['pvptotal']);
-            $this->pvpunitario = floatval($l['pvpunitario']);
-            $this->recargo = floatval($l['recargo']);
-            $this->referencia = $l['referencia'];
-            $this->orden = intval($l['orden']);
-            $this->mostrar_cantidad = $this->str2bool($l['mostrar_cantidad']);
-            $this->mostrar_precio = $this->str2bool($l['mostrar_precio']);
+        if ($data) {
+            $this->idlinea = $this->intval($data['idlinea']);
+            $this->idlineapresupuesto = $this->intval($data['idlineapresupuesto']);
+            $this->idpedido = $this->intval($data['idpedido']);
+            $this->idpresupuesto = $this->intval($data['idpresupuesto']);
+            $this->cantidad = floatval($data['cantidad']);
+            $this->codcombinacion = $data['codcombinacion'];
+            $this->codimpuesto = $data['codimpuesto'];
+            $this->descripcion = $data['descripcion'];
+            $this->dtopor = floatval($data['dtopor']);
+            $this->dtopor2 = floatval($data['dtopor2']);
+            $this->dtopor3 = floatval($data['dtopor3']);
+            $this->dtopor4 = floatval($data['dtopor4']);
+            $this->irpf = floatval($data['irpf']);
+            $this->iva = floatval($data['iva']);
+            $this->pvpsindto = floatval($data['pvpsindto']);
+            $this->pvptotal = floatval($data['pvptotal']);
+            $this->pvpunitario = floatval($data['pvpunitario']);
+            $this->recargo = floatval($data['recargo']);
+            $this->referencia = $data['referencia'];
+            $this->orden = intval($data['orden']);
+            $this->mostrar_cantidad = $this->str2bool($data['mostrar_cantidad']);
+            $this->mostrar_precio = $this->str2bool($data['mostrar_precio']);
         } else {
             $this->idlinea = NULL;
             $this->idlineapresupuesto = NULL;
