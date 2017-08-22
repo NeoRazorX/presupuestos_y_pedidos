@@ -1,8 +1,8 @@
-{$dto1=$fsc->calcDUE(array($fsc->pedido->dtopor1))}
-{$dto2=$fsc->calcDUE(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2))}
-{$dto3=$fsc->calcDUE(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3))}
-{$dto4=$fsc->calcDUE(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3,$fsc->pedido->dtopor4))}
-{$dto5=$fsc->calcDUE(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3,$fsc->pedido->dtopor4,$fsc->pedido->dtopor5))}
+{$dto1=$fsc->calc_due(array($fsc->pedido->dtopor1))}
+{$dto2=$fsc->calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2))}
+{$dto3=$fsc->calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3))}
+{$dto4=$fsc->calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3,$fsc->pedido->dtopor4))}
+{$dto5=$fsc->calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3,$fsc->pedido->dtopor4,$fsc->pedido->dtopor5))}
 <div class="table-responsive">
     {if="$fsc->pedido->editable"}
     <table class="table table-condensed">
