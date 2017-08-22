@@ -399,13 +399,13 @@ class presupuesto_cliente extends \fs_model
                 $this->hora = date('H:i:s', strtotime($p['hora']));
             }
 
-            $this->netosindto = isset($p['netosindto']) ? floatval($p['netosindto']) : 0;
+            $this->netosindto = isset($p['netosindto']) ? floatval($p['netosindto']) : 0.0;
             $this->neto = floatval($p['neto']);
-            $this->dtopor1 = isset($p['dtopor1']) ? floatval($p['dtopor1']) : 0;
-            $this->dtopor2 = isset($p['dtopor2']) ? floatval($p['dtopor2']) : 0;
-            $this->dtopor3 = isset($p['dtopor3']) ? floatval($p['dtopor3']) : 0;
-            $this->dtopor4 = isset($p['dtopor4']) ? floatval($p['dtopor4']) : 0;
-            $this->dtopor5 = isset($p['dtopor5']) ? floatval($p['dtopor5']) : 0;
+            $this->dtopor1 = isset($p['dtopor1']) ? floatval($p['dtopor1']) : 0.0;
+            $this->dtopor2 = isset($p['dtopor2']) ? floatval($p['dtopor2']) : 0.0;
+            $this->dtopor3 = isset($p['dtopor3']) ? floatval($p['dtopor3']) : 0.0;
+            $this->dtopor4 = isset($p['dtopor4']) ? floatval($p['dtopor4']) : 0.0;
+            $this->dtopor5 = isset($p['dtopor5']) ? floatval($p['dtopor5']) : 0.0;
             $this->total = floatval($p['total']);
             $this->totaliva = floatval($p['totaliva']);
             $this->totaleuros = floatval($p['totaleuros']);
