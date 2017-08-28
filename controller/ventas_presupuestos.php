@@ -126,11 +126,9 @@ class ventas_presupuestos extends fbase_controller
                     $this->mostrar = 'buscar';
                 }
 
-                if (isset($_REQUEST['codcliente'])) {
-                    if ($_REQUEST['codcliente'] != '') {
-                        $cli0 = new cliente();
-                        $this->cliente = $cli0->get($_REQUEST['codcliente']);
-                    }
+                if (isset($_REQUEST['codcliente']) && $_REQUEST['codcliente'] != '') {
+                    $cli0 = new cliente();
+                    $this->cliente = $cli0->get($_REQUEST['codcliente']);
                 }
 
                 if (isset($_REQUEST['codagente'])) {
@@ -237,9 +235,9 @@ class ventas_presupuestos extends fbase_controller
                 . "&hasta=" . $this->hasta;
 
             return $url;
-        } else {
-            return parent::url();
         }
+
+        return parent::url();
     }
 
     public function paginas()
@@ -279,10 +277,12 @@ class ventas_presupuestos extends fbase_controller
         if ($presup) {
             if ($presup->delete()) {
                 $this->clean_last_changes();
-            } else
+            } else {
                 $this->new_error_msg("¡Imposible eliminar el " . FS_PRESUPUESTO . "!");
-        } else
+            }
+        } else {
             $this->new_error_msg("¡" . ucfirst(FS_PRESUPUESTO) . " no encontrado!");
+        }
     }
 
     private function share_extension()
