@@ -33,12 +33,7 @@ class imprimir_presu_pedi extends ventas_imprimir
 
     protected function private_core()
     {
-        $this->articulo_proveedor = new articulo_proveedor();
-        $this->cliente = FALSE;
-        $this->documento = FALSE;
-        $this->impuesto = new impuesto();
-        $this->proveedor = FALSE;
-        $this->cargar_config();
+        $this->init();
 
         if (isset($_REQUEST['pedido_p']) AND isset($_REQUEST['id'])) {
             $ped = new pedido_proveedor();
@@ -49,7 +44,7 @@ class imprimir_presu_pedi extends ventas_imprimir
             }
 
             if (isset($_POST['email'])) {
-                $this->enviar_email_proveedor();
+                $this->enviar_email_proveedor('pedido');
             } else {
                 $this->generar_pdf_pedido_proveedor();
             }
@@ -80,8 +75,6 @@ class imprimir_presu_pedi extends ventas_imprimir
                 $this->generar_pdf_presupuesto();
             }
         }
-
-        $this->share_extensions();
     }
 
     protected function share_extensions()
@@ -185,55 +178,14 @@ class imprimir_presu_pedi extends ventas_imprimir
 
                 /// ¿Fecha de validez?
                 if ($linea_actual == count($lineas)) {
-                    $texto_pago = '';
-
                     if ($this->documento->finoferta) {
                         $texto_pago = "\n<b>" . ucfirst(FS_PRESUPUESTO) . ' válido hasta:</b> ' . $this->documento->finoferta;
+                        $pdf_doc->pdf->ezText($texto_pago, 9);
                     }
 
                     if ($this->impresion['print_formapago']) {
-                        $fp0 = new forma_pago();
-                        $forma_pago = $fp0->get($this->documento->codpago);
-                        if ($forma_pago) {
-                            $texto_pago .= "\n<b>Forma de pago</b>: " . $forma_pago->descripcion;
-
-                            if (!$forma_pago->imprimir) {
-                                /// nada
-                            } else if ($forma_pago->domiciliado) {
-                                $cbc0 = new cuenta_banco_cliente();
-                                $encontrada = FALSE;
-                                foreach ($cbc0->all_from_cliente($this->documento->codcliente) as $cbc) {
-                                    $texto_pago .= "\n<b>Domiciliado en</b>: ";
-                                    if ($cbc->iban) {
-                                        $texto_pago .= $cbc->iban(TRUE);
-                                    }
-
-                                    if ($cbc->swift) {
-                                        $texto_pago .= "\n<b>SWIFT/BIC</b>: " . $cbc->swift;
-                                    }
-                                    $encontrada = TRUE;
-                                    break;
-                                }
-                                if (!$encontrada) {
-                                    $texto_pago .= "\n<b>El cliente no tiene cuenta bancaria asignada.</b>";
-                                }
-                            } else if ($forma_pago->codcuenta) {
-                                $cb0 = new cuenta_banco();
-                                $cuenta_banco = $cb0->get($forma_pago->codcuenta);
-                                if ($cuenta_banco) {
-                                    if ($cuenta_banco->iban) {
-                                        $texto_pago .= "\n<b>IBAN</b>: " . $cuenta_banco->iban(TRUE);
-                                    }
-
-                                    if ($cuenta_banco->swift) {
-                                        $texto_pago .= "\n<b>SWIFT o BIC</b>: " . $cuenta_banco->swift;
-                                    }
-                                }
-                            }
-                        }
+                        $this->generar_pdf_forma_pago($pdf_doc);
                     }
-
-                    $pdf_doc->pdf->ezText($texto_pago, 9);
                 }
 
                 $pdf_doc->set_y(80);
@@ -283,48 +235,7 @@ class imprimir_presu_pedi extends ventas_imprimir
                 }
 
                 $pdf_doc->generar_pdf_cabecera($this->empresa, $lppag);
-
-                /*
-                 * Esta es la tabla con los datos del proveedor:
-                 * Pedido:                  Fecha:
-                 * Cliente:               CIF/NIF:
-                 */
-                $pdf_doc->new_table();
-                $pdf_doc->add_table_row(
-                    array(
-                        'campo1' => "<b>" . ucfirst(FS_PEDIDO) . ":</b>",
-                        'dato1' => $this->documento->codigo,
-                        'campo2' => "<b>Fecha:</b> " . $this->documento->fecha
-                    )
-                );
-
-                $tipoidfiscal = FS_CIFNIF;
-                if ($this->proveedor) {
-                    $tipoidfiscal = $this->proveedor->tipoidfiscal;
-                }
-                $pdf_doc->add_table_row(
-                    array(
-                        'campo1' => "<b>Proveedor:</b>",
-                        'dato1' => fs_fix_html($this->documento->nombre),
-                        'campo2' => "<b>" . $tipoidfiscal . ":</b> " . $this->documento->cifnif
-                    )
-                );
-
-                $pdf_doc->save_table(
-                    array(
-                        'cols' => array(
-                            'campo1' => array('width' => 90, 'justification' => 'right'),
-                            'dato1' => array('justification' => 'left'),
-                            'campo2' => array('justification' => 'right')
-                        ),
-                        'showLines' => 0,
-                        'width' => 520,
-                        'shaded' => 0
-                    )
-                );
-                $pdf_doc->pdf->ezText("\n", 10);
-
-                /// lineas + observaciones
+                $this->generar_pdf_datos_proveedor($pdf_doc);
                 $this->generar_pdf_lineas($pdf_doc, $lineas, $linea_actual, $lppag);
 
                 $pdf_doc->set_y(80);
