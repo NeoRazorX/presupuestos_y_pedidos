@@ -118,11 +118,9 @@ class compras_pedidos extends fbase_controller
                     $this->mostrar = 'buscar';
                 }
 
-                if (isset($_REQUEST['codproveedor'])) {
-                    if ($_REQUEST['codproveedor'] != '') {
-                        $pro0 = new proveedor();
-                        $this->proveedor = $pro0->get($_REQUEST['codproveedor']);
-                    }
+                if (isset($_REQUEST['codproveedor']) && $_REQUEST['codproveedor'] != '') {
+                    $pro0 = new proveedor();
+                    $this->proveedor = $pro0->get($_REQUEST['codproveedor']);
                 }
 
                 if (isset($_REQUEST['codagente'])) {
@@ -201,22 +199,40 @@ class compras_pedidos extends fbase_controller
                 . "&hasta=" . $this->hasta;
 
             return $url;
-        } else
-            return parent::url();
+        }
+
+        return parent::url();
     }
 
     public function paginas()
     {
-        if ($this->mostrar == 'pendientes')
+        if ($this->mostrar == 'pendientes') {
             $total = $this->total_pendientes();
-        else
-        if ($this->mostrar == 'buscar')
+        } else if ($this->mostrar == 'buscar') {
             $total = $this->num_resultados;
-        else
+        } else {
             $total = $this->total_registros();
-
+        }
 
         return $this->fbase_paginas($this->url(TRUE), $total, $this->offset);
+    }
+
+    public function anterior_url()
+    {
+        if ($this->offset > 0) {
+            return $this->url() . "&ref=" . $_GET['ref'] . "&offset=" . ($this->offset - FS_ITEM_LIMIT);
+        }
+
+        return '';
+    }
+
+    public function siguiente_url()
+    {
+        if (count($this->resultados) == FS_ITEM_LIMIT) {
+            return parent::url() . "&ref=" . $_GET['ref'] . "&offset=" . ($this->offset + FS_ITEM_LIMIT);
+        }
+
+        return '';
     }
 
     public function buscar_lineas()
@@ -227,10 +243,11 @@ class compras_pedidos extends fbase_controller
         $this->buscar_lineas = $_POST['buscar_lineas'];
         $linea = new linea_pedido_proveedor();
 
-        if (isset($_POST['codproveedor']))
+        if (isset($_POST['codproveedor'])) {
             $this->lineas = $linea->search_from_proveedor($_POST['codproveedor'], $this->buscar_lineas, $this->offset);
-        else
+        } else {
             $this->lineas = $linea->search($this->buscar_lineas, $this->offset);
+        }
     }
 
     private function delete_pedido()
@@ -240,10 +257,12 @@ class compras_pedidos extends fbase_controller
         if ($pedido) {
             if ($pedido->delete()) {
                 $this->clean_last_changes();
-            } else
+            } else {
                 $this->new_error_msg("¡Imposible eliminar el " . FS_PEDIDO . "!");
-        } else
+            }
+        } else {
             $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " no encontrado!");
+        }
     }
 
     private function share_extension()

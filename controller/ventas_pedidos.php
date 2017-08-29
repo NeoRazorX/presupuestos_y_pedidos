@@ -125,11 +125,9 @@ class ventas_pedidos extends fbase_controller
                     $this->mostrar = 'buscar';
                 }
 
-                if (isset($_REQUEST['codcliente'])) {
-                    if ($_REQUEST['codcliente'] != '') {
-                        $cli0 = new cliente();
-                        $this->cliente = $cli0->get($_REQUEST['codcliente']);
-                    }
+                if (isset($_REQUEST['codcliente']) && $_REQUEST['codcliente'] != '') {
+                    $cli0 = new cliente();
+                    $this->cliente = $cli0->get($_REQUEST['codcliente']);
                 }
 
                 if (isset($_REQUEST['codagente'])) {
@@ -235,9 +233,9 @@ class ventas_pedidos extends fbase_controller
                 . "&hasta=" . $this->hasta;
 
             return $url;
-        } else {
-            return parent::url();
         }
+
+        return parent::url();
     }
 
     public function paginas()
@@ -277,10 +275,12 @@ class ventas_pedidos extends fbase_controller
         if ($pedido) {
             if ($pedido->delete()) {
                 $this->clean_last_changes();
-            } else
+            } else {
                 $this->new_error_msg("¡Imposible eliminar el " . FS_PEDIDO . "!");
-        } else
+            }
+        } else {
             $this->new_error_msg("¡" . ucfirst(FS_PEDIDO) . " no encontrado!");
+        }
     }
 
     private function share_extension()
