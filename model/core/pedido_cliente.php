@@ -1,8 +1,8 @@
 <?php
 /*
  * This file is part of presupuestos_y_pedidos
- * Copyright (C) 2014-2017    Carlos Garcia Gomez        neorazorx@gmail.com
- * Copyright (C) 2014         Francesc Pineda Segarra    shawe.ewahs@gmail.com
+ * Copyright (C) 2014-2017  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2014-2017  Francesc Pineda Segarra  shawe.ewahs@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -20,7 +20,7 @@
 namespace FacturaScripts\model;
 
 /**
- * Pedido de cliente
+ * Pedido de cliente.
  */
 class pedido_cliente extends \fs_model
 {
@@ -38,104 +38,186 @@ class pedido_cliente extends \fs_model
     public $idalbaran;
 
     /**
-     * Código único. Para humanos.
-     * @var string 
+     * Código identificador único. Para humanos.
+     * @var string
      */
     public $codigo;
 
     /**
      * Serie relacionada.
-     * @var string 
+     * @var string
      */
     public $codserie;
 
     /**
      * Ejercicio relacionado. El que corresponde a la fecha.
-     * @var string 
+     * @var string
      */
     public $codejercicio;
 
     /**
      * Código del cliente del pedido.
-     * @var string 
+     * @var string
      */
     public $codcliente;
 
     /**
-     * Empleado que ha creado el pedido.
-     * @var string 
+     * Empleado que ha creado el pedido. Modelo agente.
+     * @var string
      */
     public $codagente;
 
     /**
      * Forma de pago asociada.
-     * @var string 
+     * @var string
      */
     public $codpago;
 
     /**
      * Divisa del pedido.
-     * @var string 
+     * @var string
      */
     public $coddivisa;
 
     /**
      * Almacén del que saldrá el material
-     * @var string 
+     * @var string
      */
     public $codalmacen;
 
     /**
      * País del cliente.
-     * @var string 
+     * @var string
      */
     public $codpais;
 
     /**
      * ID de la dirección del cliente.
      * Modelo direccion_cliente.
-     * @var integer 
+     * @var string
      */
     public $coddir;
+
+    /**
+     * Código postal del cliente.
+     * @var string
+     */
     public $codpostal;
 
     /**
      * Número del pedido.
      * Único dentro de la serie+ejercicio.
-     * @var string 
+     * @var string
      */
     public $numero;
 
     /**
      * Número opcional a disposición del usuario.
-     * @var string 
+     * @var string
      */
     public $numero2;
+
+    /**
+     * TODO
+     * @var
+     */
     public $nombrecliente;
+
+    /**
+     * TODO
+     * @var
+     */
     public $cifnif;
+
+    /**
+     * TODO
+     * @var
+     */
     public $direccion;
+
+    /**
+     * TODO
+     * @var
+     */
     public $ciudad;
+
+    /**
+     * TODO
+     * @var
+     */
     public $provincia;
+
+    /**
+     * TODO
+     * @var
+     */
     public $apartado;
+
+    /**
+     * TODO
+     * @var
+     */
     public $fecha;
+
+    /**
+     * TODO
+     * @var
+     */
     public $hora;
+
+    /**
+     * Importe total antes de descuentos e impuestos.
+     * Es la suma del pvptotal de las líneas.
+     * @var float
+     */
+    public $netosindto;
 
     /**
      * Importe total antes de impuestos.
      * Es la suma del pvptotal de las líneas.
-     * @var float 
+     * @var float
      */
     public $neto;
 
     /**
-     * Importe total de la factura, con impuestos.
-     * @var float 
+     * Descuento porcentual 1
+     * @var float
+     */
+    public $dtopor1;
+    
+    /**
+     * Descuento porcentual 2
+     * @var float
+     */
+    public $dtopor2;
+    
+    /**
+     * Descuento porcentual 3
+     * @var float
+     */
+    public $dtopor3;
+    
+    /**
+     * Descuento porcentual 4
+     * @var float
+     */
+    public $dtopor4;
+    
+    /**
+     * Descuento porcentual 5
+     * @var float
+     */
+    public $dtopor5;
+
+    /**
+     * Importe total del pedido, con impuestos.
+     * @var float
      */
     public $total;
 
     /**
-     * Suma del IVA de las líneas.
-     * @var float 
+     * Suma total del IVA de las líneas.
+     * @var float
      */
     public $totaliva;
 
@@ -143,40 +225,45 @@ class pedido_cliente extends \fs_model
      * Total expresado en euros, por si no fuese la divisa del pedido.
      * totaleuros = total/tasaconv
      * No hace falta rellenarlo, al hacer save() se calcula el valor.
-     * @var float 
+     * @var float
      */
     public $totaleuros;
 
     /**
      * % de retención IRPF del pedido. Se obtiene de la serie.
      * Cada línea puede tener un % distinto.
-     * @var float 
+     * @var float
      */
     public $irpf;
 
     /**
-     * Suma de las retenciones IRPF de las líneas del pedido.
-     * @var float 
+     * Suma total de las retenciones IRPF de las líneas del pedido.
+     * @var float
      */
     public $totalirpf;
 
     /**
-     * % de comisión del empleado.
-     * @var float 
+     * % de comisión del empleado (agente).
+     * @var float
      */
     public $porcomision;
 
     /**
-     * Tasa de conversión a Euros de la divisa seleccionada.
-     * @var float 
+     * Tasa de conversión a Euros de la divisa del pedido.
+     * @var float
      */
     public $tasaconv;
 
     /**
      * Suma total del recargo de equivalencia de las líneas.
-     * @var float 
+     * @var float
      */
     public $totalrecargo;
+
+    /**
+     * Observaciones del pedido
+     * @var float
+     */
     public $observaciones;
 
     /**
@@ -184,7 +271,7 @@ class pedido_cliente extends \fs_model
      * 0 -> pendiente. (editable)
      * 1 -> aprobado. (hay un idalbaran y no es editable)
      * 2 -> rechazado. (no hay idalbaran y no es editable)
-     * @var integer 
+     * @var integer
      */
     public $status;
     public $editable;
@@ -197,19 +284,70 @@ class pedido_cliente extends \fs_model
 
     /**
      * Fecha de salida prevista del material.
-     * @var string 
+     * @var string
      */
     public $fechasalida;
+
     /// datos de transporte
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codtrans;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codigo;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_nombre;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_apellidos;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_apartado;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_direccion;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codpostal;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_ciudad;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_provincia;
+
+    /**
+     * TODO
+     * @var
+     */
     public $envio_codpais;
 
     /**
@@ -220,56 +358,62 @@ class pedido_cliente extends \fs_model
 
     /**
      * Si este presupuesto es la versión de otro, aquí se almacena el idpresupuesto del original.
-     * @var integer 
+     * @var integer
      */
     public $idoriginal;
 
-    public function __construct($p = FALSE)
+    public function __construct($data = FALSE)
     {
         parent::__construct('pedidoscli');
-        if ($p) {
-            $this->idpedido = $this->intval($p['idpedido']);
-            $this->idalbaran = $this->intval($p['idalbaran']);
-            $this->codigo = $p['codigo'];
-            $this->codagente = $p['codagente'];
-            $this->codpago = $p['codpago'];
-            $this->codserie = $p['codserie'];
-            $this->codejercicio = $p['codejercicio'];
-            $this->codcliente = $p['codcliente'];
-            $this->coddivisa = $p['coddivisa'];
-            $this->codalmacen = $p['codalmacen'];
-            $this->codpais = $p['codpais'];
-            $this->coddir = $p['coddir'];
-            $this->codpostal = $p['codpostal'];
-            $this->numero = $p['numero'];
-            $this->numero2 = $p['numero2'];
-            $this->nombrecliente = $p['nombrecliente'];
-            $this->cifnif = $p['cifnif'];
-            $this->direccion = $p['direccion'];
-            $this->ciudad = $p['ciudad'];
-            $this->provincia = $p['provincia'];
-            $this->apartado = $p['apartado'];
-            $this->fecha = Date('d-m-Y', strtotime($p['fecha']));
+        if ($data) {
+            $this->idpedido = $this->intval($data['idpedido']);
+            $this->idalbaran = $this->intval($data['idalbaran']);
+            $this->codigo = $data['codigo'];
+            $this->codagente = $data['codagente'];
+            $this->codpago = $data['codpago'];
+            $this->codserie = $data['codserie'];
+            $this->codejercicio = $data['codejercicio'];
+            $this->codcliente = $data['codcliente'];
+            $this->coddivisa = $data['coddivisa'];
+            $this->codalmacen = $data['codalmacen'];
+            $this->codpais = $data['codpais'];
+            $this->coddir = $data['coddir'];
+            $this->codpostal = $data['codpostal'];
+            $this->numero = $data['numero'];
+            $this->numero2 = $data['numero2'];
+            $this->nombrecliente = $data['nombrecliente'];
+            $this->cifnif = $data['cifnif'];
+            $this->direccion = $data['direccion'];
+            $this->ciudad = $data['ciudad'];
+            $this->provincia = $data['provincia'];
+            $this->apartado = $data['apartado'];
+            $this->fecha = Date('d-m-Y', strtotime($data['fecha']));
 
-            $this->hora = Date('H:i:s', strtotime($p['fecha']));
-            if (!is_null($p['hora'])) {
-                $this->hora = date('H:i:s', strtotime($p['hora']));
+            $this->hora = Date('H:i:s', strtotime($data['fecha']));
+            if (!is_null($data['hora'])) {
+                $this->hora = date('H:i:s', strtotime($data['hora']));
             }
 
-            $this->neto = floatval($p['neto']);
-            $this->total = floatval($p['total']);
-            $this->totaliva = floatval($p['totaliva']);
-            $this->totaleuros = floatval($p['totaleuros']);
-            $this->irpf = floatval($p['irpf']);
-            $this->totalirpf = floatval($p['totalirpf']);
-            $this->porcomision = floatval($p['porcomision']);
-            $this->tasaconv = floatval($p['tasaconv']);
-            $this->totalrecargo = floatval($p['totalrecargo']);
-            $this->observaciones = $p['observaciones'];
+            $this->netosindto = isset($data['netosindto']) ? floatval($data['netosindto']) : 0.0;
+            $this->neto = floatval($data['neto']);
+            $this->dtopor1 = isset($data['dtopor1']) ? floatval($data['dtopor1']) : 0.0;
+            $this->dtopor2 = isset($data['dtopor2']) ? floatval($data['dtopor2']) : 0.0;
+            $this->dtopor3 = isset($data['dtopor3']) ? floatval($data['dtopor3']) : 0.0;
+            $this->dtopor4 = isset($data['dtopor4']) ? floatval($data['dtopor4']) : 0.0;
+            $this->dtopor5 = isset($data['dtopor5']) ? floatval($data['dtopor5']) : 0.0;
+            $this->total = floatval($data['total']);
+            $this->totaliva = floatval($data['totaliva']);
+            $this->totaleuros = floatval($data['totaleuros']);
+            $this->irpf = floatval($data['irpf']);
+            $this->totalirpf = floatval($data['totalirpf']);
+            $this->porcomision = floatval($data['porcomision']);
+            $this->tasaconv = floatval($data['tasaconv']);
+            $this->totalrecargo = floatval($data['totalrecargo']);
+            $this->observaciones = $data['observaciones'];
 
             /// calculamos el estado para mantener compatibilidad con eneboo
-            $this->status = intval($p['status']);
-            $this->editable = $this->str2bool($p['editable']);
+            $this->status = intval($data['status']);
+            $this->editable = $this->str2bool($data['editable']);
             if ($this->idalbaran) {
                 $this->status = 1;
                 $this->editable = FALSE;
@@ -283,27 +427,27 @@ class pedido_cliente extends \fs_model
             }
 
             $this->femail = NULL;
-            if (!is_null($p['femail'])) {
-                $this->femail = Date('d-m-Y', strtotime($p['femail']));
+            if (!is_null($data['femail'])) {
+                $this->femail = Date('d-m-Y', strtotime($data['femail']));
             }
 
             $this->fechasalida = NULL;
-            if (!is_null($p['fechasalida'])) {
-                $this->fechasalida = Date('d-m-Y', strtotime($p['fechasalida']));
+            if (!is_null($data['fechasalida'])) {
+                $this->fechasalida = Date('d-m-Y', strtotime($data['fechasalida']));
             }
-            $this->envio_codtrans = $p['codtrans'];
-            $this->envio_codigo = $p['codigoenv'];
-            $this->envio_nombre = $p['nombreenv'];
-            $this->envio_apellidos = $p['apellidosenv'];
-            $this->envio_apartado = $p['apartadoenv'];
-            $this->envio_direccion = $p['direccionenv'];
-            $this->envio_codpostal = $p['codpostalenv'];
-            $this->envio_ciudad = $p['ciudadenv'];
-            $this->envio_provincia = $p['provinciaenv'];
-            $this->envio_codpais = $p['codpaisenv'];
+            $this->envio_codtrans = $data['codtrans'];
+            $this->envio_codigo = $data['codigoenv'];
+            $this->envio_nombre = $data['nombreenv'];
+            $this->envio_apellidos = $data['apellidosenv'];
+            $this->envio_apartado = $data['apartadoenv'];
+            $this->envio_direccion = $data['direccionenv'];
+            $this->envio_codpostal = $data['codpostalenv'];
+            $this->envio_ciudad = $data['ciudadenv'];
+            $this->envio_provincia = $data['provinciaenv'];
+            $this->envio_codpais = $data['codpaisenv'];
 
-            $this->numdocs = intval($p['numdocs']);
-            $this->idoriginal = $this->intval($p['idoriginal']);
+            $this->numdocs = intval($data['numdocs']);
+            $this->idoriginal = $this->intval($data['idoriginal']);
         } else {
             $this->idpedido = NULL;
             $this->idalbaran = NULL;
@@ -328,15 +472,21 @@ class pedido_cliente extends \fs_model
             $this->apartado = NULL;
             $this->fecha = Date('d-m-Y');
             $this->hora = Date('H:i:s');
-            $this->neto = 0;
-            $this->total = 0;
-            $this->totaliva = 0;
-            $this->totaleuros = 0;
-            $this->irpf = 0;
-            $this->totalirpf = 0;
-            $this->porcomision = 0;
-            $this->tasaconv = 1;
-            $this->totalrecargo = 0;
+            $this->netosindto = 0.0;
+            $this->neto = 0.0;
+            $this->dtopor1 = 0.0;
+            $this->dtopor2 = 0.0;
+            $this->dtopor3 = 0.0;
+            $this->dtopor4 = 0.0;
+            $this->dtopor5 = 0.0;
+            $this->total = 0.0;
+            $this->totaliva = 0.0;
+            $this->totaleuros = 0.0;
+            $this->irpf = 0.0;
+            $this->totalirpf = 0.0;
+            $this->porcomision = 0.0;
+            $this->tasaconv = 1.0;
+            $this->totalrecargo = 0.0;
             $this->observaciones = NULL;
             $this->status = 0;
             $this->editable = TRUE;
@@ -526,46 +676,77 @@ class pedido_cliente extends \fs_model
         return FALSE;
     }
 
+    /**
+     * Comprobaciones extra del pedido, devuelve TRUE si está todo correcto
+     * @param boolean $duplicados
+     * @return boolean
+     */
     public function full_test($duplicados = TRUE)
     {
         $status = TRUE;
 
         /// comprobamos las líneas
+        $netos = array();
+        $netosindto = 0;
+        $netocondto = 0;
+        $subtotal = 0;
         $neto = 0;
         $iva = 0;
         $irpf = 0;
         $recargo = 0;
+        $total = 0;
+        
+        // Descuento total adicional del total del documento
+        $t_dto_due = (1-((1-$this->dtopor1/100)*(1-$this->dtopor2/100)*(1-$this->dtopor3/100)*(1-$this->dtopor4/100)*(1-$this->dtopor5/100)))*100;
+        $due_totales = (1-$t_dto_due/100);
+            
         foreach ($this->get_lineas() as $l) {
             if (!$l->test()) {
                 $status = FALSE;
             }
-
-            $neto += $l->pvptotal;
-            $iva += $l->pvptotal * $l->iva / 100;
-            $irpf += $l->pvptotal * $l->irpf / 100;
-            $recargo += $l->pvptotal * $l->recargo / 100;
+            $codimpuesto = ($l->codimpuesto === null ) ? 0 : $l->codimpuesto;
+            if (!array_key_exists($codimpuesto, $netos)) {
+                $netos[$codimpuesto] = array(
+                    'subtotal' => 0,    // Subtotal (Sumatorio de netos de línea)
+                    'base' => 0,        // Base imponible
+                    'iva' => 0,         // Total IVA
+                    'irpf' => 0,        // Total IRPF
+                    'recargo' => 0      // Total Recargo
+                );
+            }
+            // Acumulamos por tipos de IVAs, que es el desglose de pie de página
+            $netosindto = $l->pvptotal;                 // Precio neto por línea
+            $netocondto = $netosindto * $due_totales;   // Precio neto - % desc sobre total
+            $netos[$codimpuesto]['subtotal'] += $netosindto;
+            $netos[$codimpuesto]['base'] += $netocondto;
+            $netos[$codimpuesto]['iva'] += $netocondto * ($l->iva / 100);
+            $netos[$codimpuesto]['irpf'] += $netocondto * ($this->irpf / 100);
+            $netos[$codimpuesto]['recargo'] += $netocondto * ($l->recargo / 100);
         }
 
-        $neto = round($neto, FS_NF0);
-        $iva = round($iva, FS_NF0);
-        $irpf = round($irpf, FS_NF0);
-        $recargo = round($recargo, FS_NF0);
-        $total = $neto + $iva - $irpf + $recargo;
+        foreach ($netos as $codimp => $ne) {
+            $subtotal += $ne['subtotal'];               // Subtotal (Sumatorio de netos de línea)
+            $neto += $ne['base'];                       // Sumatorio de bases imponibles
+            $iva += $ne['iva'];                         // Sumatorio de IVAs
+            $irpf += $ne['irpf'];                       // Sumatorio de IRPFs
+            $recargo += $ne['recargo'];                 // Sumatorio de REs
+            $total = $neto + $iva - $irpf + $recargo;   // Sumatorio del total
+        }
 
         if (!$this->floatcmp($this->neto, $neto, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor neto de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $neto);
+            $this->new_error_msg("Valor neto de " . FS_PEDIDO . " " . $this->codigo . " incorrecto. Valor correcto: " . $neto . " y tiene el valor " . $this->neto);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totaliva de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $iva);
+        } elseif (!$this->floatcmp($this->totaliva, $iva, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor totaliva de " . FS_PEDIDO . " " . $this->codigo . " incorrecto. Valor correcto: " . $iva . " y tiene el valor " . $this->totaliva);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totalirpf de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $irpf);
+        } elseif (!$this->floatcmp($this->totalirpf, $irpf, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor totalirpf de " . FS_PEDIDO . " " . $this->codigo . " incorrecto. Valor correcto: " . $irpf . " y tiene el valor " . $this->totalirpf);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor totalrecargo de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $recargo);
+        } elseif (!$this->floatcmp($this->totalrecargo, $recargo, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor totalrecargo de " . FS_PEDIDO . " " . $this->codigo . " incorrecto. Valor correcto: " . $recargo . " y tiene el valor " . $this->totalrecargo);
             $status = FALSE;
-        } else if (!$this->floatcmp($this->total, $total, FS_NF0, TRUE)) {
-            $this->new_error_msg("Valor total de " . FS_PEDIDO . " incorrecto. Valor correcto: " . $total);
+        } elseif (!$this->floatcmp($this->total, $total, FS_NF0, TRUE)) {
+            $this->new_error_msg("Valor total de " . FS_PEDIDO . " " . $this->codigo . " incorrecto. Valor correcto: " . $total . " y tiene el valor " . $this->total);
             $status = FALSE;
         }
 
@@ -583,6 +764,10 @@ class pedido_cliente extends \fs_model
         return $status;
     }
 
+    /**
+     * Guarda los datos en la base de datos
+     * @return boolean
+     */
     public function save()
     {
         if ($this->test()) {
@@ -607,7 +792,13 @@ class pedido_cliente extends \fs_model
                     . ", hora = " . $this->var2str($this->hora)
                     . ", idalbaran = " . $this->var2str($this->idalbaran)
                     . ", irpf = " . $this->var2str($this->irpf)
+                    . ", netosindto = " . $this->var2str($this->netosindto)
                     . ", neto = " . $this->var2str($this->neto)
+                    . ", dtopor1 = " . $this->var2str($this->dtopor1)
+                    . ", dtopor2 = " . $this->var2str($this->dtopor2)
+                    . ", dtopor3 = " . $this->var2str($this->dtopor3)
+                    . ", dtopor4 = " . $this->var2str($this->dtopor4)
+                    . ", dtopor5 = " . $this->var2str($this->dtopor5)
                     . ", nombrecliente = " . $this->var2str($this->nombrecliente)
                     . ", numero = " . $this->var2str($this->numero)
                     . ", numero2 = " . $this->var2str($this->numero2)
@@ -643,10 +834,11 @@ class pedido_cliente extends \fs_model
             $this->new_codigo();
             $sql = "INSERT INTO " . $this->table_name . " (apartado,cifnif,ciudad,codagente,codalmacen,
                codcliente,coddir,coddivisa,codejercicio,codigo,codpais,codpago,codpostal,codserie,
-               direccion,editable,fecha,hora,idalbaran,irpf,neto,nombrecliente,numero,observaciones,
-               status,porcomision,provincia,tasaconv,total,totaleuros,totalirpf,totaliva,totalrecargo,
-               numero2,femail,fechasalida,codtrans,codigoenv,nombreenv,apellidosenv,apartadoenv,direccionenv,
-               codpostalenv,ciudadenv,provinciaenv,codpaisenv,numdocs,idoriginal) VALUES ("
+               direccion,editable,fecha,hora,idalbaran,irpf,netosindto,neto,dtopor1,dtopor2,dtopor3,dtopor4,dtopor5,
+               nombrecliente,numero,observaciones,status,porcomision,provincia,tasaconv,total,totaleuros,
+               totalirpf,totaliva,totalrecargo,numero2,femail,fechasalida,codtrans,codigoenv,nombreenv,
+               apellidosenv,apartadoenv,direccionenv,codpostalenv,ciudadenv,provinciaenv,codpaisenv,
+               numdocs,idoriginal) VALUES ("
                 . $this->var2str($this->apartado) . ","
                 . $this->var2str($this->cifnif) . ","
                 . $this->var2str($this->ciudad) . ","
@@ -667,7 +859,13 @@ class pedido_cliente extends \fs_model
                 . $this->var2str($this->hora) . ","
                 . $this->var2str($this->idalbaran) . ","
                 . $this->var2str($this->irpf) . ","
+                . $this->var2str($this->netosindto) . ","
                 . $this->var2str($this->neto) . ","
+                . $this->var2str($this->dtopor1) . ","
+                . $this->var2str($this->dtopor2) . ","
+                . $this->var2str($this->dtopor3) . ","
+                . $this->var2str($this->dtopor4) . ","
+                . $this->var2str($this->dtopor5) . ","
                 . $this->var2str($this->nombrecliente) . ","
                 . $this->var2str($this->numero) . ","
                 . $this->var2str($this->observaciones) . ","
@@ -725,7 +923,7 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con los pedidos de venta.
+     * Devuelve un array con los últimos pedidos de venta.
      * @param integer $offset
      * @param string $order
      * @return \pedido_cliente
@@ -739,14 +937,15 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con los pedidos de venta pendientes
+     * Devuelve un array con los pedidos de venta pendientes.
      * @param integer $offset
      * @param string $order
      * @return \pedido_cliente
      */
     public function all_ptealbaran($offset = 0, $order = 'fecha ASC', $limit = FS_ITEM_LIMIT)
     {
-        $sql = "SELECT * FROM " . $this->table_name . " WHERE idalbaran IS NULL AND status = 0 ORDER BY " . $order;
+        $sql = "SELECT * FROM " . $this->table_name . " WHERE idalbaran IS NULL"
+            . " AND status = 0 ORDER BY " . $order;
 
         $data = $this->db->select_limit($sql, $limit, $offset);
         return $this->all_from_data($data);
@@ -767,7 +966,7 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con los pedidos del cliente $codcliente
+     * Devuelve un array con los pedidos del cliente $codcliente.
      * @param string $codcliente
      * @param integer $offset
      * @return \pedido_cliente
@@ -811,7 +1010,7 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * 
+     * Devuelve un array con los pedidos según los filtros:
      * @param string $desde
      * @param string $hasta
      * @param string $codserie
@@ -864,7 +1063,7 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con todos los pedidos que coinciden con $query
+     * Devuelve un array con los pedidos que coinciden con $query
      * @param string $query
      * @param integer $offset
      * @return \pedido_cliente
@@ -891,7 +1090,7 @@ class pedido_cliente extends \fs_model
     }
 
     /**
-     * Devuelve un array con todos los pedidos que coincicen con $query del cliente $codcliente
+     * Devuelve un array con los pedidos que coincicen con $query del cliente $codcliente
      * @param string $codcliente
      * @param string $desde
      * @param string $hasta
@@ -938,7 +1137,10 @@ class pedido_cliente extends \fs_model
             . "WHERE status = '1' AND idalbaran NOT IN (SELECT idalbaran FROM albaranescli);");
 
         /// marcamos como rechazados todos los presupuestos no editables y sin pedido asociado
-        $this->db->exec("UPDATE pedidoscli SET status = '2' WHERE idalbaran IS NULL AND"
+        $this->db->exec("UPDATE " . $this->table_name . " SET status = '2' WHERE idalbaran IS NULL AND"
             . " editable = false;");
+        
+        /// asignamos netosindto a neto a todos los que estén a 0
+        $this->db->exec("UPDATE " . $this->table_name . " SET netosindto = neto WHERE netosindto = 0;");
     }
 }
