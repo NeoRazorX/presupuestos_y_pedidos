@@ -388,6 +388,7 @@ class ventas_presupuesto extends fbase_controller
                             /// modificamos la línea
                             if ($value->idlinea == intval($_POST['idlinea_' . $num])) {
                                 $encontrada = TRUE;
+                                $lineas[$k]->orden = $num;
                                 $lineas[$k]->cantidad = floatval($_POST['cantidad_' . $num]);
                                 $lineas[$k]->pvpunitario = floatval($_POST['pvp_' . $num]);
                                 $lineas[$k]->dtopor = floatval($_POST['dto_' . $num]);
@@ -478,6 +479,7 @@ class ventas_presupuesto extends fbase_controller
                             }
 
                             $linea->irpf = floatval($_POST['irpf_' . $num]);
+                            $linea->orden = $num;
                             $linea->cantidad = floatval($_POST['cantidad_' . $num]);
                             $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
                             $linea->dtopor = floatval($_POST['dto_' . $num]);
