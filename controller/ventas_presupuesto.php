@@ -108,11 +108,11 @@ class ventas_presupuesto extends fbase_controller
                     $this->presupuesto->status = intval($_REQUEST['status']);
 
                     /// ¿El presupuesto tiene una fecha de validez pasada y queremos ponerlo pendiente?
-                    if ($this->presupuesto->finoferta() AND intval($_REQUEST['status']) == 0) {
+                    if ($this->presupuesto->finoferta() && intval($_REQUEST['status']) == 0) {
                         $this->presupuesto->finoferta = date('d-m-Y', strtotime('+' . $this->setup_validez . ' days'));
                     }
 
-                    if ($this->presupuesto->status == 1 AND is_null($this->presupuesto->idpedido)) {
+                    if ($this->presupuesto->status == 1 && is_null($this->presupuesto->idpedido)) {
                         $this->generar_pedido();
                     } else if ($this->presupuesto->save()) {
                         $this->new_message(ucfirst(FS_PRESUPUESTO) . " modificado correctamente.");
@@ -183,19 +183,17 @@ class ventas_presupuesto extends fbase_controller
      */
     private function check_lineas()
     {
-        if ($this->presupuesto->status == 0 AND $this->presupuesto->coddivisa == $this->empresa->coddivisa) {
+        if ($this->presupuesto->status == 0 && $this->presupuesto->coddivisa == $this->empresa->coddivisa) {
             foreach ($this->presupuesto->get_lineas() as $l) {
                 if ($l->referencia != '') {
                     $data = $this->db->select("SELECT factualizado,pvp FROM articulos WHERE referencia = " . $l->var2str($l->referencia) . " ORDER BY referencia ASC;");
-                    if ($data) {
-                        if (strtotime($data[0]["factualizado"]) > strtotime($this->presupuesto->fecha)) {
-                            if ($l->pvpunitario > floatval($data[0]['pvp'])) {
-                                $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
-                                    . " ha bajado desde la elaboración del " . FS_PRESUPUESTO . ".");
-                            } else if ($l->pvpunitario < floatval($data[0]['pvp'])) {
-                                $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
-                                    . " ha subido desde la elaboración del " . FS_PRESUPUESTO . ".");
-                            }
+                    if ($data && strtotime($data[0]["factualizado"]) > strtotime($this->presupuesto->fecha)) {
+                        if ($l->pvpunitario > floatval($data[0]['pvp'])) {
+                            $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
+                                . " ha bajado desde la elaboración del " . FS_PRESUPUESTO . ".");
+                        } else if ($l->pvpunitario < floatval($data[0]['pvp'])) {
+                            $this->new_advice("El precio del artículo <a href='" . $l->articulo_url() . "'>" . $l->referencia . "</a>"
+                                . " ha subido desde la elaboración del " . FS_PRESUPUESTO . ".");
                         }
                     }
                 }
@@ -209,25 +207,13 @@ class ventas_presupuesto extends fbase_controller
             return parent::url();
         } else if ($this->presupuesto) {
             return $this->presupuesto->url();
-        } else
-            return $this->page->url();
+        }
+
+        return $this->page->url();
     }
 
     private function modificar()
     {
-        $netos = array();
-        $netosdto = array();
-        $ivas = array();
-        $irpfs = array();
-        $recargos = array();
-        $netosindto = 0;
-        $netocondto = 0;
-        $neto = 0;
-        $total_check = 0;
-        $iva = 0;
-        $irpf = 0;
-        $recargo = 0;
-        
         $this->presupuesto->observaciones = $_POST['observaciones'];
         $this->presupuesto->numero2 = $_POST['numero2'];
 
@@ -342,17 +328,17 @@ class ventas_presupuesto extends fbase_controller
             if (isset($_POST['numlineas'])) {
                 $numlineas = intval($_POST['numlineas']);
 
+                $this->presupuesto->irpf = 0;
                 $this->presupuesto->netosindto = 0;
-                $this->presupuesto->dtopor1 = 0;
-                $this->presupuesto->dtopor2 = 0;
-                $this->presupuesto->dtopor3 = 0;
-                $this->presupuesto->dtopor4 = 0;
-                $this->presupuesto->dtopor5 = 0;
                 $this->presupuesto->neto = 0;
                 $this->presupuesto->totaliva = 0;
                 $this->presupuesto->totalirpf = 0;
                 $this->presupuesto->totalrecargo = 0;
-                $this->presupuesto->irpf = 0;
+                $this->presupuesto->dtopor1 = floatval($_POST['adtopor1']);
+                $this->presupuesto->dtopor2 = floatval($_POST['adtopor2']);
+                $this->presupuesto->dtopor3 = floatval($_POST['adtopor3']);
+                $this->presupuesto->dtopor4 = floatval($_POST['adtopor4']);
+                $this->presupuesto->dtopor5 = floatval($_POST['adtopor5']);
 
                 $lineas = $this->presupuesto->get_lineas();
                 $articulo = new articulo();
@@ -361,17 +347,13 @@ class ventas_presupuesto extends fbase_controller
                 foreach ($lineas as $l) {
                     $encontrada = FALSE;
                     for ($num = 0; $num <= $numlineas; $num++) {
-                        if (isset($_POST['idlinea_' . $num])) {
-                            if ($l->idlinea == intval($_POST['idlinea_' . $num])) {
-                                $encontrada = TRUE;
-                                break;
-                            }
+                        if (isset($_POST['idlinea_' . $num]) && $l->idlinea == intval($_POST['idlinea_' . $num])) {
+                            $encontrada = TRUE;
+                            break;
                         }
                     }
-                    if (!$encontrada) {
-                        if (!$l->delete()) {
-                            $this->new_error_msg("¡Imposible eliminar la línea del artículo " . $l->referencia . "!");
-                        }
+                    if (!$encontrada && !$l->delete()) {
+                        $this->new_error_msg("¡Imposible eliminar la línea del artículo " . $l->referencia . "!");
                     }
                 }
 
@@ -395,16 +377,17 @@ class ventas_presupuesto extends fbase_controller
                                 $lineas[$k]->dtopor3 = floatval($_POST['dto3_' . $num]);
                                 $lineas[$k]->dtopor4 = floatval($_POST['dto4_' . $num]);
                                 $lineas[$k]->pvpsindto = ($value->cantidad * $value->pvpunitario);
-                                // Descuento Unificado Equivalente
-                                $due_linea = $this->calc_due(array($lineas[$k]->dtopor,$lineas[$k]->dtopor2,$lineas[$k]->dtopor3,$lineas[$k]->dtopor4));
-                                $lineas[$k]->pvptotal = $lineas[$k]->cantidad * $lineas[$k]->pvpunitario * $due_linea;
-                                $lineas[$k]->descripcion = $_POST['desc_' . $num];
 
+                                // Descuento Unificado Equivalente
+                                $due_linea = $this->fbase_calc_due(array($lineas[$k]->dtopor, $lineas[$k]->dtopor2, $lineas[$k]->dtopor3, $lineas[$k]->dtopor4));
+                                $lineas[$k]->pvptotal = $lineas[$k]->cantidad * $lineas[$k]->pvpunitario * $due_linea;
+                                
+                                $lineas[$k]->descripcion = $_POST['desc_' . $num];
                                 $lineas[$k]->codimpuesto = NULL;
                                 $lineas[$k]->iva = 0;
                                 $lineas[$k]->recargo = 0;
                                 $lineas[$k]->irpf = floatval($_POST['irpf_' . $num]);
-                                if (!$serie->siniva AND $regimeniva != 'Exento') {
+                                if (!$serie->siniva && $regimeniva != 'Exento') {
                                     $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
                                     if ($imp0) {
                                         $lineas[$k]->codimpuesto = $imp0->codimpuesto;
@@ -415,59 +398,24 @@ class ventas_presupuesto extends fbase_controller
                                 }
 
                                 if ($lineas[$k]->save()) {
-                                    if (!array_key_exists($lineas[$k]->codimpuesto, $netos)) {
-                                        $netos[$lineas[$k]->codimpuesto] = 0;
-                                        $netosdto[$lineas[$k]->codimpuesto] = 0;
-                                        $ivas[$lineas[$k]->codimpuesto] = 0;
-                                        $irpfs[$lineas[$k]->codimpuesto] = 0;
-                                        $recargos[$lineas[$k]->codimpuesto] = 0;
-                                    }
-                                    $this->presupuesto->dtopor1 = floatval($_POST['adtopor1']);
-                                    $this->presupuesto->dtopor2 = floatval($_POST['adtopor2']);
-                                    $this->presupuesto->dtopor3 = floatval($_POST['adtopor3']);
-                                    $this->presupuesto->dtopor4 = floatval($_POST['adtopor4']);
-                                    $this->presupuesto->dtopor5 = floatval($_POST['adtopor5']);
-                                    // Acumulamos por tipos de IVAs, que es el desglose de pie de página
-                                    
-                                    // Descuento Unificado Equivalente
-                                    $due_totales = $this->calc_due(array($this->presupuesto->dtopor1,$this->presupuesto->dtopor2,$this->presupuesto->dtopor3,$this->presupuesto->dtopor4,$this->presupuesto->dtopor5));
-                                    // Hacemos el recalculo del PVP por línea, con el descuento adicional de fin de documento
-                                    $pvpcondto = $due_totales * $lineas[$k]->pvptotal;
-                                    
-                                    // Netos
-                                    $netos[$lineas[$k]->codimpuesto] += $lineas[$k]->pvptotal;
-                                    // Bases
-                                    $netosdto[$lineas[$k]->codimpuesto] += $pvpcondto;
-                                    // IVA
-                                    $ivas[$lineas[$k]->codimpuesto] += $pvpcondto * ($lineas[$k]->iva /100);
-                                    // IRPF
-                                    $irpfs[$lineas[$k]->codimpuesto] += $pvpcondto * ($lineas[$k]->irpf /100);
-                                    // RE
-                                    $recargos[$lineas[$k]->codimpuesto] += $pvpcondto * ($lineas[$k]->recargo /100);
-                                    // Comprobación para el total
-                                    $total_check += 
-                                        round($pvpcondto, FS_NF0)
-                                        + round($pvpcondto * ($lineas[$k]->iva /100), FS_NF0)
-                                        - round($pvpcondto * ($lineas[$k]->irpf /100), FS_NF0)
-                                        + round($pvpcondto * ($lineas[$k]->recargo /100), FS_NF0);
-                                    
                                     if ($value->irpf > $this->presupuesto->irpf) {
                                         $this->presupuesto->irpf = $value->irpf;
                                     }
-                                } else
+                                } else {
                                     $this->new_error_msg("¡Imposible modificar la línea del artículo " . $value->referencia . "!");
+                                }
 
                                 break;
                             }
                         }
 
                         /// añadimos la línea
-                        if (!$encontrada AND intval($_POST['idlinea_' . $num]) == -1 AND isset($_POST['referencia_' . $num])) {
+                        if (!$encontrada && intval($_POST['idlinea_' . $num]) == -1 && isset($_POST['referencia_' . $num])) {
                             $linea = new linea_presupuesto_cliente();
                             $linea->idpresupuesto = $this->presupuesto->idpresupuesto;
                             $linea->descripcion = $_POST['desc_' . $num];
 
-                            if (!$serie->siniva AND $regimeniva != 'Exento') {
+                            if (!$serie->siniva && $regimeniva != 'Exento') {
                                 $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
                                 if ($imp0) {
                                     $linea->codimpuesto = $imp0->codimpuesto;
@@ -485,9 +433,10 @@ class ventas_presupuesto extends fbase_controller
                             $linea->dtopor3 = floatval($_POST['dto3_' . $num]);
                             $linea->dtopor4 = floatval($_POST['dto4_' . $num]);
                             $linea->pvpsindto = $linea->cantidad * $linea->pvpunitario;
-                            $l_dto_due = (1-((1-$linea->dtopor/100)*(1-$linea->dtopor2/100)*(1-$linea->dtopor3/100)*(1-$linea->dtopor4/100)))*100;
-                            $due_lineas = (1-$l_dto_due / 100);
-                            $linea->pvptotal = $linea->cantidad * $linea->pvpunitario * $due_lineas;
+
+                            // Descuento Unificado Equivalente
+                            $due_linea = $this->fbase_calc_due(array($linea->dtopor, $linea->dtopor2, $linea->dtopor3, $linea->dtopor4));
+                            $linea->pvptotal = $linea->cantidad * $linea->pvpunitario * $due_linea;
 
                             $art0 = $articulo->get($_POST['referencia_' . $num]);
                             if ($art0) {
@@ -498,77 +447,29 @@ class ventas_presupuesto extends fbase_controller
                             }
 
                             if ($linea->save()) {
-                                if (!array_key_exists($linea->codimpuesto, $netos)) {
-                                    // Neto
-                                    $netos[$linea->codimpuesto] = 0;
-                                    // Base
-                                    $netosdto[$linea->codimpuesto] = 0;
-                                    // IVA
-                                    $ivas[$linea->codimpuesto] = 0;
-                                    // IRPF
-                                    $irpfs[$linea->codimpuesto] = 0;
-                                    // RE
-                                    $recargos[$linea->codimpuesto] = 0;
-                                }
-
-                                $this->presupuesto->netosindto += $netosindto;
-                                $this->presupuesto->dtopor1 = floatval($_POST['adtopor1']);
-                                $this->presupuesto->dtopor2 = floatval($_POST['adtopor2']);
-                                $this->presupuesto->dtopor3 = floatval($_POST['adtopor3']);
-                                $this->presupuesto->dtopor4 = floatval($_POST['adtopor4']);
-                                $this->presupuesto->dtopor5 = floatval($_POST['adtopor5']);
-                                // Acumulamos por tipos de IVAs, que es el desglose de pie de página
-
-                                // Descuento Unificado Equivalente
-                                $due_totales = $this->calc_due(array($this->presupuesto->dtopor1,$this->presupuesto->dtopor2,$this->presupuesto->dtopor3,$this->presupuesto->dtopor4,$this->presupuesto->dtopor5));
-                                // Hacemos el recalculo del PVP por línea, con el descuento adicional de fin de documento
-                                $pvpcondto = $due_totales * $linea->pvptotal;
-
-                                // Neto
-                                $netos[$linea->codimpuesto] += $linea->pvptotal;
-                                // Base
-                                $netosdto[$linea->codimpuesto] += $pvpcondto;
-                                // IVA
-                                $ivas[$linea->codimpuesto] += $pvpcondto * ($linea->iva /100);
-                                // IRPF
-                                $irpfs[$linea->codimpuesto] += $pvpcondto * ($linea->irpf /100);
-                                // RE
-                                $recargos[$linea->codimpuesto] += $pvpcondto * ($linea->recargo /100);
-                                // Comprobación para el total
-                                $total_check += 
-                                        round($pvpcondto, FS_NF0)
-                                        + round($pvpcondto * ($linea->iva /100), FS_NF0)
-                                        - round($pvpcondto * ($linea->irpf /100), FS_NF0)
-                                        + round($pvpcondto * ($linea->recargo /100), FS_NF0);
-                                
                                 if ($linea->irpf > $this->presupuesto->irpf) {
                                     $this->presupuesto->irpf = $linea->irpf;
                                 }
-                            } else
+                            } else {
                                 $this->new_error_msg("¡Imposible guardar la línea del artículo " . $linea->referencia . "!");
+                            }
                         }
                     }
                 }
-                
-                foreach ($netos as $pos => $ne) {
-                    // Neto total de la línea (Neto)
-                    $netosindto += $netos[$pos];
-                    // Neto total de la línea, con el descuento total del documento (Base imponible)
-                    $netocondto += $netosdto[$pos];
-                    $iva += $ivas[$pos];
-                    $irpf += $irpfs[$pos];
-                    $recargo += $recargos[$pos];
+
+                /// obtenemos los subtotales por impuesto
+                $due_totales = $this->fbase_calc_due([$this->presupuesto->dtopor1, $this->presupuesto->dtopor2, $this->presupuesto->dtopor3, $this->presupuesto->dtopor4, $this->presupuesto->dtopor5]);
+                foreach ($this->fbase_get_subtotales_documento($this->presupuesto->get_lineas(), $due_totales) as $subt) {
+                    $this->presupuesto->netosindto += $subt['netosindto'];
+                    $this->presupuesto->neto += $subt['neto'];
+                    $this->presupuesto->totaliva += $subt['iva'];
+                    $this->presupuesto->totalirpf += $subt['irpf'];
+                    $this->presupuesto->totalrecargo += $subt['recargo'];
                 }
-                
-                /// redondeamos
-                $this->presupuesto->netosindto = $netosindto;
-                $this->presupuesto->neto = $netocondto;
-                $this->presupuesto->totaliva = $iva;
-                $this->presupuesto->totalirpf = $irpf;
-                $this->presupuesto->totalrecargo = $recargo;
+
                 $this->presupuesto->total = round($this->presupuesto->neto + $this->presupuesto->totaliva - $this->presupuesto->totalirpf + $this->presupuesto->totalrecargo, FS_NF0);
 
-                if (abs(floatval($_POST['atotal']) - $this->presupuesto->total) >= .02) {
+                if (abs(floatval($_POST['atotal']) - $this->presupuesto->total) > .01) {
                     $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->presupuesto->total .
                         " frente a " . $_POST['atotal'] . "). Debes informar del error.");
                 }
@@ -578,8 +479,9 @@ class ventas_presupuesto extends fbase_controller
         if ($this->presupuesto->save()) {
             $this->new_message(ucfirst(FS_PRESUPUESTO) . " modificado correctamente.");
             $this->new_change(ucfirst(FS_PRESUPUESTO) . ' Cliente ' . $this->presupuesto->codigo, $this->presupuesto->url());
-        } else
+        } else {
             $this->new_error_msg("¡Imposible modificar el " . FS_PRESUPUESTO . "!");
+        }
     }
 
     private function generar_pedido()
@@ -687,18 +589,20 @@ class ventas_presupuesto extends fbase_controller
                     $this->new_error_msg("¡Imposible vincular el " . FS_PRESUPUESTO . " con el nuevo " . FS_PEDIDO . "!");
                     if ($pedido->delete()) {
                         $this->new_error_msg("El " . FS_PEDIDO . " se ha borrado.");
-                    } else
+                    } else {
                         $this->new_error_msg("¡Imposible borrar el " . FS_PEDIDO . "!");
+                    }
                 }
-            }
-            else {
+            } else {
                 if ($pedido->delete()) {
                     $this->new_error_msg("El " . FS_PEDIDO . " se ha borrado.");
-                } else
+                } else {
                     $this->new_error_msg("¡Imposible borrar el " . FS_PEDIDO . "!");
+                }
             }
-        } else
+        } else {
             $this->new_error_msg("¡Imposible guardar el " . FS_PEDIDO . "!");
+        }
     }
 
     private function configurar_validez()

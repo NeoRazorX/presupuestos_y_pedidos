@@ -104,7 +104,7 @@ class ventas_pedido extends fbase_controller
                 if (isset($_REQUEST['status'])) {
                     $this->pedido->status = intval($_REQUEST['status']);
 
-                    if ($this->pedido->status == 1 AND is_null($this->pedido->idalbaran)) {
+                    if ($this->pedido->status == 1 && is_null($this->pedido->idalbaran)) {
                         if ($this->comprobar_stock()) {
                             $this->generar_albaran();
                         } else {
@@ -173,24 +173,13 @@ class ventas_pedido extends fbase_controller
             return parent::url();
         } else if ($this->pedido) {
             return $this->pedido->url();
-        } else
-            return $this->page->url();
+        }
+
+        return $this->page->url();
     }
 
     private function modificar()
     {
-        $netos = array();
-        $netosdto = array();
-        $ivas = array();
-        $irpfs = array();
-        $recargos = array();
-        $netosindto = 0;
-        $netocondto = 0;
-        $neto = 0;
-        $iva = 0;
-        $irpf = 0;
-        $recargo = 0;
-        
         $this->pedido->observaciones = $_POST['observaciones'];
         $this->pedido->numero2 = $_POST['numero2'];
 
@@ -304,17 +293,17 @@ class ventas_pedido extends fbase_controller
             if (isset($_POST['numlineas'])) {
                 $numlineas = intval($_POST['numlineas']);
 
+                $this->pedido->irpf = 0;
                 $this->pedido->netosindto = 0;
-                $this->pedido->dtopor1 = 0;
-                $this->pedido->dtopor2 = 0;
-                $this->pedido->dtopor3 = 0;
-                $this->pedido->dtopor4 = 0;
-                $this->pedido->dtopor5 = 0;
                 $this->pedido->neto = 0;
                 $this->pedido->totaliva = 0;
                 $this->pedido->totalirpf = 0;
                 $this->pedido->totalrecargo = 0;
-                $this->pedido->irpf = 0;
+                $this->pedido->dtopor1 = floatval($_POST['adtopor1']);
+                $this->pedido->dtopor2 = floatval($_POST['adtopor2']);
+                $this->pedido->dtopor3 = floatval($_POST['adtopor3']);
+                $this->pedido->dtopor4 = floatval($_POST['adtopor4']);
+                $this->pedido->dtopor5 = floatval($_POST['adtopor5']);
 
                 $lineas = $this->pedido->get_lineas();
                 $articulo = new articulo();
@@ -323,17 +312,13 @@ class ventas_pedido extends fbase_controller
                 foreach ($lineas as $l) {
                     $encontrada = FALSE;
                     for ($num = 0; $num <= $numlineas; $num++) {
-                        if (isset($_POST['idlinea_' . $num])) {
-                            if ($l->idlinea == intval($_POST['idlinea_' . $num])) {
-                                $encontrada = TRUE;
-                                break;
-                            }
+                        if (isset($_POST['idlinea_' . $num]) && $l->idlinea == intval($_POST['idlinea_' . $num])) {
+                            $encontrada = TRUE;
+                            break;
                         }
                     }
-                    if (!$encontrada) {
-                        if (!$l->delete()) {
-                            $this->new_error_msg("¡Imposible eliminar la línea del artículo " . $l->referencia . "!");
-                        }
+                    if (!$encontrada && !$l->delete()) {
+                        $this->new_error_msg("¡Imposible eliminar la línea del artículo " . $l->referencia . "!");
                     }
                 }
 
@@ -357,16 +342,17 @@ class ventas_pedido extends fbase_controller
                                 $lineas[$k]->dtopor3 = floatval($_POST['dto3_' . $num]);
                                 $lineas[$k]->dtopor4 = floatval($_POST['dto4_' . $num]);
                                 $lineas[$k]->pvpsindto = $value->cantidad * $value->pvpunitario;
-                                // Descuento Unificado Equivalente
-                                $due_linea = $this->calc_due(array($lineas[$k]->dtopor,$lineas[$k]->dtopor2,$lineas[$k]->dtopor3,$lineas[$k]->dtopor4));
-                                $lineas[$k]->pvptotal = $lineas[$k]->cantidad * $lineas[$k]->pvpunitario * $due_linea;
-                                $lineas[$k]->descripcion = $_POST['desc_' . $num];
 
+                                // Descuento Unificado Equivalente
+                                $due_linea = $this->fbase_calc_due(array($lineas[$k]->dtopor, $lineas[$k]->dtopor2, $lineas[$k]->dtopor3, $lineas[$k]->dtopor4));
+                                $lineas[$k]->pvptotal = $lineas[$k]->cantidad * $lineas[$k]->pvpunitario * $due_linea;
+                                
+                                $lineas[$k]->descripcion = $_POST['desc_' . $num];
                                 $lineas[$k]->codimpuesto = NULL;
                                 $lineas[$k]->iva = 0;
                                 $lineas[$k]->recargo = 0;
                                 $lineas[$k]->irpf = floatval($_POST['irpf_' . $num]);
-                                if (!$serie->siniva AND $regimeniva != 'Exento') {
+                                if (!$serie->siniva && $regimeniva != 'Exento') {
                                     $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
                                     if ($imp0) {
                                         $lineas[$k]->codimpuesto = $imp0->codimpuesto;
@@ -377,53 +363,24 @@ class ventas_pedido extends fbase_controller
                                 }
 
                                 if ($lineas[$k]->save()) {
-                                    if (!array_key_exists($lineas[$k]->codimpuesto, $netos)) {
-                                        $netos[$lineas[$k]->codimpuesto] = 0;
-                                        $netosdto[$lineas[$k]->codimpuesto] = 0;
-                                        $ivas[$lineas[$k]->codimpuesto] = 0;
-                                        $irpfs[$lineas[$k]->codimpuesto] = 0;
-                                        $recargos[$lineas[$k]->codimpuesto] = 0;
-                                    }
-                                    $this->pedido->dtopor1 = floatval($_POST['adtopor1']);
-                                    $this->pedido->dtopor2 = floatval($_POST['adtopor2']);
-                                    $this->pedido->dtopor3 = floatval($_POST['adtopor3']);
-                                    $this->pedido->dtopor4 = floatval($_POST['adtopor4']);
-                                    $this->pedido->dtopor5 = floatval($_POST['adtopor5']);
-                                    // Acumulamos por tipos de IVAs, que es el desglose de pie de página
-                                    
-                                    // Descuento Unificado Equivalente
-                                    $due_totales = $this->calc_due(array($this->pedido->dtopor1,$this->pedido->dtopor2,$this->pedido->dtopor3,$this->pedido->dtopor4,$this->pedido->dtopor5));
-                                    // Hacemos el recalculo del PVP por línea, con el descuento adicional de fin de documento
-                                    $pvpcondto = $due_totales * $lineas[$k]->pvptotal;
-                                    
-                                    // Netos
-                                    $netos[$lineas[$k]->codimpuesto] += $lineas[$k]->pvptotal;
-                                    // Bases
-                                    $netosdto[$lineas[$k]->codimpuesto] += $pvpcondto;
-                                    // IVA
-                                    $ivas[$lineas[$k]->codimpuesto] += $pvpcondto * ($lineas[$k]->iva /100);
-                                    // IRPF
-                                    $irpfs[$lineas[$k]->codimpuesto] += $pvpcondto * ($lineas[$k]->irpf /100);
-                                    // RE
-                                    $recargos[$lineas[$k]->codimpuesto] += $pvpcondto * ($lineas[$k]->recargo /100);
-
                                     if ($value->irpf > $this->pedido->irpf) {
                                         $this->pedido->irpf = $value->irpf;
                                     }
-                                } else
+                                } else {
                                     $this->new_error_msg("¡Imposible modificar la línea del artículo " . $value->referencia . "!");
+                                }
 
                                 break;
                             }
                         }
 
                         /// añadimos la línea
-                        if (!$encontrada AND intval($_POST['idlinea_' . $num]) == -1 AND isset($_POST['referencia_' . $num])) {
+                        if (!$encontrada && intval($_POST['idlinea_' . $num]) == -1 && isset($_POST['referencia_' . $num])) {
                             $linea = new linea_pedido_cliente();
                             $linea->idpedido = $this->pedido->idpedido;
                             $linea->descripcion = $_POST['desc_' . $num];
 
-                            if (!$serie->siniva AND $regimeniva != 'Exento') {
+                            if (!$serie->siniva && $regimeniva != 'Exento') {
                                 $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
                                 if ($imp0) {
                                     $linea->codimpuesto = $imp0->codimpuesto;
@@ -441,9 +398,10 @@ class ventas_pedido extends fbase_controller
                             $linea->dtopor3 = floatval($_POST['dto3_' . $num]);
                             $linea->dtopor4 = floatval($_POST['dto4_' . $num]);
                             $linea->pvpsindto = $linea->cantidad * $linea->pvpunitario;
-                            $l_dto_due = (1-((1-$linea->dtopor/100)*(1-$linea->dtopor2/100)*(1-$linea->dtopor3/100)*(1-$linea->dtopor4/100)))*100;
-                            $due_lineas = (1-$l_dto_due / 100);
-                            $linea->pvptotal = $linea->cantidad * $linea->pvpunitario * $due_lineas;
+                            
+                            // Descuento Unificado Equivalente
+                            $due_linea = $this->fbase_calc_due(array($linea->dtopor, $linea->dtopor2, $linea->dtopor3, $linea->dtopor4));
+                            $linea->pvptotal = $linea->cantidad * $linea->pvpunitario * $due_linea;
 
                             $art0 = $articulo->get($_POST['referencia_' . $num]);
                             if ($art0) {
@@ -454,72 +412,29 @@ class ventas_pedido extends fbase_controller
                             }
 
                             if ($linea->save()) {
-                                if (!array_key_exists($linea->codimpuesto, $netos)) {
-                                    // Neto
-                                    $netos[$linea->codimpuesto] = 0;
-                                    // Base
-                                    $netosdto[$linea->codimpuesto] = 0;
-                                    // IVA
-                                    $ivas[$linea->codimpuesto] = 0;
-                                    // IRPF
-                                    $irpfs[$linea->codimpuesto] = 0;
-                                    // RE
-                                    $recargos[$linea->codimpuesto] = 0;
-                                }
-                                
-                                $this->pedido->netosindto += $netosindto;
-                                $this->pedido->dtopor1 = floatval($_POST['adtopor1']);
-                                $this->pedido->dtopor2 = floatval($_POST['adtopor2']);
-                                $this->pedido->dtopor3 = floatval($_POST['adtopor3']);
-                                $this->pedido->dtopor4 = floatval($_POST['adtopor4']);
-                                $this->pedido->dtopor5 = floatval($_POST['adtopor5']);
-                                // Acumulamos por tipos de IVAs, que es el desglose de pie de página
-                                
-                                // Descuento Unificado Equivalente
-                                $due_totales = $this->calc_due(array($this->pedido->dtopor1,$this->pedido->dtopor2,$this->pedido->dtopor3,$this->pedido->dtopor4,$this->pedido->dtopor5));
-
-                                // Hacemos el recalculo del PVP por línea, con el descuento adicional de fin de documento
-                                $pvpcondto = $due_totales * $linea->pvptotal;
-
-                                // Neto
-                                $netos[$linea->codimpuesto] += $linea->pvptotal;
-                                // Base
-                                $netosdto[$linea->codimpuesto] += $pvpcondto;
-                                // IVA
-                                $ivas[$linea->codimpuesto] += $pvpcondto * ($linea->iva /100);
-                                // IRPF
-                                $irpfs[$linea->codimpuesto] += $pvpcondto * ($linea->irpf /100);
-                                // RE
-                                $recargos[$linea->codimpuesto] += $pvpcondto * ($linea->recargo /100);
-
                                 if ($linea->irpf > $this->pedido->irpf) {
                                     $this->pedido->irpf = $linea->irpf;
                                 }
-                            } else
+                            } else {
                                 $this->new_error_msg("¡Imposible guardar la línea del artículo " . $linea->referencia . "!");
+                            }
                         }
                     }
                 }
-                
-                foreach ($netos as $pos => $ne) {
-                    // Neto total de la línea (Neto)
-                    $netosindto += $netos[$pos];
-                    // Neto total de la línea, con el descuento total del documento (Base imponible)
-                    $netocondto += $netosdto[$pos];
-                    $iva += $ivas[$pos];
-                    $irpf += $irpfs[$pos];
-                    $recargo += $recargos[$pos];
+
+                /// obtenemos los subtotales por impuesto
+                $due_totales = $this->fbase_calc_due([$this->pedido->dtopor1, $this->pedido->dtopor2, $this->pedido->dtopor3, $this->pedido->dtopor4, $this->pedido->dtopor5]);
+                foreach ($this->fbase_get_subtotales_documento($this->pedido->get_lineas(), $due_totales) as $subt) {
+                    $this->pedido->netosindto += $subt['netosindto'];
+                    $this->pedido->neto += $subt['neto'];
+                    $this->pedido->totaliva += $subt['iva'];
+                    $this->pedido->totalirpf += $subt['irpf'];
+                    $this->pedido->totalrecargo += $subt['recargo'];
                 }
 
-                /// redondeamos
-                $this->pedido->netosindto = $netosindto;
-                $this->pedido->neto = $netocondto;
-                $this->pedido->totaliva = $iva;
-                $this->pedido->totalirpf = $irpf;
-                $this->pedido->totalrecargo = $recargo;
-                $this->pedido->total = $this->pedido->neto + $this->pedido->totaliva - $this->pedido->totalirpf + $this->pedido->totalrecargo;
+                $this->pedido->total = round($this->pedido->neto + $this->pedido->totaliva - $this->pedido->totalirpf + $this->pedido->totalrecargo, FS_NF0);
 
-                if (abs(floatval($_POST['atotal']) - $this->pedido->total) >= .02) {
+                if (abs(floatval($_POST['atotal']) - $this->pedido->total) > .01) {
                     $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->pedido->total .
                         " frente a " . $_POST['atotal'] . "). Debes informar del error.");
                 }
@@ -663,18 +578,20 @@ class ventas_pedido extends fbase_controller
                     $this->new_error_msg("¡Imposible vincular el " . FS_PEDIDO . " con el nuevo " . FS_ALBARAN . "!");
                     if ($albaran->delete()) {
                         $this->new_error_msg("El " . FS_ALBARAN . " se ha borrado.");
-                    } else
+                    } else {
                         $this->new_error_msg("¡Imposible borrar el " . FS_ALBARAN . "!");
+                    }
                 }
-            }
-            else {
+            } else {
                 if ($albaran->delete()) {
                     $this->new_error_msg("El " . FS_ALBARAN . " se ha borrado.");
-                } else
+                } else {
                     $this->new_error_msg("¡Imposible borrar el " . FS_ALBARAN . "!");
+                }
             }
-        } else
+        } else {
             $this->new_error_msg("¡Imposible guardar el " . FS_ALBARAN . "!");
+        }
     }
 
     public function get_lineas_stock()
@@ -779,28 +696,26 @@ class ventas_pedido extends fbase_controller
         foreach ($this->pedido->get_lineas() as $linea) {
             if ($linea->referencia) {
                 $articulo = $art0->get($linea->referencia);
-                if ($articulo) {
-                    if (!$articulo->controlstock) {
-                        if ($linea->cantidad > $articulo->stockfis) {
-                            /// si se pide más cantidad de la disponible, es que no hay suficiente
-                            $ok = FALSE;
-                        } else {
-                            /// comprobamos el stock en el almacén del pedido
-                            $ok = FALSE;
-                            foreach ($articulo->get_stock() as $stock) {
-                                if ($stock->codalmacen == $this->pedido->codalmacen) {
-                                    if ($stock->cantidad >= $linea->cantidad) {
-                                        $ok = TRUE;
-                                    }
-                                    break;
+                if ($articulo && !$articulo->controlstock) {
+                    if ($linea->cantidad > $articulo->stockfis) {
+                        /// si se pide más cantidad de la disponible, es que no hay suficiente
+                        $ok = FALSE;
+                    } else {
+                        /// comprobamos el stock en el almacén del pedido
+                        $ok = FALSE;
+                        foreach ($articulo->get_stock() as $stock) {
+                            if ($stock->codalmacen == $this->pedido->codalmacen) {
+                                if ($stock->cantidad >= $linea->cantidad) {
+                                    $ok = TRUE;
                                 }
+                                break;
                             }
                         }
+                    }
 
-                        if (!$ok) {
-                            $this->new_error_msg('No hay suficiente stock del artículo ' . $linea->referencia);
-                            break;
-                        }
+                    if (!$ok) {
+                        $this->new_error_msg('No hay suficiente stock del artículo ' . $linea->referencia);
+                        break;
                     }
                 }
             }

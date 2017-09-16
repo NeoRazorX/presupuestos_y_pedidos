@@ -1,8 +1,8 @@
-{$dto1=$fsc->calc_due(array($fsc->pedido->dtopor1))}
-{$dto2=$fsc->calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2))}
-{$dto3=$fsc->calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3))}
-{$dto4=$fsc->calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3,$fsc->pedido->dtopor4))}
-{$dto5=$fsc->calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3,$fsc->pedido->dtopor4,$fsc->pedido->dtopor5))}
+{$dto1=$fsc->fbase_calc_due(array($fsc->pedido->dtopor1))}
+{$dto2=$fsc->fbase_calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2))}
+{$dto3=$fsc->fbase_calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3))}
+{$dto4=$fsc->fbase_calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3,$fsc->pedido->dtopor4))}
+{$dto5=$fsc->fbase_calc_due(array($fsc->pedido->dtopor1,$fsc->pedido->dtopor2,$fsc->pedido->dtopor3,$fsc->pedido->dtopor4,$fsc->pedido->dtopor5))}
 <div class="table-responsive">
     {if="$fsc->pedido->editable"}
     <table class="table table-condensed">
@@ -109,15 +109,15 @@
         <tfoot>
             <tr class="info">
                 <td><input id="i_new_line" class="form-control" type="text" placeholder="Buscar para añadir..." autocomplete="off"/></td>
-                <td colspan="11">
+                <td colspan="8">
                     <a href="#" class="btn btn-sm btn-default" title="Añadir sin buscar" onclick="return add_linea_libre()">
                         <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                     </a>
                 </td>
-                <td class="recargo">
-                </td>
-                <td class="irpf">
-                </td>
+                <td colspan="3" class="dtosl"></td>
+                <td class="recargo"></td>
+                <td class="irpf"></td>
+            </tr>
         </tfoot>
     </table>
     <table class="table table-condensed">
@@ -335,80 +335,79 @@
         </tbody>
     </table>
     <table class="table table-hover">
-        <tfoot>
+        <thead>
             <tr>
                 {if="$fsc->pedido->coddivisa!=$fsc->empresa->coddivisa"}
-                <td colspan='{if="$fsc->pedido->netosindto==$fsc->pedido->neto"}6{else}1{/if}' class="text-right warning">
-                    <b>{$fsc->pedido->coddivisa}:</b>
-                </td>
+                <th>Divisa</th>
                 {/if}
+                <th class="text-right dtost">Subtotal</th>
+                <th class="text-right dtost">Dto. 1</th>
+                <th class="text-right dtost">Dto. 2</th>
+                <th class="text-right dtost">Dto. 3</th>
+                <th class="text-right dtost">Dto. 4</th>
+                <th class="text-right dtost">Dto. 5</th>
+                <th class="text-right">Neto</th>
+                <th class="text-right">{#FS_IVA#}</th>
+                <th class="text-right recargo">Recargo</th>
+                <th class="text-right irpf">{#FS_IRPF#}</th>
+                <th class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {if="$fsc->pedido->coddivisa!=$fsc->empresa->coddivisa"}
+                <td>{$fsc->pedido->coddivisa}</td>
+                {/if}
+                <td class="text-right dtost">{$fsc->show_precio($fsc->pedido->netosindto, $fsc->pedido->coddivisa)}</td>
                 <td class="text-right dtost">
-                    <b>Neto<br/><br/>{$fsc->show_precio($fsc->pedido->netosindto, $fsc->pedido->coddivisa)}</b>
-                </td>
-                <td class="text-right dtost">
-                    <b>Dto. 1<br/>{$fsc->pedido->dtopor1}%<br/>
                     {if="$fsc->pedido->dtopor1!=0"}
+                    ({$fsc->pedido->dtopor1}%)
                     {$fsc->show_precio($fsc->pedido->netosindto*(1-$dto1), $fsc->pedido->coddivisa)}
                     {else}
                     {$fsc->show_precio(0, $fsc->pedido->coddivisa)}
                     {/if}
-                    </b>
                 </td>
                 <td class="text-right dtost">
-                    <b>Dto. 2<br/>{$fsc->pedido->dtopor2}%<br/>
                     {if="$fsc->pedido->dtopor2!=0"}
+                    ({$fsc->pedido->dtopor2}%)
                     {$fsc->show_precio($fsc->pedido->netosindto*($dto1-$dto2), $fsc->pedido->coddivisa)}
                     {else}
                     {$fsc->show_precio(0, $fsc->pedido->coddivisa)}
                     {/if}
-                    </b>
                 </td>
                 <td class="text-right dtost">
-                    <b>Dto. 3<br/>{$fsc->pedido->dtopor3}%<br/>
                     {if="$fsc->pedido->dtopor3!=0"}
+                    ({$fsc->pedido->dtopor3}%)
                     {$fsc->show_precio($fsc->pedido->netosindto*($dto2-$dto3), $fsc->pedido->coddivisa)}
                     {else}
                     {$fsc->show_precio(0, $fsc->pedido->coddivisa)}
                     {/if}
-                    </b>
                 </td>
                 <td class="text-right dtost">
-                    <b>Dto. 4<br/>{$fsc->pedido->dtopor4}%<br/>
                     {if="$fsc->pedido->dtopor4!=0"}
+                    ({$fsc->pedido->dtopor4}%)
                     {$fsc->show_precio($fsc->pedido->netosindto*($dto3-$dto4), $fsc->pedido->coddivisa)}
                     {else}
                     {$fsc->show_precio(0, $fsc->pedido->coddivisa)}
                     {/if}
-                    </b>
                 </td>
                 <td class="text-right dtost">
-                    <b>Dto. 5<br/>{$fsc->pedido->dtopor5}%<br/>
                     {if="$fsc->pedido->dtopor5!=0"}
+                    ({$fsc->pedido->dtopor5}%)
                     {$fsc->show_precio($fsc->pedido->netosindto*($dto4-$dto5), $fsc->pedido->coddivisa)}
                     {else}
                     {$fsc->show_precio(0, $fsc->pedido->coddivisa)}
                     {/if}
-                    </b>
                 </td>
-                <td class="text-right">
-                    <b>Base<br/><br/>{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</b>
-                </td>
-                <td class="text-right">
-                    <b>{#FS_IVA#}<br/><br/>{$fsc->show_precio($fsc->pedido->totaliva, $fsc->pedido->coddivisa)}</b>
-                </td>
-                <td class="text-right recargo">
-                    <b>Recargo<br/><br/>{$fsc->show_precio($fsc->pedido->totalrecargo, $fsc->pedido->coddivisa)}</b>
-                </td>
-                <td class="text-right irpf">
-                    <b>{#FS_IRPF#}<br/><br/>-{$fsc->show_precio($fsc->pedido->totalirpf, $fsc->pedido->coddivisa)}</b>
-                </td>
-                <td class="text-right">
-                    <b>Total<br/><br/>{$fsc->show_precio($fsc->pedido->total, $fsc->pedido->coddivisa)}</b>
-                </td>
+                <td class="text-right">{$fsc->show_precio($fsc->pedido->neto, $fsc->pedido->coddivisa)}</td>
+                <td class="text-right">{$fsc->show_precio($fsc->pedido->totaliva, $fsc->pedido->coddivisa)}</td>
+                <td class="text-right recargo">{$fsc->show_precio($fsc->pedido->totalrecargo, $fsc->pedido->coddivisa)}</td>
+                <td class="text-right irpf">-{$fsc->show_precio($fsc->pedido->totalirpf, $fsc->pedido->coddivisa)}</td>
+                <td class="text-right">{$fsc->show_precio($fsc->pedido->total, $fsc->pedido->coddivisa)}</td>
             </tr>
             {if="$fsc->pedido->coddivisa!=$fsc->empresa->coddivisa"}
             <tr class="warning">
-                <td colspan='{if="$fsc->pedido->netosindto==$fsc->pedido->neto"}6{else}1{/if}' class="text-right"><b>{$fsc->empresa->coddivisa}:</td>
+                <td>{$fsc->empresa->coddivisa}</td>
                 <td class="dtost"></td>
                 <td class="dtost"></td>
                 <td class="dtost"></td>
@@ -422,7 +421,7 @@
                 <td class="text-right"><b>{$fsc->show_precio($fsc->euro_convert($fsc->pedido->totaleuros, $fsc->pedido->coddivisa, $fsc->pedido->tasaconv))}</b></td>
             </tr>
             {/if}
-        </tfoot>
+        </tbody>
     </table>
     {/if}
 </div>
