@@ -106,10 +106,10 @@ class compras_pedido extends fbase_controller
             if (isset($_POST['aprobar']) AND isset($_POST['petid']) AND is_null($this->pedido->idalbaran)) {
                 if ($this->duplicated_petition($_POST['petid'])) {
                     $this->new_error_msg('Petición duplicada. Evita hacer doble clic sobre los botones.');
-                } else
+                } else {
                     $this->generar_albaran();
-            }
-            else if (isset($_GET['desbloquear'])) {
+                }
+            } else if (isset($_GET['desbloquear'])) {
                 $this->pedido->editable = TRUE;
                 $this->pedido->save();
             } else if (isset($_GET['nversion'])) {
@@ -167,8 +167,9 @@ class compras_pedido extends fbase_controller
             return parent::url();
         } else if ($this->pedido) {
             return $this->pedido->url();
-        } else
-            return $this->page->url();
+        }
+
+        return $this->page->url();
     }
 
     private function modificar()
@@ -252,17 +253,13 @@ class compras_pedido extends fbase_controller
                 foreach ($lineas as $l) {
                     $encontrada = FALSE;
                     for ($num = 0; $num <= $numlineas; $num++) {
-                        if (isset($_POST['idlinea_' . $num])) {
-                            if ($l->idlinea == intval($_POST['idlinea_' . $num])) {
-                                $encontrada = TRUE;
-                                break;
-                            }
+                        if (isset($_POST['idlinea_' . $num]) && $l->idlinea == intval($_POST['idlinea_' . $num])) {
+                            $encontrada = TRUE;
+                            break;
                         }
                     }
-                    if (!$encontrada) {
-                        if (!$l->delete()) {
-                            $this->new_error_msg("¡Imposible eliminar la línea del artículo " . $l->referencia . "!");
-                        }
+                    if (!$encontrada && !$l->delete()) {
+                        $this->new_error_msg("¡Imposible eliminar la línea del artículo " . $l->referencia . "!");
                     }
                 }
 
@@ -301,16 +298,12 @@ class compras_pedido extends fbase_controller
                                 }
 
                                 if ($lineas[$k]->save()) {
-                                    $this->pedido->neto += $value->pvptotal;
-                                    $this->pedido->totaliva += $value->pvptotal * $value->iva / 100;
-                                    $this->pedido->totalirpf += $value->pvptotal * $value->irpf / 100;
-                                    $this->pedido->totalrecargo += $value->pvptotal * $value->recargo / 100;
-
                                     if ($value->irpf > $this->pedido->irpf) {
                                         $this->pedido->irpf = $value->irpf;
                                     }
-                                } else
+                                } else {
                                     $this->new_error_msg("¡Imposible modificar la línea del artículo " . $value->referencia . "!");
+                                }
 
                                 break;
                             }
@@ -348,28 +341,27 @@ class compras_pedido extends fbase_controller
                             }
 
                             if ($linea->save()) {
-                                $this->pedido->neto += $linea->pvptotal;
-                                $this->pedido->totaliva += $linea->pvptotal * $linea->iva / 100;
-                                $this->pedido->totalirpf += $linea->pvptotal * $linea->irpf / 100;
-                                $this->pedido->totalrecargo += $linea->pvptotal * $linea->recargo / 100;
-
                                 if ($linea->irpf > $this->pedido->irpf) {
                                     $this->pedido->irpf = $linea->irpf;
                                 }
-                            } else
+                            } else {
                                 $this->new_error_msg("¡Imposible guardar la línea del artículo " . $linea->referencia . "!");
+                            }
                         }
                     }
                 }
+                
+                /// obtenemos los subtotales por impuesto
+                foreach ($this->fbase_get_subtotales_documento($this->pedido->get_lineas()) as $subt) {
+                    $this->pedido->neto += $subt['neto'];
+                    $this->pedido->totaliva += $subt['iva'];
+                    $this->pedido->totalirpf += $subt['irpf'];
+                    $this->pedido->totalrecargo += $subt['recargo'];
+                }
 
-                /// redondeamos
-                $this->pedido->neto = round($this->pedido->neto, FS_NF0);
-                $this->pedido->totaliva = round($this->pedido->totaliva, FS_NF0);
-                $this->pedido->totalirpf = round($this->pedido->totalirpf, FS_NF0);
-                $this->pedido->totalrecargo = round($this->pedido->totalrecargo, FS_NF0);
-                $this->pedido->total = $this->pedido->neto + $this->pedido->totaliva - $this->pedido->totalirpf + $this->pedido->totalrecargo;
+                $this->pedido->total = round($this->pedido->neto + $this->pedido->totaliva - $this->pedido->totalirpf + $this->pedido->totalrecargo, FS_NF0);
 
-                if (abs(floatval($_POST['atotal']) - $this->pedido->total) >= .02) {
+                if (abs(floatval($_POST['atotal']) - $this->pedido->total) > .01) {
                     $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->pedido->total .
                         " frente a " . $_POST['atotal'] . "). Debes informar del error.");
                 }
@@ -379,8 +371,9 @@ class compras_pedido extends fbase_controller
         if ($this->pedido->save()) {
             $this->new_message(ucfirst(FS_PEDIDO) . " modificado correctamente.");
             $this->new_change(ucfirst(FS_PEDIDO) . ' Proveedor ' . $this->pedido->codigo, $this->pedido->url());
-        } else
+        } else {
             $this->new_error_msg("¡Imposible modificar el " . FS_PEDIDO . "!");
+        }
     }
 
     private function generar_albaran()
@@ -474,17 +467,19 @@ class compras_pedido extends fbase_controller
                     $this->new_error_msg("¡Imposible vincular el " . FS_PEDIDO . " con el nuevo " . FS_ALBARAN . "!");
                     if ($albaran->delete()) {
                         $this->new_error_msg("El " . FS_ALBARAN . " se ha borrado.");
-                    } else
+                    } else {
                         $this->new_error_msg("¡Imposible borrar el " . FS_ALBARAN . "!");
+                    }
                 }
-            }
-            else {
+            } else {
                 if ($albaran->delete()) {
                     $this->new_error_msg("El " . FS_ALBARAN . " se ha borrado.");
-                } else
+                } else {
                     $this->new_error_msg("¡Imposible borrar el " . FS_ALBARAN . "!");
+                }
             }
-        } else
+        } else {
             $this->new_error_msg("¡Imposible guardar el " . FS_ALBARAN . "!");
+        }
     }
 }
