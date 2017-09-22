@@ -181,7 +181,6 @@ class ventas_pedido extends fbase_controller
     private function modificar()
     {
         $this->pedido->observaciones = $_POST['observaciones'];
-        $this->pedido->numero2 = $_POST['numero2'];
 
         /// ¿El pedido es editable o ya ha sido aprobado?
         if ($this->pedido->editable) {
@@ -346,7 +345,7 @@ class ventas_pedido extends fbase_controller
                                 // Descuento Unificado Equivalente
                                 $due_linea = $this->fbase_calc_due(array($lineas[$k]->dtopor, $lineas[$k]->dtopor2, $lineas[$k]->dtopor3, $lineas[$k]->dtopor4));
                                 $lineas[$k]->pvptotal = $lineas[$k]->cantidad * $lineas[$k]->pvpunitario * $due_linea;
-                                
+
                                 $lineas[$k]->descripcion = $_POST['desc_' . $num];
                                 $lineas[$k]->codimpuesto = NULL;
                                 $lineas[$k]->iva = 0;
@@ -398,7 +397,7 @@ class ventas_pedido extends fbase_controller
                             $linea->dtopor3 = floatval($_POST['dto3_' . $num]);
                             $linea->dtopor4 = floatval($_POST['dto4_' . $num]);
                             $linea->pvpsindto = $linea->cantidad * $linea->pvpunitario;
-                            
+
                             // Descuento Unificado Equivalente
                             $due_linea = $this->fbase_calc_due(array($linea->dtopor, $linea->dtopor2, $linea->dtopor3, $linea->dtopor4));
                             $linea->pvptotal = $linea->cantidad * $linea->pvpunitario * $due_linea;
@@ -441,11 +440,16 @@ class ventas_pedido extends fbase_controller
             }
         }
 
+        if (!fs_generar_numero2($this->pedido)) {
+            $this->pedido->numero2 = $_POST['numero2'];
+        }
+
         if ($this->pedido->save()) {
             $this->new_message(ucfirst(FS_PEDIDO) . " modificado correctamente.");
             $this->new_change(ucfirst(FS_PEDIDO) . ' Cliente ' . $this->pedido->codigo, $this->pedido->url());
-        } else
+        } else {
             $this->new_error_msg("¡Imposible modificar el " . FS_PEDIDO . "!");
+        }
     }
 
     private function generar_albaran()
@@ -477,7 +481,6 @@ class ventas_pedido extends fbase_controller
         $albaran->provincia = $this->pedido->provincia;
         $albaran->total = $this->pedido->total;
         $albaran->totaliva = $this->pedido->totaliva;
-        $albaran->numero2 = $this->pedido->numero2;
         $albaran->irpf = $this->pedido->irpf;
         $albaran->porcomision = $this->pedido->porcomision;
         $albaran->totalirpf = $this->pedido->totalirpf;
@@ -510,6 +513,10 @@ class ventas_pedido extends fbase_controller
         $eje0 = $this->ejercicio->get_by_fecha($albaran->fecha, FALSE);
         if ($eje0) {
             $albaran->codejercicio = $eje0->codejercicio;
+        }
+
+        if (!fs_generar_numero2($albaran)) {
+            $albaran->numero2 = $this->pedido->numero2;
         }
 
         if (!$eje0) {
@@ -582,12 +589,10 @@ class ventas_pedido extends fbase_controller
                         $this->new_error_msg("¡Imposible borrar el " . FS_ALBARAN . "!");
                     }
                 }
+            } else if ($albaran->delete()) {
+                $this->new_error_msg("El " . FS_ALBARAN . " se ha borrado.");
             } else {
-                if ($albaran->delete()) {
-                    $this->new_error_msg("El " . FS_ALBARAN . " se ha borrado.");
-                } else {
-                    $this->new_error_msg("¡Imposible borrar el " . FS_ALBARAN . "!");
-                }
+                $this->new_error_msg("¡Imposible borrar el " . FS_ALBARAN . "!");
             }
         } else {
             $this->new_error_msg("¡Imposible guardar el " . FS_ALBARAN . "!");

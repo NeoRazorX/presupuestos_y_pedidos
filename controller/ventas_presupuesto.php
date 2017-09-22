@@ -215,7 +215,6 @@ class ventas_presupuesto extends fbase_controller
     private function modificar()
     {
         $this->presupuesto->observaciones = $_POST['observaciones'];
-        $this->presupuesto->numero2 = $_POST['numero2'];
 
         /// ¿El presupuesto es editable o ya ha sido aprobado?
         if ($this->presupuesto->editable) {
@@ -381,7 +380,7 @@ class ventas_presupuesto extends fbase_controller
                                 // Descuento Unificado Equivalente
                                 $due_linea = $this->fbase_calc_due(array($lineas[$k]->dtopor, $lineas[$k]->dtopor2, $lineas[$k]->dtopor3, $lineas[$k]->dtopor4));
                                 $lineas[$k]->pvptotal = $lineas[$k]->cantidad * $lineas[$k]->pvpunitario * $due_linea;
-                                
+
                                 $lineas[$k]->descripcion = $_POST['desc_' . $num];
                                 $lineas[$k]->codimpuesto = NULL;
                                 $lineas[$k]->iva = 0;
@@ -476,6 +475,10 @@ class ventas_presupuesto extends fbase_controller
             }
         }
 
+        if (!fs_generar_numero2($this->presupuesto)) {
+            $this->presupuesto->numero2 = $_POST['numero2'];
+        }
+
         if ($this->presupuesto->save()) {
             $this->new_message(ucfirst(FS_PRESUPUESTO) . " modificado correctamente.");
             $this->new_change(ucfirst(FS_PRESUPUESTO) . ' Cliente ' . $this->presupuesto->codigo, $this->presupuesto->url());
@@ -513,7 +516,6 @@ class ventas_presupuesto extends fbase_controller
         $pedido->provincia = $this->presupuesto->provincia;
         $pedido->total = $this->presupuesto->total;
         $pedido->totaliva = $this->presupuesto->totaliva;
-        $pedido->numero2 = $this->presupuesto->numero2;
         $pedido->irpf = $this->presupuesto->irpf;
         $pedido->porcomision = $this->presupuesto->porcomision;
         $pedido->totalirpf = $this->presupuesto->totalirpf;
@@ -541,6 +543,10 @@ class ventas_presupuesto extends fbase_controller
         $eje0 = $this->ejercicio->get_by_fecha($pedido->fecha, FALSE);
         if ($eje0) {
             $pedido->codejercicio = $eje0->codejercicio;
+        }
+
+        if (!fs_generar_numero2($pedido)) {
+            $pedido->numero2 = $this->presupuesto->numero2;
         }
 
         if (!$eje0) {
@@ -593,12 +599,10 @@ class ventas_presupuesto extends fbase_controller
                         $this->new_error_msg("¡Imposible borrar el " . FS_PEDIDO . "!");
                     }
                 }
+            } else if ($pedido->delete()) {
+                $this->new_error_msg("El " . FS_PEDIDO . " se ha borrado.");
             } else {
-                if ($pedido->delete()) {
-                    $this->new_error_msg("El " . FS_PEDIDO . " se ha borrado.");
-                } else {
-                    $this->new_error_msg("¡Imposible borrar el " . FS_PEDIDO . "!");
-                }
+                $this->new_error_msg("¡Imposible borrar el " . FS_PEDIDO . "!");
             }
         } else {
             $this->new_error_msg("¡Imposible guardar el " . FS_PEDIDO . "!");

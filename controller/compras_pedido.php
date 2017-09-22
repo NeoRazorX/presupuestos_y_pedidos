@@ -175,7 +175,6 @@ class compras_pedido extends fbase_controller
     private function modificar()
     {
         $this->pedido->observaciones = $_POST['observaciones'];
-        $this->pedido->numproveedor = $_POST['numproveedor'];
 
         /// ¿El pedido es editable o ya ha sido aprobado?
         if (is_null($this->pedido->idalbaran)) {
@@ -350,7 +349,7 @@ class compras_pedido extends fbase_controller
                         }
                     }
                 }
-                
+
                 /// obtenemos los subtotales por impuesto
                 foreach ($this->fbase_get_subtotales_documento($this->pedido->get_lineas()) as $subt) {
                     $this->pedido->neto += $subt['neto'];
@@ -366,6 +365,10 @@ class compras_pedido extends fbase_controller
                         " frente a " . $_POST['atotal'] . "). Debes informar del error.");
                 }
             }
+        }
+
+        if (!fs_generar_numproveedor($this->pedido)) {
+            $this->pedido->numproveedor = $_POST['numproveedor'];
         }
 
         if ($this->pedido->save()) {
@@ -392,7 +395,6 @@ class compras_pedido extends fbase_controller
         $albaran->observaciones = $this->pedido->observaciones;
         $albaran->total = $this->pedido->total;
         $albaran->totaliva = $this->pedido->totaliva;
-        $albaran->numproveedor = $this->pedido->numproveedor;
         $albaran->irpf = $this->pedido->irpf;
         $albaran->totalirpf = $this->pedido->totalirpf;
         $albaran->totalrecargo = $this->pedido->totalrecargo;
@@ -408,6 +410,10 @@ class compras_pedido extends fbase_controller
         if ($eje0) {
             $albaran->fecha = $_POST['aprobar'];
             $albaran->codejercicio = $eje0->codejercicio;
+        }
+
+        if (!fs_generar_numproveedor($albaran)) {
+            $albaran->numproveedor = $this->pedido->numproveedor;
         }
 
         if (!$eje0) {
@@ -471,12 +477,10 @@ class compras_pedido extends fbase_controller
                         $this->new_error_msg("¡Imposible borrar el " . FS_ALBARAN . "!");
                     }
                 }
+            } else if ($albaran->delete()) {
+                $this->new_error_msg("El " . FS_ALBARAN . " se ha borrado.");
             } else {
-                if ($albaran->delete()) {
-                    $this->new_error_msg("El " . FS_ALBARAN . " se ha borrado.");
-                } else {
-                    $this->new_error_msg("¡Imposible borrar el " . FS_ALBARAN . "!");
-                }
+                $this->new_error_msg("¡Imposible borrar el " . FS_ALBARAN . "!");
             }
         } else {
             $this->new_error_msg("¡Imposible guardar el " . FS_ALBARAN . "!");
