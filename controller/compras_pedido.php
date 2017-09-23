@@ -103,7 +103,7 @@ class compras_pedido extends fbase_controller
             /// comprobamos el pedido
             $this->pedido->full_test();
 
-            if (isset($_POST['aprobar']) AND isset($_POST['petid']) AND is_null($this->pedido->idalbaran)) {
+            if (isset($_POST['aprobar']) && isset($_POST['petid']) && is_null($this->pedido->idalbaran)) {
                 if ($this->duplicated_petition($_POST['petid'])) {
                     $this->new_error_msg('Petición duplicada. Evita hacer doble clic sobre los botones.');
                 } else {
@@ -286,7 +286,7 @@ class compras_pedido extends fbase_controller
                                 $lineas[$k]->iva = 0;
                                 $lineas[$k]->recargo = 0;
                                 $lineas[$k]->irpf = floatval($_POST['irpf_' . $num]);
-                                if (!$serie->siniva AND $regimeniva != 'Exento') {
+                                if (!$serie->siniva && $regimeniva != 'Exento') {
                                     $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
                                     if ($imp0) {
                                         $lineas[$k]->codimpuesto = $imp0->codimpuesto;
@@ -309,12 +309,12 @@ class compras_pedido extends fbase_controller
                         }
 
                         /// añadimos la línea
-                        if (!$encontrada AND intval($_POST['idlinea_' . $num]) == -1 AND isset($_POST['referencia_' . $num])) {
+                        if (!$encontrada && intval($_POST['idlinea_' . $num]) == -1 && isset($_POST['referencia_' . $num])) {
                             $linea = new linea_pedido_proveedor();
                             $linea->idpedido = $this->pedido->idpedido;
                             $linea->descripcion = $_POST['desc_' . $num];
 
-                            if (!$serie->siniva AND $regimeniva != 'Exento') {
+                            if (!$serie->siniva && $regimeniva != 'Exento') {
                                 $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
                                 if ($imp0) {
                                     $linea->codimpuesto = $imp0->codimpuesto;
@@ -445,7 +445,7 @@ class compras_pedido extends fbase_controller
 
                 if ($n->save()) {
                     /// añadimos al stock
-                    if ($n->referencia AND isset($_POST['stock'])) {
+                    if ($n->referencia && isset($_POST['stock'])) {
                         $articulo = $art0->get($n->referencia);
                         if ($articulo) {
                             $articulo->sum_stock($albaran->codalmacen, $l->cantidad, isset($_POST['costemedio']), $l->codcombinacion);

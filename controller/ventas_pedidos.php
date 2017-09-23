@@ -116,7 +116,7 @@ class ventas_pedidos extends fbase_controller
             if (isset($_POST['delete'])) {
                 $this->delete_pedido();
             } else {
-                if (!isset($_GET['mostrar']) AND ( $this->query != '' OR isset($_REQUEST['codagente']) OR isset($_REQUEST['codcliente']) OR isset($_REQUEST['codserie']))) {
+                if (!isset($_GET['mostrar']) && ( $this->query != '' || isset($_REQUEST['codagente']) || isset($_REQUEST['codcliente']) || isset($_REQUEST['codserie']))) {
                     /**
                      * si obtenermos un codagente, un codcliente o un codserie pasamos direcatemente
                      * a la pestaña de búsqueda, a menos que tengamos un mostrar, que
@@ -162,7 +162,7 @@ class ventas_pedidos extends fbase_controller
                 $order2 = ', hora DESC';
             } else if ($this->order == 'fecha ASC') {
                 $order2 = ', hora ASC';
-            } else if (strtolower(FS_DB_TYPE) == 'postgresql' AND ( $this->order == 'fechasalida DESC' OR $this->order == 'fechasalida ASC')) {
+            } else if (strtolower(FS_DB_TYPE) == 'postgresql' && ( $this->order == 'fechasalida DESC' || $this->order == 'fechasalida ASC')) {
                 $order2 = ' NULLS LAST';
             }
 

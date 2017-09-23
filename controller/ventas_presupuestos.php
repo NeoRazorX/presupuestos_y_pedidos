@@ -117,7 +117,7 @@ class ventas_presupuestos extends fbase_controller
             } else if (isset($_POST['rechazar'])) {
                 $this->rechazar();
             } else {
-                if (!isset($_GET['mostrar']) AND ( $this->query != '' OR isset($_REQUEST['codagente']) OR isset($_REQUEST['codcliente']) OR isset($_REQUEST['codserie']))) {
+                if (!isset($_GET['mostrar']) && ( $this->query != '' || isset($_REQUEST['codagente']) || isset($_REQUEST['codcliente']) || isset($_REQUEST['codserie']))) {
                     /**
                      * si obtenermos un codagente, un codcliente o un codserie pasamos direcatemente
                      * a la pestaña de búsqueda, a menos que tengamos un mostrar, que
@@ -164,7 +164,7 @@ class ventas_presupuestos extends fbase_controller
                 $order2 = ', hora DESC';
             } else if ($this->order == 'fecha ASC') {
                 $order2 = ', hora ASC';
-            } else if (strtolower(FS_DB_TYPE) == 'postgresql' AND ( $this->order == 'finoferta DESC' OR $this->order == 'finoferta ASC')) {
+            } else if (strtolower(FS_DB_TYPE) == 'postgresql' && ( $this->order == 'finoferta DESC' || $this->order == 'finoferta ASC')) {
                 $order2 = ' NULLS LAST';
             }
 

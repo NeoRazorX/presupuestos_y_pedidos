@@ -35,7 +35,7 @@ class imprimir_presu_pedi extends ventas_imprimir
     {
         $this->init();
 
-        if (isset($_REQUEST['pedido_p']) AND isset($_REQUEST['id'])) {
+        if (isset($_REQUEST['pedido_p']) && isset($_REQUEST['id'])) {
             $ped = new pedido_proveedor();
             $this->documento = $ped->get($_REQUEST['id']);
             if ($this->documento) {
@@ -48,7 +48,7 @@ class imprimir_presu_pedi extends ventas_imprimir
             } else {
                 $this->generar_pdf_pedido_proveedor();
             }
-        } else if (isset($_REQUEST['pedido']) AND isset($_REQUEST['id'])) {
+        } else if (isset($_REQUEST['pedido']) && isset($_REQUEST['id'])) {
             $ped = new pedido_cliente();
             $this->documento = $ped->get($_REQUEST['id']);
             if ($this->documento) {
@@ -61,7 +61,7 @@ class imprimir_presu_pedi extends ventas_imprimir
             } else {
                 $this->generar_pdf_pedido();
             }
-        } else if (isset($_REQUEST['presupuesto']) AND isset($_REQUEST['id'])) {
+        } else if (isset($_REQUEST['presupuesto']) && isset($_REQUEST['id'])) {
             $pres = new presupuesto_cliente();
             $this->documento = $pres->get($_REQUEST['id']);
             if ($this->documento) {
