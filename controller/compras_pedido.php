@@ -277,15 +277,15 @@ class compras_pedido extends fbase_controller
                                 $encontrada = TRUE;
                                 $lineas[$k]->cantidad = floatval($_POST['cantidad_' . $num]);
                                 $lineas[$k]->pvpunitario = floatval($_POST['pvp_' . $num]);
-                                $lineas[$k]->dtopor = floatval($_POST['dto_' . $num]);
-                                $lineas[$k]->pvpsindto = ($value->cantidad * $value->pvpunitario);
-                                $lineas[$k]->pvptotal = ($value->cantidad * $value->pvpunitario * (100 - $value->dtopor) / 100);
+                                $lineas[$k]->dtopor = floatval(fs_filter_input_post('dto_' . $num, 0));
+                                $lineas[$k]->pvpsindto = $value->cantidad * $value->pvpunitario;
+                                $lineas[$k]->pvptotal = $value->cantidad * $value->pvpunitario * (100 - $value->dtopor) / 100;
                                 $lineas[$k]->descripcion = $_POST['desc_' . $num];
 
                                 $lineas[$k]->codimpuesto = NULL;
                                 $lineas[$k]->iva = 0;
                                 $lineas[$k]->recargo = 0;
-                                $lineas[$k]->irpf = floatval($_POST['irpf_' . $num]);
+                                $lineas[$k]->irpf = floatval(fs_filter_input_post('irpf_' . $num, 0));
                                 if (!$serie->siniva && $regimeniva != 'Exento') {
                                     $imp0 = $this->impuesto->get_by_iva($_POST['iva_' . $num]);
                                     if ($imp0) {
@@ -293,7 +293,7 @@ class compras_pedido extends fbase_controller
                                     }
 
                                     $lineas[$k]->iva = floatval($_POST['iva_' . $num]);
-                                    $lineas[$k]->recargo = floatval($_POST['recargo_' . $num]);
+                                    $lineas[$k]->recargo = floatval(fs_filter_input_post('recargo_' . $num, 0));
                                 }
 
                                 if ($lineas[$k]->save()) {
@@ -321,15 +321,15 @@ class compras_pedido extends fbase_controller
                                 }
 
                                 $linea->iva = floatval($_POST['iva_' . $num]);
-                                $linea->recargo = floatval($_POST['recargo_' . $num]);
+                                $linea->recargo = floatval(fs_filter_input_post('recargo_' . $num, 0));
                             }
 
-                            $linea->irpf = floatval($_POST['irpf_' . $num]);
+                            $linea->irpf = floatval(fs_filter_input_post('irpf_' . $num, 0));
                             $linea->cantidad = floatval($_POST['cantidad_' . $num]);
                             $linea->pvpunitario = floatval($_POST['pvp_' . $num]);
-                            $linea->dtopor = floatval($_POST['dto_' . $num]);
-                            $linea->pvpsindto = ($linea->cantidad * $linea->pvpunitario);
-                            $linea->pvptotal = ($linea->cantidad * $linea->pvpunitario * (100 - $linea->dtopor) / 100);
+                            $linea->dtopor = floatval(fs_filter_input_post('dto_' . $num, 0));
+                            $linea->pvpsindto = $linea->cantidad * $linea->pvpunitario;
+                            $linea->pvptotal = $linea->cantidad * $linea->pvpunitario * (100 - $linea->dtopor) / 100;
 
                             $art0 = $articulo->get($_POST['referencia_' . $num]);
                             if ($art0) {
@@ -359,7 +359,7 @@ class compras_pedido extends fbase_controller
                 }
 
                 $this->pedido->total = round($this->pedido->neto + $this->pedido->totaliva - $this->pedido->totalirpf + $this->pedido->totalrecargo, FS_NF0);
-
+                
                 if (abs(floatval($_POST['atotal']) - $this->pedido->total) > .01) {
                     $this->new_error_msg("El total difiere entre el controlador y la vista (" . $this->pedido->total .
                         " frente a " . $_POST['atotal'] . "). Debes informar del error.");
