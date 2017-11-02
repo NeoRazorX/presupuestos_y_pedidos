@@ -313,7 +313,7 @@
          </tr>
       </thead>
       {loop="$fsc->resultados"}
-      <tr class='clickableRow{if="$value->status==1"} success{elseif="$value->status==2"} danger{elseif="$value->total<=0"} warning{/if}' href="{$value->url()}">
+      <tr class='clickableRow{if="$value->status==1"} success{elseif="$value->status==2"} danger{elseif="$value->total<=0"} warning{/if}' href="{$value->url()}" data-codigo="{$value->codigo}">
          <td class="text-center">
             {if="$value->idpedido"}
             <span class="glyphicon glyphicon-paperclip" title="El {#FS_PRESUPUESTO#} tiene vinculado un {#FS_PEDIDO#}"></span>
